@@ -12,9 +12,9 @@ const fadeIn = {
 const About = () => {
   return (
     <div className=" pb-12 overflow-hidden bg-slate-50">
-      <Section className='w-full flex'>
+      
         <Navbar />
-      </Section>
+     
       {/* Hero Header */}
       <section className="relative py-20 lg:py-32">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2" />
