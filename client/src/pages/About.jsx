@@ -11,7 +11,7 @@ const fadeIn = {
 
 const About = () => {
   return (
-    <div className="pt-24 pb-12 overflow-hidden bg-slate-50">
+    <div className=" pb-12 overflow-hidden bg-slate-50">
       <Section className='w-full flex'>
         <Navbar />
       </Section>
