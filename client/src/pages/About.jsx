@@ -17,8 +17,8 @@ const About = () => {
      
       {/* Hero Header */}
       <section className="relative py-20 lg:py-32">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/4 -translate-x-1/4" />
+        <div className="absolute top-0 right-0 w-125 h-125 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 left-0 w-125 h-125 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/4 -translate-x-1/4" />
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
@@ -27,7 +27,7 @@ const About = () => {
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6">
-              Redefining <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-pink-500">Love</span> in the Digital Age
+              Redefining <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-600 to-pink-500">Love</span> in the Digital Age
             </h1>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
               We started EloviaLove with a simple belief: finding love shouldn't be exhausting. It should be exciting, authentic, and safe.
@@ -179,7 +179,7 @@ const About = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-r from-primary-50 to-pink-50 rounded-[3rem] p-12 lg:p-16 border border-pink-100 shadow-xl shadow-pink-100/50"
+            className="bg-linear-to-r from-primary-50 to-pink-50 rounded-[3rem] p-12 lg:p-16 border border-pink-100 shadow-xl shadow-pink-100/50"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Write Your Own Love Story</h2>
             <p className="text-lg text-slate-600 mb-8 max-w-xl mx-auto">
@@ -187,7 +187,7 @@ const About = () => {
             </p>
             <Link
               to="/signup"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-600 to-pink-500 text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-lg hover:shadow-pink-500/30 hover:-translate-y-1 transition-all duration-300"
+              className="inline-flex items-center gap-2 bg-linear-to-r from-primary-600 to-pink-500 text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-lg hover:shadow-pink-500/30 hover:-translate-y-1 transition-all duration-300"
             >
               Start Free Trial <ArrowRight size={20} />
             </Link>

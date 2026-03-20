@@ -35,7 +35,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background Decor */}
-      <div className="absolute top-1/2 left-1/2 w-[800px] h-[800px] bg-gradient-to-tr from-primary-200 to-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute top-1/2 left-1/2 w-200 h-200 bg-linear-to-tr from-primary-200 to-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-x-1/2 -translate-y-1/2" />
       
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <motion.div
@@ -45,7 +45,7 @@ const Login = () => {
           className="bg-white py-10 px-4 shadow-2xl shadow-slate-200/50 sm:rounded-3xl sm:px-10 border border-slate-100/50 backdrop-blur-sm"
         >
           <div className="sm:mx-auto sm:w-full sm:max-w-md mb-8 text-center flex flex-col items-center">
-            <Link to="/" className="inline-flex items-center justify-center p-3 bg-gradient-to-tr from-primary-500 to-pink-500 rounded-2xl mb-4 group hover:rotate-12 transition-transform duration-300 shadow-xl shadow-pink-500/25">
+            <Link to="/" className="inline-flex items-center justify-center p-3 bg-linear-to-tr from-primary-500 to-pink-500 rounded-2xl mb-4 group hover:rotate-12 transition-transform duration-300 shadow-xl shadow-pink-500/25">
               <Heart size={32} className="text-white" fill="currentColor" />
             </Link>
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h2>
@@ -146,7 +146,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-primary-500/25 text-sm font-bold text-white bg-gradient-to-r from-primary-600 to-pink-500 hover:shadow-primary-500/40 hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-primary-500/25 text-sm font-bold text-white bg-linear-to-r from-primary-600 to-pink-500 hover:shadow-primary-500/40 hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </button>

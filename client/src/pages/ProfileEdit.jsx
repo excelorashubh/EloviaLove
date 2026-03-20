@@ -256,7 +256,7 @@ const ProfileEdit = () => {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 py-3 bg-gradient-to-r from-primary-600 to-pink-500 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-pink-500/25 transition-all disabled:opacity-50"
+              className="flex-1 py-3 bg-linear-to-r from-primary-600 to-pink-500 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-pink-500/25 transition-all disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>

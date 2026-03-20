@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import Navbar from '../components/layout/Navbar';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
@@ -10,6 +11,9 @@ const fadeIn = {
 const Contact = () => {
   return (
     <div className="pt-24 pb-12 min-h-screen bg-slate-50 relative overflow-hidden">
+
+      <Navbar />
+
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-y-1/2 translate-x-1/4" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-y-1/4 -translate-x-1/4" />
@@ -131,7 +135,7 @@ const Contact = () => {
 
                 <button 
                   type="button"
-                  className="w-full py-4 px-6 bg-gradient-to-r from-primary-600 to-pink-500 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
+                  className="w-full py-4 px-6 bg-linear-to-r from-primary-600 to-pink-500 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   Send Message <Send size={20} />
                 </button>
