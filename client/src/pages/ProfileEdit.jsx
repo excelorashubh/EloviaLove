@@ -64,12 +64,16 @@ const ProfileEdit = () => {
     try {
       const data = new FormData();
       data.append('photo', file);
-      await api.post('/users/upload-photo', data, {
+      const res = await api.post('/users/upload-photo', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      await updateProfile({});
-    } catch {
-      setError('Photo upload failed. Please try again.');
+      if (res.data.success) {
+        // Update preview with the actual saved URL
+        setPhotoPreview(res.data.photoUrl);
+        await updateProfile({});
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Photo upload failed. Please try again.');
       setPhotoPreview(null);
     } finally {
       setUploadingPhoto(false);

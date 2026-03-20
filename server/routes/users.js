@@ -101,53 +101,53 @@ router.put('/profile', protect, [
 });
 
 // @route   POST /api/users/upload-photo
-// @desc    Upload profile photo
+// @desc    Upload profile photo (base64 fallback if Cloudinary not configured)
 // @access  Private
 router.post('/upload-photo', protect, upload.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: 'No file uploaded'
-      });
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
-    // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'elovialove/profiles',
-          transformation: [
-            { width: 500, height: 500, crop: 'fill' },
-            { quality: 'auto' }
-          ]
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-      uploadStream.end(req.file.buffer);
-    });
+    let photoUrl;
 
-    // Update user profile photo
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      { profilePhoto: result.secure_url },
-      { new: true }
-    );
+    const cloudinaryConfigured =
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name' &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_KEY !== 'your_api_key';
 
-    res.json({
-      success: true,
-      message: 'Profile photo uploaded successfully',
-      photoUrl: result.secure_url
-    });
+    if (cloudinaryConfigured) {
+      // Upload to Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'elovialove/profiles',
+            transformation: [
+              { width: 500, height: 500, crop: 'fill' },
+              { quality: 'auto' }
+            ]
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        uploadStream.end(req.file.buffer);
+      });
+      photoUrl = result.secure_url;
+    } else {
+      // Fallback: store as base64 data URL
+      const base64 = req.file.buffer.toString('base64');
+      photoUrl = `data:${req.file.mimetype};base64,${base64}`;
+    }
+
+    await User.findByIdAndUpdate(req.user._id, { profilePhoto: photoUrl });
+
+    res.json({ success: true, message: 'Profile photo uploaded successfully', photoUrl });
   } catch (error) {
     console.error('Upload photo error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during upload'
-    });
+    res.status(500).json({ success: false, message: error.message || 'Server error during upload' });
   }
 });
 

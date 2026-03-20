@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Target, Heart, Shield, Users, Globe, ArrowRight } from 'lucide-react';
+import { Target, Heart, Shield, Users, Globe, ArrowRight, Section } from 'lucide-react';
+import Navbar from '../components/layout/Navbar';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -11,6 +12,9 @@ const fadeIn = {
 const About = () => {
   return (
     <div className="pt-24 pb-12 overflow-hidden bg-slate-50">
+      <Section>
+        <Navbar />
+      </Section>
       {/* Hero Header */}
       <section className="relative py-20 lg:py-32">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2" />
