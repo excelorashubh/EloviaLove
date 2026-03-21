@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Heart, Settings, Bell, Sparkles, MessageCircle, Check } from 'lucide-react';
+import { Heart, Settings, Bell, Sparkles, MessageCircle, Check, Crown, Zap, Star, Clock } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -30,26 +30,134 @@ const stagger = {
   visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
 };
 
+const PLAN_CONFIG = {
+  free:    { label: 'Free',    icon: Star,     gradient: 'from-slate-400 to-slate-500',   bg: 'bg-slate-50',   border: 'border-slate-200', perks: ['10 likes/day', 'Basic matching', 'Chat after match'] },
+  basic:   { label: 'Basic',   icon: Zap,      gradient: 'from-blue-500 to-cyan-500',     bg: 'bg-blue-50',    border: 'border-blue-200',  perks: ['Unlimited likes', 'No ads', 'Basic filters'] },
+  premium: { label: 'Premium', icon: Sparkles, gradient: 'from-primary-600 to-pink-500',  bg: 'bg-primary-50', border: 'border-primary-200', perks: ['See who liked you ❤️', 'Advanced filters', 'Read receipts'] },
+  pro:     { label: 'Pro',     icon: Crown,    gradient: 'from-amber-500 to-orange-500',  bg: 'bg-amber-50',   border: 'border-amber-200', perks: ['Profile Boost 🚀', 'VIP Badge', 'Top visibility'] },
+};
+
+const SubscriptionCard = ({ subStatus, loading }) => {
+  const plan = subStatus?.plan || 'free';
+  const isTrial = subStatus?.isTrial;
+  const trialDaysLeft = subStatus?.trialDaysLeft ?? 0;
+  const subscriptionEnd = subStatus?.subscriptionEnd;
+  const cfg = PLAN_CONFIG[plan] || PLAN_CONFIG.free;
+  const Icon = cfg.icon;
+
+  const endDate = isTrial ? subStatus?.trialEndDate : subscriptionEnd;
+  const daysLeft = endDate
+    ? Math.max(0, Math.ceil((new Date(endDate) - new Date()) / 86400000))
+    : null;
+
+  if (loading) return (
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 animate-pulse">
+      <div className="h-4 bg-slate-200 rounded w-1/2 mb-3" />
+      <div className="h-16 bg-slate-100 rounded-xl mb-3" />
+      <div className="h-8 bg-slate-200 rounded-xl" />
+    </div>
+  );
+
+  return (
+    <div className={`rounded-2xl p-5 shadow-sm border ${cfg.border} ${cfg.bg}`}>
+      {/* Plan header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${cfg.gradient} flex items-center justify-center shadow-sm`}>
+            <Icon size={17} className="text-white" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 font-medium leading-none mb-0.5">Current Plan</p>
+            <p className="text-base font-extrabold text-slate-900">{cfg.label}</p>
+          </div>
+        </div>
+        {isTrial && (
+          <span className="text-[10px] font-bold px-2 py-1 bg-amber-100 text-amber-700 rounded-full border border-amber-200">
+            FREE TRIAL
+          </span>
+        )}
+        {plan !== 'free' && !isTrial && (
+          <span className="text-[10px] font-bold px-2 py-1 bg-green-100 text-green-700 rounded-full border border-green-200">
+            ACTIVE
+          </span>
+        )}
+      </div>
+
+      {/* Trial / expiry countdown */}
+      {(isTrial || (plan !== 'free' && daysLeft !== null)) && (
+        <div className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-4 ${
+          daysLeft <= 2 ? 'bg-red-50 border border-red-200' : 'bg-white/70 border border-slate-200'
+        }`}>
+          <Clock size={13} className={daysLeft <= 2 ? 'text-red-500' : 'text-slate-400'} />
+          <p className={`text-xs font-semibold ${daysLeft <= 2 ? 'text-red-600' : 'text-slate-600'}`}>
+            {isTrial
+              ? `Trial ends in ${trialDaysLeft} day${trialDaysLeft !== 1 ? 's' : ''}`
+              : `Renews in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`
+            }
+          </p>
+        </div>
+      )}
+
+      {/* Perks */}
+      <ul className="space-y-1.5 mb-4">
+        {cfg.perks.map(perk => (
+          <li key={perk} className="flex items-center gap-2 text-xs text-slate-700">
+            <Check size={12} className="text-green-500 shrink-0" strokeWidth={3} />
+            {perk}
+          </li>
+        ))}
+      </ul>
+
+      {/* CTA */}
+      {plan === 'free' ? (
+        <Link
+          to="/pricing"
+          className={`flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r ${cfg.gradient} hover:shadow-md transition-all`}
+        >
+          <Sparkles size={14} /> Upgrade Now
+        </Link>
+      ) : isTrial ? (
+        <Link
+          to="/pricing"
+          className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-primary-600 to-pink-500 hover:shadow-md transition-all"
+        >
+          <Crown size={14} /> Keep Premium Access
+        </Link>
+      ) : (
+        <Link
+          to="/pricing"
+          className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-all"
+        >
+          Manage Subscription
+        </Link>
+      )}
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [subStatus, setSubStatus] = useState(null);
   const socketRef = useRef(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [convRes, notifRes] = await Promise.all([
+        const [convRes, notifRes, subRes] = await Promise.all([
           api.get('/messages'),
           api.get('/notifications'),
+          api.get('/subscription/status'),
         ]);
         if (convRes.data.success) setConversations(convRes.data.conversations.slice(0, 5));
         if (notifRes.data.success) {
           setNotifications(notifRes.data.notifications.slice(0, 3));
           setUnreadCount(notifRes.data.unreadCount);
         }
+        setSubStatus(subRes.data);
       } catch (e) {
         console.error(e);
       } finally {
@@ -307,11 +415,11 @@ const Dashboard = () => {
               >
                 <Settings size={14} /> Edit Profile
               </Link>
-              <Link to="/pricing"
-                className="inline-flex items-center gap-2 mt-2 w-full justify-center px-4 py-2.5 bg-gradient-to-r from-primary-600 to-pink-500 text-white rounded-xl hover:shadow-md transition-all text-sm font-bold"
-              >
-                ✨ {user?.plan === 'free' ? 'Upgrade Plan' : `${user?.plan?.charAt(0).toUpperCase() + user?.plan?.slice(1)} Plan`}
-              </Link>
+            </motion.div>
+
+            {/* Subscription Plan Card */}
+            <motion.div initial="hidden" animate="visible" variants={fadeIn}>
+              <SubscriptionCard subStatus={subStatus} loading={loading} />
             </motion.div>
 
             {/* Notifications */}
