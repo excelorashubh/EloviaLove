@@ -40,15 +40,17 @@ const PLAN_CONFIG = {
 const SubscriptionCard = ({ subStatus, loading }) => {
   const plan = subStatus?.plan || 'free';
   const isTrial = subStatus?.isTrial;
-  const trialDaysLeft = subStatus?.trialDaysLeft ?? 0;
+  const trialEndDate = subStatus?.trialEndDate;
   const subscriptionEnd = subStatus?.subscriptionEnd;
   const cfg = PLAN_CONFIG[plan] || PLAN_CONFIG.free;
   const Icon = cfg.icon;
 
-  const endDate = isTrial ? subStatus?.trialEndDate : subscriptionEnd;
+  // Calculate days left directly from date — source of truth
+  const endDate = isTrial ? trialEndDate : subscriptionEnd;
   const daysLeft = endDate
     ? Math.max(0, Math.ceil((new Date(endDate) - new Date()) / 86400000))
     : null;
+  const trialDaysLeft = daysLeft;
 
   if (loading) return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 animate-pulse">

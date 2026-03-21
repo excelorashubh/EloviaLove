@@ -14,7 +14,12 @@ const SubscriptionBanner = () => {
 
   if (!status || dismissed) return null;
 
-  const { isTrial, trialDaysLeft, plan } = status;
+  const { isTrial, trialDaysLeft: rawDaysLeft, plan, trialEndDate } = status;
+
+  // Calculate days left directly from trialEndDate as source of truth
+  const trialDaysLeft = trialEndDate
+    ? Math.max(0, Math.ceil((new Date(trialEndDate) - new Date()) / 86400000))
+    : (rawDaysLeft ?? 0);
 
   // Show banner only for trial users or expired users
   if (!isTrial && plan !== 'free') return null;

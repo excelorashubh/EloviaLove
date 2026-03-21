@@ -66,7 +66,7 @@ router.get('/status', protect, async (req, res) => {
     const isTrial = user.isTrialUsed && !user.subscriptionId && plan !== 'free';
     const trialDaysLeft = isTrial && user.trialEndDate
       ? Math.max(0, Math.ceil((new Date(user.trialEndDate) - new Date()) / 86400000))
-      : 0;
+      : null;
 
     res.json({
       success: true,
