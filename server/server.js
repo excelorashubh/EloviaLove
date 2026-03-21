@@ -22,6 +22,13 @@ app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
   credentials: true
 }));
+
+// Raw body capture for Razorpay webhook signature verification
+app.use('/api/subscription/webhook', express.raw({ type: 'application/json' }), (req, _res, next) => {
+  req.rawBody = req.body.toString('utf8');
+  next();
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 

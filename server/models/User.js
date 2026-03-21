@@ -93,9 +93,16 @@ const userSchema = new mongoose.Schema({
   trialStartDate: { type: Date },
   trialEndDate:   { type: Date },
   // Paid subscription
-  subscriptionId:    { type: String },
+  subscriptionId:    { type: String }, // Razorpay subscription_id (recurring)
   subscriptionStart: { type: Date },
   subscriptionEnd:   { type: Date },
+  subscriptionStatus: {
+    type: String,
+    enum: ['active', 'pending', 'cancelled', 'failed', 'completed'],
+    default: null,
+  },
+  nextBillingDate: { type: Date },
+  razorpayPlanId:  { type: String }, // Razorpay plan_id used for this subscription
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

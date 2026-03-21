@@ -56,43 +56,56 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
       const loaded = await loadRazorpay();
       if (!loaded) throw new Error('Razorpay SDK failed to load. Check your internet connection.');
 
-      const endpoint = isAddon ? '/subscription/addon-order' : '/subscription/create-order';
-      const payload  = isAddon ? { addon: item.key } : { plan: item.key };
-      const { data } = await api.post(endpoint, payload);
+      if (isAddon) {
+        // ── Add-ons: one-time order ──────────────────────────────────────────
+        const { data } = await api.post('/subscription/addon-order', { addon: item.key });
 
-      const options = {
-        key: data.keyId,
-        amount: data.amount,
-        currency: data.currency,
-        name: 'EloviaLove',
-        description: isAddon ? data.addonName : `${data.planName} Plan — 30 days`,
-        order_id: data.orderId,
-        prefill: { name: user?.name || '', email: user?.email || '' },
-        theme: { color: '#c026d3' },
-        modal: {
-          ondismiss: () => setStep('confirm'), // user closed checkout without paying
-        },
-        handler: async (response) => {
-          setStep('processing');
-          try {
-            if (!isAddon) {
-              await api.post('/subscription/verify', {
-                razorpay_order_id:   response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature:  response.razorpay_signature,
+        const options = {
+          key:         data.keyId,
+          amount:      data.amount,
+          currency:    data.currency,
+          name:        'EloviaLove',
+          description: data.addonName,
+          order_id:    data.orderId,
+          prefill:     { name: user?.name || '', email: user?.email || '' },
+          theme:       { color: '#c026d3' },
+          modal:       { ondismiss: () => setStep('confirm') },
+          handler:     () => { setStep('success'); setTimeout(() => onSuccess(item.key, true), 1800); },
+        };
+        new window.Razorpay(options).open();
+
+      } else {
+        // ── Plans: recurring subscription ────────────────────────────────────
+        const { data } = await api.post('/subscription/create-subscription', { plan: item.key });
+
+        const options = {
+          key:             data.keyId,
+          subscription_id: data.subscriptionId,
+          name:            'EloviaLove',
+          description:     `${data.planName} Plan — Auto-renews monthly`,
+          prefill:         { name: user?.name || '', email: user?.email || '' },
+          theme:           { color: '#c026d3' },
+          modal:           { ondismiss: () => setStep('confirm') },
+          handler: async (response) => {
+            setStep('processing');
+            try {
+              await api.post('/subscription/verify-subscription', {
+                razorpay_payment_id:      response.razorpay_payment_id,
+                razorpay_subscription_id: response.razorpay_subscription_id,
+                razorpay_signature:       response.razorpay_signature,
                 plan: item.key,
               });
+              setStep('success');
+              setTimeout(() => onSuccess(item.key, false), 1800);
+            } catch (e) {
+              setErrorMsg(e.response?.data?.message || 'Payment verification failed. Contact support.');
+              setStep('error');
             }
-            setStep('success');
-            setTimeout(() => onSuccess(item.key, isAddon), 1800);
-          } catch (e) {
-            setErrorMsg(e.response?.data?.message || 'Payment verification failed. Contact support.');
-            setStep('error');
-          }
-        },
-      };
+          },
+        };
+        new window.Razorpay(options).open();
+      }
 
-      new window.Razorpay(options).open();
     } catch (e) {
       const msg = e.response?.data?.message
         || e.response?.data?.error?.description
@@ -124,7 +137,7 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
             <div className={`bg-gradient-to-br ${isAddon ? 'from-primary-600 to-pink-500' : PLAN_META[item.key]?.gradient || 'from-primary-600 to-pink-500'} p-6 text-white text-center`}>
               <div className="text-4xl mb-2">{isAddon ? item.icon : <Icon size={36} className="mx-auto" />}</div>
               <h2 className="text-xl font-extrabold">{label}</h2>
-              <p className="text-white/80 text-sm mt-1">{isAddon ? item.desc : '30-day subscription'}</p>
+              <p className="text-white/80 text-sm mt-1">{isAddon ? item.desc : 'Auto-renews monthly · Cancel anytime'}</p>
             </div>
             <div className="p-6">
               <div className="flex items-center justify-between py-3 border-b border-slate-100">
@@ -230,6 +243,21 @@ const Pricing = () => {
 
   const openModal = (item, isAddon = false) => setModal({ item, isAddon });
   const closeModal = () => setModal(null);
+  const [cancelling, setCancelling] = useState(false);
+
+  const cancelSubscription = async () => {
+    if (!window.confirm('Cancel your subscription? You keep access until the current period ends.')) return;
+    setCancelling(true);
+    try {
+      await api.post('/subscription/cancel');
+      const r = await api.get('/subscription/status').catch(() => null);
+      if (r) setStatus(r.data);
+    } catch (e) {
+      alert(e.response?.data?.message || 'Cancellation failed');
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   const handleSuccess = async (key, isAddon) => {
     closeModal();
@@ -371,6 +399,24 @@ const Pricing = () => {
             );
           })}
         </div>
+
+        {/* Cancel subscription (active paid subscribers only) */}
+        {currentPlan !== 'free' && !isTrial && status?.subscriptionStatus !== 'cancelled' && status?.razorpaySubId && (
+          <div className="text-center mt-2 mb-8">
+            <button
+              onClick={cancelSubscription}
+              disabled={cancelling}
+              className="text-sm text-slate-400 hover:text-red-500 transition-colors underline underline-offset-2"
+            >
+              {cancelling ? 'Cancelling...' : 'Cancel subscription'}
+            </button>
+          </div>
+        )}
+        {status?.subscriptionStatus === 'cancelled' && (
+          <div className="text-center mt-2 mb-8 text-sm text-amber-600 font-medium">
+            ⚠️ Subscription cancelled — access continues until period end
+          </div>
+        )}
 
         {/* Add-ons */}
         <div className="mb-10">

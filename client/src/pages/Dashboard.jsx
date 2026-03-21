@@ -125,6 +125,13 @@ const SubscriptionCard = ({ subStatus, loading }) => {
         >
           <Crown size={14} /> Keep Premium Access
         </Link>
+      ) : subStatus?.subscriptionStatus === 'cancelled' ? (
+        <div className="space-y-2">
+          <p className="text-xs text-center text-amber-600 font-medium">Cancelled — access until period end</p>
+          <Link to="/pricing" className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-primary-600 to-pink-500 hover:shadow-md transition-all">
+            Resubscribe
+          </Link>
+        </div>
       ) : (
         <Link
           to="/pricing"
