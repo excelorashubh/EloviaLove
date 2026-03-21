@@ -21,10 +21,20 @@ const formatDate = (ts) => {
   return d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
 };
 
-const groupByDate = (messages) => {
+const groupByDate = (messages, myId) => {
   const groups = [];
   let currentDate = null;
+  let unreadInserted = false;
+
   messages.forEach(msg => {
+    // Insert "unread" divider before the first unread message from the other person
+    const senderId = (msg.sender?._id || msg.sender)?.toString();
+    const isFromOther = senderId !== myId;
+    if (!unreadInserted && isFromOther && !msg.isRead && !msg.pending) {
+      groups.push({ type: 'unread', key: 'unread-divider' });
+      unreadInserted = true;
+    }
+
     const date = new Date(msg.createdAt).toDateString();
     if (date !== currentDate) {
       currentDate = date;
@@ -54,6 +64,7 @@ const Chat = () => {
 
   const socketRef       = useRef(null);
   const messagesEndRef  = useRef(null);
+  const unreadRef       = useRef(null);
   const typingTimer     = useRef(null);
   const inputRef        = useRef(null);
   // prevent adding duplicate messages from socket echo
@@ -143,9 +154,15 @@ const Chat = () => {
   }, [userId]);
 
   // ── Auto-scroll ──────────────────────────────────────────────────────────────
+  const hasScrolledToUnread = useRef(false);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+    if (!loading && !hasScrolledToUnread.current && unreadRef.current) {
+      unreadRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      hasScrolledToUnread.current = true;
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isTyping, loading]);
 
   // ── Load earlier messages ────────────────────────────────────────────────────
   const loadMore = async () => {
@@ -243,7 +260,7 @@ const Chat = () => {
     </div>
   );
 
-  const grouped = groupByDate(messages);
+  const grouped = groupByDate(messages, myId);
   const otherAvatar = otherUser?.profilePhoto ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUser?.name || 'U')}&background=e879a0&color=fff`;
 
@@ -315,6 +332,17 @@ const Chat = () => {
           )}
 
           {grouped.map((item, idx) => {
+            // Unread divider
+            if (item.type === 'unread') return (
+              <div key="unread-divider" ref={unreadRef} className="flex items-center gap-3 py-3 my-1">
+                <div className="flex-1 h-px bg-pink-200" />
+                <span className="text-[11px] text-pink-500 font-semibold shrink-0 bg-pink-50 border border-pink-200 px-3 py-1 rounded-full">
+                  Unread messages
+                </span>
+                <div className="flex-1 h-px bg-pink-200" />
+              </div>
+            );
+
             // Date separator
             if (item.type === 'date') return (
               <div key={item.key} className="flex items-center gap-3 py-3">
