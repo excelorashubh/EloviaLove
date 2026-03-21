@@ -64,7 +64,7 @@ const Chats = () => {
     });
 
     socketRef.current.on('connect', () => {
-      socketRef.current.emit('join', user._id);
+      socketRef.current.emit('join', user._id.toString());
     });
 
     socketRef.current.on('private_message', ({ message, from }) => {

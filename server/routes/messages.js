@@ -138,7 +138,7 @@ router.post('/:userId', protect, [
           createdAt: message.createdAt,
           isRead: message.isRead,
         },
-        from: req.user._id,
+        from: req.user._id.toString(),
       });
     }
 

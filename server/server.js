@@ -11,8 +11,13 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    methods: ["GET", "POST"]
+    origin: [
+      process.env.CLIENT_URL || "http://localhost:5173",
+      "http://localhost:5173",
+      "http://localhost:5174",
+    ],
+    methods: ["GET", "POST"],
+    credentials: true,
   }
 });
 
@@ -67,7 +72,11 @@ io.on('connection', (socket) => {
 
   // Join user's room for private messages
   socket.on('join', (userId) => {
-    socket.join(userId);
+    const roomId = userId?.toString();
+    if (roomId) {
+      socket.join(roomId);
+      console.log(`Socket ${socket.id} joined room: ${roomId}`);
+    }
   });
 
   // Handle private messages — relay only to recipient, not back to sender

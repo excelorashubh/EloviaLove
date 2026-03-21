@@ -70,7 +70,7 @@ const Chat = () => {
 
     socket.on('connect', () => {
       setConnected(true);
-      socket.emit('join', user._id);
+      socket.emit('join', user._id.toString());
     });
 
     socket.on('disconnect', () => setConnected(false));
@@ -78,20 +78,17 @@ const Chat = () => {
 
     socket.on('private_message', ({ message, from }) => {
       // Only accept messages from the person we're chatting with
-      const fromId = from?.toString();
-      const targetId = userId?.toString();
-      if (fromId !== targetId) return;
+      if (from !== userId) return;
 
       // Deduplicate — ignore if we already have this message (optimistic)
-      if (sentIds.current.has(message._id)) return;
+      if (sentIds.current.has(message._id?.toString())) return;
 
       setMessages(prev => {
-        // Also guard against duplicate _id already in list
-        if (prev.some(m => m._id === message._id)) return prev;
+        if (prev.some(m => m._id?.toString() === message._id?.toString())) return prev;
         return [...prev, message];
       });
 
-      // Mark as read since chat is open — triggers messages_read event back to sender
+      // Mark as read since chat is open
       api.get(`/messages/${userId}`).catch(() => {});
     });
 
@@ -207,11 +204,11 @@ const Chat = () => {
       if (res.data.success) {
         const saved = res.data.message;
         // Track real ID so socket echo is ignored
-        sentIds.current.add(saved._id || saved.id);
+        sentIds.current.add(saved._id?.toString() || saved.id?.toString());
 
         // Replace optimistic with real message
         setMessages(prev =>
-          prev.map(m => m._id === tempId ? { ...saved, pending: false } : m)
+          prev.map(m => m._id === tempId ? { ...saved, _id: saved._id || saved.id, pending: false } : m)
         );
 
         // Server now handles socket delivery to recipient — no need to re-emit here
