@@ -18,6 +18,8 @@ import Profile from './pages/Profile';
 import ProfileEdit from './pages/ProfileEdit';
 import Notifications from './pages/Notifications';
 import Chats from './pages/Chats';
+import Pricing from './pages/Pricing';
+import SubscriptionSuccess from './pages/SubscriptionSuccess';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminReports from './pages/admin/AdminReports';
@@ -57,6 +59,8 @@ function App() {
           <Route path="/profile/edit" element={<MainLayout><ProtectedRoute><ProfileEdit /></ProtectedRoute></MainLayout>} />
           <Route path="/notifications" element={<MainLayout><ProtectedRoute><Notifications /></ProtectedRoute></MainLayout>} />
           <Route path="/chats" element={<MainLayout><ProtectedRoute><Chats /></ProtectedRoute></MainLayout>} />
+          <Route path="/pricing" element={<MainLayout><Pricing /></MainLayout>} />
+          <Route path="/subscription/success" element={<MainLayout><ProtectedRoute><SubscriptionSuccess /></ProtectedRoute></MainLayout>} />
         </Routes>
       </Router>
     </AuthProvider>

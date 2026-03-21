@@ -70,6 +70,15 @@ router.post('/register', [
       gender
     });
 
+    // ── Activate 10-day free trial on first registration ──
+    const trialEnd = new Date();
+    trialEnd.setDate(trialEnd.getDate() + 10);
+    user.plan = 'premium';
+    user.isTrialUsed = true;
+    user.trialStartDate = new Date();
+    user.trialEndDate = trialEnd;
+    await user.save({ validateBeforeSave: false });
+
     // Generate token
     const token = generateToken(user._id);
 
@@ -83,7 +92,10 @@ router.post('/register', [
         email: user.email,
         role: user.role,
         profilePhoto: user.profilePhoto,
-        profileCompleted: user.profileCompleted
+        profileCompleted: user.profileCompleted,
+        plan: user.plan,
+        isTrialUsed: user.isTrialUsed,
+        trialEndDate: user.trialEndDate,
       }
     });
   } catch (error) {
@@ -143,6 +155,20 @@ router.post('/login', [
     // Update last active
     await user.updateLastActive();
 
+    // ── Check trial expiry ──
+    if (user.plan === 'premium' && user.isTrialUsed && !user.subscriptionId) {
+      if (user.trialEndDate && new Date() > user.trialEndDate) {
+        user.plan = 'free';
+        await user.save({ validateBeforeSave: false });
+      }
+    }
+    // ── Check paid subscription expiry ──
+    if (user.subscriptionEnd && new Date() > user.subscriptionEnd && user.subscriptionId) {
+      user.plan = 'free';
+      user.subscriptionId = null;
+      await user.save({ validateBeforeSave: false });
+    }
+
     // Generate token
     const token = generateToken(user._id);
 
@@ -156,7 +182,11 @@ router.post('/login', [
         email: user.email,
         role: user.role,
         profilePhoto: user.profilePhoto,
-        profileCompleted: user.profileCompleted
+        profileCompleted: user.profileCompleted,
+        plan: user.plan,
+        isTrialUsed: user.isTrialUsed,
+        trialEndDate: user.trialEndDate,
+        subscriptionEnd: user.subscriptionEnd,
       }
     });
   } catch (error) {
@@ -193,7 +223,11 @@ router.get('/me', protect, async (req, res) => {
         isVerified: user.isVerified,
         profileCompleted: user.profileCompleted,
         lastActive: user.lastActive,
-        age: user.age
+        age: user.age,
+        plan: user.plan,
+        isTrialUsed: user.isTrialUsed,
+        trialEndDate: user.trialEndDate,
+        subscriptionEnd: user.subscriptionEnd,
       }
     });
   } catch (error) {

@@ -6,6 +6,7 @@ import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
+import SubscriptionBanner from '../components/SubscriptionBanner';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
@@ -123,6 +124,9 @@ const Dashboard = () => {
 
           {/* Main */}
           <div className="lg:col-span-2 space-y-6">
+
+            {/* Trial / subscription banner */}
+            <SubscriptionBanner />
 
             {/* Welcome */}
             <motion.div initial="hidden" animate="visible" variants={fadeIn}
@@ -302,6 +306,11 @@ const Dashboard = () => {
                 className="inline-flex items-center gap-2 mt-5 w-full justify-center px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors text-sm font-medium"
               >
                 <Settings size={14} /> Edit Profile
+              </Link>
+              <Link to="/pricing"
+                className="inline-flex items-center gap-2 mt-2 w-full justify-center px-4 py-2.5 bg-gradient-to-r from-primary-600 to-pink-500 text-white rounded-xl hover:shadow-md transition-all text-sm font-bold"
+              >
+                ✨ {user?.plan === 'free' ? 'Upgrade Plan' : `${user?.plan?.charAt(0).toUpperCase() + user?.plan?.slice(1)} Plan`}
               </Link>
             </motion.div>
 

@@ -80,7 +80,22 @@ const userSchema = new mongoose.Schema({
   profileCompleted: {
     type: Boolean,
     default: false
-  }
+  },
+
+  // ── Subscription ──────────────────────────────────────────────────────────
+  plan: {
+    type: String,
+    enum: ['free', 'basic', 'premium', 'pro'],
+    default: 'free'
+  },
+  // Trial
+  isTrialUsed: { type: Boolean, default: false },
+  trialStartDate: { type: Date },
+  trialEndDate:   { type: Date },
+  // Paid subscription
+  subscriptionId:    { type: String },
+  subscriptionStart: { type: Date },
+  subscriptionEnd:   { type: Date },
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
