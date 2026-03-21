@@ -97,7 +97,7 @@ router.post('/create-order', protect, async (req, res) => {
     const order = await razorpay.orders.create({
       amount,
       currency: 'INR',
-      receipt: `order_${req.user._id}_${Date.now()}`,
+      receipt: `rcpt_${Date.now()}`,
       notes: { plan, userId: req.user._id.toString() },
     });
 
@@ -191,7 +191,7 @@ router.post('/addon-order', protect, async (req, res) => {
     const order = await razorpay.orders.create({
       amount,
       currency: 'INR',
-      receipt: `addon_${req.user._id}_${Date.now()}`,
+      receipt: `rcpt_${Date.now()}`,
       notes: { addon, userId: req.user._id.toString() },
     });
 
