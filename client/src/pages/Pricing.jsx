@@ -86,7 +86,8 @@ const Pricing = () => {
 
       new window.Razorpay(options).open();
     } catch (e) {
-      alert(e.response?.data?.message || 'Could not initiate payment.');
+      const msg = e.response?.data?.message || e.response?.data?.error?.description || e.message || 'Could not initiate payment.';
+      alert(`Payment error: ${msg}`);
     } finally {
       setPaying('');
     }
@@ -115,7 +116,8 @@ const Pricing = () => {
 
       new window.Razorpay(options).open();
     } catch (e) {
-      alert(e.response?.data?.message || 'Could not initiate payment.');
+      const msg = e.response?.data?.message || e.response?.data?.error?.description || e.message || 'Could not initiate payment.';
+      alert(`Payment error: ${msg}`);
     } finally {
       setPaying('');
     }

@@ -119,8 +119,9 @@ router.post('/create-order', protect, async (req, res) => {
       planName: PLANS[plan].name,
     });
   } catch (err) {
-    console.error('Create order error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    console.error('Create order error:', err?.error || err?.message || err);
+    const msg = err?.error?.description || err?.message || 'Razorpay order creation failed';
+    res.status(500).json({ success: false, message: msg });
   }
 });
 
