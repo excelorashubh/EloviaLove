@@ -25,38 +25,62 @@ const getExcludedIds = async (userId) => {
 };
 
 // @route   GET /api/match/random
-// @desc    Get 10 random unseen active users
+// @desc    Get users — priority: people who liked you first, then others
 // @access  Private
 router.get('/random', protect, async (req, res) => {
   try {
     const excludeIds = await getExcludedIds(req.user._id);
 
-    const users = await User.aggregate([
-      {
-        $match: {
-          _id: { $nin: excludeIds },
-          isActive: true
-        }
-      },
-      { $sample: { size: 10 } },
-      {
-        $project: {
-          name: 1, gender: 1, location: 1,
-          interests: 1, profilePhoto: 1, bio: 1,
-          relationshipGoals: 1, dateOfBirth: 1
-        }
-      }
-    ]);
+    // Who already liked the current user (mutual chance = high)
+    const likedMeIds = await Like.find({
+      toUser:   req.user._id,
+      fromUser: { $nin: excludeIds },
+      type:     'like',
+    }).distinct('fromUser');
 
-    // Attach virtual age
-    const withAge = users.map(u => ({
+    // Priority users: people who liked me and aren't excluded
+    const priorityUsers = await User.find({
+      _id:      { $in: likedMeIds, $nin: excludeIds },
+      isActive: true,
+    })
+      .select('name gender location interests profilePhoto bio relationshipGoals dateOfBirth')
+      .limit(5)
+      .lean();
+
+    // Fill remaining slots with random unseen users
+    const priorityIds = priorityUsers.map(u => u._id);
+    const remainingCount = Math.max(0, 10 - priorityUsers.length);
+
+    const otherUsers = remainingCount > 0
+      ? await User.aggregate([
+          {
+            $match: {
+              _id:      { $nin: [...excludeIds, ...priorityIds] },
+              isActive: true,
+            },
+          },
+          { $sample: { size: remainingCount } },
+          {
+            $project: {
+              name: 1, gender: 1, location: 1,
+              interests: 1, profilePhoto: 1, bio: 1,
+              relationshipGoals: 1, dateOfBirth: 1,
+            },
+          },
+        ])
+      : [];
+
+    const addAge = u => ({
       ...u,
       age: u.dateOfBirth
         ? Math.floor((Date.now() - new Date(u.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000))
-        : null
-    }));
+        : null,
+      likedYou: likedMeIds.some(id => id.toString() === u._id.toString()),
+    });
 
-    res.json({ success: true, users: withAge });
+    const users = [...priorityUsers, ...otherUsers].map(addAge);
+
+    res.json({ success: true, users });
   } catch (error) {
     console.error('Random match error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -208,6 +232,46 @@ router.post('/swipe', protect, [
     res.json({ success: true, isMatch, matchedUser });
   } catch (error) {
     console.error('Swipe error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   GET /api/match/liked-you
+// @desc    Get users who liked the current user (premium feature)
+// @access  Private — premium/pro only
+router.get('/liked-you', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const isPremium = ['premium', 'pro'].includes(user.plan);
+
+    // Find who liked me and I haven't swiped yet
+    const alreadySwiped = await Like.find({ fromUser: req.user._id }).distinct('toUser');
+    const matched       = await Match.find({ users: req.user._id }).distinct('users');
+    const excludeIds    = [...new Set([
+      ...alreadySwiped.map(id => id.toString()),
+      ...matched.map(id => id.toString()),
+      req.user._id.toString(),
+    ])].map(id => new mongoose.Types.ObjectId(id));
+
+    const likes = await Like.find({
+      toUser:   req.user._id,
+      fromUser: { $nin: excludeIds },
+      type:     'like',
+    }).populate('fromUser', 'name profilePhoto location age bio interests dateOfBirth').lean();
+
+    const profiles = likes.map(l => ({
+      ...l.fromUser,
+      age: l.fromUser.dateOfBirth
+        ? Math.floor((Date.now() - new Date(l.fromUser.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000))
+        : null,
+      likedYou: true,
+      // Blur profile photo for free users
+      profilePhoto: isPremium ? l.fromUser.profilePhoto : null,
+    }));
+
+    res.json({ success: true, profiles, isPremium, count: profiles.length });
+  } catch (err) {
+    console.error('Liked-you error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

@@ -252,6 +252,11 @@ const SwipeCard = ({ user, onLike, onPass, isTop }) => {
           <div className="flex items-end gap-2 mb-1">
             <h2 className="text-2xl font-bold">{user.name}</h2>
             {user.age && <span className="text-xl font-light mb-0.5">{user.age}</span>}
+            {user.likedYou && (
+              <span className="mb-0.5 px-2 py-0.5 bg-pink-500/90 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
+                <Heart size={8} fill="currentColor" /> Liked you
+              </span>
+            )}
           </div>
           {user.location && (
             <div className="flex items-center gap-1 text-sm text-white/80">
@@ -289,6 +294,8 @@ const Discover = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [matchPopup, setMatchPopup] = useState(null);
   const [likeToast, setLikeToast] = useState(null);
+  const [tab, setTab] = useState('discover'); // 'discover' | 'liked-you'
+  const [likedYouData, setLikedYouData] = useState(null); // { profiles, isPremium, count }
   const likeToastTimer = useRef(null);
   const [mode, setMode] = useState('random'); // 'random' | 'filter'
   const [filters, setFilters] = useState({ gender: '', ageMin: '', ageMax: '', location: '', interests: [] });
@@ -299,6 +306,15 @@ const Discover = () => {
       const res = await api.get('/match/random');
       setUsers(res.data.users);
       setMode('random');
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  }, []);
+
+  const loadLikedYou = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/match/liked-you');
+      setLikedYouData(res.data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   }, []);
@@ -321,6 +337,10 @@ const Discover = () => {
   }, [filters]);
 
   useEffect(() => { loadRandom(); }, [loadRandom]);
+
+  useEffect(() => {
+    if (tab === 'liked-you') loadLikedYou();
+  }, [tab, loadLikedYou]);
 
   // Preload more when 2 cards left
   useEffect(() => {
@@ -391,7 +411,30 @@ const Discover = () => {
             </button>
           </div>
         </div>
-        {mode === 'filter' && (
+
+        {/* Tabs */}
+        <div className="flex gap-2 mt-4 bg-slate-100 p-1 rounded-2xl">
+          <button
+            onClick={() => setTab('discover')}
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${tab === 'discover' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Discover
+          </button>
+          <button
+            onClick={() => setTab('liked-you')}
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${tab === 'liked-you' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Heart size={13} className="text-pink-500" fill="currentColor" />
+            Liked You
+            {likedYouData?.count > 0 && (
+              <span className="bg-pink-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                {likedYouData.count}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {tab === 'discover' && mode === 'filter' && (
           <div className="flex items-center gap-2 mt-2">
             <span className="text-xs text-primary-600 font-medium bg-primary-50 px-2 py-1 rounded-full">Filtered results</span>
             <button onClick={loadRandom} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1">
@@ -401,87 +444,158 @@ const Discover = () => {
         )}
       </div>
 
-      {/* Card Stack */}
+      {/* Card Stack / Liked You */}
       <div className="max-w-md mx-auto px-4">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center h-96">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mb-4" />
-            <p className="text-slate-500 text-sm">Finding matches...</p>
-          </div>
-        ) : users.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-96 text-center">
-            <Heart className="w-16 h-16 text-slate-200 mb-4" />
-            <h2 className="text-xl font-bold text-slate-700 mb-2">No more profiles</h2>
-            <p className="text-slate-400 text-sm mb-6">You've seen everyone! Check back later.</p>
-            <button onClick={loadRandom} className="px-6 py-3 bg-primary-600 text-white rounded-2xl font-semibold hover:bg-primary-700 transition-colors">
-              Refresh
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Stack: show top 3 cards */}
-            <div className="relative h-[520px]">
-              {users.slice(0, 3).map((u, i) => (
-                <motion.div
-                  key={u._id}
-                  style={{
-                    zIndex: 3 - i,
-                    scale: 1 - i * 0.04,
-                    y: i * 10,
-                  }}
-                  className="absolute w-full"
-                >
-                  <SwipeCard
-                    user={u}
-                    isTop={i === 0}
-                    onLike={() => swipe('like')}
-                    onPass={() => swipe('pass')}
-                  />
-                </motion.div>
-              ))}
+        {tab === 'liked-you' ? (
+          /* ── Liked You Tab ── */
+          loading ? (
+            <div className="flex flex-col items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600 mb-3" />
+              <p className="text-slate-500 text-sm">Loading...</p>
             </div>
-
-            {/* Action buttons */}
-            <div className="flex justify-center gap-6 mt-6">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => swipe('pass')}
-                disabled={swiping}
-                className="w-16 h-16 bg-white rounded-full shadow-lg border border-slate-200 flex items-center justify-center text-red-400 hover:border-red-300 hover:shadow-red-100 transition-all disabled:opacity-50"
-              >
-                <X size={28} strokeWidth={2.5} />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => swipe('like')}
-                disabled={swiping}
-                className="w-16 h-16 bg-gradient-to-br from-primary-500 to-pink-500 rounded-full shadow-lg shadow-pink-500/30 flex items-center justify-center text-white hover:shadow-pink-500/50 transition-all disabled:opacity-50"
-              >
-                <Heart size={28} fill="currentColor" />
-              </motion.button>
-            </div>
-
-            {/* Dev: Force Match */}
-            {import.meta.env.DEV && users.length > 0 && (
-              <div className="flex justify-center mt-3">
-                <button
-                  onClick={forceMatch}
-                  className="text-xs text-slate-400 border border-dashed border-slate-300 px-3 py-1.5 rounded-xl hover:text-primary-500 hover:border-primary-300 transition-colors"
-                >
-                  ⚡ Force Match (dev)
-                </button>
+          ) : !likedYouData?.isPremium ? (
+            /* Free user — blurred teaser */
+            <div className="text-center py-10">
+              <div className="relative w-full max-w-xs mx-auto mb-6">
+                <div className="grid grid-cols-3 gap-2">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="aspect-square rounded-2xl bg-gradient-to-br from-pink-200 to-primary-200 flex items-center justify-center overflow-hidden relative">
+                      <div className="absolute inset-0 backdrop-blur-md bg-white/30" />
+                      <Heart size={24} className="text-pink-400 relative z-10" fill="currentColor" />
+                    </div>
+                  ))}
+                </div>
+                {likedYouData?.count > 0 && (
+                  <div className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full w-7 h-7 flex items-center justify-center shadow-lg">
+                    {likedYouData.count}
+                  </div>
+                )}
               </div>
-            )}
-
-            {/* Progress dots */}
-            <div className="flex justify-center gap-1.5 mt-5">
-              {users.slice(0, Math.min(users.length, 8)).map((_, i) => (
-                <div key={i} className={`rounded-full transition-all ${i === 0 ? 'w-5 h-1.5 bg-primary-500' : 'w-1.5 h-1.5 bg-slate-200'}`} />
-              ))}
+              <h3 className="text-lg font-bold text-slate-900 mb-1">
+                {likedYouData?.count > 0 ? `${likedYouData.count} people liked you` : 'See who likes you'}
+              </h3>
+              <p className="text-slate-500 text-sm mb-5">Upgrade to Premium to see exactly who liked your profile and match instantly.</p>
+              <a href="/pricing" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-pink-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-pink-500/30 transition-all text-sm">
+                <Heart size={15} fill="currentColor" /> Upgrade to See
+              </a>
             </div>
-          </>
+          ) : likedYouData?.profiles?.length === 0 ? (
+            <div className="text-center py-16">
+              <Heart className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+              <p className="text-slate-500 text-sm">No one has liked you yet. Keep discovering!</p>
+            </div>
+          ) : (
+            /* Premium — show profiles */
+            <div className="space-y-3">
+              <p className="text-sm text-slate-500 mb-4 text-center">
+                {likedYouData.profiles.length} {likedYouData.profiles.length === 1 ? 'person' : 'people'} liked you — like back to match instantly!
+              </p>
+              {likedYouData.profiles.map(profile => {
+                const avatar = profile.profilePhoto ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=e879a0&color=fff&size=80`;
+                return (
+                  <div key={profile._id} className="bg-white rounded-2xl p-4 border border-pink-100 shadow-sm flex items-center gap-4">
+                    <div className="relative shrink-0">
+                      <img src={avatar} alt={profile.name} className="w-14 h-14 rounded-full object-cover" />
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-pink-500 to-primary-500 rounded-full flex items-center justify-center">
+                        <Heart size={10} className="text-white" fill="currentColor" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-slate-900">{profile.name}{profile.age ? `, ${profile.age}` : ''}</p>
+                      {profile.location && <p className="text-xs text-slate-400 flex items-center gap-1"><MapPin size={10} />{profile.location}</p>}
+                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await api.post('/match/swipe', { targetUserId: profile._id, action: 'like' });
+                          if (res.data.isMatch) setMatchPopup(res.data.matchedUser);
+                          setLikedYouData(prev => ({ ...prev, profiles: prev.profiles.filter(p => p._id !== profile._id), count: prev.count - 1 }));
+                        } catch (e) { console.error(e); }
+                      }}
+                      className="shrink-0 px-4 py-2 bg-gradient-to-r from-primary-600 to-pink-500 text-white text-sm font-bold rounded-xl shadow hover:shadow-pink-500/30 transition-all"
+                    >
+                      Like Back ❤️
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )
+        ) : (
+          /* ── Discover Tab ── */
+          loading ? (
+            <div className="flex flex-col items-center justify-center h-96">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mb-4" />
+              <p className="text-slate-500 text-sm">Finding matches...</p>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-96 text-center">
+              <Heart className="w-16 h-16 text-slate-200 mb-4" />
+              <h2 className="text-xl font-bold text-slate-700 mb-2">No more profiles</h2>
+              <p className="text-slate-400 text-sm mb-6">You've seen everyone! Check back later.</p>
+              <button onClick={loadRandom} className="px-6 py-3 bg-primary-600 text-white rounded-2xl font-semibold hover:bg-primary-700 transition-colors">
+                Refresh
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Stack: show top 3 cards */}
+              <div className="relative h-[520px]">
+                {users.slice(0, 3).map((u, i) => (
+                  <motion.div
+                    key={u._id}
+                    style={{ zIndex: 3 - i, scale: 1 - i * 0.04, y: i * 10 }}
+                    className="absolute w-full"
+                  >
+                    <SwipeCard
+                      user={u}
+                      isTop={i === 0}
+                      onLike={() => swipe('like')}
+                      onPass={() => swipe('pass')}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex justify-center gap-6 mt-6">
+                <motion.button
+                  whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                  onClick={() => swipe('pass')} disabled={swiping}
+                  className="w-16 h-16 bg-white rounded-full shadow-lg border border-slate-200 flex items-center justify-center text-red-400 hover:border-red-300 hover:shadow-red-100 transition-all disabled:opacity-50"
+                >
+                  <X size={28} strokeWidth={2.5} />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                  onClick={() => swipe('like')} disabled={swiping}
+                  className="w-16 h-16 bg-gradient-to-br from-primary-500 to-pink-500 rounded-full shadow-lg shadow-pink-500/30 flex items-center justify-center text-white hover:shadow-pink-500/50 transition-all disabled:opacity-50"
+                >
+                  <Heart size={28} fill="currentColor" />
+                </motion.button>
+              </div>
+
+              {/* Dev: Force Match */}
+              {import.meta.env.DEV && users.length > 0 && (
+                <div className="flex justify-center mt-3">
+                  <button
+                    onClick={forceMatch}
+                    className="text-xs text-slate-400 border border-dashed border-slate-300 px-3 py-1.5 rounded-xl hover:text-primary-500 hover:border-primary-300 transition-colors"
+                  >
+                    ⚡ Force Match (dev)
+                  </button>
+                </div>
+              )}
+
+              {/* Progress dots */}
+              <div className="flex justify-center gap-1.5 mt-5">
+                {users.slice(0, Math.min(users.length, 8)).map((_, i) => (
+                  <div key={i} className={`rounded-full transition-all ${i === 0 ? 'w-5 h-1.5 bg-primary-500' : 'w-1.5 h-1.5 bg-slate-200'}`} />
+                ))}
+              </div>
+            </>
+          )
         )}
       </div>
 
