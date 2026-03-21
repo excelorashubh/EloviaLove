@@ -70,7 +70,7 @@ const Chat = () => {
 
     socket.on('connect', () => {
       setConnected(true);
-      socket.emit('join', user._id.toString());
+      socket.emit('join', (user.id || user._id).toString());
     });
 
     socket.on('disconnect', () => setConnected(false));
@@ -100,12 +100,12 @@ const Chat = () => {
       if (from?.toString() === userId?.toString()) setIsTyping(false);
     });
 
-    // Read-receipt: when other user reads our messages
     socket.on('messages_read', ({ by }) => {
       if (by?.toString() === userId?.toString()) {
+        const myId = (user.id || user._id)?.toString();
         setMessages(prev =>
           prev.map(m =>
-            m.sender?._id === user._id || m.sender === user._id
+            (m.sender?._id || m.sender)?.toString() === myId
               ? { ...m, isRead: true }
               : m
           )
@@ -117,7 +117,7 @@ const Chat = () => {
       clearTimeout(typingTimer.current);
       socket.disconnect();
     };
-  }, [userId, user._id]);
+  }, [userId, user.id || user._id]);
 
   // ── Load history + other user ────────────────────────────────────────────────
   useEffect(() => {
@@ -168,10 +168,10 @@ const Chat = () => {
   // ── Typing indicator ─────────────────────────────────────────────────────────
   const handleTyping = (e) => {
     setInput(e.target.value);
-    socketRef.current?.emit('typing', { to: userId, from: user._id });
+    socketRef.current?.emit('typing', { to: userId, from: (user.id || user._id) });
     clearTimeout(typingTimer.current);
     typingTimer.current = setTimeout(() => {
-      socketRef.current?.emit('stop_typing', { to: userId, from: user._id });
+      socketRef.current?.emit('stop_typing', { to: userId, from: (user.id || user._id) });
     }, 1500);
   };
 
@@ -184,13 +184,14 @@ const Chat = () => {
     setSending(true);
     setInput('');
     clearTimeout(typingTimer.current);
-    socketRef.current?.emit('stop_typing', { to: userId, from: user._id });
+    socketRef.current?.emit('stop_typing', { to: userId, from: (user.id || user._id) });
 
     // Optimistic bubble
     const tempId = `temp-${Date.now()}`;
+    const myId = user.id || user._id;
     const optimistic = {
       _id: tempId,
-      sender: { _id: user._id, name: user.name, profilePhoto: user.profilePhoto },
+      sender: { _id: myId, name: user.name, profilePhoto: user.profilePhoto },
       receiver: { _id: userId },
       content,
       createdAt: new Date().toISOString(),
@@ -324,7 +325,7 @@ const Chat = () => {
               </div>
             );
 
-            const isMe = (item.sender?._id || item.sender)?.toString() === user._id?.toString();
+            const isMe = (item.sender?._id || item.sender)?.toString() === (user.id || user._id)?.toString();
             const prev = grouped[idx - 1];
             const prevSender = prev?.type === 'message'
               ? (prev.sender?._id || prev.sender)?.toString()
