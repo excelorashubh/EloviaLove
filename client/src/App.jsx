@@ -20,6 +20,7 @@ import Notifications from './pages/Notifications';
 import Chats from './pages/Chats';
 import Pricing from './pages/Pricing';
 import SubscriptionSuccess from './pages/SubscriptionSuccess';
+import Verify from './pages/Verify';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminReports from './pages/admin/AdminReports';
@@ -61,6 +62,8 @@ function App() {
           <Route path="/chats" element={<MainLayout><ProtectedRoute><Chats /></ProtectedRoute></MainLayout>} />
           <Route path="/pricing" element={<MainLayout><Pricing /></MainLayout>} />
           <Route path="/subscription/success" element={<MainLayout><ProtectedRoute><SubscriptionSuccess /></ProtectedRoute></MainLayout>} />
+          <Route path="/verify" element={<MainLayout><ProtectedRoute><Verify /></ProtectedRoute></MainLayout>} />
+          <Route path="/verify-email" element={<MainLayout><Verify /></MainLayout>} />
         </Routes>
       </Router>
     </AuthProvider>

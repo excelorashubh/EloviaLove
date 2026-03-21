@@ -93,8 +93,12 @@ const SubscriptionCard = ({ subStatus, loading }) => {
           <Clock size={13} className={daysLeft <= 2 ? 'text-red-500' : 'text-slate-400'} />
           <p className={`text-xs font-semibold ${daysLeft <= 2 ? 'text-red-600' : 'text-slate-600'}`}>
             {isTrial
-              ? `Trial ends in ${trialDaysLeft} day${trialDaysLeft !== 1 ? 's' : ''}`
-              : `Renews in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`
+              ? daysLeft === 0
+                ? 'Trial expired — upgrade to keep access'
+                : `Trial ends in ${trialDaysLeft} day${trialDaysLeft !== 1 ? 's' : ''}`
+              : daysLeft === 0
+                ? 'Subscription expired'
+                : `Renews in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`
             }
           </p>
         </div>

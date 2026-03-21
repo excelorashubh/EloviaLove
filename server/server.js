@@ -65,6 +65,7 @@ app.use('/api/messages', require('./routes/messages'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/subscription', require('./routes/subscription'));
+app.use('/api/verify', require('./routes/verify'));
 
 // Socket.io for real-time chat
 io.on('connection', (socket) => {

@@ -43,7 +43,7 @@ router.get('/random', protect, async (req, res) => {
       _id:      { $in: likedMeIds, $nin: excludeIds },
       isActive: true,
     })
-      .select('name gender location interests profilePhoto bio relationshipGoals dateOfBirth')
+      .select('name gender location interests profilePhoto bio relationshipGoals dateOfBirth isVerified')
       .limit(5)
       .lean();
 
@@ -64,7 +64,7 @@ router.get('/random', protect, async (req, res) => {
             $project: {
               name: 1, gender: 1, location: 1,
               interests: 1, profilePhoto: 1, bio: 1,
-              relationshipGoals: 1, dateOfBirth: 1,
+              relationshipGoals: 1, dateOfBirth: 1, isVerified: 1,
             },
           },
         ])
@@ -122,7 +122,7 @@ router.post('/filter', protect, async (req, res) => {
     }
 
     const users = await User.find(query)
-      .select('name gender location interests profilePhoto bio relationshipGoals dateOfBirth')
+      .select('name gender location interests profilePhoto bio relationshipGoals dateOfBirth isVerified')
       .limit(20)
       .lean();
 

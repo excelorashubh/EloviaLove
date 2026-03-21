@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { Heart, X, MapPin, SlidersHorizontal, Zap, RotateCcw } from 'lucide-react';
+import { Heart, X, MapPin, SlidersHorizontal, Zap, RotateCcw, BadgeCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
@@ -252,6 +252,9 @@ const SwipeCard = ({ user, onLike, onPass, isTop }) => {
           <div className="flex items-end gap-2 mb-1">
             <h2 className="text-2xl font-bold">{user.name}</h2>
             {user.age && <span className="text-xl font-light mb-0.5">{user.age}</span>}
+            {user.isVerified && (
+              <span className="mb-1" title="Verified"><BadgeCheck size={18} className="text-blue-400" /></span>
+            )}
             {user.likedYou && (
               <span className="mb-0.5 px-2 py-0.5 bg-pink-500/90 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
                 <Heart size={8} fill="currentColor" /> Liked you

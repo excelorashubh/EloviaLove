@@ -64,6 +64,13 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // ── Verification ──────────────────────────────────────────────────────────
+  phone:          { type: String, default: '' },
+  phoneVerified:  { type: Boolean, default: false },
+  emailVerified:  { type: Boolean, default: false },
+  otpCode:        { type: String, select: false },
+  otpExpiry:      { type: Date,   select: false },
+  blueTickStatus: { type: String, enum: ['none', 'pending', 'approved', 'rejected'], default: 'none' },
   isActive: {
     type: Boolean,
     default: true

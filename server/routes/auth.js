@@ -228,6 +228,10 @@ router.get('/me', protect, async (req, res) => {
         isTrialUsed: user.isTrialUsed,
         trialEndDate: user.trialEndDate,
         subscriptionEnd: user.subscriptionEnd,
+        phoneVerified:  user.phoneVerified,
+        emailVerified:  user.emailVerified,
+        blueTickStatus: user.blueTickStatus,
+        phone:          user.phone,
       }
     });
   } catch (error) {

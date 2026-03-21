@@ -56,7 +56,10 @@ const SubscriptionBanner = () => {
             ) : (
               <>
                 <p className={`text-sm font-bold ${isUrgent ? 'text-amber-800' : 'text-primary-800'}`}>
-                  ⏳ {trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} left in your free trial
+                  {trialDaysLeft === 0
+                    ? '⏳ Your trial expires today'
+                    : `⏳ ${trialDaysLeft} day${trialDaysLeft !== 1 ? 's' : ''} left in your free trial`
+                  }
                 </p>
                 <p className={`text-xs ${isUrgent ? 'text-amber-600' : 'text-primary-600'}`}>
                   Upgrade now to keep premium access

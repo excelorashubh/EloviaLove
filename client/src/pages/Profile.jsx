@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Edit, MapPin, Heart, Calendar, Camera, Check, X, Plus } from 'lucide-react';
+import { Edit, MapPin, Heart, Calendar, Camera, Check, X, BadgeCheck, ShieldCheck, Phone, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
@@ -159,14 +159,14 @@ const Profile = () => {
 
               {/* Avatar */}
               <div className="relative shrink-0">
-                <img
+                  <img
                   src={user?.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&size=128&background=e879a0&color=fff`}
                   alt={user?.name}
                   className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
                 />
                 {user?.isVerified && (
-                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
-                    <Check size={14} className="text-white" />
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-500 rounded-full border-4 border-white flex items-center justify-center" title="Verified">
+                    <BadgeCheck size={14} className="text-white" />
                   </div>
                 )}
                 <label className="absolute bottom-0 left-0 w-8 h-8 bg-primary-600 rounded-full border-4 border-white flex items-center justify-center cursor-pointer hover:bg-primary-700 transition-colors">
@@ -188,6 +188,9 @@ const Profile = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <h2 className="text-3xl font-bold text-slate-900">{user?.name}</h2>
                     {age && <span className="text-xl text-slate-500">{age}</span>}
+                    {user?.isVerified && (
+                      <BadgeCheck size={22} className="text-blue-500" title="Verified" />
+                    )}
                   </div>
                 )}
 
@@ -298,21 +301,60 @@ const Profile = () => {
             )}
           </motion.div>
 
-          {/* Account Info */}
+          {/* Account Info + Verification */}
           <motion.div variants={fadeIn} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Account Information</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-900">Account Information</h2>
+              <Link to="/verify" className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-xl text-xs font-semibold hover:bg-primary-100 transition-colors">
+                <ShieldCheck size={13} /> Verify Account
+              </Link>
+            </div>
             <div className="space-y-0 divide-y divide-slate-100">
               {[
                 { label: 'Email', value: user?.email },
                 { label: 'Gender', value: user?.gender },
                 { label: 'Profile Status', value: user?.profileCompleted ? 'Complete' : 'Incomplete', color: user?.profileCompleted ? 'text-green-600' : 'text-orange-500' },
-                { label: 'Verification', value: user?.isVerified ? 'Verified' : 'Unverified', color: user?.isVerified ? 'text-green-600' : 'text-slate-400' },
               ].map(({ label, value, color }) => (
                 <div key={label} className="flex justify-between items-center py-3">
                   <span className="text-slate-500 text-sm">{label}</span>
                   <span className={`font-medium text-sm ${color || 'text-slate-900'}`}>{value}</span>
                 </div>
               ))}
+
+              {/* Phone verification row */}
+              <div className="flex justify-between items-center py-3">
+                <div className="flex items-center gap-1.5 text-slate-500 text-sm">
+                  <Phone size={13} /> Phone
+                </div>
+                {user?.phoneVerified
+                  ? <span className="flex items-center gap-1 text-green-600 text-sm font-medium"><Check size={13} /> Verified</span>
+                  : <Link to="/verify" className="text-xs text-primary-600 font-semibold hover:underline">Verify →</Link>
+                }
+              </div>
+
+              {/* Email verification row */}
+              <div className="flex justify-between items-center py-3">
+                <div className="flex items-center gap-1.5 text-slate-500 text-sm">
+                  <Mail size={13} /> Email
+                </div>
+                {user?.emailVerified
+                  ? <span className="flex items-center gap-1 text-green-600 text-sm font-medium"><Check size={13} /> Verified</span>
+                  : <Link to="/verify?tab=email" className="text-xs text-primary-600 font-semibold hover:underline">Verify →</Link>
+                }
+              </div>
+
+              {/* Blue tick row */}
+              <div className="flex justify-between items-center py-3">
+                <div className="flex items-center gap-1.5 text-slate-500 text-sm">
+                  <BadgeCheck size={13} /> Blue Tick
+                </div>
+                {user?.isVerified
+                  ? <span className="flex items-center gap-1 text-blue-600 text-sm font-medium"><BadgeCheck size={13} /> Verified</span>
+                  : user?.blueTickStatus === 'pending'
+                    ? <span className="text-xs text-amber-600 font-semibold">Under Review</span>
+                    : <Link to="/verify?tab=bluetick" className="text-xs text-primary-600 font-semibold hover:underline">Get Verified →</Link>
+                }
+              </div>
             </div>
           </motion.div>
 
