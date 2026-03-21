@@ -225,7 +225,6 @@ const AdminUsers = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [pendingCount, setPendingCount] = useState(0);
-
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -259,6 +258,16 @@ const AdminUsers = () => {
       await api.delete(`/admin/users/${userId}`);
       setUsers(prev => prev.filter(u => u._id !== userId));
       if (selectedUser?._id === userId) setSelectedUser(null);
+    } catch (e) { console.error(e); }
+    setActionLoading(null);
+  };
+
+  const grantBlueTick = async (userId, grant) => {
+    setActionLoading(userId + '_bluetick');
+    try {
+      await api.post(`/verify/grant/${userId}`, { grant });
+      setUsers(prev => prev.map(u => u._id === userId ? { ...u, isVerified: grant, blueTickStatus: grant ? 'approved' : 'none' } : u));
+      setSelectedUser(prev => prev ? { ...prev, isVerified: grant, blueTickStatus: grant ? 'approved' : 'none' } : null);
     } catch (e) { console.error(e); }
     setActionLoading(null);
   };
@@ -391,6 +400,18 @@ const AdminUsers = () => {
                               <td className="px-4 py-3">
                                 <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
                                   <button
+                                    onClick={() => grantBlueTick(u._id, !u.isVerified)}
+                                    disabled={actionLoading === u._id + '_bluetick'}
+                                    title={u.isVerified ? 'Revoke blue tick' : 'Grant blue tick'}
+                                    className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${
+                                      u.isVerified
+                                        ? 'text-blue-500 hover:bg-blue-50'
+                                        : 'text-slate-400 hover:text-blue-500 hover:bg-blue-50'
+                                    }`}
+                                  >
+                                    <BadgeCheck size={15} />
+                                  </button>
+                                  <button
                                     onClick={() => toggleStatus(u._id, u.isActive)}
                                     disabled={actionLoading === u._id + '_status'}
                                     title={u.isActive ? 'Deactivate' : 'Activate'}
@@ -492,7 +513,22 @@ const AdminUsers = () => {
                       </div>
                     </div>
                   )}
-                  <div className="flex gap-2 pt-2">
+
+                  {/* Blue tick toggle */}
+                  <button
+                    onClick={() => grantBlueTick(selectedUser._id, !selectedUser.isVerified)}
+                    disabled={actionLoading === selectedUser._id + '_bluetick'}
+                    className={`w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 ${
+                      selectedUser.isVerified
+                        ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200'
+                        : 'bg-blue-500 text-white hover:bg-blue-600'
+                    }`}
+                  >
+                    <BadgeCheck size={15} />
+                    {selectedUser.isVerified ? 'Revoke Blue Tick' : 'Grant Blue Tick'}
+                  </button>
+
+                  <div className="flex gap-2">
                     <button
                       onClick={() => toggleStatus(selectedUser._id, selectedUser.isActive)}
                       className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${

@@ -199,6 +199,39 @@ router.get('/requests', protect, async (req, res) => {
   }
 });
 
+// ── Admin: POST /api/verify/grant/:userId ────────────────────────────────────
+// Directly grant or revoke blue tick for any user
+router.post('/grant/:userId', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Admin only' });
+
+    const { grant } = req.body; // true = grant, false = revoke
+    const targetUser = await User.findById(req.params.userId);
+    if (!targetUser) return res.status(404).json({ success: false, message: 'User not found' });
+
+    await User.findByIdAndUpdate(req.params.userId, {
+      isVerified:     !!grant,
+      blueTickStatus: grant ? 'approved' : 'none',
+    });
+
+    // Notify user via socket
+    const io = req.app.get('io');
+    if (io) {
+      io.to(req.params.userId).emit('notification', {
+        type:    'verification',
+        title:   grant ? 'Blue Tick Granted ✓' : 'Blue Tick Revoked',
+        message: grant
+          ? 'An admin has granted you a verified blue tick badge!'
+          : 'Your blue tick verification has been revoked by an admin.',
+      });
+    }
+
+    res.json({ success: true, message: grant ? 'Blue tick granted' : 'Blue tick revoked' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // ── Admin: POST /api/verify/review/:requestId ─────────────────────────────────
 router.post('/review/:requestId', protect, async (req, res) => {
   try {
