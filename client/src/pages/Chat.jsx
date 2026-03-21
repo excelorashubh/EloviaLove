@@ -38,6 +38,8 @@ const groupByDate = (messages) => {
 const Chat = () => {
   const { userId } = useParams();
   const { user } = useAuth();
+  // Normalize current user ID — auth returns 'id', Mongoose virtuals return '_id'
+  const myId = (user?.id || user?._id)?.toString();
 
   const [messages, setMessages]     = useState([]);
   const [otherUser, setOtherUser]   = useState(null);
@@ -70,7 +72,7 @@ const Chat = () => {
 
     socket.on('connect', () => {
       setConnected(true);
-      socket.emit('join', (user.id || user._id).toString());
+      socket.emit('join', myId);
     });
 
     socket.on('disconnect', () => setConnected(false));
@@ -102,7 +104,6 @@ const Chat = () => {
 
     socket.on('messages_read', ({ by }) => {
       if (by?.toString() === userId?.toString()) {
-        const myId = (user.id || user._id)?.toString();
         setMessages(prev =>
           prev.map(m =>
             (m.sender?._id || m.sender)?.toString() === myId
@@ -117,7 +118,7 @@ const Chat = () => {
       clearTimeout(typingTimer.current);
       socket.disconnect();
     };
-  }, [userId, user.id || user._id]);
+  }, [userId, myId]);
 
   // ── Load history + other user ────────────────────────────────────────────────
   useEffect(() => {
@@ -168,10 +169,10 @@ const Chat = () => {
   // ── Typing indicator ─────────────────────────────────────────────────────────
   const handleTyping = (e) => {
     setInput(e.target.value);
-    socketRef.current?.emit('typing', { to: userId, from: (user.id || user._id) });
+    socketRef.current?.emit('typing', { to: userId, from: myId });
     clearTimeout(typingTimer.current);
     typingTimer.current = setTimeout(() => {
-      socketRef.current?.emit('stop_typing', { to: userId, from: (user.id || user._id) });
+      socketRef.current?.emit('stop_typing', { to: userId, from: myId });
     }, 1500);
   };
 
@@ -183,12 +184,10 @@ const Chat = () => {
 
     setSending(true);
     setInput('');
-    clearTimeout(typingTimer.current);
-    socketRef.current?.emit('stop_typing', { to: userId, from: (user.id || user._id) });
+    socketRef.current?.emit('stop_typing', { to: userId, from: myId });
 
     // Optimistic bubble
     const tempId = `temp-${Date.now()}`;
-    const myId = user.id || user._id;
     const optimistic = {
       _id: tempId,
       sender: { _id: myId, name: user.name, profilePhoto: user.profilePhoto },
@@ -325,7 +324,7 @@ const Chat = () => {
               </div>
             );
 
-            const isMe = (item.sender?._id || item.sender)?.toString() === (user.id || user._id)?.toString();
+            const isMe = (item.sender?._id || item.sender)?.toString() === myId;
             const prev = grouped[idx - 1];
             const prevSender = prev?.type === 'message'
               ? (prev.sender?._id || prev.sender)?.toString()
