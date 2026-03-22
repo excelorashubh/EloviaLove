@@ -3,6 +3,8 @@ const User = require('../models/User');
 const Report = require('../models/Report');
 const Match = require('../models/Match');
 const Message = require('../models/Message');
+const Payment = require('../models/Payment');
+const Subscription = require('../models/Subscription');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
@@ -287,6 +289,203 @@ router.get('/stats', async (req, res) => {
       success: false,
       message: 'Server error'
     });
+  }
+});
+
+// ── ANALYTICS ────────────────────────────────────────────────────────────────
+
+// Helper: date range from period query param
+const getDateRange = (period) => {
+  const now = new Date();
+  const start = new Date();
+  if (period === 'today')  { start.setHours(0, 0, 0, 0); }
+  else if (period === 'week')  { start.setDate(now.getDate() - 7); }
+  else if (period === 'month') { start.setMonth(now.getMonth() - 1); }
+  else if (period === 'year')  { start.setFullYear(now.getFullYear() - 1); }
+  else { start.setFullYear(2000); } // 'all'
+  return start;
+};
+
+// @route   GET /api/admin/analytics/overview
+// @desc    Revenue + user overview cards
+router.get('/analytics/overview', async (req, res) => {
+  try {
+    const { period = 'month' } = req.query;
+    const since = getDateRange(period);
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+
+    const [
+      totalRevenue,
+      monthRevenue,
+      todayRevenue,
+      periodRevenue,
+      activeSubscriptions,
+      newUsersToday,
+      newUsersMonth,
+      totalUsers,
+      failedPayments,
+    ] = await Promise.all([
+      Payment.aggregate([{ $match: { status: 'paid' } }, { $group: { _id: null, total: { $sum: '$amount' } } }]),
+      Payment.aggregate([{ $match: { status: 'paid', createdAt: { $gte: monthStart } } }, { $group: { _id: null, total: { $sum: '$amount' } } }]),
+      Payment.aggregate([{ $match: { status: 'paid', createdAt: { $gte: todayStart } } }, { $group: { _id: null, total: { $sum: '$amount' } } }]),
+      Payment.aggregate([{ $match: { status: 'paid', createdAt: { $gte: since } } }, { $group: { _id: null, total: { $sum: '$amount' } } }]),
+      Subscription.countDocuments({ status: 'active' }),
+      User.countDocuments({ createdAt: { $gte: todayStart } }),
+      User.countDocuments({ createdAt: { $gte: monthStart } }),
+      User.countDocuments(),
+      Payment.countDocuments({ status: 'failed' }),
+    ]);
+
+    res.json({
+      success: true,
+      totalRevenue:        totalRevenue[0]?.total  || 0,
+      monthRevenue:        monthRevenue[0]?.total  || 0,
+      todayRevenue:        todayRevenue[0]?.total  || 0,
+      periodRevenue:       periodRevenue[0]?.total || 0,
+      activeSubscriptions,
+      newUsersToday,
+      newUsersMonth,
+      totalUsers,
+      failedPayments,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   GET /api/admin/analytics/monthly-revenue
+// @desc    Revenue grouped by month (last 12 months)
+router.get('/analytics/monthly-revenue', async (req, res) => {
+  try {
+    const since = new Date();
+    since.setFullYear(since.getFullYear() - 1);
+
+    const data = await Payment.aggregate([
+      { $match: { status: 'paid', createdAt: { $gte: since } } },
+      {
+        $group: {
+          _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+          revenue: { $sum: '$amount' },
+          count:   { $sum: 1 },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+    ]);
+
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const result = data.map(d => ({
+      label:   `${MONTHS[d._id.month - 1]} ${d._id.year}`,
+      revenue: d.revenue,
+      count:   d.count,
+    }));
+
+    res.json({ success: true, data: result });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   GET /api/admin/analytics/revenue-by-plan
+// @desc    Revenue breakdown per plan
+router.get('/analytics/revenue-by-plan', async (req, res) => {
+  try {
+    const data = await Payment.aggregate([
+      { $match: { status: 'paid' } },
+      { $group: { _id: '$plan', revenue: { $sum: '$amount' }, count: { $sum: 1 } } },
+      { $sort: { revenue: -1 } },
+    ]);
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   GET /api/admin/analytics/user-growth
+// @desc    New user signups grouped by month (last 12 months)
+router.get('/analytics/user-growth', async (req, res) => {
+  try {
+    const since = new Date();
+    since.setFullYear(since.getFullYear() - 1);
+
+    const data = await User.aggregate([
+      { $match: { createdAt: { $gte: since } } },
+      {
+        $group: {
+          _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+    ]);
+
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const result = data.map(d => ({
+      label: `${MONTHS[d._id.month - 1]} ${d._id.year}`,
+      count: d.count,
+    }));
+
+    res.json({ success: true, data: result });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   GET /api/admin/analytics/payments
+// @desc    Paginated payment history with filters
+router.get('/analytics/payments', async (req, res) => {
+  try {
+    const page   = parseInt(req.query.page)  || 1;
+    const limit  = parseInt(req.query.limit) || 20;
+    const skip   = (page - 1) * limit;
+    const { plan, status, period } = req.query;
+
+    const match = {};
+    if (plan   && plan   !== 'all') match.plan   = plan;
+    if (status && status !== 'all') match.status = status;
+    if (period && period !== 'all') match.createdAt = { $gte: getDateRange(period) };
+
+    const [payments, total] = await Promise.all([
+      Payment.find(match)
+        .populate('userId', 'name email profilePhoto')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Payment.countDocuments(match),
+    ]);
+
+    res.json({
+      success: true,
+      payments,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   GET /api/admin/analytics/conversion
+// @desc    Free → paid conversion rate + plan distribution
+router.get('/analytics/conversion', async (req, res) => {
+  try {
+    const [total, paid, planDist] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ plan: { $in: ['basic', 'premium', 'pro'] } }),
+      User.aggregate([
+        { $group: { _id: '$plan', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+    ]);
+
+    res.json({
+      success: true,
+      total,
+      paid,
+      conversionRate: total > 0 ? ((paid / total) * 100).toFixed(1) : 0,
+      planDistribution: planDist,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
