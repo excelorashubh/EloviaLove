@@ -1,5 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { useEffect } from 'react';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
@@ -26,6 +27,23 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminReports from './pages/admin/AdminReports';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
 import AdminRevenue from './pages/admin/AdminRevenue';
+import AdminVisitors from './pages/admin/AdminVisitors';
+
+import api from './services/api';
+
+// ── Visitor tracker — fires on every route change ─────────────────────────────
+const VisitorTracker = () => {
+  const location = useLocation();
+  useEffect(() => {
+    let visitorId = localStorage.getItem('visitorId');
+    if (!visitorId) {
+      visitorId = `v_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      localStorage.setItem('visitorId', visitorId);
+    }
+    api.post('/analytics/track', { visitorId, page: location.pathname }).catch(() => {});
+  }, [location.pathname]);
+  return null;
+};
 
 // Layout wrapper for public/user pages
 const MainLayout = ({ children, showNav = false }) => (
@@ -40,6 +58,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <VisitorTracker />
         <Routes>
           {/* Admin — full screen with own sidebar layout */}
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
@@ -47,6 +66,7 @@ function App() {
           <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
           <Route path="/admin/revenue" element={<AdminRoute><AdminRevenue /></AdminRoute>} />
           <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+          <Route path="/admin/visitors"  element={<AdminRoute><AdminVisitors /></AdminRoute>} />
 
           {/* Public & user routes with Navbar + Footer */}
           <Route path="/" element={<MainLayout showNav><Home /></MainLayout>} />
