@@ -88,52 +88,106 @@ router.get('/random', protect, async (req, res) => {
 });
 
 // @route   POST /api/match/filter
-// @desc    Get up to 20 users matching filters
+// @desc    Get up to 20 users matching filters — enforces plan-based access
 // @access  Private
 router.post('/filter', protect, async (req, res) => {
   try {
-    const { ageMin, ageMax, gender, location, interests } = req.body;
+    const currentUser = await User.findById(req.user._id);
+    const plan = currentUser?.plan || 'free';
+
+    const {
+      // Free
+      ageMin, ageMax, gender, location,
+      // Basic
+      onlineOnly,
+      // Premium
+      interests, education, profession, relationshipGoals, lifestyle,
+      // Pro
+      heightMin, heightMax, income, religion, isVerified, recentlyActive,
+    } = req.body;
 
     const excludeIds = await getExcludedIds(req.user._id);
 
-    const query = {
-      _id: { $nin: excludeIds },
-      isActive: true
-    };
+    const query = { _id: { $nin: excludeIds }, isActive: true };
 
-    if (gender) query.gender = gender;
+    // ── FREE filters (always allowed) ────────────────────────────────────────
+    if (gender)   query.gender   = gender;
     if (location) query.location = { $regex: location, $options: 'i' };
-    if (interests?.length) query.interests = { $in: interests };
 
-    // Age filter via dateOfBirth range
     if (ageMin || ageMax) {
       const now = new Date();
       query.dateOfBirth = {};
-      if (ageMax) {
-        // older bound: born at least ageMax years ago
-        const minDate = new Date(now.getFullYear() - ageMax, now.getMonth(), now.getDate());
-        query.dateOfBirth.$gte = minDate;
-      }
-      if (ageMin) {
-        // younger bound: born at most ageMin years ago
-        const maxDate = new Date(now.getFullYear() - ageMin, now.getMonth(), now.getDate());
-        query.dateOfBirth.$lte = maxDate;
+      if (ageMax) query.dateOfBirth.$gte = new Date(now.getFullYear() - ageMax, now.getMonth(), now.getDate());
+      if (ageMin) query.dateOfBirth.$lte = new Date(now.getFullYear() - ageMin, now.getMonth(), now.getDate());
+    }
+
+    // ── BASIC filters ────────────────────────────────────────────────────────
+    if (['basic', 'premium', 'pro'].includes(plan)) {
+      if (onlineOnly) {
+        const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
+        query.lastActive = { $gte: fifteenMinsAgo };
       }
     }
 
-    const users = await User.find(query)
-      .select('name gender location interests profilePhoto bio relationshipGoals dateOfBirth isVerified')
-      .limit(20)
+    // ── PREMIUM filters ──────────────────────────────────────────────────────
+    if (['premium', 'pro'].includes(plan)) {
+      if (interests?.length)    query.interests        = { $in: interests };
+      if (education)            query.education        = { $regex: education, $options: 'i' };
+      if (profession)           query.profession       = { $regex: profession, $options: 'i' };
+      if (relationshipGoals)    query.relationshipGoals = relationshipGoals;
+      if (lifestyle?.smoking)   query['lifestyle.smoking']  = lifestyle.smoking;
+      if (lifestyle?.drinking)  query['lifestyle.drinking'] = lifestyle.drinking;
+    }
+
+    // ── PRO filters ──────────────────────────────────────────────────────────
+    if (plan === 'pro') {
+      if (heightMin || heightMax) {
+        query.height = {};
+        if (heightMin) query.height.$gte = Number(heightMin);
+        if (heightMax) query.height.$lte = Number(heightMax);
+      }
+      if (income)   query.income   = income;
+      if (religion) query.religion = { $regex: religion, $options: 'i' };
+      if (isVerified)      query.isVerified = true;
+      if (recentlyActive) {
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        query.lastActive = { $gte: oneDayAgo };
+      }
+    }
+
+    // Who liked me (for boost sorting)
+    const likedMeIds = await Like.find({
+      toUser: req.user._id, type: 'like',
+    }).distinct('fromUser');
+    const likedMeSet = new Set(likedMeIds.map(id => id.toString()));
+
+    let users = await User.find(query)
+      .select('name gender location interests profilePhoto bio relationshipGoals dateOfBirth isVerified lastActive education profession height income religion lifestyle')
+      .limit(40)
       .lean();
 
-    const withAge = users.map(u => ({
+    // Smart sort: liked you > verified > recently active > others
+    users.sort((a, b) => {
+      const aLiked   = likedMeSet.has(a._id.toString()) ? 3 : 0;
+      const bLiked   = likedMeSet.has(b._id.toString()) ? 3 : 0;
+      const aVerif   = a.isVerified ? 2 : 0;
+      const bVerif   = b.isVerified ? 2 : 0;
+      const aActive  = a.lastActive ? new Date(a.lastActive).getTime() : 0;
+      const bActive  = b.lastActive ? new Date(b.lastActive).getTime() : 0;
+      const aScore   = aLiked + aVerif + (aActive > Date.now() - 3600000 ? 1 : 0);
+      const bScore   = bLiked + bVerif + (bActive > Date.now() - 3600000 ? 1 : 0);
+      return bScore - aScore;
+    });
+
+    const withAge = users.slice(0, 20).map(u => ({
       ...u,
       age: u.dateOfBirth
         ? Math.floor((Date.now() - new Date(u.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000))
-        : null
+        : null,
+      likedYou: likedMeSet.has(u._id.toString()),
     }));
 
-    res.json({ success: true, users: withAge });
+    res.json({ success: true, users: withAge, plan });
   } catch (error) {
     console.error('Filter match error:', error);
     res.status(500).json({ success: false, message: 'Server error' });

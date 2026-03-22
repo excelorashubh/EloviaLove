@@ -1,15 +1,35 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { Heart, X, MapPin, SlidersHorizontal, Zap, RotateCcw, BadgeCheck } from 'lucide-react';
+import {
+  Heart, X, MapPin, SlidersHorizontal, Zap, RotateCcw, BadgeCheck,
+  Lock, Crown, Sparkles, ChevronRight, Users, CheckCircle2,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
 
 const INTERESTS_OPTIONS = [
   'Travel', 'Coffee', 'Dogs', 'Photography', 'Hiking', 'Music',
   'Cooking', 'Reading', 'Gaming', 'Fitness', 'Art', 'Movies',
-  'Dancing', 'Yoga', 'Sports', 'Nature', 'Fashion', 'Tech'
+  'Dancing', 'Yoga', 'Sports', 'Nature', 'Fashion', 'Tech',
 ];
+
+const EDUCATION_OPTIONS  = ["High School", "Bachelor's", "Master's", "PhD", "Diploma", "Other"];
+const PROFESSION_OPTIONS = ['Engineer', 'Doctor', 'Teacher', 'Designer', 'Lawyer', 'Artist', 'Entrepreneur', 'Student', 'Other'];
+const GOAL_OPTIONS       = ['Casual Dating', 'Serious Relationship', 'Marriage', 'Friendship'];
+const INCOME_OPTIONS     = ['< 3 LPA', '3–5 LPA', '5–10 LPA', '10–20 LPA', '20+ LPA'];
+const RELIGION_OPTIONS   = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhist', 'Jain', 'Other'];
+
+// Plan hierarchy
+const PLAN_RANK = { free: 0, basic: 1, premium: 2, pro: 3 };
+const planHas   = (userPlan, required) => PLAN_RANK[userPlan] >= PLAN_RANK[required];
+
+const PLAN_META = {
+  basic:   { label: 'Basic',   color: 'text-blue-600',   bg: 'bg-blue-50',   border: 'border-blue-200',   icon: Users },
+  premium: { label: 'Premium', color: 'text-primary-600', bg: 'bg-primary-50', border: 'border-primary-200', icon: Sparkles },
+  pro:     { label: 'Pro',     color: 'text-amber-600',  bg: 'bg-amber-50',  border: 'border-amber-200',  icon: Crown },
+};
 
 // ── Match Popup ──────────────────────────────────────────────────────────────
 const MatchPopup = ({ matchedUser, onClose }) => {
@@ -99,118 +119,298 @@ const LikeToast = ({ likedUser, onClose }) => {
   );
 };
 
-// ── Filter Panel ─────────────────────────────────────────────────────────────
-const FilterPanel = ({ filters, onChange, onApply, onClose }) => (
-  <motion.div
-    initial={{ x: '100%' }}
-    animate={{ x: 0 }}
-    exit={{ x: '100%' }}
-    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-    className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-40 flex flex-col"
-  >
-    <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-      <h2 className="font-bold text-slate-900 text-lg">Filters</h2>
-      <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600"><X size={20} /></button>
-    </div>
-
-    <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
-      {/* Gender */}
-      <div>
-        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">Gender</label>
-        <div className="flex gap-2">
-          {['', 'Male', 'Female', 'Non-binary'].map(g => (
-            <button
-              key={g}
-              onClick={() => onChange('gender', g)}
-              className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-colors ${
-                filters.gender === g ? 'bg-primary-600 text-white border-primary-600' : 'border-slate-200 text-slate-600 hover:border-primary-400'
-              }`}
-            >
-              {g || 'Any'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Age Range */}
-      <div>
-        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
-          Age Range: {filters.ageMin || 18} – {filters.ageMax || 60}
-        </label>
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <p className="text-xs text-slate-400 mb-1">Min</p>
-            <input
-              type="number" min={18} max={80}
-              value={filters.ageMin}
-              onChange={e => onChange('ageMin', e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-            />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs text-slate-400 mb-1">Max</p>
-            <input
-              type="number" min={18} max={80}
-              value={filters.ageMax}
-              onChange={e => onChange('ageMax', e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Location */}
-      <div>
-        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">Location</label>
-        <input
-          type="text"
-          placeholder="e.g. New York"
-          value={filters.location}
-          onChange={e => onChange('location', e.target.value)}
-          className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-        />
-      </div>
-
-      {/* Interests */}
-      <div>
-        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">Interests</label>
-        <div className="flex flex-wrap gap-2">
-          {INTERESTS_OPTIONS.map(i => (
-            <button
-              key={i}
-              onClick={() => {
-                const cur = filters.interests || [];
-                onChange('interests', cur.includes(i) ? cur.filter(x => x !== i) : [...cur, i]);
-              }}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                (filters.interests || []).includes(i)
-                  ? 'bg-primary-600 text-white border-primary-600'
-                  : 'border-slate-200 text-slate-600 hover:border-primary-400'
-              }`}
-            >
-              {i}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    <div className="px-5 py-4 border-t border-slate-100 space-y-2">
-      <button
-        onClick={onApply}
-        className="w-full py-3 bg-gradient-to-r from-primary-600 to-pink-500 text-white font-bold rounded-2xl shadow-lg"
+// ── Upgrade Modal ─────────────────────────────────────────────────────────────
+const UpgradeModal = ({ requiredPlan, onClose }) => {
+  const navigate = useNavigate();
+  const meta = PLAN_META[requiredPlan] || PLAN_META.premium;
+  const Icon = meta.icon;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+        onClick={e => e.stopPropagation()}
+        className="bg-white rounded-3xl p-7 w-full max-w-sm text-center shadow-2xl mb-4 sm:mb-0"
       >
-        Apply Filters
-      </button>
-      <button
-        onClick={() => { onChange('reset'); onClose(); }}
-        className="w-full py-2 text-sm text-slate-500 hover:text-slate-700"
-      >
-        Reset
-      </button>
+        <div className={`w-14 h-14 ${meta.bg} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+          <Icon size={26} className={meta.color} />
+        </div>
+        <h3 className="text-xl font-extrabold text-slate-900 mb-1">{meta.label} Feature</h3>
+        <p className="text-slate-500 text-sm mb-5">
+          This filter is available on the <span className={`font-bold ${meta.color}`}>{meta.label}</span> plan and above.
+          Upgrade to unlock better matches.
+        </p>
+        <button
+          onClick={() => { onClose(); navigate('/pricing'); }}
+          className="w-full py-3 bg-gradient-to-r from-primary-600 to-pink-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-pink-500/30 transition-all mb-2"
+        >
+          Upgrade Now 🚀
+        </button>
+        <button onClick={onClose} className="w-full py-2 text-sm text-slate-400 hover:text-slate-600">
+          Maybe later
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// ── Filter section wrapper ────────────────────────────────────────────────────
+const FilterSection = ({ title, requiredPlan, userPlan, onLockClick, children }) => {
+  const locked = !planHas(userPlan, requiredPlan);
+  const meta   = PLAN_META[requiredPlan];
+  const Icon   = meta?.icon;
+  return (
+    <div className={`rounded-2xl border p-4 space-y-3 transition-all ${locked ? 'opacity-70' : ''} ${meta ? meta.border : 'border-slate-200'}`}>
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">{title}</p>
+        {locked && meta && (
+          <button
+            onClick={() => onLockClick(requiredPlan)}
+            className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full ${meta.bg} ${meta.color} border ${meta.border}`}
+          >
+            <Lock size={9} /> {meta.label}
+          </button>
+        )}
+      </div>
+      <div className={locked ? 'pointer-events-none select-none' : ''}>{children}</div>
     </div>
-  </motion.div>
+  );
+};
+
+// ── Pill toggle ───────────────────────────────────────────────────────────────
+const PillGroup = ({ options, value, onChange, multi = false }) => (
+  <div className="flex flex-wrap gap-1.5">
+    {options.map(opt => {
+      const active = multi ? (value || []).includes(opt) : value === opt;
+      return (
+        <button
+          key={opt}
+          onClick={() => {
+            if (multi) {
+              const cur = value || [];
+              onChange(active ? cur.filter(x => x !== opt) : [...cur, opt]);
+            } else {
+              onChange(active ? '' : opt);
+            }
+          }}
+          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+            active ? 'bg-primary-600 text-white border-primary-600' : 'border-slate-200 text-slate-600 hover:border-primary-400'
+          }`}
+        >
+          {opt}
+        </button>
+      );
+    })}
+  </div>
 );
+
+// ── Filter Panel ─────────────────────────────────────────────────────────────
+const FilterPanel = ({ filters, onChange, onApply, onClose, userPlan }) => {
+  const [upgradeModal, setUpgradeModal] = useState(null); // plan string
+
+  const field = (key) => ({
+    value: filters[key],
+    onChange: (v) => onChange(key, v),
+  });
+
+  const activeCount = [
+    filters.gender, filters.ageMin, filters.ageMax, filters.location,
+    filters.onlineOnly,
+    filters.interests?.length, filters.education, filters.profession, filters.relationshipGoals,
+    filters.lifestyle?.smoking, filters.lifestyle?.drinking,
+    filters.heightMin, filters.heightMax, filters.income, filters.religion,
+    filters.isVerified, filters.recentlyActive,
+  ].filter(Boolean).length;
+
+  return (
+    <>
+      <motion.div
+        initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="fixed right-0 top-0 h-full w-[340px] bg-white shadow-2xl z-40 flex flex-col"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <h2 className="font-bold text-slate-900 text-lg">Filters</h2>
+            {activeCount > 0 && (
+              <span className="text-[10px] font-bold bg-primary-600 text-white px-1.5 py-0.5 rounded-full">
+                {activeCount}
+              </span>
+            )}
+          </div>
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600"><X size={20} /></button>
+        </div>
+
+        {/* Plan badge */}
+        <div className="px-5 pt-3">
+          {(() => {
+            const meta = PLAN_META[userPlan];
+            const Icon = meta?.icon;
+            return meta ? (
+              <div className={`flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl ${meta.bg} ${meta.color} border ${meta.border}`}>
+                <Icon size={13} /> {meta.label} Plan — advanced filters unlocked
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl bg-slate-100 text-slate-500 border border-slate-200">
+                <Lock size={13} /> Free Plan — upgrade to unlock more filters
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Scrollable filters */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+
+          {/* ── FREE ── */}
+          <FilterSection title="🆓 Basic Filters" userPlan={userPlan} onLockClick={setUpgradeModal}>
+            {/* Gender */}
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Gender</p>
+              <PillGroup options={['Male', 'Female', 'Non-binary']} {...field('gender')} />
+            </div>
+            {/* Age */}
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Age Range: {filters.ageMin || 18} – {filters.ageMax || 60}</p>
+              <div className="flex gap-2">
+                <input type="number" min={18} max={80} placeholder="Min" value={filters.ageMin}
+                  onChange={e => onChange('ageMin', e.target.value)}
+                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                <input type="number" min={18} max={80} placeholder="Max" value={filters.ageMax}
+                  onChange={e => onChange('ageMax', e.target.value)}
+                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
+              </div>
+            </div>
+            {/* Location */}
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">City / Location</p>
+              <input type="text" placeholder="e.g. Mumbai" value={filters.location}
+                onChange={e => onChange('location', e.target.value)}
+                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
+            </div>
+          </FilterSection>
+
+          {/* ── BASIC ── */}
+          <FilterSection title="💰 Basic Plan" requiredPlan="basic" userPlan={userPlan} onLockClick={setUpgradeModal}>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div
+                onClick={() => planHas(userPlan, 'basic') && onChange('onlineOnly', !filters.onlineOnly)}
+                className={`w-10 h-5 rounded-full transition-colors relative ${filters.onlineOnly ? 'bg-primary-600' : 'bg-slate-200'}`}
+              >
+                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${filters.onlineOnly ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              </div>
+              <span className="text-sm text-slate-700 font-medium">Online users only</span>
+              {!planHas(userPlan, 'basic') && <Lock size={12} className="text-slate-400" />}
+            </label>
+          </FilterSection>
+
+          {/* ── PREMIUM ── */}
+          <FilterSection title="🔥 Premium Filters" requiredPlan="premium" userPlan={userPlan} onLockClick={setUpgradeModal}>
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Interests</p>
+              <PillGroup options={INTERESTS_OPTIONS} value={filters.interests} onChange={v => onChange('interests', v)} multi />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Education</p>
+              <PillGroup options={EDUCATION_OPTIONS} {...field('education')} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Profession</p>
+              <PillGroup options={PROFESSION_OPTIONS} {...field('profession')} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Relationship Goal</p>
+              <PillGroup options={GOAL_OPTIONS} {...field('relationshipGoals')} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Lifestyle</p>
+              <div className="space-y-2">
+                <div>
+                  <p className="text-[10px] text-slate-400 mb-1">Smoking</p>
+                  <PillGroup options={['Never', 'Occasionally', 'Regularly']}
+                    value={filters.lifestyle?.smoking}
+                    onChange={v => onChange('lifestyle', { ...filters.lifestyle, smoking: v })} />
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-400 mb-1">Drinking</p>
+                  <PillGroup options={['Never', 'Occasionally', 'Regularly']}
+                    value={filters.lifestyle?.drinking}
+                    onChange={v => onChange('lifestyle', { ...filters.lifestyle, drinking: v })} />
+                </div>
+              </div>
+            </div>
+          </FilterSection>
+
+          {/* ── PRO ── */}
+          <FilterSection title="👑 Pro Filters" requiredPlan="pro" userPlan={userPlan} onLockClick={setUpgradeModal}>
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Height (cm): {filters.heightMin || 140} – {filters.heightMax || 210}</p>
+              <div className="flex gap-2">
+                <input type="number" placeholder="Min cm" value={filters.heightMin}
+                  onChange={e => onChange('heightMin', e.target.value)}
+                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                <input type="number" placeholder="Max cm" value={filters.heightMax}
+                  onChange={e => onChange('heightMax', e.target.value)}
+                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Income Range</p>
+              <PillGroup options={INCOME_OPTIONS} {...field('income')} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Religion</p>
+              <PillGroup options={RELIGION_OPTIONS} {...field('religion')} />
+            </div>
+            <div className="space-y-2">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div
+                  onClick={() => planHas(userPlan, 'pro') && onChange('isVerified', !filters.isVerified)}
+                  className={`w-10 h-5 rounded-full transition-colors relative ${filters.isVerified ? 'bg-primary-600' : 'bg-slate-200'}`}
+                >
+                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${filters.isVerified ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </div>
+                <span className="text-sm text-slate-700 font-medium flex items-center gap-1">
+                  <CheckCircle2 size={13} className="text-blue-500" /> Verified profiles only
+                </span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div
+                  onClick={() => planHas(userPlan, 'pro') && onChange('recentlyActive', !filters.recentlyActive)}
+                  className={`w-10 h-5 rounded-full transition-colors relative ${filters.recentlyActive ? 'bg-primary-600' : 'bg-slate-200'}`}
+                >
+                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${filters.recentlyActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </div>
+                <span className="text-sm text-slate-700 font-medium">Recently active (24h)</span>
+              </label>
+            </div>
+          </FilterSection>
+
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-4 border-t border-slate-100 space-y-2">
+          <button onClick={onApply}
+            className="w-full py-3 bg-gradient-to-r from-primary-600 to-pink-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-pink-500/30 transition-all">
+            Apply Filters {activeCount > 0 && `(${activeCount})`}
+          </button>
+          <button onClick={() => { onChange('reset'); onClose(); }}
+            className="w-full py-2 text-sm text-slate-500 hover:text-slate-700">
+            Reset all filters
+          </button>
+        </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {upgradeModal && <UpgradeModal requiredPlan={upgradeModal} onClose={() => setUpgradeModal(null)} />}
+      </AnimatePresence>
+    </>
+  );
+};
 
 // ── Swipeable Card ────────────────────────────────────────────────────────────
 const SwipeCard = ({ user, onLike, onPass, isTop }) => {
@@ -291,17 +491,29 @@ const SwipeCard = ({ user, onLike, onPass, isTop }) => {
 
 // ── Main Discover Page ────────────────────────────────────────────────────────
 const Discover = () => {
+  const { user } = useAuth();
+  const userPlan = user?.plan || 'free';
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [swiping, setSwiping] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [matchPopup, setMatchPopup] = useState(null);
   const [likeToast, setLikeToast] = useState(null);
-  const [tab, setTab] = useState('discover'); // 'discover' | 'liked-you'
-  const [likedYouData, setLikedYouData] = useState(null); // { profiles, isPremium, count }
+  const [tab, setTab] = useState('discover');
+  const [likedYouData, setLikedYouData] = useState(null);
   const likeToastTimer = useRef(null);
-  const [mode, setMode] = useState('random'); // 'random' | 'filter'
-  const [filters, setFilters] = useState({ gender: '', ageMin: '', ageMax: '', location: '', interests: [] });
+  const [mode, setMode] = useState('random');
+  const [filters, setFilters] = useState({
+    // free
+    gender: '', ageMin: '', ageMax: '', location: '',
+    // basic
+    onlineOnly: false,
+    // premium
+    interests: [], education: '', profession: '', relationshipGoals: '', lifestyle: { smoking: '', drinking: '' },
+    // pro
+    heightMin: '', heightMax: '', income: '', religion: '', isVerified: false, recentlyActive: false,
+  });
 
   const loadRandom = useCallback(async () => {
     setLoading(true);
@@ -327,11 +539,27 @@ const Discover = () => {
     setShowFilter(false);
     try {
       const payload = {};
-      if (filters.gender) payload.gender = filters.gender;
-      if (filters.ageMin) payload.ageMin = Number(filters.ageMin);
-      if (filters.ageMax) payload.ageMax = Number(filters.ageMax);
+      // Free
+      if (filters.gender)   payload.gender   = filters.gender;
+      if (filters.ageMin)   payload.ageMin   = Number(filters.ageMin);
+      if (filters.ageMax)   payload.ageMax   = Number(filters.ageMax);
       if (filters.location) payload.location = filters.location;
-      if (filters.interests?.length) payload.interests = filters.interests;
+      // Basic
+      if (filters.onlineOnly) payload.onlineOnly = true;
+      // Premium
+      if (filters.interests?.length)  payload.interests       = filters.interests;
+      if (filters.education)          payload.education       = filters.education;
+      if (filters.profession)         payload.profession      = filters.profession;
+      if (filters.relationshipGoals)  payload.relationshipGoals = filters.relationshipGoals;
+      if (filters.lifestyle?.smoking || filters.lifestyle?.drinking) payload.lifestyle = filters.lifestyle;
+      // Pro
+      if (filters.heightMin)    payload.heightMin     = Number(filters.heightMin);
+      if (filters.heightMax)    payload.heightMax     = Number(filters.heightMax);
+      if (filters.income)       payload.income        = filters.income;
+      if (filters.religion)     payload.religion      = filters.religion;
+      if (filters.isVerified)   payload.isVerified    = true;
+      if (filters.recentlyActive) payload.recentlyActive = true;
+
       const res = await api.post('/match/filter', payload);
       setUsers(res.data.users);
       setMode('filter');
@@ -383,7 +611,12 @@ const Discover = () => {
 
   const handleFilterChange = (key, value) => {
     if (key === 'reset') {
-      setFilters({ gender: '', ageMin: '', ageMax: '', location: '', interests: [] });
+      setFilters({
+        gender: '', ageMin: '', ageMax: '', location: '',
+        onlineOnly: false,
+        interests: [], education: '', profession: '', relationshipGoals: '', lifestyle: { smoking: '', drinking: '' },
+        heightMin: '', heightMax: '', income: '', religion: '', isVerified: false, recentlyActive: false,
+      });
     } else {
       setFilters(prev => ({ ...prev, [key]: value }));
     }
@@ -616,6 +849,7 @@ const Discover = () => {
               onChange={handleFilterChange}
               onApply={loadFiltered}
               onClose={() => setShowFilter(false)}
+              userPlan={userPlan}
             />
           </>
         )}

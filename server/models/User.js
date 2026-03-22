@@ -57,6 +57,16 @@ const userSchema = new mongoose.Schema({
     enum: ['Casual Dating', 'Serious Relationship', 'Marriage', 'Friendship'],
     default: 'Casual Dating'
   },
+  // ── Extended profile fields ───────────────────────────────────────────────
+  education:  { type: String, default: '' },   // e.g. "Bachelor's", "Master's"
+  profession: { type: String, default: '' },   // e.g. "Engineer", "Doctor"
+  height:     { type: Number, default: null }, // cm
+  income:     { type: String, default: '' },   // e.g. "5-10 LPA"
+  religion:   { type: String, default: '' },
+  lifestyle: {
+    smoking:  { type: String, enum: ['Never', 'Occasionally', 'Regularly', ''], default: '' },
+    drinking: { type: String, enum: ['Never', 'Occasionally', 'Regularly', ''], default: '' },
+  },
   photos: [{
     type: String
   }],
