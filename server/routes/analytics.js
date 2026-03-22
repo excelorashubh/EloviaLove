@@ -108,6 +108,25 @@ router.get('/overview', async (req, res) => {
   }
 });
 
+// @route  GET /api/analytics/recent
+// @desc   Paginated recent visit log
+router.get('/recent', async (req, res) => {
+  try {
+    const page  = parseInt(req.query.page) || 1;
+    const limit = 20;
+    const skip  = (page - 1) * limit;
+
+    const [visits, total] = await Promise.all([
+      Visitor.find({}).sort({ visitedAt: -1 }).skip(skip).limit(limit).lean(),
+      Visitor.countDocuments(),
+    ]);
+
+    res.json({ success: true, visits, total });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // @route  GET /api/analytics/daily
 // @desc   Daily visitor counts (last 30 days)
 router.get('/daily', async (req, res) => {
