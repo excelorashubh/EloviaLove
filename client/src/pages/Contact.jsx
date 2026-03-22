@@ -50,7 +50,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-slate-900">Email</h4>
-                    <a href="mailto:hello@elovialove.com" className="text-slate-600 hover:text-primary-600 transition-colors">hello@elovialove.com</a>
+                    <a href="mailto:elovialove@gmail.com.com" className="text-slate-600 hover:text-primary-600 transition-colors">hello@elovialove.com</a>
                   </div>
                 </div>
 
@@ -60,8 +60,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-slate-900">Phone</h4>
-                    <p className="text-slate-600">+1 (555) 123-4567</p>
-                    <p className="text-sm text-slate-400 mt-1">Mon-Fri 9am to 6pm EST</p>
+                    <p className="text-slate-600">+91 89868 68974</p>
+                    <p className="text-sm text-slate-400 mt-1">Mon-Sat 10am to 8pm EST</p>
                   </div>
                 </div>
 
@@ -72,9 +72,7 @@ const Contact = () => {
                   <div>
                     <h4 className="font-semibold text-slate-900">Office</h4>
                     <p className="text-slate-600 leading-relaxed">
-                      123 Love Avenue, Suite 400<br />
-                      New York, NY 10012<br />
-                      United States
+                      New Madhukam, Near New Lions Club, Ranchi Jharkhand, India Pin-834001
                     </p>
                   </div>
                 </div>
