@@ -25,6 +25,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminReports from './pages/admin/AdminReports';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminRevenue from './pages/admin/AdminRevenue';
 
 // Layout wrapper for public/user pages
 const MainLayout = ({ children, showNav = false }) => (
@@ -44,6 +45,7 @@ function App() {
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
           <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
+          <Route path="/admin/revenue" element={<AdminRoute><AdminRevenue /></AdminRoute>} />
           <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
 
           {/* Public & user routes with Navbar + Footer */}
