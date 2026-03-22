@@ -109,16 +109,35 @@ router.get('/overview', async (req, res) => {
 });
 
 // @route  GET /api/analytics/recent
-// @desc   Paginated recent visit log
+// @desc   Paginated recent visit log with filters (page, device, pageFilter, period, from, to)
 router.get('/recent', async (req, res) => {
   try {
-    const page  = parseInt(req.query.page) || 1;
-    const limit = 20;
-    const skip  = (page - 1) * limit;
+    const page   = parseInt(req.query.page) || 1;
+    const limit  = 20;
+    const skip   = (page - 1) * limit;
+    const { device, pageFilter, period, from, to } = req.query;
+
+    const match = {};
+
+    // Device filter
+    if (device && device !== 'all') match.device = device;
+
+    // Page filter
+    if (pageFilter && pageFilter !== 'all') match.page = pageFilter;
+
+    // Date filter
+    if (from || to) {
+      match.visitedAt = {};
+      if (from) match.visitedAt.$gte = new Date(from);
+      if (to)   match.visitedAt.$lte = new Date(new Date(to).setHours(23, 59, 59, 999));
+    } else if (period && period !== 'all') {
+      const df = dateFilter(period);
+      if (df) match.visitedAt = df;
+    }
 
     const [visits, total] = await Promise.all([
-      Visitor.find({}).sort({ visitedAt: -1 }).skip(skip).limit(limit).lean(),
-      Visitor.countDocuments(),
+      Visitor.find(match).sort({ visitedAt: -1 }).skip(skip).limit(limit).lean(),
+      Visitor.countDocuments(match),
     ]);
 
     res.json({ success: true, visits, total });

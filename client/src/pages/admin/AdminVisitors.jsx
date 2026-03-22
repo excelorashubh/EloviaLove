@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import {
   Eye, Users, UserCheck, UserPlus, Smartphone, Monitor,
-  RefreshCw, Globe, Tablet, ChevronLeft, ChevronRight,
+  RefreshCw, Globe, Tablet, ChevronLeft, ChevronRight, X,
 } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../services/api';
@@ -18,8 +18,33 @@ const PERIOD_OPTS = [
   { label: 'All',   value: 'all'   },
 ];
 
-const DEVICE_COLORS = { desktop: '#64748b', mobile: '#e879a0', tablet: '#a855f7' };
-const PIE_COLORS    = ['#e879a0', '#818cf8'];
+const TABLE_PERIOD_OPTS = [
+  { label: 'Today',  value: 'today'  },
+  { label: 'Week',   value: 'week'   },
+  { label: 'Month',  value: 'month'  },
+  { label: 'Year',   value: 'year'   },
+  { label: 'All',    value: 'all'    },
+  { label: 'Custom', value: 'custom' },
+];
+
+const PAGE_OPTS = [
+  { label: 'All Pages', value: 'all' },
+  { label: '🏠 Home',      value: '/'          },
+  { label: '🔑 Login',     value: '/login'      },
+  { label: '📝 Signup',    value: '/signup'     },
+  { label: '💳 Pricing',   value: '/pricing'    },
+  { label: '🔍 Discover',  value: '/discover'   },
+  { label: '📊 Dashboard', value: '/dashboard'  },
+  { label: '💞 Matches',   value: '/matches'    },
+  { label: '💬 Chats',     value: '/chats'      },
+  { label: '👤 Profile',   value: '/profile'    },
+  { label: 'ℹ️ About',     value: '/about'      },
+  { label: '📬 Contact',   value: '/contact'    },
+];
+
+const toISO = (d) => d ? new Date(d).toISOString().split('T')[0] : '';
+
+const PIE_COLORS = ['#e879a0', '#818cf8'];
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, sub, color = 'bg-primary-500' }) => (
@@ -83,6 +108,14 @@ const AdminVisitors = () => {
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Table filters
+  const [tblPeriod,   setTblPeriod]   = useState('all');
+  const [tblDevice,   setTblDevice]   = useState('all');
+  const [tblPage,     setTblPage]     = useState('all');
+  const [customFrom,  setCustomFrom]  = useState('');
+  const [customTo,    setCustomTo]    = useState('');
+  const [showCustom,  setShowCustom]  = useState(false);
+
   const load = useCallback(async (spinner = false) => {
     if (spinner) setRefreshing(true); else setLoading(true);
     try {
@@ -98,11 +131,20 @@ const AdminVisitors = () => {
 
   const loadRecent = useCallback(async () => {
     try {
-      const res = await api.get(`/analytics/recent?page=${visitPage}`);
+      const params = new URLSearchParams({ page: visitPage });
+      if (tblDevice !== 'all') params.set('device', tblDevice);
+      if (tblPage   !== 'all') params.set('pageFilter', tblPage);
+      if (tblPeriod === 'custom') {
+        if (customFrom) params.set('from', customFrom);
+        if (customTo)   params.set('to',   customTo);
+      } else if (tblPeriod !== 'all') {
+        params.set('period', tblPeriod);
+      }
+      const res = await api.get(`/analytics/recent?${params}`);
       setRecent(res.data.visits || []);
       setVisitTotal(res.data.total || 0);
     } catch (e) { console.error(e); }
-  }, [visitPage]);
+  }, [visitPage, tblDevice, tblPage, tblPeriod, customFrom, customTo]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { loadRecent(); }, [loadRecent]);
@@ -309,18 +351,123 @@ const AdminVisitors = () => {
 
         {/* ── Recent Visits Log ── */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <div>
-              <h2 className="font-semibold text-slate-800">Recent Visits</h2>
-              <p className="text-xs text-slate-400 mt-0.5">{visitTotal} total records</p>
+
+          {/* Table header + filters */}
+          <div className="px-5 py-4 border-b border-slate-100 space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h2 className="font-semibold text-slate-800 flex items-center gap-2">
+                  Recent Visits
+                  {[tblPeriod !== 'all', tblDevice !== 'all', tblPage !== 'all'].filter(Boolean).length > 0 && (
+                    <span className="text-[10px] font-bold bg-primary-600 text-white px-1.5 py-0.5 rounded-full">
+                      {[tblPeriod !== 'all', tblDevice !== 'all', tblPage !== 'all'].filter(Boolean).length} filter{[tblPeriod !== 'all', tblDevice !== 'all', tblPage !== 'all'].filter(Boolean).length > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">{visitTotal} records</p>
+              </div>
+              {/* Reset */}
+              {(tblPeriod !== 'all' || tblDevice !== 'all' || tblPage !== 'all') && (
+                <button
+                  onClick={() => {
+                    setTblPeriod('all'); setTblDevice('all'); setTblPage('all');
+                    setCustomFrom(''); setCustomTo(''); setShowCustom(false); setVisitPage(1);
+                  }}
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-red-500 transition-colors"
+                >
+                  <X size={12} /> Reset filters
+                </button>
+              )}
             </div>
+
+            {/* Filter row */}
+            <div className="flex flex-wrap gap-2 items-center">
+
+              {/* Period presets */}
+              <div className="flex gap-1 bg-slate-100 p-1 rounded-xl flex-wrap">
+                {TABLE_PERIOD_OPTS.map(({ label, value }) => (
+                  <button key={value}
+                    onClick={() => {
+                      setTblPeriod(value); setVisitPage(1);
+                      setShowCustom(value === 'custom');
+                      if (value !== 'custom') { setCustomFrom(''); setCustomTo(''); }
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                      tblPeriod === value ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Device filter */}
+              <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+                {['all', 'desktop', 'mobile', 'tablet'].map(d => (
+                  <button key={d}
+                    onClick={() => { setTblDevice(d); setVisitPage(1); }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-all ${
+                      tblDevice === d ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    {d === 'all' ? 'All Devices' : d}
+                  </button>
+                ))}
+              </div>
+
+              {/* Page filter */}
+              <select
+                value={tblPage}
+                onChange={e => { setTblPage(e.target.value); setVisitPage(1); }}
+                className="border border-slate-200 rounded-xl px-3 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 text-slate-700"
+              >
+                {PAGE_OPTS.map(({ label, value }) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Custom date range */}
+            {showCustom && (
+              <div className="flex items-center gap-3 flex-wrap pt-1">
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">From</label>
+                  <input type="date" value={customFrom}
+                    max={customTo || toISO(new Date())}
+                    onChange={e => { setCustomFrom(e.target.value); setVisitPage(1); }}
+                    className="border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary-400 bg-slate-50"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">To</label>
+                  <input type="date" value={customTo}
+                    min={customFrom} max={toISO(new Date())}
+                    onChange={e => { setCustomTo(e.target.value); setVisitPage(1); }}
+                    className="border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary-400 bg-slate-50"
+                  />
+                </div>
+                {(customFrom || customTo) && (
+                  <button onClick={() => { setCustomFrom(''); setCustomTo(''); setVisitPage(1); }}
+                    className="text-xs text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors">
+                    <X size={11} /> Clear dates
+                  </button>
+                )}
+                {customFrom && customTo && (
+                  <span className="text-xs text-primary-600 font-semibold bg-primary-50 px-2 py-1 rounded-lg">
+                    {new Date(customFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                    {' → '}
+                    {new Date(customTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {recentVisits.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Eye size={36} className="text-slate-200 mb-3" />
-              <p className="text-slate-500 font-medium">No visits recorded yet</p>
-              <p className="text-slate-400 text-sm mt-1">Visits will appear here as users browse the site</p>
+              <p className="text-slate-500 font-medium">No visits found</p>
+              <p className="text-slate-400 text-sm mt-1">Try adjusting the filters above</p>
             </div>
           ) : (
             <>
