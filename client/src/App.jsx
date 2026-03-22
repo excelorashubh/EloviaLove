@@ -27,9 +27,9 @@ import AdminReports from './pages/admin/AdminReports';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
 
 // Layout wrapper for public/user pages
-const MainLayout = ({ children }) => (
+const MainLayout = ({ children, showNav = false }) => (
   <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
-    {/* <Navbar /> */}
+    {showNav && <Navbar />}
     <main className="flex-grow">{children}</main>
     <Footer />
   </div>
@@ -47,11 +47,12 @@ function App() {
           <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
 
           {/* Public & user routes with Navbar + Footer */}
-          <Route path="/" element={<MainLayout><Home /></MainLayout>} />
-          <Route path="/about" element={<MainLayout><About /></MainLayout>} />
-          <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
-          <Route path="/login" element={<MainLayout><GuestRoute><Login /></GuestRoute></MainLayout>} />
-          <Route path="/signup" element={<MainLayout><GuestRoute><Signup /></GuestRoute></MainLayout>} />
+          <Route path="/" element={<MainLayout showNav><Home /></MainLayout>} />
+          <Route path="/about" element={<MainLayout showNav><About /></MainLayout>} />
+          <Route path="/contact" element={<MainLayout showNav><Contact /></MainLayout>} />
+          <Route path="/login" element={<MainLayout showNav><GuestRoute><Login /></GuestRoute></MainLayout>} />
+          <Route path="/signup" element={<MainLayout showNav><GuestRoute><Signup /></GuestRoute></MainLayout>} />
+          <Route path="/pricing" element={<MainLayout showNav><Pricing /></MainLayout>} />
           <Route path="/dashboard" element={<MainLayout><ProtectedRoute><Dashboard /></ProtectedRoute></MainLayout>} />
           <Route path="/discover" element={<MainLayout><ProtectedRoute><Discover /></ProtectedRoute></MainLayout>} />
           <Route path="/matches" element={<MainLayout><ProtectedRoute><Matches /></ProtectedRoute></MainLayout>} />
@@ -60,7 +61,6 @@ function App() {
           <Route path="/profile/edit" element={<MainLayout><ProtectedRoute><ProfileEdit /></ProtectedRoute></MainLayout>} />
           <Route path="/notifications" element={<MainLayout><ProtectedRoute><Notifications /></ProtectedRoute></MainLayout>} />
           <Route path="/chats" element={<MainLayout><ProtectedRoute><Chats /></ProtectedRoute></MainLayout>} />
-          <Route path="/pricing" element={<MainLayout><Pricing /></MainLayout>} />
           <Route path="/subscription/success" element={<MainLayout><ProtectedRoute><SubscriptionSuccess /></ProtectedRoute></MainLayout>} />
           <Route path="/verify" element={<MainLayout><ProtectedRoute><Verify /></ProtectedRoute></MainLayout>} />
           <Route path="/verify-email" element={<MainLayout><Verify /></MainLayout>} />

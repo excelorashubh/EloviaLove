@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Users, Heart, MessageSquare, Flag, UserCheck, TrendingUp } from 'lucide-react';
+import { Users, Heart, MessageSquare, Flag, UserCheck, TrendingUp, DollarSign } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../services/api';
 
-const StatCard = ({ icon: Icon, label, value, color, sub }) => (
+const StatCard = ({ icon: Icon, label, value, color, sub, raw }) => (
   <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
     <div className="flex items-center justify-between mb-4">
       <p className="text-sm font-medium text-slate-500">{label}</p>
@@ -20,16 +20,19 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [recentUsers, setRecentUsers] = useState([]);
+  const [revenue, setRevenue] = useState(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [statsRes, usersRes] = await Promise.all([
+        const [statsRes, usersRes, revRes] = await Promise.all([
           api.get('/admin/stats'),
           api.get('/admin/users?page=1'),
+          api.get('/admin/analytics/overview?period=month'),
         ]);
         setStats(statsRes.data.stats);
         setRecentUsers(usersRes.data.users.slice(0, 5));
+        setRevenue(revRes.data);
       } catch (e) {
         console.error(e);
       } finally {
@@ -48,12 +51,13 @@ const AdminDashboard = () => {
   );
 
   const cards = [
-    { icon: Users,        label: 'Total Users',     value: stats?.totalUsers,    color: 'bg-blue-500',    sub: `${stats?.recentUsers} joined last 30 days` },
-    { icon: UserCheck,    label: 'Active Users',    value: stats?.activeUsers,   color: 'bg-green-500',   sub: `${stats?.userActivity?.toFixed(1)}% activity rate` },
-    { icon: Heart,        label: 'Total Matches',   value: stats?.totalMatches,  color: 'bg-pink-500',    sub: 'All time' },
-    { icon: MessageSquare,label: 'Messages Sent',   value: stats?.totalMessages, color: 'bg-purple-500',  sub: 'All time' },
-    { icon: Flag,         label: 'Pending Reports', value: stats?.pendingReports,color: 'bg-red-500',     sub: 'Needs review' },
-    { icon: TrendingUp,   label: 'New This Month',  value: stats?.recentUsers,   color: 'bg-orange-500',  sub: 'Last 30 days' },
+    { icon: Users,        label: 'Total Users',       value: stats?.totalUsers,    color: 'bg-blue-500',    sub: `${stats?.recentUsers} joined last 30 days` },
+    { icon: UserCheck,    label: 'Active Users',       value: stats?.activeUsers,   color: 'bg-green-500',   sub: `${stats?.userActivity?.toFixed(1)}% activity rate` },
+    { icon: Heart,        label: 'Total Matches',      value: stats?.totalMatches,  color: 'bg-pink-500',    sub: 'All time' },
+    { icon: MessageSquare,label: 'Messages Sent',      value: stats?.totalMessages, color: 'bg-purple-500',  sub: 'All time' },
+    { icon: DollarSign,   label: 'Revenue This Month', value: `₹${Number(revenue?.monthRevenue || 0).toLocaleString('en-IN')}`, color: 'bg-emerald-500', sub: `₹${Number(revenue?.totalRevenue || 0).toLocaleString('en-IN')} all time`, raw: true },
+    { icon: TrendingUp,   label: 'Active Subscriptions', value: revenue?.activeSubscriptions ?? '—', color: 'bg-orange-500', sub: 'Currently active', raw: true },
+    { icon: Flag,         label: 'Pending Reports',    value: stats?.pendingReports,color: 'bg-red-500',     sub: 'Needs review' },
   ];
 
   return (
