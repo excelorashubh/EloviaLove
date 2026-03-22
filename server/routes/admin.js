@@ -438,12 +438,19 @@ router.get('/analytics/payments', async (req, res) => {
     const page   = parseInt(req.query.page)  || 1;
     const limit  = parseInt(req.query.limit) || 20;
     const skip   = (page - 1) * limit;
-    const { plan, status, period } = req.query;
+    const { plan, status, period, from, to } = req.query;
 
     const match = {};
     if (plan   && plan   !== 'all') match.plan   = plan;
     if (status && status !== 'all') match.status = status;
-    if (period && period !== 'all') match.createdAt = { $gte: getDateRange(period) };
+
+    if (from || to) {
+      match.createdAt = {};
+      if (from) match.createdAt.$gte = new Date(from);
+      if (to)   match.createdAt.$lte = new Date(new Date(to).setHours(23, 59, 59, 999));
+    } else if (period && period !== 'all') {
+      match.createdAt = { $gte: getDateRange(period) };
+    }
 
     const [payments, total] = await Promise.all([
       Payment.find(match)
