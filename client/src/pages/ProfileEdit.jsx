@@ -1,20 +1,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Camera, Check, X, ArrowLeft, MapPin, User, FileText, Heart, Sparkles } from 'lucide-react';
+import {
+  Camera, Check, X, ArrowLeft, MapPin, User, FileText,
+  Heart, Sparkles, GraduationCap, Briefcase, Ruler, Banknote, BookOpen, Wine,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
 const INTERESTS_OPTIONS = [
   'Travel', 'Coffee', 'Dogs', 'Photography', 'Hiking', 'Music',
   'Cooking', 'Reading', 'Gaming', 'Fitness', 'Art', 'Movies',
-  'Dancing', 'Yoga', 'Sports', 'Nature', 'Fashion', 'Tech'
+  'Dancing', 'Yoga', 'Sports', 'Nature', 'Fashion', 'Tech',
 ];
 
-const RELATIONSHIP_GOALS = ['Casual Dating', 'Serious Relationship', 'Marriage', 'Friendship'];
-const GENDERS = ['Male', 'Female', 'Non-binary'];
+const RELATIONSHIP_GOALS  = ['Casual Dating', 'Serious Relationship', 'Marriage', 'Friendship'];
+const EDUCATION_OPTIONS   = ["High School", "Bachelor's", "Master's", "PhD", "Diploma", "Other"];
+const PROFESSION_OPTIONS  = ['Engineer', 'Doctor', 'Teacher', 'Designer', 'Lawyer', 'Artist', 'Entrepreneur', 'Student', 'Other'];
+const INCOME_OPTIONS      = ['< 3 LPA', '3–5 LPA', '5–10 LPA', '10–20 LPA', '20+ LPA'];
+const RELIGION_OPTIONS    = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhist', 'Jain', 'Other'];
+const LIFESTYLE_OPTIONS   = ['Never', 'Occasionally', 'Regularly'];
 
-const Section = ({ icon: Icon, title, children }) => (
+const Section = ({ icon: Icon, title, children, badge }) => (
   <motion.div
     variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
     className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
@@ -24,9 +31,25 @@ const Section = ({ icon: Icon, title, children }) => (
         <Icon size={18} className="text-primary-600" />
       </div>
       <h2 className="text-base font-bold text-slate-900">{title}</h2>
+      {badge && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 ml-auto">{badge}</span>}
     </div>
     {children}
   </motion.div>
+);
+
+// Single-select pill group
+const PillSelect = ({ options, value, onChange }) => (
+  <div className="flex flex-wrap gap-2">
+    {options.map(opt => (
+      <button key={opt} type="button" onClick={() => onChange(value === opt ? '' : opt)}
+        className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+          value === opt ? 'bg-primary-600 text-white border-primary-600' : 'border-slate-200 text-slate-600 hover:border-primary-400 bg-white'
+        }`}
+      >
+        {opt}
+      </button>
+    ))}
+  </div>
 );
 
 const ProfileEdit = () => {
@@ -34,11 +57,21 @@ const ProfileEdit = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    name: user?.name || '',
-    bio: user?.bio || '',
-    location: user?.location || '',
-    interests: user?.interests || [],
+    name:              user?.name              || '',
+    bio:               user?.bio               || '',
+    location:          user?.location          || '',
+    interests:         user?.interests         || [],
     relationshipGoals: user?.relationshipGoals || 'Casual Dating',
+    // Extended fields
+    education:         user?.education         || '',
+    profession:        user?.profession        || '',
+    height:            user?.height            || '',
+    income:            user?.income            || '',
+    religion:          user?.religion          || '',
+    lifestyle: {
+      smoking:  user?.lifestyle?.smoking  || '',
+      drinking: user?.lifestyle?.drinking || '',
+    },
   });
 
   const [saving, setSaving] = useState(false);
@@ -243,6 +276,59 @@ const ProfileEdit = () => {
             {form.interests.length > 0 && (
               <p className="text-xs text-primary-600 mt-3 font-medium">{form.interests.length} selected</p>
             )}
+          </Section>
+
+          {/* Education & Profession */}
+          <Section icon={GraduationCap} title="Education & Career" badge="Premium Filter">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Education</label>
+                <PillSelect options={EDUCATION_OPTIONS} value={form.education} onChange={v => set('education', v)} />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Profession</label>
+                <PillSelect options={PROFESSION_OPTIONS} value={form.profession} onChange={v => set('profession', v)} />
+              </div>
+            </div>
+          </Section>
+
+          {/* Lifestyle */}
+          <Section icon={Wine} title="Lifestyle" badge="Premium Filter">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Smoking</label>
+                <PillSelect options={LIFESTYLE_OPTIONS} value={form.lifestyle.smoking}
+                  onChange={v => set('lifestyle', { ...form.lifestyle, smoking: v })} />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Drinking</label>
+                <PillSelect options={LIFESTYLE_OPTIONS} value={form.lifestyle.drinking}
+                  onChange={v => set('lifestyle', { ...form.lifestyle, drinking: v })} />
+              </div>
+            </div>
+          </Section>
+
+          {/* Height, Income, Religion */}
+          <Section icon={Ruler} title="More About You" badge="Pro Filter">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Height (cm)</label>
+                <input
+                  type="number" min={100} max={250} placeholder="e.g. 170"
+                  value={form.height}
+                  onChange={e => set('height', e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none transition-all text-slate-900 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Income Range</label>
+                <PillSelect options={INCOME_OPTIONS} value={form.income} onChange={v => set('income', v)} />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Religion</label>
+                <PillSelect options={RELIGION_OPTIONS} value={form.religion} onChange={v => set('religion', v)} />
+              </div>
+            </div>
           </Section>
 
           {/* Save / Cancel */}

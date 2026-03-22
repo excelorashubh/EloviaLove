@@ -301,6 +301,57 @@ const Profile = () => {
             )}
           </motion.div>
 
+          {/* Extended Profile Info */}
+          {(user?.education || user?.profession || user?.height || user?.income || user?.religion || user?.lifestyle?.smoking || user?.lifestyle?.drinking) && (
+            <motion.div variants={fadeIn} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+              <h2 className="text-lg font-bold text-slate-900 mb-4">About Me</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {user?.education && (
+                  <div className="bg-slate-50 rounded-xl p-3">
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Education</p>
+                    <p className="text-sm font-semibold text-slate-800">{user.education}</p>
+                  </div>
+                )}
+                {user?.profession && (
+                  <div className="bg-slate-50 rounded-xl p-3">
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Profession</p>
+                    <p className="text-sm font-semibold text-slate-800">{user.profession}</p>
+                  </div>
+                )}
+                {user?.height && (
+                  <div className="bg-slate-50 rounded-xl p-3">
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Height</p>
+                    <p className="text-sm font-semibold text-slate-800">{user.height} cm</p>
+                  </div>
+                )}
+                {user?.income && (
+                  <div className="bg-slate-50 rounded-xl p-3">
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Income</p>
+                    <p className="text-sm font-semibold text-slate-800">{user.income}</p>
+                  </div>
+                )}
+                {user?.religion && (
+                  <div className="bg-slate-50 rounded-xl p-3">
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Religion</p>
+                    <p className="text-sm font-semibold text-slate-800">{user.religion}</p>
+                  </div>
+                )}
+                {user?.lifestyle?.smoking && (
+                  <div className="bg-slate-50 rounded-xl p-3">
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Smoking</p>
+                    <p className="text-sm font-semibold text-slate-800">{user.lifestyle.smoking}</p>
+                  </div>
+                )}
+                {user?.lifestyle?.drinking && (
+                  <div className="bg-slate-50 rounded-xl p-3">
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Drinking</p>
+                    <p className="text-sm font-semibold text-slate-800">{user.lifestyle.drinking}</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
           {/* Account Info + Verification */}
           <motion.div variants={fadeIn} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
             <div className="flex items-center justify-between mb-4">

@@ -472,9 +472,17 @@ const SwipeCard = ({ user, onLike, onPass, isTop }) => {
       {/* Details */}
       <div className="p-5">
         {user.bio && <p className="text-slate-600 text-sm leading-relaxed mb-3 line-clamp-2">{user.bio}</p>}
+        {/* Extended info pills */}
+        {(user.education || user.profession || user.height) && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {user.education  && <span className="px-2.5 py-1 bg-blue-50   text-blue-700   rounded-full text-xs font-medium">🎓 {user.education}</span>}
+            {user.profession && <span className="px-2.5 py-1 bg-slate-100 text-slate-700  rounded-full text-xs font-medium">💼 {user.profession}</span>}
+            {user.height     && <span className="px-2.5 py-1 bg-green-50  text-green-700  rounded-full text-xs font-medium">📏 {user.height}cm</span>}
+          </div>
+        )}
         {user.interests?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
-            {user.interests.slice(0, 5).map(i => (
+            {user.interests.slice(0, 4).map(i => (
               <span key={i} className="px-2.5 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-medium">{i}</span>
             ))}
           </div>
