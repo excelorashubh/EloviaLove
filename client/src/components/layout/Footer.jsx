@@ -20,7 +20,12 @@ const Footer = () => {
               Finding real connections in a digital world. Join thousands of happy couples who found love on EloviaLove.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="p-2 rounded-full bg-slate-800 hover:bg-primary-600 hover:text-white transition-all text-slate-400">
+              <a
+                href="https://www.instagram.com/reel/DWMPilFEa7M/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-full bg-slate-800 hover:bg-primary-600 hover:text-white transition-all text-slate-400"
+              >
                 <Instagram size={18} />
               </a>
               <a href="#" className="p-2 rounded-full bg-slate-800 hover:bg-blue-500 hover:text-white transition-all text-slate-400">
