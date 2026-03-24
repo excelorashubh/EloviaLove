@@ -161,7 +161,7 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
         {/* ── Confirm step ── */}
         {step === 'confirm' && (
           <>
-            <div className={`bg-gradient-to-br ${isAddon ? 'from-primary-600 to-pink-500' : PLAN_META[item.key]?.gradient || 'from-primary-600 to-pink-500'} p-6 text-white text-center`}>
+            <div className={`bg-gradient-to-br ${isAddon ? 'from-primary-600 to-pink-500' : item.gradient || 'from-primary-600 to-pink-500'} p-6 text-white text-center`}>
               <div className="text-4xl mb-2">{isAddon ? item.icon : <Icon size={36} className="mx-auto" />}</div>
               <h2 className="text-xl font-extrabold">{label}</h2>
               <p className="text-white/80 text-sm mt-1">{isAddon ? item.desc : 'Auto-renews monthly · Cancel anytime'}</p>
