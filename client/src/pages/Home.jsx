@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Heart, Star, Shield, Zap, MessageCircle, MapPin, Users, HeartHandshake, Quote } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import BannerAd from '../components/ads/BannerAd';
+import AdWrapper from '../components/ads/AdWrapper';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -113,7 +114,9 @@ const Home = () => {
 
       {/* Ad — between hero and features */}
       <div className="py-4 bg-white flex justify-center">
-        <BannerAd slot="1234567890" />
+        <AdWrapper showUpgradeNudge>
+          <BannerAd slot="1234567890" />
+        </AdWrapper>
       </div>
 
       {/* Features Section */}
@@ -260,7 +263,9 @@ const Home = () => {
 
       {/* Ad — between testimonials and CTA */}
       <div className="py-4 bg-white flex justify-center">
-        <BannerAd slot="1234567891" />
+        <AdWrapper showUpgradeNudge>
+          <BannerAd slot="1234567891" />
+        </AdWrapper>
       </div>
 
       {/* CTA Section */}

@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
 import InFeedAd from '../components/ads/InFeedAd';
+import AdWrapper from '../components/ads/AdWrapper';
 
 const INTERESTS_OPTIONS = [
   'Travel', 'Coffee', 'Dogs', 'Photography', 'Hiking', 'Music',
@@ -742,7 +743,9 @@ const Discover = () => {
                   <div key={profile._id}>
                     {/* InFeed ad every 5 profiles */}
                     {idx > 0 && idx % 5 === 0 && (
-                      <InFeedAd slot="4567890123" className="mb-3" />
+                      <AdWrapper>
+                        <InFeedAd slot="4567890123" className="mb-3" />
+                      </AdWrapper>
                     )}
                     <div className="bg-white rounded-2xl p-4 border border-pink-100 shadow-sm flex items-center gap-4">
                     <div className="relative shrink-0">

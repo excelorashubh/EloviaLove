@@ -5,8 +5,9 @@ const isProduction = typeof window !== 'undefined' &&
   window.location.hostname !== '127.0.0.1';
 
 /**
- * Base ad unit with lazy loading via IntersectionObserver.
- * Only renders on production (not localhost).
+ * Base ad unit.
+ * - Production: lazy-loads real AdSense unit via IntersectionObserver
+ * - Development: renders a labelled placeholder so layout is visible
  */
 const AdUnit = ({ slot, format = 'auto', style = {}, className = '' }) => {
   const ref = useRef(null);
@@ -24,14 +25,24 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '' }) => {
   }, []);
 
   useEffect(() => {
-    if (!visible || pushed.current) return;
+    if (!isProduction || !visible || pushed.current) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
     } catch (e) { /* ignore */ }
   }, [visible]);
 
-  if (!isProduction) return null;
+  // Dev placeholder — shows ad slot info so you can verify placement
+  if (!isProduction) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-slate-100 border border-dashed border-slate-300 rounded-lg text-slate-400 text-xs font-mono select-none ${className}`}
+        style={{ minHeight: style.minHeight || style.height || 90, ...style }}
+      >
+        📢 Ad slot: {slot} [{format}]
+      </div>
+    );
+  }
 
   return (
     <div ref={ref} className={className}>

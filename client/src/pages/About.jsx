@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Target, Heart, Shield, Users, Globe, ArrowRight } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import BannerAd from '../components/ads/BannerAd';
+import AdWrapper from '../components/ads/AdWrapper';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -175,7 +176,9 @@ const About = () => {
 
       {/* Ad — between team and CTA */}
       <div className="py-4 bg-slate-50 flex justify-center">
-        <BannerAd slot="2345678901" />
+        <AdWrapper showUpgradeNudge>
+          <BannerAd slot="2345678901" />
+        </AdWrapper>
       </div>
 
       {/* CTA Section */}
