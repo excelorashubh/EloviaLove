@@ -3,17 +3,12 @@ const crypto  = require('crypto');
 const User         = require('../models/User');
 const Subscription = require('../models/Subscription');
 const Payment      = require('../models/Payment');
+const PlanConfig   = require('../models/PlanConfig');
 const { protect }  = require('../middleware/auth');
 
 const router = express.Router();
 
-// ── Plan config ──────────────────────────────────────────────────────────────
-const PLANS = {
-  basic:   { name: 'Basic',   price: 149, durationDays: 30 },
-  premium: { name: 'Premium', price: 399, durationDays: 30 },
-  pro:     { name: 'Pro',     price: 899, durationDays: 30 },
-};
-
+// ── Add-ons (still static — admin can extend later) ──────────────────────────
 const ADD_ONS = {
   boost:     { name: 'Profile Boost', price: 99  },
   superlike: { name: 'Super Like',    price: 49  },
@@ -28,28 +23,54 @@ const getRazorpay = () => {
   });
 };
 
-// Cache for Razorpay plan IDs (plan_id created once per plan type)
-// In production store these in DB or env vars after first creation
+// Helper — fetch a single active paid plan from DB
+async function getPlan(key) {
+  const plan = await PlanConfig.findOne({ key: key.toLowerCase(), isActive: true });
+  if (!plan) throw new Error(`Plan "${key}" not found or inactive`);
+  return plan;
+}
+
+// Helper — compute effective price (respects discount + expiry)
+function getEffectivePrice(plan) {
+  const d = plan.discount;
+  if (
+    d?.isActive &&
+    d?.offerPrice != null &&
+    d.offerPrice >= 0 &&
+    (!d.expiresAt || new Date(d.expiresAt) > new Date())
+  ) {
+    return d.offerPrice;
+  }
+  return plan.price;
+}
+
+// Helper — serialize plan with effectivePrice for API responses
+function serializePlan(plan) {
+  const obj = plan.toObject ? plan.toObject() : { ...plan };
+  obj.effectivePrice = getEffectivePrice(plan);
+  return obj;
+}
+
+// Cache for Razorpay plan IDs
 const razorpayPlanCache = {};
 
-// Create or fetch a Razorpay Plan for a given plan key
 async function getOrCreateRazorpayPlan(planKey) {
   if (razorpayPlanCache[planKey]) return razorpayPlanCache[planKey];
 
-  // Check env vars first (set after first run)
   const envKey = `RAZORPAY_PLAN_ID_${planKey.toUpperCase()}`;
   if (process.env[envKey]) {
     razorpayPlanCache[planKey] = process.env[envKey];
     return process.env[envKey];
   }
 
+  const planDoc  = await getPlan(planKey);
   const razorpay = getRazorpay();
   const plan = await razorpay.plans.create({
     period:   'monthly',
     interval: 1,
     item: {
-      name:     `EloviaLove ${PLANS[planKey].name}`,
-      amount:   PLANS[planKey].price * 100, // paise
+      name:     `EloviaLove ${planDoc.name}`,
+      amount:   getEffectivePrice(planDoc) * 100,
       currency: 'INR',
     },
     notes: { plan: planKey },
@@ -60,9 +81,14 @@ async function getOrCreateRazorpayPlan(planKey) {
   return plan.id;
 }
 
-// ── GET /api/subscription/plans ──────────────────────────────────────────────
-router.get('/plans', (_req, res) => {
-  res.json({ success: true, plans: PLANS, addOns: ADD_ONS });
+// ── GET /api/subscription/plans — public, used by Pricing page ───────────────
+router.get('/plans', async (_req, res) => {
+  try {
+    const plans = await PlanConfig.find({ isActive: true }).sort({ sortOrder: 1 });
+    res.json({ success: true, plans: plans.map(serializePlan), addOns: ADD_ONS });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
 // ── GET /api/subscription/status ─────────────────────────────────────────────
@@ -112,31 +138,32 @@ router.get('/status', protect, async (req, res) => {
 });
 
 // ── POST /api/subscription/create-subscription ───────────────────────────────
-// Creates a Razorpay Subscription (recurring auto-debit)
 router.post('/create-subscription', protect, async (req, res) => {
   try {
     const { plan } = req.body;
-    if (!PLANS[plan]) return res.status(400).json({ success: false, message: 'Invalid plan' });
+    const planDoc = await getPlan(plan).catch(() => null);
+    if (!planDoc || planDoc.key === 'free') {
+      return res.status(400).json({ success: false, message: 'Invalid plan' });
+    }
 
-    const razorpay   = getRazorpay();
-    const planId     = await getOrCreateRazorpayPlan(plan);
+    const razorpay = getRazorpay();
+    const planId   = await getOrCreateRazorpayPlan(plan);
 
     const subscription = await razorpay.subscriptions.create({
       plan_id:         planId,
       customer_notify: 1,
-      total_count:     12,   // 12 monthly cycles
+      total_count:     12,
       quantity:        1,
       notes: { plan, userId: req.user._id.toString() },
     });
 
-    // Save pending subscription record
     await Subscription.create({
-      userId:        req.user._id,
+      userId:         req.user._id,
       plan,
-      status:        'pending',
-      razorpaySubId: subscription.id,
+      status:         'pending',
+      razorpaySubId:  subscription.id,
       razorpayPlanId: planId,
-      totalCount:    12,
+      totalCount:     12,
     });
 
     res.json({
@@ -144,8 +171,8 @@ router.post('/create-subscription', protect, async (req, res) => {
       subscriptionId: subscription.id,
       keyId:          process.env.RAZORPAY_KEY_ID,
       plan,
-      planName:       PLANS[plan].name,
-      amount:         PLANS[plan].price * 100,
+      planName:       planDoc.name,
+      amount:         getEffectivePrice(planDoc) * 100,
       currency:       'INR',
     });
   } catch (err) {
@@ -204,7 +231,7 @@ router.post('/verify-subscription', protect, async (req, res) => {
     await Payment.create({
       userId:    req.user._id,
       plan,
-      amount:    PLANS[plan].price,
+      amount:    getEffectivePrice(await PlanConfig.findOne({ key: plan })) || 0,
       orderId:   razorpay_subscription_id,
       paymentId: razorpay_payment_id,
       status:    'paid',
@@ -340,7 +367,7 @@ router.post('/webhook', async (req, res) => {
           await Payment.create({
             userId:    sub.userId,
             plan:      sub.plan,
-            amount:    PLANS[sub.plan]?.price || 0,
+            amount:    getEffectivePrice(await PlanConfig.findOne({ key: sub.plan })) || 0,
             orderId:   payload.id,
             paymentId: payment.id,
             status:    'paid',

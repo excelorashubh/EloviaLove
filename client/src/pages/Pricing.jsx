@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap, Crown, Star, Sparkles, ArrowLeft, X, ShieldCheck, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -7,30 +7,55 @@ import api from '../services/api';
 import BannerAd from '../components/ads/BannerAd';
 import AdWrapper from '../components/ads/AdWrapper';
 
-const PLAN_META = {
-  free:    { label: 'Free',    icon: Star,     price: 0,   gradient: 'from-slate-400 to-slate-500' },
-  basic:   { label: 'Basic',   icon: Zap,      price: 149, gradient: 'from-blue-500 to-cyan-500'   },
-  premium: { label: 'Premium', icon: Sparkles, price: 399, gradient: 'from-primary-600 to-pink-500' },
-  pro:     { label: 'Pro',     icon: Crown,    price: 899, gradient: 'from-amber-500 to-orange-500' },
-};
-
-const FEATURES = [
-  { label: 'Daily Likes',       free: '10/day', basic: 'Unlimited', premium: 'Unlimited', pro: 'Unlimited' },
-  { label: 'See Who Liked You', free: false,    basic: false,       premium: true,        pro: true        },
-  { label: 'Advanced Filters',  free: false,    basic: true,        premium: true,        pro: true        },
-  { label: 'Priority Matching', free: false,    basic: false,       premium: true,        pro: true        },
-  { label: 'Read Receipts',     free: false,    basic: false,       premium: true,        pro: true        },
-  { label: 'No Ads',            free: false,    basic: true,        premium: true,        pro: true        },
-  { label: 'Profile Boost',     free: false,    basic: false,       premium: false,       pro: true        },
-  { label: 'VIP Badge',         free: false,    basic: false,       premium: false,       pro: true        },
-  { label: 'Top Visibility',    free: false,    basic: false,       premium: false,       pro: true        },
-];
+// Icon map — keyed by plan.key
+const ICON_MAP = { free: Star, basic: Zap, premium: Sparkles, pro: Crown };
+const getIcon = (key) => ICON_MAP[key] || Star;
 
 const ADD_ONS = [
   { key: 'boost',     label: 'Profile Boost', price: 99,  icon: '🚀', desc: 'Get 10x more profile views for 24h' },
   { key: 'superlike', label: 'Super Like',    price: 49,  icon: '⭐', desc: 'Stand out with a super like'        },
   { key: 'spotlight', label: 'Spotlight',     price: 199, icon: '💡', desc: 'Be featured at the top for 6h'      },
 ];
+
+// ── Discount helpers ─────────────────────────────────────────────────────────
+function getEffectivePrice(plan) {
+  const d = plan?.discount;
+  if (d?.isActive && d?.offerPrice != null && (!d.expiresAt || new Date(d.expiresAt) > new Date())) {
+    return d.offerPrice;
+  }
+  return plan?.price ?? 0;
+}
+
+function useCountdown(expiresAt) {
+  const calc = useCallback(() => {
+    if (!expiresAt) return null;
+    const diff = new Date(expiresAt) - new Date();
+    if (diff <= 0) return null;
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    return h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+  }, [expiresAt]);
+
+  const [timeLeft, setTimeLeft] = useState(calc);
+  useEffect(() => {
+    if (!expiresAt) return;
+    const id = setInterval(() => setTimeLeft(calc()), 1000);
+    return () => clearInterval(id);
+  }, [expiresAt, calc]);
+  return timeLeft;
+}
+
+// ── Per-plan countdown timer component ───────────────────────────────────────
+const PlanCountdown = ({ expiresAt, isPop }) => {
+  const timeLeft = useCountdown(expiresAt);
+  if (!timeLeft) return null;
+  return (
+    <p className={`text-xs font-semibold mt-1 ${isPop ? 'text-yellow-200' : 'text-orange-500'}`}>
+      ⏱ Offer ends in {timeLeft}
+    </p>
+  );
+};
 
 // ── Load Razorpay SDK ────────────────────────────────────────────────────────
 const loadRazorpay = () =>
@@ -236,10 +261,15 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
 const Pricing = () => {
   const { user, loadUser } = useAuth();
   const navigate = useNavigate();
-  const [status, setStatus] = useState(null);
-  const [modal, setModal] = useState(null); // { item, isAddon }
+  const [plans, setPlans]       = useState([]);
+  const [plansLoading, setPlansLoading] = useState(true);
+  const [status, setStatus]     = useState(null);
+  const [modal, setModal]       = useState(null);
 
   useEffect(() => {
+    api.get('/subscription/plans').then(r => {
+      setPlans(r.data.plans || []);
+    }).catch(() => {}).finally(() => setPlansLoading(false));
     api.get('/subscription/status').then(r => setStatus(r.data)).catch(() => {});
   }, []);
 
@@ -269,9 +299,18 @@ const Pricing = () => {
     if (!isAddon) navigate('/subscription/success');
   };
 
-  const currentPlan = status?.plan || user?.plan || 'free';
-  const isTrial = status?.isTrial;
+  const currentPlan   = status?.plan || user?.plan || 'free';
+  const isTrial       = status?.isTrial;
   const trialDaysLeft = status?.trialDaysLeft ?? 0;
+
+  // All unique feature labels across plans (for comparison table)
+  const allFeatureLabels = [...new Set(plans.flatMap(p => p.features?.map(f => f.label) || []))];
+
+  if (plansLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50">
+      <Loader2 size={36} className="text-primary-500 animate-spin" />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50 pb-16">
@@ -308,93 +347,116 @@ const Pricing = () => {
           )}
         </div>
 
-        {/* Plan cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-14">
-          {Object.entries(PLAN_META).map(([planKey, meta], i) => {
-            const Icon = meta.icon;
-            const isCurrent = currentPlan === planKey;
-            const isPremium = planKey === 'premium';
+        {/* Plan cards — dynamic from DB */}
+        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 mb-14 ${plans.length >= 4 ? 'lg:grid-cols-4' : `lg:grid-cols-${plans.length}`}`}>
+          {plans.map((plan, i) => {
+            const Icon      = getIcon(plan.key);
+            const isCurrent = currentPlan === plan.key;
+            const isPop     = plan.isPopular;
 
             return (
               <motion.div
-                key={planKey}
+                key={plan._id}
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07 }}
                 className={`relative rounded-3xl p-6 flex flex-col border-2 transition-all ${
-                  isPremium
+                  isPop
                     ? 'border-primary-500 bg-gradient-to-b from-primary-600 to-pink-600 text-white shadow-2xl shadow-primary-500/30 scale-105'
                     : isCurrent
                       ? 'border-primary-300 bg-white shadow-lg'
                       : 'border-slate-200 bg-white shadow-sm hover:shadow-md'
                 }`}
               >
-                {isPremium && (
+                {isPop && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-amber-400 text-amber-900 text-xs font-bold rounded-full whitespace-nowrap">
                     Most Popular
                   </span>
                 )}
-                {isCurrent && !isPremium && (
+                {isCurrent && !isPop && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full whitespace-nowrap">
                     Current Plan
                   </span>
                 )}
-
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${isPremium ? 'bg-white/20' : 'bg-primary-50'}`}>
-                  <Icon size={22} className={isPremium ? 'text-white' : 'text-primary-600'} />
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${isPop ? 'bg-white/20' : 'bg-primary-50'}`}>
+                  <Icon size={22} className={isPop ? 'text-white' : 'text-primary-600'} />
                 </div>
-
-                <h3 className={`text-xl font-bold mb-1 ${isPremium ? 'text-white' : 'text-slate-900'}`}>{meta.label}</h3>
-                <div className={`text-3xl font-extrabold mb-1 ${isPremium ? 'text-white' : 'text-slate-900'}`}>
-                  {meta.price === 0 ? 'Free' : `₹${meta.price}`}
-                </div>
-                {meta.price > 0 && (
-                  <p className={`text-xs mb-5 ${isPremium ? 'text-white/70' : 'text-slate-400'}`}>per month</p>
+                <h3 className={`text-xl font-bold mb-1 ${isPop ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h3>
+                {plan.description && (
+                  <p className={`text-xs mb-2 ${isPop ? 'text-white/70' : 'text-slate-400'}`}>{plan.description}</p>
                 )}
-
+                {/* Price display */}
+                {(() => {
+                  const d = plan.discount;
+                  const hasDiscount = d?.isActive && d?.offerPrice != null && (!d.expiresAt || new Date(d.expiresAt) > new Date());
+                  const effectivePrice = hasDiscount ? d.offerPrice : plan.price;
+                  return (
+                    <div className="mb-1">
+                      {hasDiscount && (
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className={`text-sm line-through ${isPop ? 'text-white/50' : 'text-slate-400'}`}>
+                            ₹{plan.price}
+                          </span>
+                          {d.label && (
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isPop ? 'bg-yellow-400 text-yellow-900' : 'bg-orange-100 text-orange-700'}`}>
+                              🔥 {d.label}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className={`text-3xl font-extrabold ${isPop ? 'text-white' : 'text-slate-900'}`}>
+                        {effectivePrice === 0 ? 'Free' : `₹${effectivePrice}`}
+                      </div>
+                      {effectivePrice > 0 && (
+                        <p className={`text-xs ${isPop ? 'text-white/70' : 'text-slate-400'}`}>per month</p>
+                      )}
+                      {hasDiscount && d.expiresAt && (
+                        <PlanCountdown expiresAt={d.expiresAt} isPop={isPop} />
+                      )}
+                    </div>
+                  );
+                })()}
+                <div className="mb-5" />
                 <ul className="space-y-2 flex-1 mb-6">
-                  {FEATURES.map(f => {
-                    const val = f[planKey];
-                    return (
-                      <li key={f.label} className="flex items-center gap-2 text-sm">
-                        {val === false ? (
-                          <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${isPremium ? 'bg-white/20' : 'bg-slate-100'}`}>
-                            <span className={`text-[10px] ${isPremium ? 'text-white/50' : 'text-slate-400'}`}>✕</span>
-                          </span>
-                        ) : (
-                          <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${isPremium ? 'bg-white/30' : 'bg-primary-100'}`}>
-                            <Check size={10} className={isPremium ? 'text-white' : 'text-primary-600'} strokeWidth={3} />
-                          </span>
-                        )}
-                        <span className={val === false
-                          ? (isPremium ? 'text-white/40 line-through' : 'text-slate-300 line-through')
-                          : (isPremium ? 'text-white' : 'text-slate-700')
-                        }>
-                          {val === true ? f.label : val === false ? f.label : `${f.label}: ${val}`}
+                  {(plan.features || []).map((f, fi) => (
+                    <li key={fi} className="flex items-center gap-2 text-sm">
+                      {f.value === false ? (
+                        <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${isPop ? 'bg-white/20' : 'bg-slate-100'}`}>
+                          <span className={`text-[10px] ${isPop ? 'text-white/50' : 'text-slate-400'}`}>✕</span>
                         </span>
-                      </li>
-                    );
-                  })}
+                      ) : (
+                        <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${isPop ? 'bg-white/30' : 'bg-primary-100'}`}>
+                          <Check size={10} className={isPop ? 'text-white' : 'text-primary-600'} strokeWidth={3} />
+                        </span>
+                      )}
+                      <span className={
+                        f.value === false
+                          ? (isPop ? 'text-white/40 line-through' : 'text-slate-300 line-through')
+                          : (isPop ? 'text-white' : f.highlight ? 'font-semibold text-slate-800' : 'text-slate-700')
+                      }>
+                        {f.value === true || f.value === false ? f.label : `${f.label}: ${f.value}`}
+                      </span>
+                    </li>
+                  ))}
                 </ul>
-
-                {planKey === 'free' ? (
+                {plan.key === 'free' ? (
                   <button disabled className="w-full py-3 rounded-2xl text-sm font-semibold bg-slate-100 text-slate-400 cursor-default">
                     {isCurrent ? 'Current Plan' : 'Free Forever'}
                   </button>
                 ) : isCurrent ? (
-                  <button disabled className={`w-full py-3 rounded-2xl text-sm font-semibold ${isPremium ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'}`}>
+                  <button disabled className={`w-full py-3 rounded-2xl text-sm font-semibold ${isPop ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'}`}>
                     ✓ Active
                   </button>
                 ) : (
                   <button
-                    onClick={() => openModal({ key: planKey, ...meta }, false)}
+                    onClick={() => openModal({ key: plan.key, label: plan.name, price: getEffectivePrice(plan), gradient: plan.color, icon: Icon }, false)}
                     className={`w-full py-3 rounded-2xl text-sm font-bold transition-all active:scale-95 ${
-                      isPremium
+                      isPop
                         ? 'bg-white text-primary-600 hover:bg-primary-50 shadow-lg'
                         : 'bg-gradient-to-r from-primary-600 to-pink-500 text-white hover:shadow-lg hover:shadow-pink-500/30'
                     }`}
                   >
-                    Upgrade to {meta.label}
+                    Upgrade to {plan.name}
                   </button>
                 )}
               </motion.div>
@@ -459,44 +521,50 @@ const Pricing = () => {
           </AdWrapper>
         </div>
 
-        {/* Feature comparison table */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-900">Full Feature Comparison</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left px-6 py-3 text-slate-500 font-semibold w-1/3">Feature</th>
-                  {['free','basic','premium','pro'].map(p => (
-                    <th key={p} className={`px-4 py-3 font-bold text-center ${currentPlan === p ? 'text-primary-600' : 'text-slate-700'}`}>
-                      {PLAN_META[p].label}
-                      {currentPlan === p && <span className="block text-[10px] text-primary-400 font-normal">current</span>}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {FEATURES.map((f, i) => (
-                  <tr key={f.label} className={i % 2 === 0 ? 'bg-slate-50/50' : ''}>
-                    <td className="px-6 py-3 text-slate-700 font-medium">{f.label}</td>
-                    {['free','basic','premium','pro'].map(p => (
-                      <td key={p} className="px-4 py-3 text-center">
-                        {f[p] === true
-                          ? <Check size={16} className="text-green-500 mx-auto" strokeWidth={2.5} />
-                          : f[p] === false
-                            ? <span className="text-slate-300 text-lg">—</span>
-                            : <span className="text-slate-700 font-medium">{f[p]}</span>
-                        }
-                      </td>
+        {/* Feature comparison table — dynamic */}
+        {allFeatureLabels.length > 0 && (
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100">
+              <h2 className="text-lg font-bold text-slate-900">Full Feature Comparison</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="text-left px-6 py-3 text-slate-500 font-semibold w-1/3">Feature</th>
+                    {plans.map(p => (
+                      <th key={p._id} className={`px-4 py-3 font-bold text-center ${currentPlan === p.key ? 'text-primary-600' : 'text-slate-700'}`}>
+                        {p.name}
+                        {currentPlan === p.key && <span className="block text-[10px] text-primary-400 font-normal">current</span>}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {allFeatureLabels.map((label, i) => (
+                    <tr key={label} className={i % 2 === 0 ? 'bg-slate-50/50' : ''}>
+                      <td className="px-6 py-3 text-slate-700 font-medium">{label}</td>
+                      {plans.map(p => {
+                        const feat = p.features?.find(f => f.label === label);
+                        const val  = feat?.value;
+                        return (
+                          <td key={p._id} className="px-4 py-3 text-center">
+                            {val === true
+                              ? <Check size={16} className="text-green-500 mx-auto" strokeWidth={2.5} />
+                              : val === false || val === undefined
+                                ? <span className="text-slate-300 text-lg">—</span>
+                                : <span className="text-slate-700 font-medium">{val}</span>
+                            }
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Payment Modal */}

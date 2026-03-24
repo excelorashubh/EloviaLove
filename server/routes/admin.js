@@ -530,3 +530,138 @@ router.get('/analytics/ads', async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
+// ── PLAN CONFIG (dynamic subscription plans) ─────────────────────────────────
+const PlanConfig = require('../models/PlanConfig');
+
+// Default seed data — runs once if no plans exist
+const DEFAULT_PLANS = [
+  {
+    key: 'free', name: 'Free', price: 0, durationDays: 0, sortOrder: 0,
+    description: 'Get started for free',
+    color: 'from-slate-400 to-slate-500', isActive: true, isPopular: false,
+    features: [
+      { label: 'Daily Likes',        value: '10/day' },
+      { label: 'See Who Liked You',  value: false },
+      { label: 'Advanced Filters',   value: false },
+      { label: 'Priority Matching',  value: false },
+      { label: 'Read Receipts',      value: false },
+      { label: 'No Ads',             value: false },
+      { label: 'Profile Boost',      value: false },
+      { label: 'VIP Badge',          value: false },
+    ],
+  },
+  {
+    key: 'basic', name: 'Basic', price: 149, durationDays: 30, sortOrder: 1,
+    description: 'Perfect for getting started',
+    color: 'from-blue-500 to-cyan-500', isActive: true, isPopular: false,
+    features: [
+      { label: 'Daily Likes',        value: 'Unlimited' },
+      { label: 'See Who Liked You',  value: false },
+      { label: 'Advanced Filters',   value: true },
+      { label: 'Priority Matching',  value: false },
+      { label: 'Read Receipts',      value: false },
+      { label: 'No Ads',             value: true },
+      { label: 'Profile Boost',      value: false },
+      { label: 'VIP Badge',          value: false },
+    ],
+  },
+  {
+    key: 'premium', name: 'Premium', price: 399, durationDays: 30, sortOrder: 2,
+    description: 'Most popular — find love faster',
+    color: 'from-primary-600 to-pink-500', isActive: true, isPopular: true,
+    features: [
+      { label: 'Daily Likes',        value: 'Unlimited' },
+      { label: 'See Who Liked You',  value: true,  highlight: true },
+      { label: 'Advanced Filters',   value: true },
+      { label: 'Priority Matching',  value: true,  highlight: true },
+      { label: 'Read Receipts',      value: true },
+      { label: 'No Ads',             value: true },
+      { label: 'Profile Boost',      value: false },
+      { label: 'VIP Badge',          value: false },
+    ],
+  },
+  {
+    key: 'pro', name: 'Pro', price: 899, durationDays: 30, sortOrder: 3,
+    description: 'Ultimate dating experience',
+    color: 'from-amber-500 to-orange-500', isActive: true, isPopular: false,
+    features: [
+      { label: 'Daily Likes',        value: 'Unlimited' },
+      { label: 'See Who Liked You',  value: true },
+      { label: 'Advanced Filters',   value: true },
+      { label: 'Priority Matching',  value: true },
+      { label: 'Read Receipts',      value: true },
+      { label: 'No Ads',             value: true },
+      { label: 'Profile Boost',      value: true,  highlight: true },
+      { label: 'VIP Badge',          value: true,  highlight: true },
+    ],
+  },
+];
+
+// Seed defaults if collection is empty
+async function seedPlansIfEmpty() {
+  const count = await PlanConfig.countDocuments();
+  if (count === 0) {
+    await PlanConfig.insertMany(DEFAULT_PLANS);
+    console.log('Plan configs seeded with defaults');
+  }
+}
+seedPlansIfEmpty().catch(console.error);
+
+// @route   GET /api/admin/plans
+router.get('/plans', async (req, res) => {
+  try {
+    const plans = await PlanConfig.find().sort({ sortOrder: 1 });
+    res.json({ success: true, plans });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   POST /api/admin/plans
+router.post('/plans', async (req, res) => {
+  try {
+    const { key, name, price, durationDays, description, color, isActive, isPopular, sortOrder, features } = req.body;
+    if (!key || !name || price === undefined) {
+      return res.status(400).json({ success: false, message: 'key, name and price are required' });
+    }
+    const existing = await PlanConfig.findOne({ key: key.toLowerCase() });
+    if (existing) return res.status(400).json({ success: false, message: 'Plan key already exists' });
+
+    const plan = await PlanConfig.create({
+      key: key.toLowerCase(), name, price, durationDays: durationDays || 30,
+      description, color, isActive, isPopular, sortOrder: sortOrder || 0, features: features || [],
+    });
+    res.status(201).json({ success: true, plan });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   PUT /api/admin/plans/:planId
+router.put('/plans/:planId', async (req, res) => {
+  try {
+    const plan = await PlanConfig.findByIdAndUpdate(
+      req.params.planId,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
+    res.json({ success: true, plan });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   DELETE /api/admin/plans/:planId
+router.delete('/plans/:planId', async (req, res) => {
+  try {
+    const plan = await PlanConfig.findById(req.params.planId);
+    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
+    if (plan.key === 'free') return res.status(400).json({ success: false, message: 'Cannot delete the free plan' });
+    await PlanConfig.findByIdAndDelete(req.params.planId);
+    res.json({ success: true, message: 'Plan deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});

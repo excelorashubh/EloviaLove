@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Flag, BarChart2, DollarSign,
-  LogOut, Menu, X, Heart, ChevronRight, Eye, Megaphone
+  LogOut, Menu, X, Heart, ChevronRight, Eye, Megaphone, CreditCard
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -13,6 +13,7 @@ const navItems = [
   { label: 'Revenue',   path: '/admin/revenue',   icon: DollarSign },
   { label: 'Analytics', path: '/admin/analytics', icon: BarChart2 },
   { label: 'Visitors',  path: '/admin/visitors',  icon: Eye },
+  { label: 'Plans',     path: '/admin/plans',     icon: CreditCard },
   { label: 'Ads',       path: '/admin/ads',       icon: Megaphone },
 ];
 
