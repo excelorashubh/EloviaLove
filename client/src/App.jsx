@@ -30,8 +30,16 @@ import AdminRevenue from './pages/admin/AdminRevenue';
 import AdminVisitors from './pages/admin/AdminVisitors';
 
 import api from './services/api';
+import CookieConsent from './components/CookieConsent';
 
-// ── Visitor tracker — fires on every route change ─────────────────────────────
+// ── Google Analytics page view helper ────────────────────────────────────────
+const trackPageView = (path) => {
+  if (typeof window.gtag === 'function') {
+    window.gtag('config', import.meta.env.VITE_GA_MEASUREMENT_ID, { page_path: path });
+  }
+};
+
+// ── Visitor tracker + GA page view — fires on every route change ──────────────
 const VisitorTracker = () => {
   const location = useLocation();
   useEffect(() => {
@@ -41,6 +49,7 @@ const VisitorTracker = () => {
       localStorage.setItem('visitorId', visitorId);
     }
     api.post('/analytics/track', { visitorId, page: location.pathname }).catch(() => {});
+    trackPageView(location.pathname);
   }, [location.pathname]);
   return null;
 };
@@ -59,6 +68,7 @@ function App() {
     <AuthProvider>
       <Router>
         <VisitorTracker />
+        <CookieConsent />
         <Routes>
           {/* Admin — full screen with own sidebar layout */}
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

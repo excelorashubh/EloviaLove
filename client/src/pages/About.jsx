@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Target, Heart, Shield, Users, Globe, ArrowRight, Section } from 'lucide-react';
+import { Target, Heart, Shield, Users, Globe, ArrowRight } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
+import BannerAd from '../components/ads/BannerAd';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -171,6 +172,11 @@ const About = () => {
           </div>
         </div>
       </section>
+
+      {/* Ad — between team and CTA */}
+      <div className="py-4 bg-slate-50 flex justify-center">
+        <BannerAd slot="2345678901" />
+      </div>
 
       {/* CTA Section */}
       <section className="py-20 bg-white">

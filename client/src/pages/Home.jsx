@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Heart, Star, Shield, Zap, MessageCircle, MapPin, Users, HeartHandshake, Quote } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
+import BannerAd from '../components/ads/BannerAd';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -109,6 +110,11 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Ad — between hero and features */}
+      <div className="py-4 bg-white flex justify-center">
+        <BannerAd slot="1234567890" />
+      </div>
 
       {/* Features Section */}
       <section className="py-24 bg-white relative">
@@ -251,6 +257,11 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Ad — between testimonials and CTA */}
+      <div className="py-4 bg-white flex justify-center">
+        <BannerAd slot="1234567891" />
+      </div>
 
       {/* CTA Section */}
       <section className="py-20">

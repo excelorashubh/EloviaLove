@@ -4,6 +4,7 @@ import { Check, Zap, Crown, Star, Sparkles, ArrowLeft, X, ShieldCheck, Loader2, 
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import BannerAd from '../components/ads/BannerAd';
 
 const PLAN_META = {
   free:    { label: 'Free',    icon: Star,     price: 0,   gradient: 'from-slate-400 to-slate-500' },
@@ -448,6 +449,11 @@ const Pricing = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+
+        {/* Ad — above feature comparison */}
+        <div className="py-4 flex justify-center">
+          <BannerAd slot="3456789012" />
         </div>
 
         {/* Feature comparison table */}

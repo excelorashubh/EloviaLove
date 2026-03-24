@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
+import InFeedAd from '../components/ads/InFeedAd';
 
 const INTERESTS_OPTIONS = [
   'Travel', 'Coffee', 'Dogs', 'Photography', 'Hiking', 'Music',
@@ -734,11 +735,16 @@ const Discover = () => {
               <p className="text-sm text-slate-500 mb-4 text-center">
                 {likedYouData.profiles.length} {likedYouData.profiles.length === 1 ? 'person' : 'people'} liked you — like back to match instantly!
               </p>
-              {likedYouData.profiles.map(profile => {
+              {likedYouData.profiles.map((profile, idx) => {
                 const avatar = profile.profilePhoto ||
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=e879a0&color=fff&size=80`;
                 return (
-                  <div key={profile._id} className="bg-white rounded-2xl p-4 border border-pink-100 shadow-sm flex items-center gap-4">
+                  <div key={profile._id}>
+                    {/* InFeed ad every 5 profiles */}
+                    {idx > 0 && idx % 5 === 0 && (
+                      <InFeedAd slot="4567890123" className="mb-3" />
+                    )}
+                    <div className="bg-white rounded-2xl p-4 border border-pink-100 shadow-sm flex items-center gap-4">
                     <div className="relative shrink-0">
                       <img src={avatar} alt={profile.name} className="w-14 h-14 rounded-full object-cover" />
                       <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-pink-500 to-primary-500 rounded-full flex items-center justify-center">
@@ -761,6 +767,7 @@ const Discover = () => {
                     >
                       Like Back ❤️
                     </button>
+                  </div>
                   </div>
                 );
               })}
