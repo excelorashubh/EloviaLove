@@ -28,6 +28,7 @@ import AdminReports from './pages/admin/AdminReports';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
 import AdminRevenue from './pages/admin/AdminRevenue';
 import AdminVisitors from './pages/admin/AdminVisitors';
+import AdminAds from './pages/admin/AdminAds';
 
 import api from './services/api';
 import CookieConsent from './components/CookieConsent';
@@ -77,6 +78,7 @@ function App() {
           <Route path="/admin/revenue" element={<AdminRoute><AdminRevenue /></AdminRoute>} />
           <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
           <Route path="/admin/visitors"  element={<AdminRoute><AdminVisitors /></AdminRoute>} />
+          <Route path="/admin/ads"      element={<AdminRoute><AdminAds /></AdminRoute>} />
 
           {/* Public & user routes with Navbar + Footer */}
           <Route path="/" element={<MainLayout showNav><Home /></MainLayout>} />

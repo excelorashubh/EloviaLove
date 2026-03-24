@@ -497,3 +497,36 @@ router.get('/analytics/conversion', async (req, res) => {
 });
 
 module.exports = router;
+
+// @route   GET /api/admin/analytics/ads
+// @desc    Ad exposure stats — how many users see ads vs don't
+router.get('/analytics/ads', async (req, res) => {
+  try {
+    const [planDist, total] = await Promise.all([
+      User.aggregate([
+        { $group: { _id: '$plan', count: { $sum: 1 } } },
+      ]),
+      User.countDocuments(),
+    ]);
+
+    const byPlan = { free: 0, basic: 0, premium: 0, pro: 0 };
+    planDist.forEach(p => { if (byPlan[p._id] !== undefined) byPlan[p._id] = p.count; });
+
+    const adAudience  = byPlan.free;                                          // sees ads
+    const noAdAudience = byPlan.basic + byPlan.premium + byPlan.pro;          // ad-free
+    const exposureRate = total > 0 ? ((adAudience / total) * 100).toFixed(1) : 0;
+    const upgradeRate  = total > 0 ? ((noAdAudience / total) * 100).toFixed(1) : 0;
+
+    res.json({
+      success: true,
+      total,
+      adAudience,
+      noAdAudience,
+      exposureRate,
+      upgradeRate,
+      byPlan,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});

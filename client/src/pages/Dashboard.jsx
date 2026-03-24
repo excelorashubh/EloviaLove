@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
 import SubscriptionBanner from '../components/SubscriptionBanner';
+import BannerAd from '../components/ads/BannerAd';
+import AdWrapper from '../components/ads/AdWrapper';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
@@ -319,6 +321,11 @@ const Dashboard = () => {
                 </div>
               </Link>
             </motion.div>
+
+            {/* Ad — between quick actions and chats (free users only) */}
+            <AdWrapper showUpgradeNudge>
+              <BannerAd slot="5678901234" />
+            </AdWrapper>
 
             {/* Recent Conversations */}
             <motion.div initial="hidden" animate="visible" variants={fadeIn}
