@@ -5,7 +5,6 @@ import { Target, Heart, Shield, Users, Globe, ArrowRight } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import BannerAd from '../components/ads/BannerAd';
 import AdWrapper from '../components/ads/AdWrapper';
-import PersonalPhoto from '../assets/personal_photo.jpeg';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -150,7 +149,7 @@ const About = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { name: "Shubham Kumar", role: "CEO & Founder", img: PersonalPhoto },
+              { name: "Jessica Chen", role: "CEO & Founder", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&auto=format&fit=crop" },
               { name: "Marcus Johnson", role: "Head of Product", img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=500&auto=format&fit=crop" },
               { name: "Dr. Elena Rostova", role: "Lead Psychologist", img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=500&auto=format&fit=crop" },
               { name: "Alex Rivera", role: "Head of Community safety", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=500&auto=format&fit=crop" }
