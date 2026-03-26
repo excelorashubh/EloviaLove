@@ -152,7 +152,7 @@ const About = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { name: "Shubham Kumar", role: "CEO & Founder", img: personalPhoto },
-              { name: "Marcus Johnson", role: "Head of Product", img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=500&auto=format&fit=crop" },
+              { name: "Shweta Sharma", role: "Head of Administration", img: "https://www.shutterstock.com/image-photo/happy-confident-20s-indian-girl-260nw-2449701257.jpg" },
               { name: "Dr. Elena Rostova", role: "Lead Psychologist", img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=500&auto=format&fit=crop" },
               { name: "Alex Rivera", role: "Head of Community safety", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=500&auto=format&fit=crop" }
             ].map((member, idx) => (
