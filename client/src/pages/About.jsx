@@ -154,7 +154,7 @@ const About = () => {
               { name: "Shubham Kumar", role: "CEO & Founder", img: personalPhoto },
               { name: "Shweta Sharma", role: "Head of Administration", img: "https://www.shutterstock.com/image-photo/happy-confident-20s-indian-girl-260nw-2449701257.jpg" },
               { name: "Dr. Priya Singh", role: "Lead Psychologist", img: "https://thumbs.dreamstime.com/b/close-up-photo-young-indian-girl-home-sitting-couch-texting-phone-close-up-photo-young-indian-girl-401219813.jpg" },
-              { name: "Alex Rivera", role: "Head of Community safety", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=500&auto=format&fit=crop" }
+              { name: "Anjali Nair", role: "Head of Customer Executive", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfGuXHLGTsCBFAKp30Mb2v4Mc1E--LZL6vvjhDWS4yCLEtHm0IDHvT5Fw&s" }
             ].map((member, idx) => (
               <motion.div
                 key={idx}
