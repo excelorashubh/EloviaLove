@@ -5,7 +5,7 @@ import { Target, Heart, Shield, Users, Globe, ArrowRight } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import BannerAd from '../components/ads/BannerAd';
 import AdWrapper from '../components/ads/AdWrapper';
-import PersonalPhoto from '../assets/personal_photo.jpg';
+import PersonalPhoto from '../assets/personal_photo.jpeg';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
