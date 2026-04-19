@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { Search, Calendar, Eye, Tag, ArrowRight, Loader2, Heart } from 'lucide-react';
+import { Search, Calendar, Eye, Tag, ArrowRight, Loader2, Heart, Clock } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
 
+const BASE_URL = 'https://elovialove.onrender.com';
+
 const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+function readingTime(content) {
+  const words = (content || '').replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
 
 const PostCard = ({ post, idx }) => (
   <motion.article
@@ -54,6 +62,7 @@ const PostCard = ({ post, idx }) => (
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1"><Calendar size={12} />{formatDate(post.publishedAt)}</span>
           <span className="flex items-center gap-1"><Eye size={12} />{post.views || 0}</span>
+          {post.readingTime && <span className="flex items-center gap-1"><Clock size={12} />{post.readingTime} min</span>}
         </div>
         <Link to={`/blog/${post.slug}`} className="flex items-center gap-1 text-primary-600 font-semibold hover:gap-2 transition-all text-xs">
           Read <ArrowRight size={12} />
@@ -86,14 +95,16 @@ const Blog = () => {
       .finally(() => setLoading(false));
   }, [page, tag, q]);
 
-  // Update document title for SEO
-  useEffect(() => {
-    document.title = q
-      ? `"${q}" — EloviaLove Blog`
-      : tag
-        ? `#${tag} — EloviaLove Blog`
-        : 'Love & Relationship Advice Blog — EloviaLove';
-  }, [q, tag]);
+  // Update document title for SEO — handled by Helmet below
+  const pageTitle = q
+    ? `"${q}" — EloviaLove Blog`
+    : tag
+      ? `#${tag} — EloviaLove Blog`
+      : 'Love & Relationship Advice Blog — EloviaLove';
+
+  const pageDesc = q || tag
+    ? `Browse EloviaLove blog articles about ${q || tag} — love, dating, and relationship advice for Indians.`
+    : 'Read expert love and relationship advice on EloviaLove. Dating tips, heartbreak recovery, and self-growth for young Indians.';
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -111,6 +122,17 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDesc} />
+        <meta name="robots"      content="index, follow" />
+        <link rel="canonical"    href={`${BASE_URL}/blog${q ? `?q=${q}` : tag ? `?tag=${tag}` : ''}`} />
+        <meta property="og:title"       content={pageTitle} />
+        <meta property="og:description" content={pageDesc} />
+        <meta property="og:url"         content={`${BASE_URL}/blog`} />
+        <meta property="og:type"        content="website" />
+        <meta property="og:image"       content={`${BASE_URL}/EloviaLoveWB.png`} />
+      </Helmet>
       <Navbar />
 
       {/* Hero */}

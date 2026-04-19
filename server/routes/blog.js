@@ -32,12 +32,21 @@ router.get('/', async (req, res) => {
 
     const total = await Blog.countDocuments(filter);
     const posts = await Blog.find(filter)
-      .select('title slug excerpt featuredImage author tags publishedAt views')
+      .select('title slug excerpt featuredImage author tags publishedAt views content')
       .sort({ publishedAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
-    res.json({ success: true, posts, total, page, pages: Math.ceil(total / limit) });
+    // Compute reading time without sending full content
+    const postsWithMeta = posts.map(p => {
+      const obj = p.toObject();
+      const words = (obj.content || '').replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length;
+      obj.readingTime = Math.max(1, Math.ceil(words / 200));
+      delete obj.content; // don't send full content in listing
+      return obj;
+    });
+
+    res.json({ success: true, posts: postsWithMeta, total, page, pages: Math.ceil(total / limit) });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
