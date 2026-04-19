@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, X, Check, Loader2,
-  AlertCircle, Globe, FileText, Tag, Image, Search,
+  AlertCircle, Globe, FileText, Tag, Image, Search, Upload, UploadCloud,
 } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../services/api';
@@ -12,6 +12,102 @@ const toSlug = (t) => t.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
+// ── Image uploader ────────────────────────────────────────────────────────────
+const ImageUploader = ({ value, onChange }) => {
+  const inputRef  = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+
+  const processFile = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { setError('Please select an image file'); return; }
+    if (file.size > 5 * 1024 * 1024) { setError('Image must be under 5 MB'); return; }
+    setError('');
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = (e) => { onChange(e.target.result); setUploading(false); };
+    reader.onerror = () => { setError('Failed to read file'); setUploading(false); };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault(); setDragging(false);
+    processFile(e.dataTransfer.files[0]);
+  };
+
+  const handleChange = (e) => processFile(e.target.files[0]);
+
+  return (
+    <div className="space-y-2">
+      {value ? (
+        /* Preview with replace/remove controls */
+        <div className="relative rounded-xl overflow-hidden border border-slate-200 group">
+          <img src={value} alt="Featured" className="w-full h-44 object-cover" />
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="flex items-center gap-1.5 px-3 py-2 bg-white text-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-100 transition-colors"
+            >
+              <Upload size={13} /> Replace
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              className="flex items-center gap-1.5 px-3 py-2 bg-red-500 text-white rounded-xl text-xs font-semibold hover:bg-red-600 transition-colors"
+            >
+              <X size={13} /> Remove
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Drop zone */
+        <div
+          onDragOver={e => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+          className={`flex flex-col items-center justify-center gap-2 h-36 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
+            dragging
+              ? 'border-primary-400 bg-primary-50'
+              : 'border-slate-200 bg-slate-50 hover:border-primary-300 hover:bg-primary-50/50'
+          }`}
+        >
+          {uploading ? (
+            <Loader2 size={24} className="text-primary-500 animate-spin" />
+          ) : (
+            <>
+              <UploadCloud size={28} className={dragging ? 'text-primary-500' : 'text-slate-300'} />
+              <p className="text-sm font-medium text-slate-500">
+                {dragging ? 'Drop image here' : 'Click or drag & drop to upload'}
+              </p>
+              <p className="text-xs text-slate-400">PNG, JPG, WEBP — max 5 MB</p>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Also allow URL paste */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 h-px bg-slate-100" />
+        <span className="text-xs text-slate-400">or paste URL</span>
+        <div className="flex-1 h-px bg-slate-100" />
+      </div>
+      <input
+        value={value?.startsWith('data:') ? '' : (value || '')}
+        onChange={e => { setError(''); onChange(e.target.value); }}
+        placeholder="https://example.com/image.jpg"
+        className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+      />
+
+      {error && <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{error}</p>}
+
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleChange} />
+    </div>
+  );
+};
+
 // ── Blog post editor modal ────────────────────────────────────────────────────
 const BlogModal = ({ post, onClose, onSave }) => {
   const isNew = !post?._id;
@@ -19,7 +115,15 @@ const BlogModal = ({ post, onClose, onSave }) => {
     title: '', slug: '', content: '', excerpt: '', featuredImage: '',
     author: 'EloviaLove Team', tags: '', metaTitle: '', metaDescription: '', isPublished: false,
   };
-  const [form, setForm]   = useState(post ? { ...post, tags: (post.tags || []).join(', ') } : blank);
+  const [form, setForm]   = useState(post ? {
+    ...post,
+    tags:            (post.tags || []).join(', '),
+    metaTitle:       post.metaTitle       || '',
+    metaDescription: post.metaDescription || '',
+    excerpt:         post.excerpt         || '',
+    featuredImage:   post.featuredImage   || '',
+    author:          post.author          || 'EloviaLove Team',
+  } : blank);
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState('');
   const [tab, setTab]       = useState('content'); // content | seo | settings
@@ -136,17 +240,12 @@ const BlogModal = ({ post, onClose, onSave }) => {
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-500 mb-1 block">
-                  <Image size={12} className="inline mr-1" />Featured Image URL
+                  <Image size={12} className="inline mr-1" />Featured Image
                 </label>
-                <input
+                <ImageUploader
                   value={form.featuredImage}
-                  onChange={e => set('featuredImage', e.target.value)}
-                  placeholder="https://... or leave blank"
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                  onChange={v => set('featuredImage', v)}
                 />
-                {form.featuredImage && (
-                  <img src={form.featuredImage} alt="preview" className="mt-2 h-24 rounded-xl object-cover border border-slate-200" />
-                )}
               </div>
             </>
           )}
@@ -180,7 +279,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
                   placeholder="SEO title shown in Google results"
                   className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
                 />
-                <p className="text-xs text-slate-400 mt-1">{form.metaTitle.length}/60 characters</p>
+                <p className="text-xs text-slate-400 mt-1">{(form.metaTitle || '').length}/60 characters</p>
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-500 mb-1 block">
@@ -194,7 +293,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
                   placeholder="Compelling description shown in Google search results..."
                   className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 resize-none"
                 />
-                <p className="text-xs text-slate-400 mt-1">{form.metaDescription.length}/160 characters</p>
+                <p className="text-xs text-slate-400 mt-1">{(form.metaDescription || '').length}/160 characters</p>
               </div>
               {/* Google preview */}
               <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
@@ -276,11 +375,12 @@ const BlogModal = ({ post, onClose, onSave }) => {
 
 // ── Main admin blog page ──────────────────────────────────────────────────────
 const AdminBlog = () => {
-  const [posts, setPosts]     = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [modal, setModal]     = useState(null);
+  const [posts, setPosts]       = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [modal, setModal]       = useState(null);
+  const [loadingEdit, setLoadingEdit] = useState(false);
   const [deleting, setDeleting] = useState(null);
-  const [search, setSearch]   = useState('');
+  const [search, setSearch]     = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -292,6 +392,19 @@ const AdminBlog = () => {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // Fetch full post data before opening edit modal
+  const openEdit = async (post) => {
+    setLoadingEdit(post._id);
+    try {
+      const r = await api.get(`/blog/admin/${post._id}`);
+      setModal(r.data.post);
+    } catch (e) {
+      alert('Failed to load post for editing');
+    } finally {
+      setLoadingEdit(null);
+    }
+  };
 
   const handleDelete = async (post) => {
     if (!window.confirm(`Delete "${post.title}"? This cannot be undone.`)) return;
@@ -407,8 +520,15 @@ const AdminBlog = () => {
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
-                        <button onClick={() => setModal(post)} className="p-1.5 text-slate-400 hover:text-primary-600 transition-colors">
-                          <Pencil size={14} />
+                        <button
+                          onClick={() => openEdit(post)}
+                          disabled={loadingEdit === post._id}
+                          className="p-1.5 text-slate-400 hover:text-primary-600 transition-colors"
+                        >
+                          {loadingEdit === post._id
+                            ? <Loader2 size={14} className="animate-spin text-primary-400" />
+                            : <Pencil size={14} />
+                          }
                         </button>
                         <a href={`/blog/${post.slug}`} target="_blank" rel="noreferrer" className="p-1.5 text-slate-400 hover:text-green-600 transition-colors">
                           <Eye size={14} />
