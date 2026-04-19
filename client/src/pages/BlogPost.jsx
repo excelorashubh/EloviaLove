@@ -120,11 +120,11 @@ const BlogPost = () => {
 
       {/* Featured image */}
       {post.featuredImage && (
-        <div className="w-full bg-slate-200">
+        <div className="w-full bg-slate-100" style={{ aspectRatio: '4 / 1' }}>
           <img
             src={post.featuredImage}
             alt={post.title}
-            className="w-full max-h-[480px] object-cover object-center block"
+            className="w-full h-full object-contain object-center block"
           />
         </div>
       )}
