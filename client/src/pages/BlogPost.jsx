@@ -120,8 +120,12 @@ const BlogPost = () => {
 
       {/* Featured image */}
       {post.featuredImage && (
-        <div className="w-full max-h-[420px] overflow-hidden bg-slate-200">
-          <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover" />
+        <div className="w-full bg-slate-200">
+          <img
+            src={post.featuredImage}
+            alt={post.title}
+            className="w-full max-h-[480px] object-cover object-center block"
+          />
         </div>
       )}
 
