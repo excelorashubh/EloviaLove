@@ -67,6 +67,22 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/subscription', require('./routes/subscription'));
 app.use('/api/verify', require('./routes/verify'));
 app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/blog',     require('./routes/blog'));
+
+// robots.txt
+app.get('/robots.txt', (_req, res) => {
+  const base = process.env.CLIENT_URL || 'http://localhost:5173';
+  res.type('text/plain').send(
+`User-agent: *
+Allow: /
+Allow: /blog
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api/
+
+Sitemap: ${base}/api/blog/sitemap/xml`
+  );
+});
 
 // Socket.io for real-time chat
 io.on('connection', (socket) => {

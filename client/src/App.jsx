@@ -30,6 +30,9 @@ import AdminRevenue from './pages/admin/AdminRevenue';
 import AdminVisitors from './pages/admin/AdminVisitors';
 import AdminAds from './pages/admin/AdminAds';
 import AdminPlans from './pages/admin/AdminPlans';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
+import AdminBlog from './pages/admin/AdminBlog';
 
 import api from './services/api';
 import CookieConsent from './components/CookieConsent';
@@ -81,6 +84,7 @@ function App() {
           <Route path="/admin/visitors"  element={<AdminRoute><AdminVisitors /></AdminRoute>} />
           <Route path="/admin/ads"      element={<AdminRoute><AdminAds /></AdminRoute>} />
           <Route path="/admin/plans"    element={<AdminRoute><AdminPlans /></AdminRoute>} />
+          <Route path="/admin/blog"     element={<AdminRoute><AdminBlog /></AdminRoute>} />
 
           {/* Public & user routes with Navbar + Footer */}
           <Route path="/" element={<MainLayout showNav><Home /></MainLayout>} />
@@ -89,6 +93,8 @@ function App() {
           <Route path="/login" element={<MainLayout showNav><GuestRoute><Login /></GuestRoute></MainLayout>} />
           <Route path="/signup" element={<MainLayout showNav><GuestRoute><Signup /></GuestRoute></MainLayout>} />
           <Route path="/pricing" element={<MainLayout showNav><Pricing /></MainLayout>} />
+          <Route path="/blog" element={<MainLayout showNav><Blog /></MainLayout>} />
+          <Route path="/blog/:slug" element={<MainLayout showNav><BlogPost /></MainLayout>} />
           <Route path="/dashboard" element={<MainLayout><ProtectedRoute><Dashboard /></ProtectedRoute></MainLayout>} />
           <Route path="/discover" element={<MainLayout><ProtectedRoute><Discover /></ProtectedRoute></MainLayout>} />
           <Route path="/matches" element={<MainLayout><ProtectedRoute><Matches /></ProtectedRoute></MainLayout>} />
