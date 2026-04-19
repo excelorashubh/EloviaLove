@@ -114,6 +114,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
   const blank = {
     title: '', slug: '', content: '', excerpt: '', featuredImage: '',
     author: 'EloviaLove Team', tags: '', metaTitle: '', metaDescription: '', isPublished: false,
+    faqs: [],
   };
   const [form, setForm]   = useState(post ? {
     ...post,
@@ -123,6 +124,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
     excerpt:         post.excerpt         || '',
     featuredImage:   post.featuredImage   || '',
     author:          post.author          || 'EloviaLove Team',
+    faqs:            post.faqs            || [],
   } : blank);
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState('');
@@ -349,6 +351,61 @@ const BlogModal = ({ post, onClose, onSave }) => {
                 >
                   <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${form.isPublished ? 'translate-x-7' : 'translate-x-1'}`} />
                 </div>
+              </div>
+
+              {/* FAQ Editor */}
+              <div className="border border-slate-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-700">FAQ Section</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Adds FAQ rich results in Google search</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => set('faqs', [...(form.faqs || []), { question: '', answer: '' }])}
+                    className="flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-semibold"
+                  >
+                    <Plus size={12} /> Add FAQ
+                  </button>
+                </div>
+                {(form.faqs || []).length === 0 && (
+                  <p className="text-xs text-slate-400 text-center py-2">No FAQs yet — click "Add FAQ"</p>
+                )}
+                {(form.faqs || []).map((faq, i) => (
+                  <div key={i} className="space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">FAQ {i + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => set('faqs', form.faqs.filter((_, idx) => idx !== i))}
+                        className="p-0.5 text-slate-300 hover:text-red-500 transition-colors"
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                    <input
+                      value={faq.question}
+                      onChange={e => {
+                        const updated = [...form.faqs];
+                        updated[i] = { ...updated[i], question: e.target.value };
+                        set('faqs', updated);
+                      }}
+                      placeholder="Question (e.g. Why am I not getting matches?)"
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary-400"
+                    />
+                    <textarea
+                      value={faq.answer}
+                      onChange={e => {
+                        const updated = [...form.faqs];
+                        updated[i] = { ...updated[i], answer: e.target.value };
+                        set('faqs', updated);
+                      }}
+                      rows={2}
+                      placeholder="Answer..."
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary-400 resize-none"
+                    />
+                  </div>
+                ))}
               </div>
             </>
           )}

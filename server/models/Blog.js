@@ -13,6 +13,10 @@ const blogSchema = new mongoose.Schema({
   isPublished:     { type: Boolean, default: false },
   publishedAt:     { type: Date },
   views:           { type: Number, default: 0 },
+  faqs: [{
+    question: { type: String, required: true },
+    answer:   { type: String, required: true },
+  }],
 }, { timestamps: true });
 
 // Auto-set publishedAt when first published

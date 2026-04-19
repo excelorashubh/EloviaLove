@@ -135,4 +135,14 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+// Keep-alive ping — prevents Render free tier from sleeping
+if (process.env.NODE_ENV === 'production') {
+  const https = require('https');
+  setInterval(() => {
+    https.get('https://elovialove.onrender.com/api/blog?limit=1', (res) => {
+      console.log(`Keep-alive ping: ${res.statusCode}`);
+    }).on('error', () => {});
+  }, 14 * 60 * 1000); // every 14 minutes
+}
+
 module.exports = { app, server, io };

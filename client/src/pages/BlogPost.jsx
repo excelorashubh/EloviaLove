@@ -4,15 +4,16 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Calendar, Eye, Tag, ArrowLeft, ArrowRight, Heart, Share2, Loader2, Clock } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
+import FAQAccordion from '../components/FAQAccordion';
 import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
 
 const BASE_URL = 'https://elovialove.onrender.com';
 
-const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+const formatDate = (d) =>
+  new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
-// ── Reading time ──────────────────────────────────────────────────────────────
 function readingTime(content) {
   const words = (content || '').replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
@@ -20,7 +21,10 @@ function readingTime(content) {
 
 // ── Related post card ─────────────────────────────────────────────────────────
 const RelatedCard = ({ post }) => (
-  <Link to={`/blog/${post.slug}`} className="group flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition-all">
+  <Link
+    to={`/blog/${post.slug}`}
+    className="group flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition-all"
+  >
     <div className="aspect-video bg-primary-50 overflow-hidden">
       {post.featuredImage
         ? <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
@@ -36,8 +40,8 @@ const RelatedCard = ({ post }) => (
 
 // ── Main component ────────────────────────────────────────────────────────────
 const BlogPost = () => {
-  const { slug } = useParams();
-  const navigate = useNavigate();
+  const { slug }    = useParams();
+  const navigate    = useNavigate();
   const [post, setPost]         = useState(null);
   const [related, setRelated]   = useState([]);
   const [loading, setLoading]   = useState(true);
@@ -66,33 +70,62 @@ const BlogPost = () => {
     }
   };
 
-  // ── SEO meta via Helmet ───────────────────────────────────────────────────
+  // ── Derived SEO values ────────────────────────────────────────────────────
   const pageTitle       = post ? `${post.metaTitle || post.title} — EloviaLove` : 'EloviaLove Blog';
   const pageDescription = post?.metaDescription || post?.excerpt || 'Read love and relationship advice on EloviaLove.';
   const pageImage       = post?.featuredImage || `${BASE_URL}/EloviaLoveWB.png`;
   const pageUrl         = `${BASE_URL}/blog/${slug}`;
   const mins            = post ? readingTime(post.content) : 0;
+  const wordCount       = post ? (post.content || '').replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length : 0;
 
-  // JSON-LD structured data
-  const jsonLd = post ? {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline:        post.title,
-    description:     post.excerpt || post.metaDescription || '',
-    image:           pageImage,
-    author:          { '@type': 'Person', name: post.author || 'EloviaLove Team' },
-    publisher: {
-      '@type':  'Organization',
-      name:     'EloviaLove',
-      logo:     { '@type': 'ImageObject', url: `${BASE_URL}/EloviaLoveWB.png` },
-    },
-    datePublished:   post.publishedAt,
-    dateModified:    post.updatedAt,
-    mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
-    keywords:        (post.tags || []).join(', '),
-    timeRequired:    `PT${mins}M`,
-  } : null;
+  // ── @graph JSON-LD — combines BlogPosting + FAQPage in one script ─────────
+  const buildJsonLd = () => {
+    if (!post) return null;
 
+    const blogPosting = {
+      '@type':    'BlogPosting',
+      '@id':      `${pageUrl}#article`,
+      headline:   post.title,
+      description: post.excerpt || post.metaDescription || '',
+      image:      pageImage,
+      author:     { '@type': 'Person', name: post.author || 'EloviaLove Team' },
+      publisher: {
+        '@type': 'Organization',
+        name:    'EloviaLove',
+        logo:    { '@type': 'ImageObject', url: `${BASE_URL}/EloviaLoveWB.png` },
+      },
+      datePublished:    post.publishedAt,
+      dateModified:     post.updatedAt,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
+      keywords:         (post.tags || []).join(', '),
+      timeRequired:     `PT${mins}M`,
+      wordCount,
+      inLanguage:       'en-IN',
+      isPartOf:         { '@type': 'Blog', name: 'EloviaLove Blog', url: `${BASE_URL}/blog` },
+    };
+
+    const graph = [blogPosting];
+
+    // Add FAQPage only if post has faqs
+    const faqs = post.faqs || [];
+    if (faqs.length > 0) {
+      graph.push({
+        '@type': 'FAQPage',
+        '@id':   `${pageUrl}#faq`,
+        mainEntity: faqs.map(f => ({
+          '@type': 'Question',
+          name:    f.question,
+          acceptedAnswer: { '@type': 'Answer', text: f.answer },
+        })),
+      });
+    }
+
+    return { '@context': 'https://schema.org', '@graph': graph };
+  };
+
+  const jsonLd = buildJsonLd();
+
+  // ── Loading state ─────────────────────────────────────────────────────────
   if (loading) return (
     <>
       <Helmet><title>Loading... — EloviaLove</title></Helmet>
@@ -152,7 +185,7 @@ const BlogPost = () => {
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image"       content={pageImage} />
 
-        {/* JSON-LD */}
+        {/* Single @graph JSON-LD — BlogPosting + FAQPage combined */}
         {jsonLd && (
           <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         )}
@@ -175,14 +208,17 @@ const BlogPost = () => {
         <div className="max-w-6xl mx-auto px-4 py-10">
           <div className="flex flex-col lg:flex-row gap-10">
 
-            {/* ── Main content ── */}
+            {/* ── Main article ── */}
             <motion.article
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               className="flex-1 min-w-0"
             >
               {/* Back */}
-              <button onClick={() => navigate('/blog')} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary-600 mb-6 transition-colors">
+              <button
+                onClick={() => navigate('/blog')}
+                className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary-600 mb-6 transition-colors"
+              >
                 <ArrowLeft size={16} /> All Articles
               </button>
 
@@ -190,7 +226,11 @@ const BlogPost = () => {
               {post.tags?.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-4">
                   {post.tags.map(t => (
-                    <Link key={t} to={`/blog?tag=${t}`} className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-primary-50 text-primary-600 rounded-full hover:bg-primary-100 transition-colors">
+                    <Link
+                      key={t}
+                      to={`/blog?tag=${t}`}
+                      className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-primary-50 text-primary-600 rounded-full hover:bg-primary-100 transition-colors"
+                    >
                       <Tag size={10} /> {t}
                     </Link>
                   ))}
@@ -204,7 +244,6 @@ const BlogPost = () => {
 
               {/* Author + meta bar */}
               <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400 mb-8 pb-6 border-b border-slate-100">
-                {/* Author */}
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
                     {post.author?.[0]?.toUpperCase()}
@@ -240,6 +279,9 @@ const BlogPost = () => {
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
 
+              {/* FAQ Accordion — shown only if post has FAQs */}
+              <FAQAccordion faqs={post.faqs} />
+
               {/* Ad */}
               <div className="my-10 flex justify-center">
                 <AdWrapper showUpgradeNudge><BannerAd slot="1122334455" /></AdWrapper>
@@ -260,7 +302,7 @@ const BlogPost = () => {
                 </Link>
               </div>
 
-              {/* Keep Reading — bottom related posts */}
+              {/* Keep Reading */}
               {related.length > 0 && (
                 <div className="mt-12">
                   <h2 className="text-xl font-bold text-slate-900 mb-5">Keep Reading</h2>
@@ -274,7 +316,6 @@ const BlogPost = () => {
             {/* ── Sidebar ── */}
             <aside className="lg:w-72 shrink-0 space-y-6">
 
-              {/* Related posts sidebar */}
               {related.length > 0 && (
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
                   <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wide">Related Articles</h3>
@@ -297,7 +338,6 @@ const BlogPost = () => {
                 </div>
               )}
 
-              {/* Tags cloud */}
               {post.tags?.length > 0 && (
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
                   <h3 className="font-bold text-slate-900 mb-3 text-sm uppercase tracking-wide">Topics</h3>
@@ -311,7 +351,6 @@ const BlogPost = () => {
                 </div>
               )}
 
-              {/* Sticky CTA */}
               <div className="bg-gradient-to-br from-primary-50 to-pink-50 border border-primary-100 rounded-2xl p-5 text-center sticky top-6">
                 <Heart size={28} className="text-primary-500 mx-auto mb-2" />
                 <p className="font-bold text-slate-900 text-sm mb-1">Find Love on EloviaLove</p>
