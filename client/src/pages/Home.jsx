@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Heart, Star, Shield, Zap, MessageCircle, MapPin, Users, HeartHandshake, Quote } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import BannerAd from '../components/ads/BannerAd';
@@ -23,6 +24,15 @@ const staggerContainer = {
 
 const Home = () => {
   return (
+    <>
+      <Helmet>
+        <title>Elovia Love — Verified Dating App for Real Connections in India</title>
+        <meta name="description" content="Elovia Love is India's verified dating platform for serious relationships. No fake profiles. Real connections. Start your free trial today." />
+        <link rel="canonical" href="https://elovialove.onrender.com/" />
+        <meta property="og:title" content="Elovia Love — Verified Dating App for Real Connections in India" />
+        <meta property="og:description" content="India's verified dating platform. No fake profiles. Real connections." />
+        <meta property="og:url" content="https://elovialove.onrender.com/" />
+      </Helmet>
     <div className="overflow-hidden">
       <Navbar />
       {/* Hero Section */}
@@ -52,7 +62,9 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8"
           >
-            Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-pink-500">Perfect Match</span> Today
+            <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-0">
+              Find Real Love on <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-pink-500">Elovia Love</span> — India's Verified Dating App
+            </h1>
           </motion.h1>
 
           <motion.p 
@@ -299,6 +311,7 @@ const Home = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 
