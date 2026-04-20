@@ -292,13 +292,13 @@ const BlogPost = () => {
                 <Heart size={36} className="mx-auto mb-3 fill-white/30" />
                 <h3 className="text-2xl font-extrabold mb-2">Ready to Find Your Person?</h3>
                 <p className="text-white/80 mb-5 text-sm max-w-sm mx-auto">
-                  Join thousands of Indians finding real love on EloviaLove. Start your free trial today.
+                  Join thousands of Indians finding real love on Elovia Love. Start your free trial today.
                 </p>
                 <Link
                   to="/signup"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary-600 font-bold rounded-2xl hover:bg-primary-50 transition-colors text-sm"
                 >
-                  Start Free Trial <ArrowRight size={16} />
+                  Join Elovia Love Free <ArrowRight size={16} />
                 </Link>
               </div>
 
@@ -353,10 +353,10 @@ const BlogPost = () => {
 
               <div className="bg-gradient-to-br from-primary-50 to-pink-50 border border-primary-100 rounded-2xl p-5 text-center sticky top-6">
                 <Heart size={28} className="text-primary-500 mx-auto mb-2" />
-                <p className="font-bold text-slate-900 text-sm mb-1">Find Love on EloviaLove</p>
+                <p className="font-bold text-slate-900 text-sm mb-1">Find Love on Elovia Love</p>
                 <p className="text-xs text-slate-500 mb-3">10 days free premium trial</p>
                 <Link to="/signup" className="block w-full py-2.5 bg-gradient-to-r from-primary-600 to-pink-500 text-white text-sm font-bold rounded-xl hover:shadow-md transition-all">
-                  Join Free →
+                  Join Elovia Love Free →
                 </Link>
               </div>
             </aside>
