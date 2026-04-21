@@ -77,41 +77,6 @@ router.get('/:slug', async (req, res) => {
   }
 });
 
-// ── PUBLIC: GET /api/blog/sitemap/xml — sitemap for SEO ──────────────────────
-router.get('/sitemap/xml', async (_req, res) => {
-  try {
-    const posts = await Blog.find({ isPublished: true }).select('slug updatedAt');
-    const base  = process.env.CLIENT_URL || 'http://localhost:5173';
-
-    const urls = posts.map(p => `
-  <url>
-    <loc>${base}/blog/${p.slug}</loc>
-    <lastmod>${new Date(p.updatedAt).toISOString().split('T')[0]}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`).join('');
-
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${base}/</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${base}/blog</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>${urls}
-</urlset>`;
-
-    res.header('Content-Type', 'application/xml');
-    res.send(xml);
-  } catch (err) {
-    res.status(500).send('Sitemap generation failed');
-  }
-});
-
 // ── ADMIN: GET /api/blog/admin/all — all posts (published + drafts) ───────────
 router.get('/admin/all', protect, isAdmin, async (req, res) => {
   try {
