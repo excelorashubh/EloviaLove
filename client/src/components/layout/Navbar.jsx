@@ -49,7 +49,7 @@ const Navbar = () => {
               <img src={EloviaLoveWB} className='w-10' />
             </div>
             <span className={`text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-primary-600 to-pink-600`}>
-              EloviaLove
+              Elovia Love
             </span>
           </Link>
 

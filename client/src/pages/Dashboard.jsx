@@ -221,7 +221,7 @@ const Dashboard = () => {
                 <Heart size={22} fill="currentColor" />
               </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-pink-600">
-                EloviaLove
+                Elovia Love
               </span>
             </Link>
             </div>

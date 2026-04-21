@@ -97,14 +97,14 @@ const Blog = () => {
 
   // Update document title for SEO — handled by Helmet below
   const pageTitle = q
-    ? `"${q}" — EloviaLove Blog`
+    ? `"${q}" — Elovia Love Blog`
     : tag
-      ? `#${tag} — EloviaLove Blog`
-      : 'Love & Relationship Advice Blog — EloviaLove';
+      ? `#${tag} — Elovia Love Blog`
+      : 'Love & Relationship Advice Blog — Elovia Love';
 
   const pageDesc = q || tag
-    ? `Browse EloviaLove blog articles about ${q || tag} — love, dating, and relationship advice for Indians.`
-    : 'Read expert love and relationship advice on EloviaLove. Dating tips, heartbreak recovery, and self-growth for young Indians.';
+    ? `Browse Elovia Love blog articles about ${q || tag} — love, dating, and relationship advice for Indians.`
+    : 'Read expert love and relationship advice on Elovia Love. Dating tips, heartbreak recovery, and self-growth for young Indians.';
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -143,7 +143,7 @@ const Blog = () => {
               💕 Love & Relationship Advice
             </span>
             <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-              EloviaLove Blog
+              Elovia Love Blog
             </h1>
             <p className="text-white/80 text-lg mb-8">
               Real talk on love, dating, heartbreak & self-growth — for the modern Indian heart.

@@ -141,7 +141,7 @@ const Home = () => {
             variants={fadeIn}
             className="text-center max-w-3xl mx-auto mb-16"
           >
-            <h2 className="text-primary-600 font-semibold tracking-wide uppercase mb-3">Why EloviaLove?</h2>
+            <h2 className="text-primary-600 font-semibold tracking-wide uppercase mb-3">Why Elovia Love?</h2>
             <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Built for meaningful connections</h3>
             <p className="text-lg text-slate-600">We've designed our platform from the ground up to foster real, authentic conversations rather than endless swiping.</p>
           </motion.div>
@@ -232,7 +232,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                text: "I had given up on dating apps until I found EloviaLove. The quality of matches and conversations here is unmatched. We are getting married next month!",
+                text: "I had given up on dating apps until I found Elovia Love. The quality of matches and conversations here is unmatched. We are getting married next month!",
                 author: "Sarah & David",
                 image: "https://images.unsplash.com/photo-1522851259500-2eac44e7cde2?w=500&auto=format&fit=crop"
               },
@@ -295,7 +295,7 @@ const Home = () => {
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 transform -translate-x-1/2 translate-y-1/2"></div>
             
             <div className="relative z-10">
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Ready to find your Elovia?</h2>
+              <h2 className="text-3xl font-extrabold text-white mb-6">Ready to find your Elovia Love?</h2>
               <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10">
                 Join thousands of singles who are taking the stress out of dating and focusing on real connections.
               </p>

@@ -107,7 +107,7 @@ const Signup = () => {
             <Link to="/" className="inline-flex items-center justify-center p-3 bg-gradient-to-tr from-primary-500 to-pink-500 rounded-2xl mb-4 group hover:rotate-12 transition-transform duration-300 shadow-xl shadow-pink-500/25">
               <Heart size={32} className="text-white" fill="currentColor" />
             </Link>
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Join EloviaLove</h2>
+            <h2 className="text-3xl font-extrabold text-slate-900 mb-6">Join Elovia Love</h2>
             <p className="mt-2 text-sm text-slate-600 font-medium">
               Your journey to finding true connection starts here.
             </p>

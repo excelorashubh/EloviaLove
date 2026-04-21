@@ -34,7 +34,7 @@ const About = () => {
               Redefining <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-600 to-pink-500">Love</span> in the Digital Age
             </h1>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              We started EloviaLove with a simple belief: finding love shouldn't be exhausting. It should be exciting, authentic, and safe.
+              We started Elovia Love with a simple belief: finding love shouldn't be exhausting. It should be exciting, authentic, and safe.
             </p>
           </motion.div>
         </div>
@@ -104,7 +104,7 @@ const About = () => {
             variants={fadeIn}
             className="mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Why Choose EloviaLove</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Why Choose Elovia Love</h2>
             <p className="text-lg text-slate-600">The thoughtful approach to digital dating.</p>
           </motion.div>
 

@@ -71,8 +71,8 @@ const BlogPost = () => {
   };
 
   // ── Derived SEO values ────────────────────────────────────────────────────
-  const pageTitle       = post ? `${post.metaTitle || post.title} — EloviaLove` : 'EloviaLove Blog';
-  const pageDescription = post?.metaDescription || post?.excerpt || 'Read love and relationship advice on EloviaLove.';
+  const pageTitle = post ? `${post.metaTitle || post.title} — Elovia Love` : 'Elovia Love Blog';
+  const pageDescription = post?.metaDescription || post?.excerpt || 'Read love and relationship advice on Elovia Love.';
   const pageImage       = post?.featuredImage || `${BASE_URL}/EloviaLoveWB.png`;
   const pageUrl         = `${BASE_URL}/blog/${slug}`;
   const mins            = post ? readingTime(post.content) : 0;
@@ -128,7 +128,7 @@ const BlogPost = () => {
   // ── Loading state ─────────────────────────────────────────────────────────
   if (loading) return (
     <>
-      <Helmet><title>Loading... — EloviaLove</title></Helmet>
+      <Helmet><title>Loading... — Elovia Love</title></Helmet>
       <div className="min-h-screen bg-slate-50">
         <Navbar />
         <div className="flex justify-center items-center py-32">
@@ -141,7 +141,7 @@ const BlogPost = () => {
   if (notFound) return (
     <>
       <Helmet>
-        <title>Post Not Found — EloviaLove</title>
+        <title>Post Not Found — Elovia Love</title>
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
@@ -173,7 +173,7 @@ const BlogPost = () => {
         <meta property="og:description" content={pageDescription} />
         <meta property="og:url"         content={pageUrl} />
         <meta property="og:image"       content={pageImage} />
-        <meta property="og:site_name"   content="EloviaLove" />
+        <meta property="og:site_name"   content="Elovia Love" />
         <meta property="og:locale"      content="en_IN" />
         {post.publishedAt && <meta property="article:published_time" content={new Date(post.publishedAt).toISOString()} />}
         {post.updatedAt   && <meta property="article:modified_time"  content={new Date(post.updatedAt).toISOString()} />}
@@ -250,7 +250,7 @@ const BlogPost = () => {
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-slate-700 leading-tight">{post.author}</p>
-                    <p className="text-[10px] text-slate-400">EloviaLove Team</p>
+                    <p className="text-[10px] text-slate-400">Elovia Love Team</p>
                   </div>
                 </div>
                 <span className="flex items-center gap-1"><Calendar size={13} />{formatDate(post.publishedAt)}</span>

@@ -113,7 +113,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
   const isNew = !post?._id;
   const blank = {
     title: '', slug: '', content: '', excerpt: '', featuredImage: '',
-    author: 'EloviaLove Team', tags: '', metaTitle: '', metaDescription: '', isPublished: false,
+    author: 'Elovia Love Team', tags: '', metaTitle: '', metaDescription: '', isPublished: false,
     faqs: [],
   };
   const [form, setForm]   = useState(post ? {
@@ -123,7 +123,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
     metaDescription: post.metaDescription || '',
     excerpt:         post.excerpt         || '',
     featuredImage:   post.featuredImage   || '',
-    author:          post.author          || 'EloviaLove Team',
+    author:          post.author          || 'Elovia Love Team',
     faqs:            post.faqs            || [],
   } : blank);
   const [saving, setSaving] = useState(false);
