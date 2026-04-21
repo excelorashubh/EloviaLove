@@ -96,6 +96,21 @@ const Home = () => {
             </Link>
           </motion.div>
 
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="mt-8 text-center"
+          >
+            <Link
+              to="/blog"
+              className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
+            >
+              <span>Read our relationship advice and online dating tips in India</span>
+              <Heart size={16} />
+            </Link>
+          </motion.div>
+
           {/* User faces pile up mock */}
           <motion.div 
             initial={{ opacity: 0 }}
