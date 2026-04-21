@@ -300,7 +300,7 @@ const Chat = () => {
                 ) : connected ? (
                   <span className="text-green-500 font-medium">Online</span>
                 ) : (
-                  otherUser?.location || 'EloviaLove member'
+                  otherUser?.location || 'Elovia Love member'
                 )}
               </p>
             </div>

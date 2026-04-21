@@ -88,10 +88,10 @@ const BlogPost = () => {
       headline:   post.title,
       description: post.excerpt || post.metaDescription || '',
       image:      pageImage,
-      author:     { '@type': 'Person', name: post.author || 'EloviaLove Team' },
+      author:     { '@type': 'Person', name: post.author || 'Elovia Love Team' },
       publisher: {
         '@type': 'Organization',
-        name:    'EloviaLove',
+        name:    'Elovia Love',
         logo:    { '@type': 'ImageObject', url: `${BASE_URL}/EloviaLoveWB.png` },
       },
       datePublished:    post.publishedAt,
@@ -101,7 +101,7 @@ const BlogPost = () => {
       timeRequired:     `PT${mins}M`,
       wordCount,
       inLanguage:       'en-IN',
-      isPartOf:         { '@type': 'Blog', name: 'EloviaLove Blog', url: `${BASE_URL}/blog` },
+      isPartOf:         { '@type': 'Blog', name: 'Elovia Love Blog', url: `${BASE_URL}/blog` },
     };
 
     const graph = [blogPosting];

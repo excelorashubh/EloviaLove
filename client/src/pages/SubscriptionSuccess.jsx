@@ -14,7 +14,7 @@ const SubscriptionSuccess = () => (
         <Crown size={36} className="text-white" />
       </div>
       <h1 className="text-3xl font-extrabold text-slate-900 mb-2">You're Premium!</h1>
-      <p className="text-slate-500 mb-8">Your subscription is now active. Enjoy all premium features on EloviaLove.</p>
+      <p className="text-slate-500 mb-8">Your subscription is now active. Enjoy all premium features on Elovia Love.</p>
       <div className="space-y-3">
         <Link
           to="/discover"
