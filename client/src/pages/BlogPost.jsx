@@ -19,6 +19,34 @@ function readingTime(content) {
   return Math.max(1, Math.ceil(words / 200));
 }
 
+// ── Internal linking helper ──────────────────────────────────────────────────
+const insertInternalLinks = (content, relatedPosts) => {
+  if (!content || !relatedPosts?.length) return content;
+
+  let linkedContent = content;
+
+  // Define keyword to slug mappings for common topics
+  const linkMappings = {
+    'why you\'re not getting matches': 'why-youre-not-getting-matches',
+    'how to write a dating profile bio': 'how-to-write-a-dating-profile-bio',
+    'best dating apps for serious relationships in india': 'best-dating-apps-for-serious-relationships-in-india',
+    '10 online dating safety tips': '10-online-dating-safety-tips',
+    'signs someone is serious about a relationship': 'signs-someone-is-serious-about-a-relationship',
+    'online dating safety tips': '10-online-dating-safety-tips',
+  };
+
+  // Replace keywords with links if they exist in related posts
+  Object.entries(linkMappings).forEach(([keyword, slug]) => {
+    const relatedPost = relatedPosts.find(p => p.slug === slug);
+    if (relatedPost && linkedContent.toLowerCase().includes(keyword.toLowerCase())) {
+      const regex = new RegExp(`(${keyword})`, 'gi');
+      linkedContent = linkedContent.replace(regex, `<a href="/blog/${slug}" class="text-primary-600 hover:text-primary-700 font-semibold">$1</a>`);
+    }
+  });
+
+  return linkedContent;
+};
+
 // ── Related post card ─────────────────────────────────────────────────────────
 const RelatedCard = ({ post }) => (
   <Link
@@ -119,6 +147,32 @@ const BlogPost = () => {
         })),
       });
     }
+
+    // Add BreadcrumbList
+    graph.push({
+      '@type': 'BreadcrumbList',
+      '@id':   `${pageUrl}#breadcrumb`,
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: BASE_URL,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Blog',
+          item: `${BASE_URL}/blog`,
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: post.title,
+          item: pageUrl,
+        },
+      ],
+    });
 
     return { '@context': 'https://schema.org', '@graph': graph };
   };
@@ -276,7 +330,7 @@ const BlogPost = () => {
                   prose-strong:text-slate-900
                   prose-blockquote:border-primary-400 prose-blockquote:bg-primary-50 prose-blockquote:rounded-r-xl prose-blockquote:py-1
                   prose-img:rounded-2xl prose-img:shadow-md"
-                dangerouslySetInnerHTML={{ __html: post.content }}
+                dangerouslySetInnerHTML={{ __html: insertInternalLinks(post.content, related) }}
               />
 
               {/* FAQ Accordion — shown only if post has FAQs */}

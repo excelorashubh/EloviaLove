@@ -443,7 +443,11 @@ const AdminBlog = () => {
     setLoading(true);
     try {
       const r = await api.get('/blog/admin/all');
-      setPosts(r.data.posts);
+      const postsWithMeta = r.data.posts.map(p => ({
+        ...p,
+        wordCount: (p.content || '').replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length,
+      }));
+      setPosts(postsWithMeta);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   }, []);
@@ -535,18 +539,16 @@ const AdminBlog = () => {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  {['Title', 'Tags', 'Views', 'Date', 'Status', 'Actions'].map(h => (
+                  {['Title', 'Tags', 'Views', 'Words', 'Date', 'Status', 'Actions'].map(h => (
                     <th key={h} className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
-              </thead>
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
-                  <tr><td colSpan={6} className="px-5 py-10 text-center"><Loader2 size={24} className="animate-spin text-primary-400 mx-auto" /></td></tr>
+                  <tr><td colSpan={7} className="px-5 py-10 text-center"><Loader2 size={24} className="animate-spin text-primary-400 mx-auto" /></td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={6} className="px-5 py-10 text-center text-slate-400">No posts found</td></tr>
+                  <tr><td colSpan={7} className="px-5 py-10 text-center text-slate-400">No posts found</td></tr>
                 ) : filtered.map(post => (
                   <tr key={post._id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-3 max-w-[240px]">
@@ -562,6 +564,11 @@ const AdminBlog = () => {
                       </div>
                     </td>
                     <td className="px-5 py-3 text-slate-500">{post.views || 0}</td>
+                    <td className="px-5 py-3 text-slate-500">
+                      <span className={`text-xs ${post.wordCount < 1200 ? 'text-amber-600 font-semibold' : 'text-green-600'}`}>
+                        {post.wordCount}
+                      </span>
+                    </td>
                     <td className="px-5 py-3 text-slate-500 whitespace-nowrap">{formatDate(post.publishedAt || post.createdAt)}</td>
                     <td className="px-5 py-3">
                       <button

@@ -32,6 +32,7 @@ import AdminAds from './pages/admin/AdminAds';
 import AdminPlans from './pages/admin/AdminPlans';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
+import DatingTips from './pages/DatingTips';
 import AdminBlog from './pages/admin/AdminBlog';
 
 import api from './services/api';
@@ -94,6 +95,7 @@ function App() {
           <Route path="/signup" element={<MainLayout showNav><GuestRoute><Signup /></GuestRoute></MainLayout>} />
           <Route path="/pricing" element={<MainLayout showNav><Pricing /></MainLayout>} />
           <Route path="/blog" element={<MainLayout showNav><Blog /></MainLayout>} />
+          <Route path="/blog/dating-tips" element={<MainLayout showNav><DatingTips /></MainLayout>} />
           <Route path="/blog/:slug" element={<MainLayout showNav><BlogPost /></MainLayout>} />
           <Route path="/dashboard" element={<MainLayout><ProtectedRoute><Dashboard /></ProtectedRoute></MainLayout>} />
           <Route path="/discover" element={<MainLayout><ProtectedRoute><Discover /></ProtectedRoute></MainLayout>} />
