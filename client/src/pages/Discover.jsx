@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import {
   Heart, X, MapPin, SlidersHorizontal, Zap, RotateCcw, BadgeCheck,
@@ -634,6 +635,11 @@ const Discover = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-pink-50 pt-6 pb-10">
+      <Helmet>
+        <title>Discover Matches — Elovia Love Verified Dating</title>
+        <meta name="description" content="Explore verified profiles, discover compatible singles, and find meaningful matches on Elovia Love." />
+        <link rel="canonical" href="https://elovialove.com/discover" />
+      </Helmet>
       {/* Header */}
       <div className="max-w-md mx-auto px-4 mb-6">
         <div className="flex items-center justify-between">

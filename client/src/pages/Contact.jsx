@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
@@ -10,9 +11,14 @@ const fadeIn = {
 
 const Contact = () => {
   return (
-    <div className="pt-24 pb-12 min-h-screen bg-slate-50 relative overflow-hidden">
-
-      <Navbar />
+    <>
+      <Helmet>
+        <title>Contact Elovia Love — Get Help with Your Dating Journey</title>
+        <meta name="description" content="Contact Elovia Love for support, questions about verified dating, safety, or membership options." />
+        <link rel="canonical" href="https://elovialove.com/contact" />
+      </Helmet>
+      <div className="pt-24 pb-12 min-h-screen bg-slate-50 relative overflow-hidden">
+        <Navbar />
 
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-y-1/2 translate-x-1/4" />
@@ -143,6 +149,7 @@ const Contact = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

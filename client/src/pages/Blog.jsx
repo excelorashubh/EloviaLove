@@ -167,6 +167,29 @@ const Blog = () => {
         </div>
       </section>
 
+      <section className="bg-white py-14">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">Helpful Guides for Indian Singles</h2>
+          <p className="text-slate-600 mb-6 text-lg">
+            Our blog publishes practical advice on dating safety, verified profiles, relationship communication, and building confidence — all written for singles in India.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+            <div className="rounded-3xl border border-slate-200 p-6 bg-slate-50">
+              <h3 className="font-semibold text-slate-900 mb-3">Match smarter</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">Learn how to create a trusted profile, spot fake accounts, and start conversations that lead to real relationships.</p>
+            </div>
+            <div className="rounded-3xl border border-slate-200 p-6 bg-slate-50">
+              <h3 className="font-semibold text-slate-900 mb-3">Stay safe</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">Read our guides on online dating security, verified profiles, scam prevention, and protecting your privacy.</p>
+            </div>
+            <div className="rounded-3xl border border-slate-200 p-6 bg-slate-50">
+              <h3 className="font-semibold text-slate-900 mb-3">Find real love</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">This is your trusted space for long-term relationship advice, dating mindset, and building a better romantic future.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div className="max-w-6xl mx-auto px-4 py-10">
         {/* Active filters */}
         {(q || tag) && (

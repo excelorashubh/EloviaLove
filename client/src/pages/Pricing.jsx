@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap, Crown, Star, Sparkles, ArrowLeft, X, ShieldCheck, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -314,6 +315,11 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50 pb-16">
+      <Helmet>
+        <title>Elovia Love Pricing — Verified Dating Plans for Serious Singles</title>
+        <meta name="description" content="Compare Elovia Love plans and choose the subscription that helps you meet verified singles and build meaningful relationships." />
+        <link rel="canonical" href="https://elovialove.com/pricing" />
+      </Helmet>
       <div className="max-w-5xl mx-auto px-4 pt-8 pb-4">
 
         {/* Back */}

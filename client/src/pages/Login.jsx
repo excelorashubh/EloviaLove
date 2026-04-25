@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Heart, EyeOff, Eye } from 'lucide-react';
@@ -34,6 +35,11 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      <Helmet>
+        <title>Login to Elovia Love — Secure Dating for Serious Relationships</title>
+        <meta name="description" content="Access your Elovia Love account and continue building trusted connections with verified singles in India." />
+        <link rel="canonical" href="https://elovialove.com/login" />
+      </Helmet>
       {/* Background Decor */}
       <div className="absolute top-1/2 left-1/2 w-200 h-200 bg-linear-to-tr from-primary-200 to-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-x-1/2 -translate-y-1/2" />
       

@@ -114,7 +114,7 @@ const BlogPost = () => {
   };
 
   // ── Derived SEO values ────────────────────────────────────────────────────
-  const pageTitle = post ? `${post.metaTitle || post.title} — Elovia Love` : 'Elovia Love Blog';
+  const pageTitle = post ? `${post.metaTitle || `${post.title} | Elovia Love`}` : 'Elovia Love Blog';
   const pageDescription = post?.metaDescription || post?.excerpt || 'Read love and relationship advice on Elovia Love.';
   const pageImage       = post?.featuredImage || `${BASE_URL}/EloviaLoveWB.png`;
   const pageUrl         = `${BASE_URL}/blog/${slug}`;
@@ -323,6 +323,9 @@ const BlogPost = () => {
                   </div>
                 </div>
                 <span className="flex items-center gap-1"><Calendar size={13} />{formatDate(post.publishedAt)}</span>
+                {post.updatedAt && (
+                  <span className="flex items-center gap-1"><Calendar size={13} /> Updated {formatDate(post.updatedAt)}</span>
+                )}
                 <span className="flex items-center gap-1"><Clock size={13} />{mins} min read</span>
                 <span className="flex items-center gap-1"><Eye size={13} />{post.views} views</span>
                 <button
@@ -347,6 +350,13 @@ const BlogPost = () => {
                   prose-img:rounded-2xl prose-img:shadow-md"
                 dangerouslySetInnerHTML={{ __html: insertInternalLinks(post.content, related) }}
               />
+
+              <div className="mt-10 rounded-3xl border border-slate-200 bg-slate-50 p-6">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500 mb-3">Editorial Note</p>
+                <p className="text-slate-700 leading-relaxed">
+                  This guide is written for Indian singles who want safe, verified dating advice, honest profile guidance, and practical steps to build stronger, more meaningful relationships.
+                </p>
+              </div>
 
               {/* FAQ Accordion — shown only if post has FAQs */}
               <FAQAccordion faqs={post.faqs} />

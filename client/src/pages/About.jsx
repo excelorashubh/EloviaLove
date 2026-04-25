@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Target, Heart, Shield, Users, Globe, ArrowRight } from 'lucide-react';
@@ -15,10 +16,15 @@ const fadeIn = {
 
 const About = () => {
   return (
-    <div className=" pb-12 overflow-hidden bg-slate-50">
-      
+    <>
+      <Helmet>
+        <title>About Elovia Love — Verified Dating App for Real Connections in India</title>
+        <meta name="description" content="Learn about Elovia Love's mission to create a safer, verified dating platform for serious relationships in India." />
+        <link rel="canonical" href="https://elovialove.com/about" />
+      </Helmet>
+      <div className=" pb-12 overflow-hidden bg-slate-50">
         <Navbar />
-     
+      
       {/* Hero Header */}
       <section className="relative py-20 lg:py-32">
         <div className="absolute top-0 right-0 w-125 h-125 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2" />
@@ -206,6 +212,7 @@ const About = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 
