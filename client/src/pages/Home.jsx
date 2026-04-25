@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Heart, Star, Shield, Zap, MessageCircle, MapPin, Users, HeartHandshake, Quote } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
+import FAQAccordion from '../components/FAQAccordion';
 import BannerAd from '../components/ads/BannerAd';
 import AdWrapper from '../components/ads/AdWrapper';
 
@@ -32,6 +33,54 @@ const Home = () => {
         <meta property="og:title" content="Elovia Love — Verified Dating App for Real Connections in India" />
         <meta property="og:description" content="India's verified dating platform. No fake profiles. Real connections." />
         <meta property="og:url" content="https://elovialove.onrender.com/" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Is Elovia Love for serious relationships?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, Elovia Love is specifically designed for singles seeking serious, long-term relationships. Unlike casual dating apps, we focus on meaningful connections and compatibility matching to help you find a partner who shares your values and life goals."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does profile verification work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Every profile on Elovia Love goes through a comprehensive verification process. Users must provide government-issued ID, complete a detailed questionnaire, and submit photos that are manually reviewed by our team. This ensures you're connecting with real people who are genuinely interested in relationships."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is Elovia Love safe for online dating?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Safety is our top priority. We use bank-level encryption for all communications, provide advanced privacy controls, and offer safety tools like emergency contact sharing and location check-ins. Our verification process eliminates fake profiles, and we have a dedicated safety team that responds to reports within 24 hours."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does the matching algorithm work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Our AI-powered matching system considers multiple factors including your personality traits, values, lifestyle preferences, cultural background, and relationship goals. We go beyond surface-level matching to ensure compatibility that leads to lasting relationships."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is Elovia Love free to use?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "You can create a profile and browse matches for free. Premium features like unlimited messaging, advanced filters, and priority matching are available through our subscription plans. We believe in quality over quantity, so even our free features are designed to help you find meaningful connections."
+                }
+              }
+            ]
+          })}
+        </script>
       </Helmet>
     <div className="overflow-hidden">
       <Navbar />
@@ -62,9 +111,7 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8"
           >
-            <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-0">
-              Find Real Love on <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-pink-500">Elovia Love</span> — India's Verified Dating App
-            </h1>
+            Find Real Love on <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-pink-500">Elovia Love</span> — India's Verified Dating App
           </motion.h1>
 
           <motion.p 
@@ -185,6 +232,123 @@ const Home = () => {
         </div>
       </section>
 
+      {/* What is Elovia Love */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">What is Elovia Love?</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">India's premier dating platform designed specifically for serious relationships and meaningful connections.</p>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="prose prose-lg max-w-none text-slate-700 leading-relaxed"
+          >
+            <p>
+              Elovia Love is more than just another dating app – it's a revolutionary platform built from the ground up to address the real challenges of finding genuine love in today's digital world. Launched in 2024, we've quickly become India's most trusted dating service for singles who are serious about finding lasting relationships.
+            </p>
+
+            <p>
+              Unlike generic dating apps that prioritize quantity over quality, Elovia Love focuses on creating authentic connections. Our platform combines advanced AI matching technology with a deep understanding of Indian culture, values, and relationship expectations. We believe that real love starts with real conversations, which is why we've eliminated superficial swiping in favor of meaningful interactions.
+            </p>
+
+            <p>
+              Every aspect of Elovia Love is designed with your safety and success in mind. From our rigorous profile verification process to our innovative conversation starters, we ensure that you can focus on what matters most – finding someone who truly complements your life and shares your vision for the future.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Why Different */}
+      <section className="py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Why Elovia Love is Different</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">We're not just another dating app – we're a relationship-focused platform built for India's modern singles.</p>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="prose prose-lg max-w-none text-slate-700 leading-relaxed"
+          >
+            <p>
+              The dating app landscape in India has been dominated by platforms that treat relationships like commodities. Elovia Love changes that paradigm by prioritizing genuine connections over endless scrolling. Our approach is simple but powerful: we focus on quality matches rather than quantity.
+            </p>
+
+            <p>
+              What sets us apart is our commitment to cultural relevance. We understand the unique dynamics of Indian dating – from family values to regional preferences. Our platform respects these nuances while embracing modern relationship ideals. Whether you're looking for a partner who shares your religious beliefs, regional background, or simply your outlook on life, our smart matching algorithm considers all these factors.
+            </p>
+
+            <p>
+              Safety is not an afterthought – it's our foundation. Every profile on Elovia Love undergoes a comprehensive verification process, giving you peace of mind as you explore potential connections. We also provide tools and resources to help you navigate the dating process safely and confidently.
+            </p>
+
+            <p>
+              Most importantly, we're serious about serious relationships. While other apps might be fine for casual dating, Elovia Love is designed for people who want to find their life partner. Our features, from detailed compatibility questionnaires to relationship-focused conversation prompts, are all geared toward helping you build something real and lasting.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Safety Features */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Safety & Verification Features</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">Your safety is our top priority. Here's how we protect you while you search for love.</p>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="prose prose-lg max-w-none text-slate-700 leading-relaxed"
+          >
+            <p>
+              Online dating should be exciting, not scary. At Elovia Love, we've implemented multiple layers of security to ensure you can focus on finding love without worrying about your safety. Our comprehensive safety features are designed to protect you from the common risks associated with online dating.
+            </p>
+
+            <p>
+              Profile verification is at the heart of our platform. Every user must complete a thorough verification process that includes identity confirmation, photo validation, and background checks. This eliminates fake profiles and ensures you're connecting with real people who are genuinely interested in relationships.
+            </p>
+
+            <p>
+              We also provide advanced privacy controls that give you complete control over your information. You can choose what to share, when to share it, and with whom. Our platform never sells your data to third parties, and we use bank-level encryption to protect all communications.
+            </p>
+
+            <p>
+              For added peace of mind, we offer safety tools like emergency contact sharing, location-based safety check-ins, and direct access to our safety team. If you ever feel uncomfortable in a conversation, you can report issues instantly, and our team reviews every report within 24 hours.
+            </p>
+
+            <p>
+              Dating safely also means dating smart. That's why we provide educational resources about online safety, red flags to watch for, and tips for successful first dates. Our goal is not just to help you find love, but to ensure that journey is safe and positive.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* How it Works */}
       <section className="py-24 bg-slate-50 border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -294,6 +458,45 @@ const Home = () => {
           <BannerAd slot="1234567891" />
         </AdWrapper>
       </div>
+
+      {/* FAQ Section */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Frequently Asked Questions</h2>
+            <p className="text-lg text-slate-600">Everything you need to know about finding love on Elovia Love.</p>
+          </motion.div>
+
+          <FAQAccordion faqs={[
+            {
+              question: "Is Elovia Love for serious relationships?",
+              answer: "Yes, Elovia Love is specifically designed for singles seeking serious, long-term relationships. Unlike casual dating apps, we focus on meaningful connections and compatibility matching to help you find a partner who shares your values and life goals."
+            },
+            {
+              question: "How does profile verification work?",
+              answer: "Every profile on Elovia Love goes through a comprehensive verification process. Users must provide government-issued ID, complete a detailed questionnaire, and submit photos that are manually reviewed by our team. This ensures you're connecting with real people who are genuinely interested in relationships."
+            },
+            {
+              question: "Is Elovia Love safe for online dating?",
+              answer: "Safety is our top priority. We use bank-level encryption for all communications, provide advanced privacy controls, and offer safety tools like emergency contact sharing and location check-ins. Our verification process eliminates fake profiles, and we have a dedicated safety team that responds to reports within 24 hours."
+            },
+            {
+              question: "How does the matching algorithm work?",
+              answer: "Our AI-powered matching system considers multiple factors including your personality traits, values, lifestyle preferences, cultural background, and relationship goals. We go beyond surface-level matching to ensure compatibility that leads to lasting relationships."
+            },
+            {
+              question: "Is Elovia Love free to use?",
+              answer: "You can create a profile and browse matches for free. Premium features like unlimited messaging, advanced filters, and priority matching are available through our subscription plans. We believe in quality over quantity, so even our free features are designed to help you find meaningful connections."
+            }
+          ]} />
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="py-20">

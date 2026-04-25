@@ -100,7 +100,7 @@ const Blog = () => {
     ? `"${q}" — Elovia Love Blog`
     : tag
       ? `#${tag} — Elovia Love Blog`
-      : 'Love & Relationship Advice Blog — Elovia Love';
+      : 'Dating Tips & Relationship Advice — Elovia Love';
 
   const pageDesc = q || tag
     ? `Browse Elovia Love blog articles about ${q || tag} — love, dating, and relationship advice for Indians.`
