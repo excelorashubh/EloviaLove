@@ -64,7 +64,7 @@ const VisitorTracker = () => {
 const MainLayout = ({ children, showNav = false }) => (
   <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
     {showNav && <Navbar />}
-    <main className="flex-grow">{children}</main>
+    <main className="grow">{children}</main>
     <Footer />
   </div>
 );

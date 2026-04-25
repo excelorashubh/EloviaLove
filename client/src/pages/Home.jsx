@@ -29,10 +29,10 @@ const Home = () => {
       <Helmet>
         <title>Elovia Love — Verified Dating App for Real Connections in India</title>
         <meta name="description" content="Elovia Love is India's verified dating platform for serious relationships. No fake profiles. Real connections. Start your free trial today." />
-        <link rel="canonical" href="https://elovialove.onrender.com/" />
+        <link rel="canonical" href="https://elovialove.com/" />
         <meta property="og:title" content="Elovia Love — Verified Dating App for Real Connections in India" />
         <meta property="og:description" content="India's verified dating platform. No fake profiles. Real connections." />
-        <meta property="og:url" content="https://elovialove.onrender.com/" />
+        <meta property="og:url" content="https://elovialove.com/" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -149,13 +149,7 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="mt-8 text-center"
           >
-            <Link
-              to="/blog"
-              className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
-            >
-              <span>Read our relationship advice and online dating tips in India</span>
-              <Heart size={16} />
-            </Link>
+            <p className="text-sm text-slate-400">Join thousands of singles finding real love</p>
           </motion.div>
 
           {/* User faces pile up mock */}
