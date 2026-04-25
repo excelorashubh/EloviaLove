@@ -318,7 +318,7 @@ const Pricing = () => {
       <Helmet>
         <title>Elovia Love Pricing — Verified Dating Plans for Serious Singles</title>
         <meta name="description" content="Compare Elovia Love plans and choose the subscription that helps you meet verified singles and build meaningful relationships." />
-        <link rel="canonical" href="https://elovialove.com/pricing" />
+        <link rel="canonical" href="https://elovialove.onrender.com/pricing" />
       </Helmet>
       <div className="max-w-5xl mx-auto px-4 pt-8 pb-4">
 

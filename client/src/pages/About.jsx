@@ -20,7 +20,7 @@ const About = () => {
       <Helmet>
         <title>About Elovia Love — Verified Dating App for Real Connections in India</title>
         <meta name="description" content="Learn about Elovia Love's mission to create a safer, verified dating platform for serious relationships in India." />
-        <link rel="canonical" href="https://elovialove.com/about" />
+        <link rel="canonical" href="https://elovialove.onrender.com/about" />
       </Helmet>
       <div className=" pb-12 overflow-hidden bg-slate-50">
         <Navbar />

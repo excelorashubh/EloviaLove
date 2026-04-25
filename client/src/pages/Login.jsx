@@ -38,7 +38,7 @@ const Login = () => {
       <Helmet>
         <title>Login to Elovia Love — Secure Dating for Serious Relationships</title>
         <meta name="description" content="Access your Elovia Love account and continue building trusted connections with verified singles in India." />
-        <link rel="canonical" href="https://elovialove.com/login" />
+        <link rel="canonical" href="https://elovialove.onrender.com/login" />
       </Helmet>
       {/* Background Decor */}
       <div className="absolute top-1/2 left-1/2 w-200 h-200 bg-linear-to-tr from-primary-200 to-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-x-1/2 -translate-y-1/2" />

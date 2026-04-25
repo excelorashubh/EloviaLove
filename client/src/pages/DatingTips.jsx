@@ -8,7 +8,7 @@ import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
 
-const BASE_URL = 'https://elovialove.com';
+const BASE_URL = 'https://elovialove.onrender.com';
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 

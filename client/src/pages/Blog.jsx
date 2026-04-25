@@ -8,7 +8,7 @@ import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
 
-const BASE_URL = 'https://elovialove.com';
+const BASE_URL = 'https://elovialove.onrender.com';
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -126,12 +126,12 @@ const Blog = () => {
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
         <meta name="robots"      content="index, follow" />
-        <link rel="canonical"    href={`${BASE_URL}/blog${q ? `?q=${q}` : tag ? `?tag=${tag}` : ''}`} />
+        <link rel="canonical"    href={`https://elovialove.onrender.com/blog${q ? `?q=${q}` : tag ? `?tag=${tag}` : ''}`} />
         <meta property="og:title"       content={pageTitle} />
         <meta property="og:description" content={pageDesc} />
-        <meta property="og:url"         content={`${BASE_URL}/blog`} />
+        <meta property="og:url"         content={`https://elovialove.onrender.com/blog`} />
         <meta property="og:type"        content="website" />
-        <meta property="og:image"       content={`${BASE_URL}/EloviaLoveWB.png`} />
+        <meta property="og:image"       content={`https://elovialove.onrender.com/EloviaLoveWB.png`} />
       </Helmet>
       <Navbar />
 

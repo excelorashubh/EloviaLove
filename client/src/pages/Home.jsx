@@ -29,10 +29,10 @@ const Home = () => {
       <Helmet>
         <title>Elovia Love — Verified Dating App for Real Connections in India</title>
         <meta name="description" content="Elovia Love is India's verified dating platform for serious relationships. No fake profiles. Real connections. Start your free trial today." />
-        <link rel="canonical" href="https://elovialove.com/" />
+        <link rel="canonical" href="https://elovialove.onrender.com/" />
         <meta property="og:title" content="Elovia Love — Verified Dating App for Real Connections in India" />
         <meta property="og:description" content="India's verified dating platform. No fake profiles. Real connections." />
-        <meta property="og:url" content="https://elovialove.com/" />
+        <meta property="og:url" content="https://elovialove.onrender.com/" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -76,6 +76,46 @@ const Home = () => {
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "You can create a profile and browse matches for free. Premium features like unlimited messaging, advanced filters, and priority matching are available through our subscription plans. We believe in quality over quantity, so even our free features are designed to help you find meaningful connections."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What makes Elovia Love different from other dating apps?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Unlike casual dating apps focused on swiping and quick matches, Elovia Love is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for Indian singles who want long-term partnerships rather than casual encounters."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How do I know if someone is verified?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Verified profiles display a blue checkmark badge next to their name. This badge indicates they've completed our verification process, including ID submission, photo review, and questionnaire completion. You can only match with verified users, ensuring authenticity."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What safety features does Elovia Love offer?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "We offer comprehensive safety features including emergency contact sharing, location check-ins, photo verification, encrypted messaging, and a 24/7 safety team. You can also block/report suspicious users, and all profiles are manually reviewed before approval."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I use Elovia Love if I'm looking for marriage?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Absolutely. Many of our users are marriage-minded singles. Our matching algorithm considers relationship goals, and you can specify 'marriage' as your objective in your profile. We help connect people who share similar long-term aspirations."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does Elovia Love handle cultural compatibility?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Our platform is designed with Indian cultural context in mind. We consider factors like family values, religious preferences, and cultural background in our matching algorithm. This helps create more compatible, lasting relationships within the Indian community."
                 }
               }
             ]
@@ -175,6 +215,105 @@ const Home = () => {
                 {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
               </span>
               <span className="ml-2 font-semibold text-slate-700">4.9/5</span> from over 10,000+ happy couples
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">How Elovia Love Works</h2>
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto">
+              Our verified dating platform is designed to help serious singles find meaningful relationships through a safe, structured process.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-center"
+            >
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Shield className="w-8 h-8 text-primary-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">1. Verify Your Profile</h3>
+              <p className="text-slate-600 leading-relaxed">
+                Every member undergoes a comprehensive verification process. We require government-issued ID, detailed questionnaires, and photo reviews to ensure authenticity. This eliminates fake profiles and creates a trustworthy community.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-center"
+            >
+              <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Heart className="w-8 h-8 text-pink-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">2. Smart Matching</h3>
+              <p className="text-slate-600 leading-relaxed">
+                Our AI-powered algorithm considers compatibility factors like values, lifestyle preferences, cultural background, and relationship goals. Unlike swipe-based apps, we focus on long-term compatibility rather than superficial attraction.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-center"
+            >
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <MessageCircle className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">3. Meaningful Conversations</h3>
+              <p className="text-slate-600 leading-relaxed">
+                Start conversations with icebreakers designed for serious relationships. Our platform encourages thoughtful communication and provides safety tools like emergency contacts and location sharing for peace of mind.
+              </p>
+            </motion.div>
+          </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="mt-16 text-center"
+          >
+            <h3 className="text-2xl font-bold text-slate-900 mb-4">Why Choose Elovia Love Over Other Dating Apps?</h3>
+            <p className="text-slate-600 max-w-4xl mx-auto leading-relaxed mb-8">
+              In a market flooded with casual dating apps, Elovia Love stands out by prioritizing serious relationships. We don't just connect people—we help build lasting partnerships. Our verification process ensures every profile is real, our matching algorithm focuses on compatibility, and our community guidelines promote respectful, meaningful interactions. Unlike apps designed for quick matches, we create an environment where singles can take their time to develop genuine connections.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200">
+                <h4 className="font-semibold text-slate-900 mb-2">Verified Profiles Only</h4>
+                <p className="text-slate-600 text-sm">No fake accounts, no catfishing. Every member is thoroughly vetted.</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-200">
+                <h4 className="font-semibold text-slate-900 mb-2">Serious Relationship Focus</h4>
+                <p className="text-slate-600 text-sm">Designed for commitment-minded singles seeking long-term partnerships.</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-200">
+                <h4 className="font-semibold text-slate-900 mb-2">Advanced Safety Features</h4>
+                <p className="text-slate-600 text-sm">Emergency contacts, location check-ins, and 24/7 safety monitoring.</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-200">
+                <h4 className="font-semibold text-slate-900 mb-2">Cultural Compatibility</h4>
+                <p className="text-slate-600 text-sm">Matches consider Indian cultural values and family expectations.</p>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -487,8 +626,62 @@ const Home = () => {
             {
               question: "Is Elovia Love free to use?",
               answer: "You can create a profile and browse matches for free. Premium features like unlimited messaging, advanced filters, and priority matching are available through our subscription plans. We believe in quality over quantity, so even our free features are designed to help you find meaningful connections."
+            },
+            {
+              question: "What makes Elovia Love different from other dating apps?",
+              answer: "Unlike casual dating apps focused on swiping and quick matches, Elovia Love is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for Indian singles who want long-term partnerships rather than casual encounters."
+            },
+            {
+              question: "How do I know if someone is verified?",
+              answer: "Verified profiles display a blue checkmark badge next to their name. This badge indicates they've completed our verification process, including ID submission, photo review, and questionnaire completion. You can only match with verified users, ensuring authenticity."
+            },
+            {
+              question: "What safety features does Elovia Love offer?",
+              answer: "We offer comprehensive safety features including emergency contact sharing, location check-ins, photo verification, encrypted messaging, and a 24/7 safety team. You can also block/report suspicious users, and all profiles are manually reviewed before approval."
+            },
+            {
+              question: "Can I use Elovia Love if I'm looking for marriage?",
+              answer: "Absolutely. Many of our users are marriage-minded singles. Our matching algorithm considers relationship goals, and you can specify 'marriage' as your objective in your profile. We help connect people who share similar long-term aspirations."
+            },
+            {
+              question: "How does Elovia Love handle cultural compatibility?",
+              answer: "Our platform is designed with Indian cultural context in mind. We consider factors like family values, religious preferences, and cultural background in our matching algorithm. This helps create more compatible, lasting relationships within the Indian community."
             }
           ]} />
+        </div>
+      </section>
+
+      {/* External Links Section */}
+      <section className="py-16 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h3 className="text-xl font-semibold text-slate-900 mb-6">Learn More About Dating & Relationships</h3>
+          <p className="text-slate-600 mb-8">Read our expert insights and community discussions on trusted platforms.</p>
+          <div className="flex flex-wrap justify-center gap-6">
+            <a
+              href="https://medium.com/@elovialove"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition-colors"
+            >
+              <span className="text-slate-700 font-medium">Medium</span>
+            </a>
+            <a
+              href="https://www.quora.com/profile/Elovia-Love"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition-colors"
+            >
+              <span className="text-slate-700 font-medium">Quora</span>
+            </a>
+            <a
+              href="https://www.reddit.com/r/elovialove/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition-colors"
+            >
+              <span className="text-slate-700 font-medium">Reddit</span>
+            </a>
+          </div>
         </div>
       </section>
 

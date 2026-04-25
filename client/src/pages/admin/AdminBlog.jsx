@@ -303,7 +303,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
                 <p className="text-blue-700 text-base font-medium leading-tight truncate">
                   {form.metaTitle || form.title || 'Your Post Title'}
                 </p>
-                <p className="text-green-700 text-xs mt-0.5">elovialove.com/blog/{form.slug || 'your-post-slug'}</p>
+                <p className="text-green-700 text-xs mt-0.5">elovialove.onrender.com/blog/{form.slug || 'your-post-slug'}</p>
                 <p className="text-slate-600 text-sm mt-1 line-clamp-2">
                   {form.metaDescription || form.excerpt || 'Your meta description will appear here...'}
                 </p>
