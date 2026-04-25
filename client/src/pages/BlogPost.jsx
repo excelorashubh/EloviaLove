@@ -21,7 +21,7 @@ function readingTime(content) {
 
 // ── Internal linking helper ──────────────────────────────────────────────────
 const insertInternalLinks = (content, relatedPosts) => {
-  if (!content || !relatedPosts?.length) return content;
+  if (!content) return content;
 
   let linkedContent = content;
 
@@ -33,16 +33,31 @@ const insertInternalLinks = (content, relatedPosts) => {
     '10 online dating safety tips': '10-online-dating-safety-tips',
     'signs someone is serious about a relationship': 'signs-someone-is-serious-about-a-relationship',
     'online dating safety tips': '10-online-dating-safety-tips',
+    'best dating apps': 'best-dating-apps-for-serious-relationships-in-india',
+    'dating profile': 'how-to-write-a-dating-profile-bio',
+    'fake profiles': 'how-to-spot-fake-dating-profiles',
+    'toxic relationships': '10-signs-youre-in-a-toxic-relationship',
   };
 
   // Replace keywords with links if they exist in related posts
+  let linkCount = 0;
   Object.entries(linkMappings).forEach(([keyword, slug]) => {
+    if (linkCount >= 3) return; // Limit to 3 related links
     const relatedPost = relatedPosts.find(p => p.slug === slug);
     if (relatedPost && linkedContent.toLowerCase().includes(keyword.toLowerCase())) {
       const regex = new RegExp(`(${keyword})`, 'gi');
-      linkedContent = linkedContent.replace(regex, `<a href="/blog/${slug}" class="text-primary-600 hover:text-primary-700 font-semibold">$1</a>`);
+      linkedContent = linkedContent.replace(regex, (match) => {
+        linkCount++;
+        return `<a href="/blog/${slug}" class="text-primary-600 hover:text-primary-700 font-semibold">${match}</a>`;
+      });
     }
   });
+
+  // Add homepage and blog hub links at the end if not already present
+  const homepageLink = '<p class="mt-6 text-sm text-slate-600">Looking for more love advice? <a href="/" class="text-primary-600 hover:text-primary-700 font-semibold">Visit our homepage</a> or <a href="/blog" class="text-primary-600 hover:text-primary-700 font-semibold">explore our blog</a> for more articles.</p>';
+  if (!linkedContent.includes('href="/"') && !linkedContent.includes('href="/blog"')) {
+    linkedContent += homepageLink;
+  }
 
   return linkedContent;
 };
