@@ -104,6 +104,72 @@ io.on('connection', (socket) => {
   });
 });
 
+// ── Dynamic sitemap.xml route (root level) ──────────────────────────────────
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const Blog = require('./models/Blog');
+    const posts = await Blog.find({ isPublished: true }).select('slug updatedAt').sort({ updatedAt: -1 });
+    const baseUrl = 'https://elovialove.onrender.com';
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/blog</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/blog/dating-tips</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/pricing</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+
+    posts.forEach(post => {
+      xml += `
+  <url>
+    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <lastmod>${post.updatedAt.toISOString().split('T')[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+    });
+
+    xml += `
+</urlset>`;
+
+    res.header('Content-Type', 'application/xml; charset=UTF-8');
+    res.header('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+    res.send(xml);
+  } catch (err) {
+    console.error('Sitemap generation error:', err);
+    res.status(500).header('Content-Type', 'application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://elovialove.onrender.com/</loc></url>
+  <url><loc>https://elovialove.onrender.com/blog</loc></url>
+</urlset>`);
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
