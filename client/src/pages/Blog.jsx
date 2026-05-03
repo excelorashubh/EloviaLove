@@ -100,11 +100,11 @@ const Blog = () => {
     ? `"${q}" — Elovia Love Blog`
     : tag
       ? `#${tag} — Elovia Love Blog`
-      : 'Dating Tips & Relationship Advice — Elovia Love';
+      : 'Love & Relationship Blog | Elovia Love';
 
   const pageDesc = q || tag
     ? `Browse Elovia Love blog articles about ${q || tag} — love, dating, and relationship advice for Indians.`
-    : 'Read expert love and relationship advice on Elovia Love. Dating tips, heartbreak recovery, and self-growth for young Indians.';
+    : 'Explore love and relationship advice on Elovia Love. Find dating tips, communication guides, and confidence-building stories for modern Indian singles.';
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -126,12 +126,12 @@ const Blog = () => {
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
         <meta name="robots"      content="index, follow" />
-        <link rel="canonical"    href={`https://elovialove.onrender.com/blog${q ? `?q=${q}` : tag ? `?tag=${tag}` : ''}`} />
+        <link rel="canonical"    href="https://elovialove.onrender.com/blog" />
         <meta property="og:title"       content={pageTitle} />
         <meta property="og:description" content={pageDesc} />
-        <meta property="og:url"         content={`https://elovialove.onrender.com/blog`} />
+        <meta property="og:url"         content="https://elovialove.onrender.com/blog" />
         <meta property="og:type"        content="website" />
-        <meta property="og:image"       content={`https://elovialove.onrender.com/EloviaLoveWB.png`} />
+        <meta property="og:image"       content="https://elovialove.onrender.com/EloviaLoveWB.png" />
       </Helmet>
       <Navbar />
 
@@ -143,7 +143,7 @@ const Blog = () => {
               💕 Love & Relationship Advice
             </span>
             <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-              Elovia Love Blog
+              Love & Relationship Advice Blog
             </h1>
             <p className="text-white/80 text-lg mb-8">
               Real talk on love, dating, heartbreak & self-growth — for the modern Indian heart.
@@ -164,6 +164,89 @@ const Blog = () => {
               </button>
             </form>
           </motion.div>
+        </div>
+      </section>
+
+      <section className="bg-white py-14">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">A trusted resource for modern relationships</h2>
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl mx-auto mb-6">
+            Discover practical guidance for Indian singles and couples who want more from their relationships. Our blog brings together honest stories, mindful dating advice, and communication tools designed to help you build deeper, healthier connections without the guesswork.
+          </p>
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl mx-auto mb-6">
+            From first-date confidence to long-term commitment conversations, these articles are written to help you move forward with clarity. Each post is crafted to support your emotional growth, improve your dating choices, and make it easier to turn attraction into meaningful love.
+          </p>
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl mx-auto mb-6">
+            Explore our latest featured pieces below, including relationship checklists, heartbreak recovery tips, match-smart strategies, and practical ways to stay safe online. The Blog is your home for fresh insights, honest advice, and real-world steps toward stronger partnerships.
+          </p>
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl mx-auto mb-6">
+            Each article is written with Indian dating culture in mind, offering clear advice on communication, boundaries, dating safety, and how to find the right partner. If you want to make better first impressions, avoid fake profiles, and build lasting trust, this page is where to start.
+          </p>
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl mx-auto mb-6">
+            We update this blog regularly with new content for singles who want more than casual matches. Read stories from verified members, learn how to recover from heartbreak, and discover ways to keep your love life healthy while you search for a meaningful relationship.
+          </p>
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl mx-auto mb-6">
+            This page is built to be your central guide for modern relationship questions, from how to start a conversation after matching to knowing when to ask about commitment. Our goal is to make every step of your love journey easier, more confident, and more authentic.
+          </p>
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl mx-auto mb-6">
+            If you are looking for practical ideas for date planning, tips for managing misunderstandings, or tools to strengthen emotional connection, you will find them here. Every post includes real examples, expert-backed advice, and clear next actions you can use today.
+          </p>
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl mx-auto mb-6">
+            Browse the full collection below and use these articles as your relationship roadmap. Whether you are single, dating, or in a committed partnership, this blog is designed to help you make decisions that lead to deeper, safer, and more meaningful love.
+          </p>
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl mx-auto mb-6">
+            The Blog also includes practical checklists for digital dating safety, conversation starters, and ways to build trust early. If you want to feel more prepared before meeting someone new, these articles help you move confidently through every stage of the dating process.
+          </p>
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl mx-auto mb-6">
+            Use this page to access all of our relationship guides with one click. The internal links below connect directly to each article, so you can jump to the most relevant topic and continue exploring related posts from the same trusted advice hub.
+          </p>
+          <div className="mx-auto max-w-4xl mb-8 text-left">
+            <h3 className="text-xl font-semibold text-slate-900 mb-4">Explore our latest posts</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {posts.slice(0, 12).map(post => (
+                <Link
+                  key={post._id}
+                  to={`/blog/${post.slug}`}
+                  className="text-primary-600 hover:text-primary-700 font-medium"
+                >
+                  • {post.title}
+                </Link>
+              ))}
+              {!posts.length && (
+                <p className="text-slate-500">Recent posts will appear here once they are loaded.</p>
+              )}
+            </div>
+          </div>
+          <div className="grid gap-4 text-left mx-auto max-w-4xl">
+            {posts.length > 0 ? (
+              posts.slice(0, 4).map((post, index) => (
+                <Link
+                  key={post._id}
+                  to={`/blog/${post.slug}`}
+                  className="block rounded-3xl border border-slate-200 p-4 text-slate-700 hover:border-primary-300 hover:bg-primary-50 transition-colors"
+                >
+                  <span className="font-semibold">{post.title}</span>
+                </Link>
+              ))
+            ) : (
+              <p className="text-slate-500">Explore trending relationship guides in the blog, including dating tips, safety advice, and real connection stories.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-slate-50 py-10">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">Why this blog matters</h2>
+          <p className="text-slate-600 leading-relaxed mb-4">
+            Our content is written for Indian singles and relationship seekers who want to move beyond small talk and build emotional connection with confidence. Each article offers practical takeaways, real examples, and clear next steps so you can apply what you read right away.
+          </p>
+          <p className="text-slate-600 leading-relaxed mb-4">
+            When you browse Elovia Love articles, you’ll find expert-backed advice on navigating dates, talking about commitment, protecting your privacy, and recognizing compatibility. We also cover self-care after heartbreak, dating boundaries, and how to nurture long-term love.
+          </p>
+          <p className="text-slate-600 leading-relaxed">
+            Read our latest articles to discover new ways to show up for love, understand your relationship needs, and create a strong foundation for the next phase of your romantic journey.
+          </p>
         </div>
       </section>
 

@@ -114,7 +114,7 @@ const BlogPost = () => {
   };
 
   // ── Derived SEO values ────────────────────────────────────────────────────
-  const pageTitle = post ? `${post.metaTitle || `${post.title} | Elovia Love`}` : 'Elovia Love Blog';
+  const pageTitle = post ? `${post.title} | Elovia Love` : 'Elovia Love Blog';
   const pageDescription = post?.metaDescription || post?.excerpt || 'Read love and relationship advice on Elovia Love.';
   const pageImage       = post?.featuredImage || `${BASE_URL}/EloviaLoveWB.png`;
   const pageUrl         = `${BASE_URL}/blog/${slug}`;

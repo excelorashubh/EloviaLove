@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useEffect } from 'react';
 import Navbar from './components/layout/Navbar';
@@ -95,6 +95,7 @@ function App() {
           <Route path="/signup" element={<MainLayout showNav><GuestRoute><Signup /></GuestRoute></MainLayout>} />
           <Route path="/pricing" element={<MainLayout showNav><Pricing /></MainLayout>} />
           <Route path="/blog" element={<MainLayout showNav><Blog /></MainLayout>} />
+          <Route path="/blog/" element={<Navigate to="/blog" replace />} />
           <Route path="/blog/dating-tips" element={<MainLayout showNav><DatingTips /></MainLayout>} />
           <Route path="/blog/:slug" element={<MainLayout showNav><BlogPost /></MainLayout>} />
           <Route path="/dashboard" element={<MainLayout><ProtectedRoute><Dashboard /></ProtectedRoute></MainLayout>} />

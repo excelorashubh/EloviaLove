@@ -27,10 +27,10 @@ const Home = () => {
   return (
     <>
       <Helmet>
-        <title>Elovia Love — Verified Dating App for Real Connections in India</title>
+        <title>Elovia Love – Relationship Advice, Dating Tips & Love Guides</title>
         <meta name="description" content="Elovia Love is India's verified dating platform for serious relationships. No fake profiles. Real connections. Start your free trial today." />
         <link rel="canonical" href="https://elovialove.onrender.com/" />
-        <meta property="og:title" content="Elovia Love — Verified Dating App for Real Connections in India" />
+        <meta property="og:title" content="Elovia Love – Relationship Advice, Dating Tips & Love Guides" />
         <meta property="og:description" content="India's verified dating platform. No fake profiles. Real connections." />
         <meta property="og:url" content="https://elovialove.onrender.com/" />
         <script type="application/ld+json">
@@ -180,6 +180,12 @@ const Home = () => {
               className="w-full sm:w-auto px-8 py-4 bg-white text-slate-800 rounded-full font-bold text-lg border border-slate-200 shadow-sm hover:bg-slate-50 hover:-translate-y-1 transition-all duration-300"
             >
               Log in to Account
+            </Link>
+            <Link
+              to="/blog"
+              className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-full font-bold text-lg border border-transparent shadow-sm hover:bg-primary-600 transition-all duration-300"
+            >
+              Read Latest Blog Articles
             </Link>
           </motion.div>
 
