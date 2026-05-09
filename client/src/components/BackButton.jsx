@@ -7,10 +7,11 @@ const BackButton = ({ to, className = '' }) => {
 
   return (
     <button
+      aria-label="Go back to previous page"
       onClick={handleBack}
       className={`flex items-center gap-1.5 text-slate-500 hover:text-slate-900 transition-colors font-medium text-sm ${className}`}
     >
-      <ArrowLeft size={18} />
+      <ArrowLeft size={18} aria-hidden="true" />
       Back
     </button>
   );

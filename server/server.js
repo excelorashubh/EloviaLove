@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
@@ -21,12 +22,65 @@ const io = new Server(server, {
   }
 });
 
-// Middleware
-app.use(helmet());
+// ── Security & Performance Middleware ──────────────────────────────────────
+// Gzip/Brotli compression for responses
+app.use(compression({ level: 6, threshold: 1024 }));
+
+// Enhanced Helmet.js configuration for security
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://pagead2.googlesyndication.com",
+        "https://googleads.g.doubleclick.net",
+        "https://www.googletagmanager.com",
+        "https://www.google-analytics.com",
+        "https://www.gstatic.com"
+      ],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      connectSrc: [
+        "'self'",
+        "https://elovialove.onrender.com",
+        "wss://elovialove.onrender.com",
+        "https://www.google-analytics.com",
+        "https://www.googletagmanager.com",
+        "https://pagead2.googlesyndication.com"
+      ],
+      frameSrc: ["'self'", "https://googleads.g.doubleclick.net"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : undefined,
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  strictTransportSecurity: { maxAge: 31536000, includeSubDomains: true, preload: true },
+  xssFilter: true,
+  noSniff: true,
+  frameguard: { action: 'sameorigin' },
+}));
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
   credentials: true
 }));
+
+// ── Cache headers for optimal performance ──────────────────────────────────
+// API responses (short cache)
+app.use('/api/', (req, res, next) => {
+  // Cache read-only API endpoints for 5 minutes
+  if (req.method === 'GET') {
+    res.set('Cache-Control', 'public, max-age=300'); // 5 minutes
+  } else {
+    // No cache for POST/PUT/DELETE
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  }
+  next();
+});
 
 // Raw body capture for Razorpay webhook signature verification
 app.use('/api/subscription/webhook', express.raw({ type: 'application/json' }), (req, _res, next) => {

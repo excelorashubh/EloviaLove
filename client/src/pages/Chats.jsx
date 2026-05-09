@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Search, MessageCircle, Check, CheckCheck, Sparkles, X } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
@@ -149,7 +150,13 @@ const Chats = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
+      <Helmet>
+        <title>Messages — Elovia Love</title>
+        <meta name="description" content="View and manage all your conversations on Elovia Love." />
+        <link rel="canonical" href="https://elovialove.onrender.com/chats" />
+      </Helmet>
+      <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
@@ -317,7 +324,8 @@ const Chats = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

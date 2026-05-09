@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import EloviaLoveWB from "../../assets/EloviaLoveWB.png"
+import EloviaLoveWB from "../../assets/EloviaLoveWB_small.png"
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -46,7 +46,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <div className=" text-white p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300">
-              <img src={EloviaLoveWB} className='w-10' />
+              <img src={EloviaLoveWB} alt="Elovia Love logo" className='w-10' />
             </div>
             <span className={`text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-primary-600 to-pink-600`}>
               Elovia Love
@@ -97,6 +97,7 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
+            aria-label="Toggle navigation menu"
             className="md:hidden p-2 text-slate-600"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >

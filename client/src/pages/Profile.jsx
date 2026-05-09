@@ -270,7 +270,7 @@ const Profile = () => {
 
           {/* Interests */}
           <motion.div variants={fadeIn} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Interests</h2>
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Interests</h3>
             {editing ? (
               <div className="flex flex-wrap gap-2">
                 {INTERESTS_OPTIONS.map(interest => (
@@ -304,7 +304,7 @@ const Profile = () => {
           {/* Extended Profile Info */}
           {(user?.education || user?.profession || user?.height || user?.income || user?.religion || user?.lifestyle?.smoking || user?.lifestyle?.drinking) && (
             <motion.div variants={fadeIn} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-              <h2 className="text-lg font-bold text-slate-900 mb-4">About Me</h2>
+              <h3 className="text-lg font-bold text-slate-900 mb-4">About Me</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {user?.education && (
                   <div className="bg-slate-50 rounded-xl p-3">
@@ -355,7 +355,7 @@ const Profile = () => {
           {/* Account Info + Verification */}
           <motion.div variants={fadeIn} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-slate-900">Account Information</h2>
+              <h3 className="text-lg font-bold text-slate-900">Account Information</h3>
               <Link to="/verify" className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-xl text-xs font-semibold hover:bg-primary-100 transition-colors">
                 <ShieldCheck size={13} /> Verify Account
               </Link>

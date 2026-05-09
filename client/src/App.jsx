@@ -1,42 +1,60 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { useEffect } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
+import { Helmet } from 'react-helmet-async';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import AdminRoute from './components/AdminRoute';
 import Footer from './components/layout/Footer';
+import CookieConsent from './components/CookieConsent';
+import api from './services/api';
+
+// ── Eagerly loaded pages (above-the-fold, critical) ──────────────────────────
 import Home from './pages/Home';
-import About from './pages/About';
-import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import Dashboard from './pages/Dashboard';
-import Discover from './pages/Discover';
-import Matches from './pages/Matches';
-import Chat from './pages/Chat';
-import Profile from './pages/Profile';
-import ProfileEdit from './pages/ProfileEdit';
-import Notifications from './pages/Notifications';
-import Chats from './pages/Chats';
-import Pricing from './pages/Pricing';
-import SubscriptionSuccess from './pages/SubscriptionSuccess';
-import Verify from './pages/Verify';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminReports from './pages/admin/AdminReports';
-import AdminAnalytics from './pages/admin/AdminAnalytics';
-import AdminRevenue from './pages/admin/AdminRevenue';
-import AdminVisitors from './pages/admin/AdminVisitors';
-import AdminAds from './pages/admin/AdminAds';
-import AdminPlans from './pages/admin/AdminPlans';
-import Blog from './pages/Blog';
-import BlogPost from './pages/BlogPost';
-import DatingTips from './pages/DatingTips';
-import AdminBlog from './pages/admin/AdminBlog';
 
-import api from './services/api';
-import CookieConsent from './components/CookieConsent';
+// ── Lazy loaded pages (public, non-critical) ──────────────────────────────────
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
+const DatingTips = lazy(() => import('./pages/DatingTips'));
+
+// ── Lazy loaded authenticated pages ────────────────────────────────────────────
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Discover = lazy(() => import('./pages/Discover'));
+const Matches = lazy(() => import('./pages/Matches'));
+const Chat = lazy(() => import('./pages/Chat'));
+const Profile = lazy(() => import('./pages/Profile'));
+const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Chats = lazy(() => import('./pages/Chats'));
+const SubscriptionSuccess = lazy(() => import('./pages/SubscriptionSuccess'));
+const Verify = lazy(() => import('./pages/Verify'));
+
+// ── Lazy loaded admin pages ────────────────────────────────────────────────────
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
+const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
+const AdminRevenue = lazy(() => import('./pages/admin/AdminRevenue'));
+const AdminVisitors = lazy(() => import('./pages/admin/AdminVisitors'));
+const AdminAds = lazy(() => import('./pages/admin/AdminAds'));
+const AdminPlans = lazy(() => import('./pages/admin/AdminPlans'));
+const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'));
+
+// ── Loading fallback component ─────────────────────────────────────────────────
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen bg-slate-50">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+      <p className="text-slate-600 font-medium">Loading...</p>
+    </div>
+  </div>
+);
 
 // ── Google Analytics page view helper ────────────────────────────────────────
 const trackPageView = (path) => {
@@ -60,9 +78,29 @@ const VisitorTracker = () => {
   return null;
 };
 
+// Default SEO wrapper for all routes
+const SeoDefaults = () => {
+  const location = useLocation();
+  const url = `https://elovialove.onrender.com${location.pathname === '/' ? '' : location.pathname}`;
+  return (
+    <Helmet>
+      <link rel="canonical" href={url} />
+      <meta property="og:site_name" content="Elovia Love" />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:image" content="https://elovialove.onrender.com/EloviaLoveWB_small.png" />
+      <meta property="og:image:alt" content="Elovia Love logo" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:image" content="https://elovialove.onrender.com/EloviaLoveWB_small.png" />
+      <meta name="twitter:image:alt" content="Elovia Love logo" />
+    </Helmet>
+  );
+};
+
 // Layout wrapper for public/user pages
 const MainLayout = ({ children, showNav = false }) => (
   <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
+    <SeoDefaults />
     {showNav && <Navbar />}
     <main className="grow">{children}</main>
     <Footer />
@@ -77,37 +115,37 @@ function App() {
         <CookieConsent />
         <Routes>
           {/* Admin — full screen with own sidebar layout */}
-          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
-          <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
-          <Route path="/admin/revenue" element={<AdminRoute><AdminRevenue /></AdminRoute>} />
-          <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
-          <Route path="/admin/visitors"  element={<AdminRoute><AdminVisitors /></AdminRoute>} />
-          <Route path="/admin/ads"      element={<AdminRoute><AdminAds /></AdminRoute>} />
-          <Route path="/admin/plans"    element={<AdminRoute><AdminPlans /></AdminRoute>} />
-          <Route path="/admin/blog"     element={<AdminRoute><AdminBlog /></AdminRoute>} />
+          <Route path="/admin" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></AdminRoute>} />
+          <Route path="/admin/users" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminUsers /></Suspense></AdminRoute>} />
+          <Route path="/admin/reports" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminReports /></Suspense></AdminRoute>} />
+          <Route path="/admin/revenue" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminRevenue /></Suspense></AdminRoute>} />
+          <Route path="/admin/analytics" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminAnalytics /></Suspense></AdminRoute>} />
+          <Route path="/admin/visitors"  element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminVisitors /></Suspense></AdminRoute>} />
+          <Route path="/admin/ads"      element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminAds /></Suspense></AdminRoute>} />
+          <Route path="/admin/plans"    element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminPlans /></Suspense></AdminRoute>} />
+          <Route path="/admin/blog"     element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminBlog /></Suspense></AdminRoute>} />
 
           {/* Public & user routes with Navbar + Footer */}
           <Route path="/" element={<MainLayout showNav><Home /></MainLayout>} />
-          <Route path="/about" element={<MainLayout showNav><About /></MainLayout>} />
-          <Route path="/contact" element={<MainLayout showNav><Contact /></MainLayout>} />
+          <Route path="/about" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><About /></Suspense></MainLayout>} />
+          <Route path="/contact" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Contact /></Suspense></MainLayout>} />
           <Route path="/login" element={<MainLayout showNav><GuestRoute><Login /></GuestRoute></MainLayout>} />
           <Route path="/signup" element={<MainLayout showNav><GuestRoute><Signup /></GuestRoute></MainLayout>} />
-          <Route path="/pricing" element={<MainLayout showNav><Pricing /></MainLayout>} />
-          <Route path="/blog" element={<MainLayout showNav><Blog /></MainLayout>} />
+          <Route path="/pricing" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Pricing /></Suspense></MainLayout>} />
+          <Route path="/blog" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Blog /></Suspense></MainLayout>} />
           <Route path="/blog/" element={<Navigate to="/blog" replace />} />
-          <Route path="/blog/dating-tips" element={<MainLayout showNav><DatingTips /></MainLayout>} />
-          <Route path="/blog/:slug" element={<MainLayout showNav><BlogPost /></MainLayout>} />
-          <Route path="/dashboard" element={<MainLayout><ProtectedRoute><Dashboard /></ProtectedRoute></MainLayout>} />
-          <Route path="/discover" element={<MainLayout><ProtectedRoute><Discover /></ProtectedRoute></MainLayout>} />
-          <Route path="/matches" element={<MainLayout><ProtectedRoute><Matches /></ProtectedRoute></MainLayout>} />
-          <Route path="/chat/:userId" element={<MainLayout><ProtectedRoute><Chat /></ProtectedRoute></MainLayout>} />
-          <Route path="/profile" element={<MainLayout><ProtectedRoute><Profile /></ProtectedRoute></MainLayout>} />
-          <Route path="/profile/edit" element={<MainLayout><ProtectedRoute><ProfileEdit /></ProtectedRoute></MainLayout>} />
-          <Route path="/notifications" element={<MainLayout><ProtectedRoute><Notifications /></ProtectedRoute></MainLayout>} />
-          <Route path="/chats" element={<MainLayout><ProtectedRoute><Chats /></ProtectedRoute></MainLayout>} />
-          <Route path="/subscription/success" element={<MainLayout><ProtectedRoute><SubscriptionSuccess /></ProtectedRoute></MainLayout>} />
-          <Route path="/verify" element={<MainLayout><ProtectedRoute><Verify /></ProtectedRoute></MainLayout>} />
+          <Route path="/blog/dating-tips" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><DatingTips /></Suspense></MainLayout>} />
+          <Route path="/blog/:slug" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><BlogPost /></Suspense></MainLayout>} />
+          <Route path="/dashboard" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Dashboard /></Suspense></ProtectedRoute></MainLayout>} />
+          <Route path="/discover" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Discover /></Suspense></ProtectedRoute></MainLayout>} />
+          <Route path="/matches" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Matches /></Suspense></ProtectedRoute></MainLayout>} />
+          <Route path="/chat/:userId" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Chat /></Suspense></ProtectedRoute></MainLayout>} />
+          <Route path="/profile" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Profile /></Suspense></ProtectedRoute></MainLayout>} />
+          <Route path="/profile/edit" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><ProfileEdit /></Suspense></ProtectedRoute></MainLayout>} />
+          <Route path="/notifications" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Notifications /></Suspense></ProtectedRoute></MainLayout>} />
+          <Route path="/chats" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Chats /></Suspense></ProtectedRoute></MainLayout>} />
+          <Route path="/subscription/success" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><SubscriptionSuccess /></Suspense></ProtectedRoute></MainLayout>} />
+          <Route path="/verify" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Verify /></Suspense></ProtectedRoute></MainLayout>} />
           <Route path="/verify-email" element={<MainLayout><Verify /></MainLayout>} />
         </Routes>
       </Router>

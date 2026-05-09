@@ -116,7 +116,7 @@ const BlogPost = () => {
   // ── Derived SEO values ────────────────────────────────────────────────────
   const pageTitle = post ? `${post.title} | Elovia Love` : 'Elovia Love Blog';
   const pageDescription = post?.metaDescription || post?.excerpt || 'Read love and relationship advice on Elovia Love.';
-  const pageImage       = post?.featuredImage || `${BASE_URL}/EloviaLoveWB.png`;
+  const pageImage       = post?.featuredImage || `${BASE_URL}/EloviaLoveWB_small.png`;
   const pageUrl         = `${BASE_URL}/blog/${slug}`;
   const mins            = post ? readingTime(post.content) : 0;
   const wordCount       = post ? (post.content || '').replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length : 0;
@@ -135,7 +135,7 @@ const BlogPost = () => {
       publisher: {
         '@type': 'Organization',
         name:    'Elovia Love',
-        logo:    { '@type': 'ImageObject', url: `${BASE_URL}/EloviaLoveWB.png` },
+        logo:    { '@type': 'ImageObject', url: `${BASE_URL}/EloviaLoveWB_small.png` },
       },
       datePublished:    post.publishedAt,
       dateModified:     post.updatedAt,

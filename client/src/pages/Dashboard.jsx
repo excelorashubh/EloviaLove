@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Heart, Settings, Bell, Sparkles, MessageCircle, Check, Crown, Zap, Star, Clock } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
@@ -209,7 +210,13 @@ const Dashboard = () => {
     || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&size=128&background=e879a0&color=fff`;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
+      <Helmet>
+        <title>Dashboard — Elovia Love</title>
+        <meta name="description" content="Your Elovia Love dashboard. Manage matches, chats, profile status, and subscription details in one place." />
+        <link rel="canonical" href="https://elovialove.onrender.com/dashboard" />
+      </Helmet>
+      <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -226,16 +233,16 @@ const Dashboard = () => {
             </Link>
             </div>
             <div className="flex items-center gap-3">
-              <Link to="/notifications" className="relative p-2 text-slate-500 hover:text-primary-600 transition-colors">
-                <Bell size={20} />
+              <Link to="/notifications" aria-label="View notifications" className="relative p-2 text-slate-500 hover:text-primary-600 transition-colors">
+                <Bell size={20} aria-hidden="true" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </Link>
-              <Link to="/profile">
-                <img src={avatarSrc} alt="Profile" className="w-8 h-8 rounded-full object-cover ring-2 ring-primary-100" />
+              <Link to="/profile" aria-label="View your profile">
+                <img src={avatarSrc} alt={`${user?.name || 'Your'} profile`} className="w-8 h-8 rounded-full object-cover ring-2 ring-primary-100" />
               </Link>
             </div>
           </div>
@@ -279,47 +286,52 @@ const Dashboard = () => {
 
             {/* Quick Actions */}
             <motion.div initial="hidden" animate="visible" variants={fadeIn}
-              className="grid grid-cols-2 gap-4"
+              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
             >
-              <Link to="/discover"
-                className="bg-gradient-to-r from-primary-600 to-pink-500 text-white p-5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 group"
+              <h2 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h2>
+              <div
+                className="grid grid-cols-2 gap-4"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold mb-1">Discover</h3>
-                    <p className="text-primary-100 text-sm">Find your match</p>
+                <Link to="/discover"
+                  className="bg-gradient-to-r from-primary-600 to-pink-500 text-white p-5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold mb-1">Discover</h3>
+                      <p className="text-primary-100 text-sm">Find your match</p>
+                    </div>
+                    <Sparkles className="w-7 h-7 text-white/70 group-hover:scale-110 transition-transform" />
                   </div>
-                  <Sparkles className="w-7 h-7 text-white/70 group-hover:scale-110 transition-transform" />
-                </div>
-              </Link>
-              <Link to="/matches"
-                className="bg-white text-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold mb-1">Matches</h3>
-                    <p className="text-slate-500 text-sm">
-                      {conversations.length > 0 ? `${conversations.length} conversation${conversations.length > 1 ? 's' : ''}` : 'Chat with matches'}
-                    </p>
+                </Link>
+                <Link to="/matches"
+                  className="bg-white text-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold mb-1">Matches</h3>
+                      <p className="text-slate-500 text-sm">
+                        {conversations.length > 0 ? `${conversations.length} conversation${conversations.length > 1 ? 's' : ''}` : 'Chat with matches'}
+                      </p>
+                    </div>
+                    <Heart className="w-7 h-7 text-pink-500 group-hover:scale-110 transition-transform" />
                   </div>
-                  <Heart className="w-7 h-7 text-pink-500 group-hover:scale-110 transition-transform" />
-                </div>
-              </Link>
-              <Link to="/chats"
-                className="col-span-2 bg-white text-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold mb-1">Chats</h3>
-                    <p className="text-slate-500 text-sm">
-                      {conversations.filter(c => c.lastMessage).length > 0
-                        ? `${conversations.filter(c => c.lastMessage).length} active conversation${conversations.filter(c => c.lastMessage).length > 1 ? 's' : ''}`
-                        : 'All your conversations'}
-                    </p>
+                </Link>
+                <Link to="/chats"
+                  className="col-span-2 bg-white text-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold mb-1">Chats</h3>
+                      <p className="text-slate-500 text-sm">
+                        {conversations.filter(c => c.lastMessage).length > 0
+                          ? `${conversations.filter(c => c.lastMessage).length} active conversation${conversations.filter(c => c.lastMessage).length > 1 ? 's' : ''}`
+                          : 'All your conversations'}
+                      </p>
+                    </div>
+                    <MessageCircle className="w-7 h-7 text-primary-500 group-hover:scale-110 transition-transform" />
                   </div>
-                  <MessageCircle className="w-7 h-7 text-primary-500 group-hover:scale-110 transition-transform" />
-                </div>
-              </Link>
+                </Link>
+              </div>
             </motion.div>
 
             {/* Ad — between quick actions and chats (free users only) */}
@@ -475,7 +487,8 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

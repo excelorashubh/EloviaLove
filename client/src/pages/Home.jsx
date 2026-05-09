@@ -342,7 +342,7 @@ const Home = () => {
             variants={fadeIn}
             className="text-center max-w-3xl mx-auto mb-16"
           >
-            <h2 className="text-primary-600 font-semibold tracking-wide uppercase mb-3">Why Elovia Love?</h2>
+            <h3 className="text-primary-600 font-semibold tracking-wide uppercase mb-3">Why Elovia Love?</h3>
             <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Built for meaningful connections</h3>
             <p className="text-lg text-slate-600">We've designed our platform from the ground up to foster real, authentic conversations rather than endless swiping.</p>
           </motion.div>

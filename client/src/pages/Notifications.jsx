@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { Heart, MessageCircle, Bell, CheckCheck, User } from 'lucide-react';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
@@ -84,7 +85,13 @@ const Notifications = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
+      <Helmet>
+        <title>Notifications — Elovia Love</title>
+        <meta name="description" content="View all your notifications from matches, messages, and profile activity on Elovia Love." />
+        <link rel="canonical" href="https://elovialove.onrender.com/notifications" />
+      </Helmet>
+      <div className="min-h-screen bg-slate-50">
       <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center py-4">
@@ -189,7 +196,8 @@ const Notifications = () => {
           </motion.div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

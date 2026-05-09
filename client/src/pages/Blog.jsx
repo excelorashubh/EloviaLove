@@ -131,7 +131,7 @@ const Blog = () => {
         <meta property="og:description" content={pageDesc} />
         <meta property="og:url"         content="https://elovialove.onrender.com/blog" />
         <meta property="og:type"        content="website" />
-        <meta property="og:image"       content="https://elovialove.onrender.com/EloviaLoveWB.png" />
+        <meta property="og:image"       content="https://elovialove.onrender.com/EloviaLoveWB_small.png" />
       </Helmet>
       <Navbar />
 

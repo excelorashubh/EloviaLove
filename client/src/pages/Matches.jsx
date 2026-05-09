@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { MessageCircle, Heart, Search } from 'lucide-react';
 import api from '../services/api';
 
@@ -44,7 +45,13 @@ const Matches = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
+      <Helmet>
+        <title>Matches — Elovia Love</title>
+        <meta name="description" content="View your matches and connect with people you're interested in on Elovia Love." />
+        <link rel="canonical" href="https://elovialove.onrender.com/matches" />
+      </Helmet>
+      <div className="min-h-screen bg-slate-50">
       <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center py-4">
@@ -131,7 +138,8 @@ const Matches = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -46,8 +46,11 @@ const CookieConsent = () => {
                   <Link to="/about" className="text-primary-600 underline">Learn more</Link>
                 </p>
               </div>
-              <button onClick={decline} className="text-slate-400 hover:text-slate-600 shrink-0">
-                <X size={16} />
+              <button 
+                onClick={decline} 
+                aria-label="Close cookie consent notification"
+                className="text-slate-400 hover:text-slate-600 shrink-0">
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
             <div className="flex gap-2">

@@ -99,18 +99,18 @@ const Signup = () => {
         <link rel="canonical" href="https://elovialove.onrender.com/signup" />
       </Helmet>
       {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-tr from-pink-200 to-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-x-1/3 -translate-y-1/3" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-primary-200 to-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-x-1/3 translate-y-1/3" />
+      <div className="absolute top-0 right-0 w-150 h-150 bg-linear-to-tr from-pink-200 to-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-x-1/3 -translate-y-1/3" />
+      <div className="absolute bottom-0 left-0 w-150 h-150 bg-linear-to-tr from-primary-200 to-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-x-1/3 translate-y-1/3" />
       
       <div className="sm:mx-auto sm:w-full sm:max-w-xl relative z-10 my-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-white py-10 px-4 shadow-2xl shadow-slate-200/50 sm:rounded-[2rem] sm:px-10 border border-slate-100/50 backdrop-blur-sm"
+          className="bg-white py-10 px-4 shadow-2xl shadow-slate-200/50 sm:rounded-4xl  sm:px-10 border border-slate-100/50 backdrop-blur-sm"
         >
           <div className="sm:mx-auto sm:w-full sm:max-w-md mb-8 text-center flex flex-col items-center">
-            <Link to="/" className="inline-flex items-center justify-center p-3 bg-gradient-to-tr from-primary-500 to-pink-500 rounded-2xl mb-4 group hover:rotate-12 transition-transform duration-300 shadow-xl shadow-pink-500/25">
+            <Link to="/" className="inline-flex items-center justify-center p-3 bg-linear-to-tr from-primary-500 to-pink-500 rounded-2xl mb-4 group hover:rotate-12 transition-transform duration-300 shadow-xl shadow-pink-500/25">
               <Heart size={32} className="text-white" fill="currentColor" />
             </Link>
             <h2 className="text-3xl font-extrabold text-slate-900 mb-6">Join Elovia Love</h2>
@@ -159,7 +159,7 @@ const Signup = () => {
                     required
                     value={formData.dob}
                     onChange={handleInputChange}
-                    className="appearance-none block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-slate-50 focus:bg-white transition-all sm:text-sm font-medium text-slate-900 text-slate-500"
+                    className="appearance-none block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-slate-50 focus:bg-white transition-all sm:text-sm font-medium text-slate-900  text-slate-500"
                   />
                 </div>
               </div>
@@ -233,6 +233,7 @@ const Signup = () => {
                   />
                   <button
                     type="button"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                   >
@@ -282,6 +283,7 @@ const Signup = () => {
                   />
                   <button
                     type="button"
+                    aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >

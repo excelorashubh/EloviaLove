@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, ArrowLeft, Check, CheckCheck, WifiOff } from 'lucide-react';
 import { io } from 'socket.io-client';
@@ -265,7 +266,13 @@ const Chat = () => {
     `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUser?.name || 'U')}&background=e879a0&color=fff`;
 
   return (
-    <div className="flex flex-col h-screen bg-slate-50">
+    <>
+      <Helmet>
+        <title>Chat — Elovia Love</title>
+        <meta name="description" content="Real-time messaging with your matches on Elovia Love." />
+        <link rel="canonical" href="https://elovialove.onrender.com/chat" />
+      </Helmet>
+      <div className="flex flex-col h-screen bg-slate-50">
 
       {/* ── Header ── */}
       <header className="bg-white border-b border-slate-200 shadow-sm shrink-0 z-10">
@@ -370,7 +377,7 @@ const Chat = () => {
               >
                 {/* Other user avatar */}
                 {!isMe && !isGrouped && (
-                  <img src={otherAvatar} alt="" className="w-7 h-7 rounded-full object-cover mr-2 self-end shrink-0" />
+                  <img src={otherAvatar} alt={`${otherUser?.name}'s profile picture`} className="w-7 h-7 rounded-full object-cover mr-2 self-end shrink-0" />
                 )}
                 {!isMe && isGrouped && <div className="w-7 mr-2 shrink-0" />}
 
@@ -422,7 +429,7 @@ const Chat = () => {
                 exit={{ opacity: 0, y: 8 }}
                 className="flex items-end gap-2 mt-3"
               >
-                <img src={otherAvatar} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                <img src={otherAvatar} alt={`${otherUser?.name} is typing`} className="w-7 h-7 rounded-full object-cover shrink-0" />
                 <div className="bg-white border border-slate-100 shadow-sm px-4 py-3 rounded-2xl rounded-tl-md flex gap-1 items-center">
                   {[0, 1, 2].map(i => (
                     <span
@@ -468,7 +475,8 @@ const Chat = () => {
           </p>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -96,7 +96,7 @@ const DatingTips = () => {
   const pageTitle = 'Dating Tips & Relationship Advice — Elovia Love';
   const pageDescription = 'Expert dating tips and relationship advice for Indians. Learn how to find love, build healthy relationships, and navigate modern dating in India.';
   const pageUrl = `${BASE_URL}/blog/dating-tips`;
-  const pageImage = `${BASE_URL}/EloviaLoveWB.png`;
+  const pageImage = `${BASE_URL}/EloviaLoveWB_small.png`;
 
   return (
     <>
@@ -147,7 +147,7 @@ const DatingTips = () => {
             publisher: {
               '@type': 'Organization',
               name: 'Elovia Love',
-              logo: { '@type': 'ImageObject', url: `${BASE_URL}/EloviaLoveWB.png` },
+              logo: { '@type': 'ImageObject', url: `${BASE_URL}/EloviaLoveWB_small.png` },
             },
           })}
         </script>
