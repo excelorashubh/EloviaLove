@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -139,9 +139,11 @@ const Chats = () => {
 
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 
-  const filtered = conversations.filter(c =>
-    c.otherUser.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = useMemo(() => {
+    return conversations.filter(c =>
+      c.otherUser.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [conversations, search]);
 
   if (loading) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -278,6 +280,9 @@ const Chats = () => {
                           className={`w-14 h-14 rounded-full object-cover transition-all ${
                             isUnread ? 'ring-2 ring-primary-400 ring-offset-2' : ''
                           }`}
+                          loading="lazy"
+                          width="56"
+                          height="56"
                         />
                         {isUnread && (
                           <motion.span

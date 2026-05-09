@@ -12,10 +12,10 @@ import api from './services/api';
 
 // ── Eagerly loaded pages (above-the-fold, critical) ──────────────────────────
 import Home from './pages/Home';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
 
 // ── Lazy loaded pages (public, non-critical) ──────────────────────────────────
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Pricing = lazy(() => import('./pages/Pricing'));
@@ -129,8 +129,8 @@ function App() {
           <Route path="/" element={<MainLayout showNav><Home /></MainLayout>} />
           <Route path="/about" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><About /></Suspense></MainLayout>} />
           <Route path="/contact" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Contact /></Suspense></MainLayout>} />
-          <Route path="/login" element={<MainLayout showNav><GuestRoute><Login /></GuestRoute></MainLayout>} />
-          <Route path="/signup" element={<MainLayout showNav><GuestRoute><Signup /></GuestRoute></MainLayout>} />
+          <Route path="/login" element={<MainLayout showNav><GuestRoute><Suspense fallback={<LoadingFallback />}><Login /></Suspense></GuestRoute></MainLayout>} />
+          <Route path="/signup" element={<MainLayout showNav><GuestRoute><Suspense fallback={<LoadingFallback />}><Signup /></Suspense></GuestRoute></MainLayout>} />
           <Route path="/pricing" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Pricing /></Suspense></MainLayout>} />
           <Route path="/blog" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Blog /></Suspense></MainLayout>} />
           <Route path="/blog/" element={<Navigate to="/blog" replace />} />

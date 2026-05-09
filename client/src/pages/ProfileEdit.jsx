@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import {
   Camera, Check, X, ArrowLeft, MapPin, User, FileText,
@@ -131,7 +132,13 @@ const ProfileEdit = () => {
     || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&size=128&background=e879a0&color=fff`;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
+      <Helmet>
+        <title>Edit Profile — Elovia Love</title>
+        <meta name="description" content="Update your profile details and preferences on Elovia Love." />
+        <link rel="canonical" href="https://elovialove.onrender.com/profile/edit" />
+      </Helmet>
+      <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
@@ -350,6 +357,7 @@ const ProfileEdit = () => {
         </motion.div>
       </div>
     </div>
+    </>
   );
 };
 

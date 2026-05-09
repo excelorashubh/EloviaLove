@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,6 +45,59 @@ const groupByDate = (messages, myId) => {
   });
   return groups;
 };
+
+const MessageBubble = React.memo(({ item, isMe, isGrouped, otherAvatar, otherUser, retryFailed }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      className={`flex ${isMe ? 'justify-end' : 'justify-start'} ${isGrouped ? 'mt-0.5' : 'mt-3'}`}
+    >
+      {/* Other user avatar */}
+      {!isMe && !isGrouped && (
+        <img src={otherAvatar} alt={`${otherUser?.name}'s profile picture`} loading="lazy" width="28" height="28" className="w-7 h-7 rounded-full object-cover mr-2 self-end shrink-0" />
+      )}
+      {!isMe && isGrouped && <div className="w-7 mr-2 shrink-0" />}
+
+      <div className={`max-w-[72%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+        {/* Bubble */}
+        <div
+          onClick={() => item.failed && retryFailed(item)}
+          className={[
+            'px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words',
+            isMe
+              ? `bg-gradient-to-br from-primary-600 to-pink-500 text-white shadow-md shadow-pink-500/20
+                 ${item.failed ? 'opacity-50 cursor-pointer' : ''}
+                 ${item.pending ? 'opacity-80' : ''}`
+              : 'bg-white text-slate-900 border border-slate-100 shadow-sm',
+            isMe && isGrouped ? 'rounded-tr-md' : '',
+            !isMe && isGrouped ? 'rounded-tl-md' : '',
+          ].join(' ')}
+        >
+          {item.content}
+          {item.failed && (
+            <span className="block text-[10px] text-red-200 mt-1">Tap to retry</span>
+          )}
+        </div>
+
+        {/* Timestamp + status */}
+        <div className={`flex items-center gap-1 mt-0.5 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
+          <span className="text-[10px] text-slate-400">{formatTime(item.createdAt)}</span>
+          {isMe && (
+            item.pending
+              ? <Check size={11} className="text-slate-300" />
+              : item.failed
+                ? <span className="text-[10px] text-red-400">!</span>
+                : item.isRead
+                  ? <CheckCheck size={11} className="text-primary-500" />
+                  : <CheckCheck size={11} className="text-slate-400" />
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+});
 
 const Chat = () => {
   const { userId } = useParams();
@@ -368,55 +421,15 @@ const Chat = () => {
             const isGrouped = prevSender === currSender;
 
             return (
-              <motion.div
+              <MessageBubble
                 key={item._id}
-                initial={{ opacity: 0, y: 10, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
-                className={`flex ${isMe ? 'justify-end' : 'justify-start'} ${isGrouped ? 'mt-0.5' : 'mt-3'}`}
-              >
-                {/* Other user avatar */}
-                {!isMe && !isGrouped && (
-                  <img src={otherAvatar} alt={`${otherUser?.name}'s profile picture`} className="w-7 h-7 rounded-full object-cover mr-2 self-end shrink-0" />
-                )}
-                {!isMe && isGrouped && <div className="w-7 mr-2 shrink-0" />}
-
-                <div className={`max-w-[72%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                  {/* Bubble */}
-                  <div
-                    onClick={() => item.failed && retryFailed(item)}
-                    className={[
-                      'px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words',
-                      isMe
-                        ? `bg-gradient-to-br from-primary-600 to-pink-500 text-white shadow-md shadow-pink-500/20
-                           ${item.failed ? 'opacity-50 cursor-pointer' : ''}
-                           ${item.pending ? 'opacity-80' : ''}`
-                        : 'bg-white text-slate-900 border border-slate-100 shadow-sm',
-                      isMe && isGrouped ? 'rounded-tr-md' : '',
-                      !isMe && isGrouped ? 'rounded-tl-md' : '',
-                    ].join(' ')}
-                  >
-                    {item.content}
-                    {item.failed && (
-                      <span className="block text-[10px] text-red-200 mt-1">Tap to retry</span>
-                    )}
-                  </div>
-
-                  {/* Timestamp + status */}
-                  <div className={`flex items-center gap-1 mt-0.5 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
-                    <span className="text-[10px] text-slate-400">{formatTime(item.createdAt)}</span>
-                    {isMe && (
-                      item.pending
-                        ? <Check size={11} className="text-slate-300" />
-                        : item.failed
-                          ? <span className="text-[10px] text-red-400">!</span>
-                          : item.isRead
-                            ? <CheckCheck size={11} className="text-primary-500" />
-                            : <CheckCheck size={11} className="text-slate-400" />
-                    )}
-                  </div>
-                </div>
-              </motion.div>
+                item={item}
+                isMe={isMe}
+                isGrouped={isGrouped}
+                otherAvatar={otherAvatar}
+                otherUser={otherUser}
+                retryFailed={retryFailed}
+              />
             );
           })}
 

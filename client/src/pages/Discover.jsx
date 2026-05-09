@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import {
@@ -35,7 +35,7 @@ const PLAN_META = {
 };
 
 // ── Match Popup ──────────────────────────────────────────────────────────────
-const MatchPopup = ({ matchedUser, onClose }) => {
+const MatchPopup = React.memo(({ matchedUser, onClose }) => {
   const navigate = useNavigate();
   return (
     <motion.div
@@ -80,10 +80,10 @@ const MatchPopup = ({ matchedUser, onClose }) => {
       </motion.div>
     </motion.div>
   );
-};
+});
 
 // ── Like Toast ───────────────────────────────────────────────────────────────
-const LikeToast = ({ likedUser, onClose }) => {
+const LikeToast = React.memo(({ likedUser, onClose }) => {
   const navigate = useNavigate();
   return (
     <motion.div
@@ -99,6 +99,9 @@ const LikeToast = ({ likedUser, onClose }) => {
             src={likedUser?.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(likedUser?.name || '')}&background=e879a0&color=fff&size=80`}
             alt={likedUser?.name}
             className="w-12 h-12 rounded-full object-cover"
+            loading="lazy"
+            width="48"
+            height="48"
           />
           <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-primary-500 to-pink-500 rounded-full flex items-center justify-center">
             <Heart size={10} className="text-white" fill="currentColor" />
@@ -120,10 +123,10 @@ const LikeToast = ({ likedUser, onClose }) => {
       </div>
     </motion.div>
   );
-};
+});
 
 // ── Upgrade Modal ─────────────────────────────────────────────────────────────
-const UpgradeModal = ({ requiredPlan, onClose }) => {
+const UpgradeModal = React.memo(({ requiredPlan, onClose }) => {
   const navigate = useNavigate();
   const meta = PLAN_META[requiredPlan] || PLAN_META.premium;
   const Icon = meta.icon;
@@ -159,10 +162,10 @@ const UpgradeModal = ({ requiredPlan, onClose }) => {
       </motion.div>
     </motion.div>
   );
-};
+});
 
 // ── Filter section wrapper ────────────────────────────────────────────────────
-const FilterSection = ({ title, requiredPlan, userPlan, onLockClick, children }) => {
+const FilterSection = React.memo(({ title, requiredPlan, userPlan, onLockClick, children }) => {
   const locked = !planHas(userPlan, requiredPlan);
   const meta   = PLAN_META[requiredPlan];
   const Icon   = meta?.icon;
@@ -182,10 +185,10 @@ const FilterSection = ({ title, requiredPlan, userPlan, onLockClick, children })
       <div className={locked ? 'pointer-events-none select-none' : ''}>{children}</div>
     </div>
   );
-};
+});
 
 // ── Pill toggle ───────────────────────────────────────────────────────────────
-const PillGroup = ({ options, value, onChange, multi = false }) => (
+const PillGroup = React.memo(({ options, value, onChange, multi = false }) => (
   <div className="flex flex-wrap gap-1.5">
     {options.map(opt => {
       const active = multi ? (value || []).includes(opt) : value === opt;
@@ -209,10 +212,10 @@ const PillGroup = ({ options, value, onChange, multi = false }) => (
       );
     })}
   </div>
-);
+));
 
 // ── Filter Panel ─────────────────────────────────────────────────────────────
-const FilterPanel = ({ filters, onChange, onApply, onClose, userPlan }) => {
+const FilterPanel = React.memo(({ filters, onChange, onApply, onClose, userPlan }) => {
   const [upgradeModal, setUpgradeModal] = useState(null); // plan string
 
   const field = (key) => ({
@@ -413,10 +416,10 @@ const FilterPanel = ({ filters, onChange, onApply, onClose, userPlan }) => {
       </AnimatePresence>
     </>
   );
-};
+});
 
 // ── Swipeable Card ────────────────────────────────────────────────────────────
-const SwipeCard = ({ user, onLike, onPass, isTop }) => {
+const SwipeCard = React.memo(({ user, onLike, onPass, isTop }) => {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
   const likeOpacity = useTransform(x, [20, 100], [0, 1]);
@@ -449,7 +452,7 @@ const SwipeCard = ({ user, onLike, onPass, isTop }) => {
 
       {/* Photo */}
       <div className="relative h-96">
-        <img src={avatar} alt={user.name} className="w-full h-full object-cover" />
+        <img src={avatar} alt={user.name} className="w-full h-full object-cover" loading={isTop ? "eager" : "lazy"} width="400" height="400" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         <div className="absolute bottom-5 left-5 right-5 text-white">
           <div className="flex items-end gap-2 mb-1">
@@ -498,7 +501,7 @@ const SwipeCard = ({ user, onLike, onPass, isTop }) => {
       </div>
     </motion.div>
   );
-};
+});
 
 // ── Main Discover Page ────────────────────────────────────────────────────────
 const Discover = () => {
@@ -755,7 +758,7 @@ const Discover = () => {
                     )}
                     <div className="bg-white rounded-2xl p-4 border border-pink-100 shadow-sm flex items-center gap-4">
                     <div className="relative shrink-0">
-                      <img src={avatar} alt={profile.name} className="w-14 h-14 rounded-full object-cover" />
+                      <img src={avatar} alt={profile.name} className="w-14 h-14 rounded-full object-cover" loading="lazy" width="56" height="56" />
                       <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-pink-500 to-primary-500 rounded-full flex items-center justify-center">
                         <Heart size={10} className="text-white" fill="currentColor" />
                       </div>

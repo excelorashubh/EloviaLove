@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -34,9 +34,11 @@ const Matches = () => {
     load();
   }, []);
 
-  const filtered = conversations.filter(c =>
-    c.otherUser.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = useMemo(() => {
+    return conversations.filter(c =>
+      c.otherUser.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [conversations, search]);
 
   if (loading) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -97,6 +99,9 @@ const Matches = () => {
                       src={conv.otherUser.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(conv.otherUser.name)}&background=e879a0&color=fff`}
                       alt={conv.otherUser.name}
                       className="w-12 h-12 rounded-full object-cover"
+                      loading="lazy"
+                      width="48"
+                      height="48"
                     />
                   </div>
                   <div className="flex-1 min-w-0">

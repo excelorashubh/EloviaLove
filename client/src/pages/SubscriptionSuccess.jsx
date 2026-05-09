@@ -1,9 +1,16 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Crown, Heart } from 'lucide-react';
 
 const SubscriptionSuccess = () => (
-  <div className="min-h-screen bg-gradient-to-br from-primary-50 to-pink-50 flex items-center justify-center px-4">
+  <>
+    <Helmet>
+      <title>Subscription Confirmed — Elovia Love</title>
+      <meta name="description" content="Your subscription purchase was successful. Enjoy premium features on Elovia Love." />
+      <link rel="canonical" href="https://elovialove.onrender.com/subscription/success" />
+    </Helmet>
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-pink-50 flex items-center justify-center px-4">
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -28,6 +35,7 @@ const SubscriptionSuccess = () => (
       </div>
     </motion.div>
   </div>
+  </>
 );
 
 export default SubscriptionSuccess;

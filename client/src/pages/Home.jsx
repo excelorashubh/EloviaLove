@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Heart, Star, Shield, Zap, MessageCircle, MapPin, Users, HeartHandshake, Quote } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
-import FAQAccordion from '../components/FAQAccordion';
-import BannerAd from '../components/ads/BannerAd';
-import AdWrapper from '../components/ads/AdWrapper';
+
+const FAQAccordion = React.lazy(() => import('../components/FAQAccordion'));
+const BannerAd = React.lazy(() => import('../components/ads/BannerAd'));
+const AdWrapper = React.lazy(() => import('../components/ads/AdWrapper'));
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -30,6 +31,7 @@ const Home = () => {
         <title>Elovia Love – Relationship Advice, Dating Tips & Love Guides</title>
         <meta name="description" content="Elovia Love is India's verified dating platform for serious relationships. No fake profiles. Real connections. Start your free trial today." />
         <link rel="canonical" href="https://elovialove.onrender.com/" />
+        <link rel="preload" as="image" href="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1920&auto=format&fm=webp" fetchpriority="high" />
         <meta property="og:title" content="Elovia Love – Relationship Advice, Dating Tips & Love Guides" />
         <meta property="og:description" content="India's verified dating platform. No fake profiles. Real connections." />
         <meta property="og:url" content="https://elovialove.onrender.com/" />
@@ -126,7 +128,7 @@ const Home = () => {
       <Navbar />
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-5" />
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1920&auto=format&fm=webp')] bg-cover bg-center opacity-5" />
         <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/50 to-white/95" />
         <div className="absolute top-20 left-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
         <div className="absolute top-40 right-10 w-72 h-72 bg-primary-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
@@ -207,13 +209,13 @@ const Home = () => {
           >
             <div className="flex -space-x-4 mb-3">
               {[
-                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop",
-                "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&auto=format&fit=crop",
-                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop",
-                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop",
-                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fm=webp&fit=crop",
+                "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&auto=format&fm=webp&fit=crop",
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fm=webp&fit=crop",
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fm=webp&fit=crop",
+                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fm=webp&fit=crop",
               ].map((src, idx) => (
-                <img key={idx} className="w-12 h-12 rounded-full border-4 border-white object-cover" src={src} alt="User" />
+                <img key={idx} className="w-12 h-12 rounded-full border-4 border-white object-cover" src={src} alt="User" loading="lazy" width="48" height="48" />
               ))}
             </div>
             <div className="text-sm font-medium text-slate-500 flex items-center gap-1">
@@ -327,9 +329,11 @@ const Home = () => {
 
       {/* Ad — between hero and features */}
       <div className="py-4 bg-white flex justify-center">
-        <AdWrapper showUpgradeNudge>
-          <BannerAd slot="1234567890" />
-        </AdWrapper>
+        <React.Suspense fallback={<div className="h-24 w-full max-w-3xl bg-slate-100 animate-pulse rounded-lg" />}>
+          <AdWrapper showUpgradeNudge>
+            <BannerAd slot="1234567890" />
+          </AdWrapper>
+        </React.Suspense>
       </div>
 
       {/* Features Section */}
@@ -552,17 +556,17 @@ const Home = () => {
               {
                 text: "I had given up on dating apps until I found Elovia Love. The quality of matches and conversations here is unmatched. We are getting married next month!",
                 author: "Sarah & David",
-                image: "https://images.unsplash.com/photo-1522851259500-2eac44e7cde2?w=500&auto=format&fit=crop"
+                image: "https://images.unsplash.com/photo-1522851259500-2eac44e7cde2?w=500&auto=format&fm=webp&fit=crop"
               },
               {
                 text: "The verification process made me feel so much safer. I met Alex within my first week and we hit it off instantly. Thank you for this amazing platform.",
                 author: "Emily & Alex",
-                image: "https://images.unsplash.com/photo-1543854589-9892c554e950?w=500&auto=format&fit=crop"
+                image: "https://images.unsplash.com/photo-1543854589-9892c554e950?w=500&auto=format&fm=webp&fit=crop"
               },
               {
                 text: "What I loved most were the icebreakers. It made starting that first conversation so easy. Now we've been together for 2 years and adopted a dog!",
                 author: "Jessica & Michael",
-                image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=500&auto=format&fit=crop"
+                image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=500&auto=format&fm=webp&fit=crop"
               }
             ].map((testimonial, idx) => (
               <motion.div 
@@ -579,7 +583,7 @@ const Home = () => {
                 </div>
                 <p className="text-slate-700 italic mb-8 relative z-10 leading-relaxed font-medium">"{testimonial.text}"</p>
                 <div className="flex items-center gap-4">
-                  <img src={testimonial.image} alt={testimonial.author} className="w-14 h-14 rounded-full object-cover shadow-md border-2 border-white" />
+                  <img src={testimonial.image} alt={testimonial.author} loading="lazy" width="56" height="56" className="w-14 h-14 rounded-full object-cover shadow-md border-2 border-white" />
                   <div>
                     <h5 className="font-bold text-slate-900">{testimonial.author}</h5>
                     <p className="text-sm text-primary-600 font-medium">Matched 2024</p>
@@ -593,9 +597,11 @@ const Home = () => {
 
       {/* Ad — between testimonials and CTA */}
       <div className="py-4 bg-white flex justify-center">
-        <AdWrapper showUpgradeNudge>
-          <BannerAd slot="1234567891" />
-        </AdWrapper>
+        <React.Suspense fallback={<div className="h-24 w-full max-w-3xl bg-slate-100 animate-pulse rounded-lg" />}>
+          <AdWrapper showUpgradeNudge>
+            <BannerAd slot="1234567891" />
+          </AdWrapper>
+        </React.Suspense>
       </div>
 
       {/* FAQ Section */}
@@ -612,48 +618,50 @@ const Home = () => {
             <p className="text-lg text-slate-600">Everything you need to know about finding love on Elovia Love.</p>
           </motion.div>
 
-          <FAQAccordion faqs={[
-            {
-              question: "Is Elovia Love for serious relationships?",
-              answer: "Yes, Elovia Love is specifically designed for singles seeking serious, long-term relationships. Unlike casual dating apps, we focus on meaningful connections and compatibility matching to help you find a partner who shares your values and life goals."
-            },
-            {
-              question: "How does profile verification work?",
-              answer: "Every profile on Elovia Love goes through a comprehensive verification process. Users must provide government-issued ID, complete a detailed questionnaire, and submit photos that are manually reviewed by our team. This ensures you're connecting with real people who are genuinely interested in relationships."
-            },
-            {
-              question: "Is Elovia Love safe for online dating?",
-              answer: "Safety is our top priority. We use bank-level encryption for all communications, provide advanced privacy controls, and offer safety tools like emergency contact sharing and location check-ins. Our verification process eliminates fake profiles, and we have a dedicated safety team that responds to reports within 24 hours."
-            },
-            {
-              question: "How does the matching algorithm work?",
-              answer: "Our AI-powered matching system considers multiple factors including your personality traits, values, lifestyle preferences, cultural background, and relationship goals. We go beyond surface-level matching to ensure compatibility that leads to lasting relationships."
-            },
-            {
-              question: "Is Elovia Love free to use?",
-              answer: "You can create a profile and browse matches for free. Premium features like unlimited messaging, advanced filters, and priority matching are available through our subscription plans. We believe in quality over quantity, so even our free features are designed to help you find meaningful connections."
-            },
-            {
-              question: "What makes Elovia Love different from other dating apps?",
-              answer: "Unlike casual dating apps focused on swiping and quick matches, Elovia Love is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for Indian singles who want long-term partnerships rather than casual encounters."
-            },
-            {
-              question: "How do I know if someone is verified?",
-              answer: "Verified profiles display a blue checkmark badge next to their name. This badge indicates they've completed our verification process, including ID submission, photo review, and questionnaire completion. You can only match with verified users, ensuring authenticity."
-            },
-            {
-              question: "What safety features does Elovia Love offer?",
-              answer: "We offer comprehensive safety features including emergency contact sharing, location check-ins, photo verification, encrypted messaging, and a 24/7 safety team. You can also block/report suspicious users, and all profiles are manually reviewed before approval."
-            },
-            {
-              question: "Can I use Elovia Love if I'm looking for marriage?",
-              answer: "Absolutely. Many of our users are marriage-minded singles. Our matching algorithm considers relationship goals, and you can specify 'marriage' as your objective in your profile. We help connect people who share similar long-term aspirations."
-            },
-            {
-              question: "How does Elovia Love handle cultural compatibility?",
-              answer: "Our platform is designed with Indian cultural context in mind. We consider factors like family values, religious preferences, and cultural background in our matching algorithm. This helps create more compatible, lasting relationships within the Indian community."
-            }
-          ]} />
+          <React.Suspense fallback={<div className="h-64 w-full bg-slate-100 animate-pulse rounded-xl" />}>
+            <FAQAccordion faqs={[
+              {
+                question: "Is Elovia Love for serious relationships?",
+                answer: "Yes, Elovia Love is specifically designed for singles seeking serious, long-term relationships. Unlike casual dating apps, we focus on meaningful connections and compatibility matching to help you find a partner who shares your values and life goals."
+              },
+              {
+                question: "How does profile verification work?",
+                answer: "Every profile on Elovia Love goes through a comprehensive verification process. Users must provide government-issued ID, complete a detailed questionnaire, and submit photos that are manually reviewed by our team. This ensures you're connecting with real people who are genuinely interested in relationships."
+              },
+              {
+                question: "Is Elovia Love safe for online dating?",
+                answer: "Safety is our top priority. We use bank-level encryption for all communications, provide advanced privacy controls, and offer safety tools like emergency contact sharing and location check-ins. Our verification process eliminates fake profiles, and we have a dedicated safety team that responds to reports within 24 hours."
+              },
+              {
+                question: "How does the matching algorithm work?",
+                answer: "Our AI-powered matching system considers multiple factors including your personality traits, values, lifestyle preferences, cultural background, and relationship goals. We go beyond surface-level matching to ensure compatibility that leads to lasting relationships."
+              },
+              {
+                question: "Is Elovia Love free to use?",
+                answer: "You can create a profile and browse matches for free. Premium features like unlimited messaging, advanced filters, and priority matching are available through our subscription plans. We believe in quality over quantity, so even our free features are designed to help you find meaningful connections."
+              },
+              {
+                question: "What makes Elovia Love different from other dating apps?",
+                answer: "Unlike casual dating apps focused on swiping and quick matches, Elovia Love is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for Indian singles who want long-term partnerships rather than casual encounters."
+              },
+              {
+                question: "How do I know if someone is verified?",
+                answer: "Verified profiles display a blue checkmark badge next to their name. This badge indicates they've completed our verification process, including ID submission, photo review, and questionnaire completion. You can only match with verified users, ensuring authenticity."
+              },
+              {
+                question: "What safety features does Elovia Love offer?",
+                answer: "We offer comprehensive safety features including emergency contact sharing, location check-ins, photo verification, encrypted messaging, and a 24/7 safety team. You can also block/report suspicious users, and all profiles are manually reviewed before approval."
+              },
+              {
+                question: "Can I use Elovia Love if I'm looking for marriage?",
+                answer: "Absolutely. Many of our users are marriage-minded singles. Our matching algorithm considers relationship goals, and you can specify 'marriage' as your objective in your profile. We help connect people who share similar long-term aspirations."
+              },
+              {
+                question: "How does Elovia Love handle cultural compatibility?",
+                answer: "Our platform is designed with Indian cultural context in mind. We consider factors like family values, religious preferences, and cultural background in our matching algorithm. This helps create more compatible, lasting relationships within the Indian community."
+              }
+            ]} />
+          </React.Suspense>
         </div>
       </section>
 
