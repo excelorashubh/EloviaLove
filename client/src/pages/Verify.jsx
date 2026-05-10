@@ -121,8 +121,14 @@ const Verify = () => {
   const isPremium = ['premium', 'pro'].includes(user?.plan);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50 pb-16">
-      <div className="max-w-lg mx-auto px-4 pt-8">
+    <>
+      <Helmet>
+        <title>Verify Your Account — Elovia Love</title>
+        <meta name="description" content="Complete account verification to increase trust and match success on Elovia Love." />
+        <link rel="canonical" href="https://elovialove.onrender.com/verify" />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50 pb-16">
+        <div className="max-w-lg mx-auto px-4 pt-8">
 
         {/* Back */}
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-6 text-sm font-medium">
@@ -378,6 +384,7 @@ const Verify = () => {
         </AnimatePresence>
       </div>
     </div>
+    </>
   );
 };
 
