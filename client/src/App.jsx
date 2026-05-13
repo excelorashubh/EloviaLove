@@ -9,6 +9,7 @@ import AdminRoute from './components/AdminRoute';
 import Footer from './components/layout/Footer';
 import CookieConsent from './components/CookieConsent';
 import api from './services/api';
+import { SEO_PAGE_SLUGS } from './data/seoContent';
 
 // ── Eagerly loaded pages (above-the-fold, critical) ──────────────────────────
 import Home from './pages/Home';
@@ -22,6 +23,7 @@ const Pricing = lazy(() => import('./pages/Pricing'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const DatingTips = lazy(() => import('./pages/DatingTips'));
+const SeoPage = lazy(() => import('./pages/SeoPage'));
 
 // ── Lazy loaded authenticated pages ────────────────────────────────────────────
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -136,6 +138,19 @@ function App() {
           <Route path="/blog/" element={<Navigate to="/blog" replace />} />
           <Route path="/blog/dating-tips" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><DatingTips /></Suspense></MainLayout>} />
           <Route path="/blog/:slug" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><BlogPost /></Suspense></MainLayout>} />
+          {SEO_PAGE_SLUGS.map((slug) => (
+            <Route
+              key={slug}
+              path={`/${slug}`}
+              element={(
+                <MainLayout showNav>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <SeoPage slug={slug} />
+                  </Suspense>
+                </MainLayout>
+              )}
+            />
+          ))}
           <Route path="/dashboard" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Dashboard /></Suspense></ProtectedRoute></MainLayout>} />
           <Route path="/discover" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Discover /></Suspense></ProtectedRoute></MainLayout>} />
           <Route path="/matches" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Matches /></Suspense></ProtectedRoute></MainLayout>} />

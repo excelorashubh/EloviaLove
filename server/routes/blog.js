@@ -177,10 +177,36 @@ router.get('/sitemap.xml', async (req, res) => {
     <priority>0.8</priority>
   </url>`;
 
-    posts.forEach(post => {
+    const blogSlugs = [
+      'dating-profile-tips',
+      'online-dating-safety',
+      'first-message-examples',
+      'how-to-find-real-love',
+      'red-flags-in-online-dating',
+      'long-distance-relationship-advice',
+      'how-to-avoid-fake-profiles',
+      'best-dating-app-tips',
+      'how-to-start-a-conversation'
+    ];
+
+    const existingUrls = new Set([`${baseUrl}/`, `${baseUrl}/blog`, `${baseUrl}/blog/dating-tips`]);
+    blogSlugs.forEach((slug) => {
+      const url = `${baseUrl}/blog/${slug}`;
+      existingUrls.add(url);
       xml += `
   <url>
-    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <loc>${url}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>`;
+    });
+
+    posts.forEach(post => {
+      const url = `${baseUrl}/blog/${post.slug}`;
+      if (existingUrls.has(url)) return;
+      xml += `
+  <url>
+    <loc>${url}</loc>
     <lastmod>${post.updatedAt.toISOString().split('T')[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

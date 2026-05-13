@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
@@ -7,6 +7,7 @@ import Navbar from '../components/layout/Navbar';
 import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
+import { STATIC_BLOG_POST_LIST } from '../data/seoContent';
 
 const BASE_URL = 'https://elovialove.onrender.com';
 
@@ -120,6 +121,18 @@ const Blog = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const mergedPosts = useMemo(() => {
+    const combined = [...posts];
+    STATIC_BLOG_POST_LIST.forEach((staticPost) => {
+      if (!combined.some((post) => post.slug === staticPost.slug)) {
+        combined.push(staticPost);
+      }
+    });
+    return combined;
+  }, [posts]);
+
+  const visibleCount = Math.max(total, mergedPosts.length);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Helmet>
@@ -203,7 +216,7 @@ const Blog = () => {
           <div className="mx-auto max-w-4xl mb-8 text-left">
             <h3 className="text-xl font-semibold text-slate-900 mb-4">Explore our latest posts</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {posts.slice(0, 12).map(post => (
+              {mergedPosts.slice(0, 12).map(post => (
                 <Link
                   key={post._id}
                   to={`/blog/${post.slug}`}
@@ -212,14 +225,14 @@ const Blog = () => {
                   • {post.title}
                 </Link>
               ))}
-              {!posts.length && (
+              {!mergedPosts.length && (
                 <p className="text-slate-500">Recent posts will appear here once they are loaded.</p>
               )}
             </div>
           </div>
           <div className="grid gap-4 text-left mx-auto max-w-4xl">
-            {posts.length > 0 ? (
-              posts.slice(0, 4).map((post, index) => (
+            {mergedPosts.length > 0 ? (
+              mergedPosts.slice(0, 4).map((post, index) => (
                 <Link
                   key={post._id}
                   to={`/blog/${post.slug}`}
@@ -290,7 +303,7 @@ const Blog = () => {
                 <button onClick={() => setSearchParams({})} className="ml-1 hover:text-red-500">×</button>
               </span>
             )}
-            <span className="text-sm text-slate-400">{total} result{total !== 1 ? 's' : ''}</span>
+            <span className="text-sm text-slate-400">{visibleCount} result{visibleCount !== 1 ? 's' : ''}</span>
           </div>
         )}
 
@@ -299,7 +312,7 @@ const Blog = () => {
           <div className="flex justify-center py-20">
             <Loader2 size={36} className="text-primary-500 animate-spin" />
           </div>
-        ) : posts.length === 0 ? (
+        ) : mergedPosts.length === 0 ? (
           <div className="text-center py-20">
             <Heart size={48} className="text-slate-200 mx-auto mb-4" />
             <p className="text-slate-500 text-lg font-medium">No posts found</p>
@@ -309,12 +322,12 @@ const Blog = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post, i) => <PostCard key={post._id} post={post} idx={i} />)}
+            {mergedPosts.map((post, i) => <PostCard key={post._id} post={post} idx={i} />)}
           </div>
         )}
 
         {/* Ad */}
-        {!loading && posts.length > 0 && (
+        {!loading && mergedPosts.length > 0 && (
           <div className="py-8 flex justify-center">
             <AdWrapper showUpgradeNudge><BannerAd slot="9876543210" /></AdWrapper>
           </div>

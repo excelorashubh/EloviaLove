@@ -111,6 +111,12 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/elovialov
 
 // Routes
 app.set('io', io);
+
+// ── Prerendering middleware for SEO pages ───────────────────────────────────
+const { prerenderMiddleware } = require('./routes/seo');
+app.use(prerenderMiddleware);
+
+// ── API Routes ──────────────────────────────────────────────────────────────
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/match', require('./routes/match'));
@@ -122,6 +128,7 @@ app.use('/api/subscription', require('./routes/subscription'));
 app.use('/api/verify', require('./routes/verify'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/blog',     require('./routes/blog'));
+app.use('/api/seo', require('./routes/seo'));
 
 // Socket.io for real-time chat
 io.on('connection', (socket) => {
@@ -165,43 +172,76 @@ app.get('/sitemap.xml', async (req, res) => {
     const posts = await Blog.find({ isPublished: true }).select('slug updatedAt').sort({ updatedAt: -1 });
     const baseUrl = 'https://elovialove.onrender.com';
 
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/blog</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/blog/dating-tips</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/about</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/contact</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/pricing</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
+    const staticUrls = [
+      '/',
+      '/blog',
+      '/blog/dating-tips',
+      '/about',
+      '/contact',
+      '/pricing',
+      '/privacy',
+      '/terms',
+      '/safety',
+      '/community-guidelines',
+      '/dating-safety',
+      '/report-abuse',
+      '/help',
+      '/faq',
+      '/dating-in-delhi',
+      '/dating-in-mumbai',
+      '/dating-in-bangalore',
+      '/dating-in-kolkata',
+      '/dating-in-ranchi',
+      '/verified-profiles',
+      '/private-chat',
+      '/video-chat',
+      '/safe-dating',
+      '/serious-relationships'
+    ];
 
-    posts.forEach(post => {
+    const blogSlugs = [
+      'dating-profile-tips',
+      'online-dating-safety',
+      'first-message-examples',
+      'how-to-find-real-love',
+      'red-flags-in-online-dating',
+      'long-distance-relationship-advice',
+      'how-to-avoid-fake-profiles',
+      'best-dating-app-tips',
+      'how-to-start-a-conversation'
+    ];
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+    staticUrls.forEach((path) => {
       xml += `
   <url>
-    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <loc>${baseUrl}${path}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+    });
+
+    const existingUrls = new Set();
+    staticUrls.forEach((path) => existingUrls.add(`${baseUrl}${path}`));
+    blogSlugs.forEach((slug) => {
+      const url = `${baseUrl}/blog/${slug}`;
+      existingUrls.add(url);
+      xml += `
+  <url>
+    <loc>${url}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>`;
+    });
+
+    posts.forEach(post => {
+      const url = `${baseUrl}/blog/${post.slug}`;
+      if (existingUrls.has(url)) return;
+      xml += `
+  <url>
+    <loc>${url}</loc>
     <lastmod>${post.updatedAt.toISOString().split('T')[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

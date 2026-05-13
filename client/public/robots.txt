@@ -1,4 +1,71 @@
+# ── Elovia Love Robots.txt - Production SEO Optimization ─────────────────────
+# Block admin, user-specific, and low-value pages from crawling
+# Allow all public content pages for maximum indexing
+
 User-agent: *
+# Allow all public content
 Allow: /
 
+# Block admin pages (waste of crawl budget)
+Disallow: /admin
+Disallow: /admin/*
+
+# Block user-specific pages (privacy + crawl waste)
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /profile/*
+Disallow: /discover
+Disallow: /matches
+Disallow: /chat
+Disallow: /chat/*
+Disallow: /chats
+Disallow: /notifications
+
+# Block search/filter URLs (infinite crawl traps)
+Disallow: /discover?*
+Disallow: /*?filter=*
+Disallow: /*?search=*
+Disallow: /*?page=*
+Disallow: /*?sort=*
+
+# Block API routes (not useful for search engines)
+Disallow: /api
+Disallow: /api/*
+
+# Block development/debug routes
+Disallow: /verify
+Disallow: /subscription-success
+
+# Allow sitemap
+Allow: /sitemap.xml
+Allow: /api/blog/sitemap.xml
+
+# Sitemap location
 Sitemap: https://elovialove.onrender.com/sitemap.xml
+
+# ── Crawl Delay (if needed for Render free tier) ──────────────────────────────
+# Crawl-delay: 1
+
+# ── Specific Bot Instructions ─────────────────────────────────────────────────
+
+# Googlebot - Allow everything except blocked paths above
+User-agent: Googlebot
+Allow: /
+
+# Bingbot - Allow everything except blocked paths above
+User-agent: Bingbot
+Allow: /
+
+# Block aggressive bots
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Crawl-delay: 10
+
+# ── Mobile Crawlers ──────────────────────────────────────────────────────────
+User-agent: Googlebot-Mobile
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
