@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
+const path = require('path');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
@@ -23,10 +24,12 @@ const io = new Server(server, {
 });
 
 // ── Security & Performance Middleware ──────────────────────────────────────
+app.set('trust proxy', 1);
+
 // Gzip/Brotli compression for responses
 app.use(compression({ level: 6, threshold: 1024 }));
 
-// Enhanced Helmet.js configuration for security
+// Optimized Helmet configuration for React SPA on Render
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -34,35 +37,31 @@ app.use(helmet({
       scriptSrc: [
         "'self'",
         "'unsafe-inline'",
-        "https://pagead2.googlesyndication.com",
-        "https://googleads.g.doubleclick.net",
         "https://www.googletagmanager.com",
         "https://www.google-analytics.com",
         "https://www.gstatic.com"
       ],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:", "blob:"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       connectSrc: [
         "'self'",
-        "https://elovialove.onrender.com",
-        "wss://elovialove.onrender.com",
         "https://www.google-analytics.com",
+        "https://analytics.google.com",
         "https://www.googletagmanager.com",
-        "https://pagead2.googlesyndication.com"
+        "wss://elovialove.onrender.com"
       ],
-      frameSrc: ["'self'", "https://googleads.g.doubleclick.net"],
       objectSrc: ["'none'"],
-      upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : undefined,
-    },
+      upgradeInsecureRequests: [],
+    }
   },
   crossOriginEmbedderPolicy: false,
-  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   strictTransportSecurity: { maxAge: 31536000, includeSubDomains: true, preload: true },
-  xssFilter: true,
   noSniff: true,
   frameguard: { action: 'sameorigin' },
+  hidePoweredBy: true,
 }));
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -90,6 +89,12 @@ app.use('/api/subscription/webhook', express.raw({ type: 'application/json' }), 
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Serve React static assets with cache headers when built
+app.use(express.static(path.join(__dirname, '../client/dist'), {
+  maxAge: '7d',
+  immutable: true
+}));
 
 // Rate limiting
 const limiter = rateLimit({
