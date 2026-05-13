@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Heart, Star, Shield, Zap, MessageCircle, MapPin, Users, HeartHandshake, Quote } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
+import { WebSiteSchema, OrganizationSchema, BreadcrumbSchema } from '../components/seo/SchemaComponents';
 
 const FAQAccordion = React.lazy(() => import('../components/FAQAccordion'));
 const BannerAd = React.lazy(() => import('../components/ads/BannerAd'));
@@ -27,14 +28,37 @@ const staggerContainer = {
 const Home = () => {
   return (
     <>
+      {/* ── SEO Schema Markup ── */}
+      <WebSiteSchema />
+      <OrganizationSchema />
+      <BreadcrumbSchema items={[
+        { name: 'Home', url: '/' }
+      ]} />
+      
       <Helmet>
-        <title>Elovia Love – Relationship Advice, Dating Tips & Love Guides</title>
-        <meta name="description" content="Elovia Love is India's verified dating platform for serious relationships. No fake profiles. Real connections. Start your free trial today." />
+        <title>Elovia Love – India's Verified Dating App for Serious Relationships</title>
+        <meta name="description" content="Find real love on India's most trusted dating platform. Verified profiles, AI-powered matching, and advanced safety features. Join 10,000+ singles finding serious relationships. Start free today." />
         <link rel="canonical" href="https://elovialove.onrender.com/" />
         <link rel="preload" as="image" href="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1920&auto=format&fm=webp" fetchpriority="high" />
-        <meta property="og:title" content="Elovia Love – Relationship Advice, Dating Tips & Love Guides" />
-        <meta property="og:description" content="India's verified dating platform. No fake profiles. Real connections." />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Elovia Love – India's Verified Dating App for Serious Relationships" />
+        <meta property="og:description" content="Find real love on India's most trusted dating platform. Verified profiles, AI-powered matching, and advanced safety features." />
         <meta property="og:url" content="https://elovialove.onrender.com/" />
+        <meta property="og:image" content="https://elovialove.onrender.com/EloviaLoveWB.png" />
+        <meta property="og:site_name" content="Elovia Love" />
+        <meta property="og:locale" content="en_IN" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Elovia Love – India's Verified Dating App" />
+        <meta name="twitter:description" content="Find real love on India's most trusted dating platform. Verified profiles, AI-powered matching, and advanced safety features." />
+        <meta name="twitter:image" content="https://elovialove.onrender.com/EloviaLoveWB.png" />
+        
+        {/* Keywords */}
+        <meta name="keywords" content="online dating India, verified dating app, serious relationships India, safe dating platform, Indian dating site, dating app India, find life partner, meaningful connections, marriage minded singles" />
+        
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -153,7 +177,7 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8"
           >
-            Find Real Love on <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-pink-500">Elovia Love</span> — India's Verified Dating App
+            Find Real Love on <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-pink-500">India's Verified Dating App</span> for Serious Relationships
           </motion.h1>
 
           <motion.p 
@@ -162,7 +186,7 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="mt-4 text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed font-light"
           >
-            Join a community of singles who are ready to find genuine love. Meaningful conversations start here.
+            Join India's safest online dating platform with verified profiles, AI-powered matching, and advanced safety features. Start meaningful conversations with singles seeking serious relationships today.
           </motion.p>
 
           <motion.div 
@@ -238,9 +262,9 @@ const Home = () => {
             variants={fadeIn}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">How Elovia Love Works</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">How Elovia Love Works: Your Journey to Finding Love</h2>
             <p className="text-lg text-slate-600 max-w-3xl mx-auto">
-              Our verified dating platform is designed to help serious singles find meaningful relationships through a safe, structured process.
+              Our verified dating platform is designed to help serious singles in India find meaningful relationships through a safe, structured process. From profile verification to AI-powered matching, every step is optimized for your success.
             </p>
           </motion.div>
 
@@ -257,7 +281,7 @@ const Home = () => {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-4">1. Verify Your Profile</h3>
               <p className="text-slate-600 leading-relaxed">
-                Every member undergoes a comprehensive verification process. We require government-issued ID, detailed questionnaires, and photo reviews to ensure authenticity. This eliminates fake profiles and creates a trustworthy community.
+                Every member undergoes a comprehensive verification process to ensure authenticity. We require government-issued ID, detailed questionnaires, and photo reviews manually checked by our team. This rigorous process eliminates fake profiles, prevents catfishing, and creates a trustworthy community of genuine singles looking for serious relationships. Your verified badge shows others you're real and serious about finding love.
               </p>
             </motion.div>
 
@@ -271,9 +295,9 @@ const Home = () => {
               <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Heart className="w-8 h-8 text-pink-600" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-4">2. Smart Matching</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">2. Smart AI-Powered Matching</h3>
               <p className="text-slate-600 leading-relaxed">
-                Our AI-powered algorithm considers compatibility factors like values, lifestyle preferences, cultural background, and relationship goals. Unlike swipe-based apps, we focus on long-term compatibility rather than superficial attraction.
+                Our advanced AI matching algorithm considers multiple compatibility factors including your personality traits, core values, lifestyle preferences, cultural background, religious beliefs, and long-term relationship goals. Unlike superficial swipe-based dating apps, we focus on deep compatibility that leads to lasting relationships. Our smart matching system learns from your preferences to suggest better matches over time, helping you find your perfect life partner.
               </p>
             </motion.div>
 
@@ -287,9 +311,9 @@ const Home = () => {
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <MessageCircle className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-4">3. Meaningful Conversations</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">3. Start Meaningful Conversations</h3>
               <p className="text-slate-600 leading-relaxed">
-                Start conversations with icebreakers designed for serious relationships. Our platform encourages thoughtful communication and provides safety tools like emergency contacts and location sharing for peace of mind.
+                Begin conversations with intelligent icebreakers specifically designed for serious relationships. Our platform encourages thoughtful communication and provides comprehensive safety tools including emergency contact sharing, location-based safety check-ins, and direct access to our 24/7 safety team. Unlike casual dating apps, we create an environment for deep, meaningful conversations that lead to genuine connections and lasting love.
               </p>
             </motion.div>
           </div>
@@ -301,26 +325,26 @@ const Home = () => {
             transition={{ delay: 0.4 }}
             className="mt-16 text-center"
           >
-            <h3 className="text-2xl font-bold text-slate-900 mb-4">Why Choose Elovia Love Over Other Dating Apps?</h3>
+            <h3 className="text-2xl font-bold text-slate-900 mb-4">Why Choose Elovia Love Over Other Dating Apps in India?</h3>
             <p className="text-slate-600 max-w-4xl mx-auto leading-relaxed mb-8">
-              In a market flooded with casual dating apps, Elovia Love stands out by prioritizing serious relationships. We don't just connect people—we help build lasting partnerships. Our verification process ensures every profile is real, our matching algorithm focuses on compatibility, and our community guidelines promote respectful, meaningful interactions. Unlike apps designed for quick matches, we create an environment where singles can take their time to develop genuine connections.
+              In a market flooded with casual dating apps, Elovia Love stands out as India's best dating app for serious relationships. We don't just connect people—we help build lasting partnerships through verified profiles and AI-powered matching. Our comprehensive verification process ensures every profile is real, our smart matching algorithm focuses on compatibility and shared values, and our community guidelines promote respectful, meaningful interactions. Unlike apps designed for quick matches and hookups, we create a safe dating platform where Indian singles can take their time to develop genuine connections and find their life partner.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               <div className="bg-white p-6 rounded-2xl border border-slate-200">
-                <h4 className="font-semibold text-slate-900 mb-2">Verified Profiles Only</h4>
-                <p className="text-slate-600 text-sm">No fake accounts, no catfishing. Every member is thoroughly vetted.</p>
+                <h4 className="font-semibold text-slate-900 mb-2">100% Verified Profiles Only</h4>
+                <p className="text-slate-600 text-sm">No fake accounts, no catfishing, no scams. Every member is thoroughly vetted through our comprehensive verification process with government ID and photo validation.</p>
               </div>
               <div className="bg-white p-6 rounded-2xl border border-slate-200">
                 <h4 className="font-semibold text-slate-900 mb-2">Serious Relationship Focus</h4>
-                <p className="text-slate-600 text-sm">Designed for commitment-minded singles seeking long-term partnerships.</p>
+                <p className="text-slate-600 text-sm">Designed exclusively for commitment-minded singles seeking long-term partnerships and marriage. Perfect for those tired of casual dating and hookup culture.</p>
               </div>
               <div className="bg-white p-6 rounded-2xl border border-slate-200">
                 <h4 className="font-semibold text-slate-900 mb-2">Advanced Safety Features</h4>
-                <p className="text-slate-600 text-sm">Emergency contacts, location check-ins, and 24/7 safety monitoring.</p>
+                <p className="text-slate-600 text-sm">Bank-level encryption, emergency contact sharing, location check-ins, and 24/7 safety monitoring. Your online dating safety is our top priority.</p>
               </div>
               <div className="bg-white p-6 rounded-2xl border border-slate-200">
-                <h4 className="font-semibold text-slate-900 mb-2">Cultural Compatibility</h4>
-                <p className="text-slate-600 text-sm">Matches consider Indian cultural values and family expectations.</p>
+                <h4 className="font-semibold text-slate-900 mb-2">Cultural Compatibility Matching</h4>
+                <p className="text-slate-600 text-sm">Our AI algorithm considers Indian cultural values, family expectations, religious preferences, and regional backgrounds for better compatibility.</p>
               </div>
             </div>
           </motion.div>
@@ -385,8 +409,8 @@ const Home = () => {
             variants={fadeIn}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">What is Elovia Love?</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">India's premier dating platform designed specifically for serious relationships and meaningful connections.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">What is Elovia Love? India's Most Trusted Dating Platform</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">India's premier online dating platform designed specifically for serious relationships, meaningful connections, and marriage-minded singles.</p>
           </motion.div>
 
           <motion.div 
@@ -396,15 +420,15 @@ const Home = () => {
             className="prose prose-lg max-w-none text-slate-700 leading-relaxed"
           >
             <p>
-              Elovia Love is more than just another dating app – it's a revolutionary platform built from the ground up to address the real challenges of finding genuine love in today's digital world. Launched in 2024, we've quickly become India's most trusted dating service for singles who are serious about finding lasting relationships.
+              Elovia Love is more than just another dating app – it's a revolutionary platform built from the ground up to address the real challenges of finding genuine love in today's digital world. Launched in 2024, we've quickly become India's most trusted dating service for singles who are serious about finding lasting relationships, life partners, and marriage.
             </p>
 
             <p>
-              Unlike generic dating apps that prioritize quantity over quality, Elovia Love focuses on creating authentic connections. Our platform combines advanced AI matching technology with a deep understanding of Indian culture, values, and relationship expectations. We believe that real love starts with real conversations, which is why we've eliminated superficial swiping in favor of meaningful interactions.
+              Unlike generic dating apps that prioritize quantity over quality, Elovia Love focuses on creating authentic connections through verified profiles and AI-powered matching. Our platform combines advanced matchmaking technology with a deep understanding of Indian culture, values, family expectations, and relationship dynamics. We believe that real love starts with real conversations, which is why we've eliminated superficial swiping in favor of meaningful interactions based on compatibility and shared life goals.
             </p>
 
             <p>
-              Every aspect of Elovia Love is designed with your safety and success in mind. From our rigorous profile verification process to our innovative conversation starters, we ensure that you can focus on what matters most – finding someone who truly complements your life and shares your vision for the future.
+              Every aspect of Elovia Love is designed with your safety and success in mind. From our rigorous profile verification process to our innovative conversation starters and comprehensive safety features, we ensure that you can focus on what matters most – finding someone who truly complements your life, shares your vision for the future, and is ready for a serious, committed relationship.
             </p>
           </motion.div>
         </div>
@@ -420,8 +444,8 @@ const Home = () => {
             variants={fadeIn}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Why Elovia Love is Different</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">We're not just another dating app – we're a relationship-focused platform built for India's modern singles.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Why Elovia Love is Different from Other Dating Apps</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">We're not just another dating app – we're a relationship-focused platform built specifically for India's modern singles seeking serious, long-term partnerships.</p>
           </motion.div>
 
           <motion.div 
@@ -431,19 +455,19 @@ const Home = () => {
             className="prose prose-lg max-w-none text-slate-700 leading-relaxed"
           >
             <p>
-              The dating app landscape in India has been dominated by platforms that treat relationships like commodities. Elovia Love changes that paradigm by prioritizing genuine connections over endless scrolling. Our approach is simple but powerful: we focus on quality matches rather than quantity.
+              The dating app landscape in India has been dominated by platforms that treat relationships like commodities and promote casual hookup culture. Elovia Love changes that paradigm by prioritizing genuine connections over endless scrolling and superficial swiping. Our approach is simple but powerful: we focus on quality matches based on deep compatibility rather than quantity of matches based on looks alone.
             </p>
 
             <p>
-              What sets us apart is our commitment to cultural relevance. We understand the unique dynamics of Indian dating – from family values to regional preferences. Our platform respects these nuances while embracing modern relationship ideals. Whether you're looking for a partner who shares your religious beliefs, regional background, or simply your outlook on life, our smart matching algorithm considers all these factors.
+              What sets us apart is our commitment to cultural relevance and understanding Indian dating dynamics. We understand the unique aspects of Indian dating – from family values and parental expectations to religious preferences and regional backgrounds. Our safe dating platform respects these cultural nuances while embracing modern relationship ideals. Whether you're looking for a partner who shares your religious beliefs, regional background, career ambitions, or simply your outlook on life and marriage, our smart matching algorithm considers all these factors to find your perfect match.
             </p>
 
             <p>
-              Safety is not an afterthought – it's our foundation. Every profile on Elovia Love undergoes a comprehensive verification process, giving you peace of mind as you explore potential connections. We also provide tools and resources to help you navigate the dating process safely and confidently.
+              Safety is not an afterthought – it's our foundation. Every profile on Elovia Love undergoes a comprehensive verification process with government ID validation, giving you complete peace of mind as you explore potential connections. We also provide advanced safety tools and educational resources to help you navigate the online dating process safely and confidently, avoiding scams, fake profiles, and catfishing.
             </p>
 
             <p>
-              Most importantly, we're serious about serious relationships. While other apps might be fine for casual dating, Elovia Love is designed for people who want to find their life partner. Our features, from detailed compatibility questionnaires to relationship-focused conversation prompts, are all geared toward helping you build something real and lasting.
+              Most importantly, we're serious about helping you find serious relationships. While other apps might be fine for casual dating and hookups, Elovia Love is designed exclusively for people who want to find their life partner and build something real and lasting. Our features, from detailed compatibility questionnaires to relationship-focused conversation prompts and marriage-minded matching, are all geared toward helping you build a meaningful, long-term partnership.
             </p>
           </motion.div>
         </div>
@@ -459,8 +483,8 @@ const Home = () => {
             variants={fadeIn}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Safety & Verification Features</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">Your safety is our top priority. Here's how we protect you while you search for love.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Online Dating Safety & Verification Features</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">Your safety is our top priority. Here's how we protect you while you search for love on India's safest dating platform.</p>
           </motion.div>
 
           <motion.div 
@@ -470,23 +494,23 @@ const Home = () => {
             className="prose prose-lg max-w-none text-slate-700 leading-relaxed"
           >
             <p>
-              Online dating should be exciting, not scary. At Elovia Love, we've implemented multiple layers of security to ensure you can focus on finding love without worrying about your safety. Our comprehensive safety features are designed to protect you from the common risks associated with online dating.
+              Online dating should be exciting, not scary. At Elovia Love, we've implemented multiple layers of security to ensure you can focus on finding love without worrying about your safety. Our comprehensive safety features are designed to protect you from the common risks associated with online dating in India, including fake profiles, catfishing, scams, and harassment.
             </p>
 
             <p>
-              Profile verification is at the heart of our platform. Every user must complete a thorough verification process that includes identity confirmation, photo validation, and background checks. This eliminates fake profiles and ensures you're connecting with real people who are genuinely interested in relationships.
+              Profile verification is at the heart of our safe dating platform. Every user must complete a thorough verification process that includes government-issued identity confirmation, photo validation, and background checks. This rigorous process eliminates fake profiles, prevents catfishing attempts, and ensures you're connecting with real people who are genuinely interested in serious relationships. Our verified badge system lets you instantly identify authentic profiles.
             </p>
 
             <p>
-              We also provide advanced privacy controls that give you complete control over your information. You can choose what to share, when to share it, and with whom. Our platform never sells your data to third parties, and we use bank-level encryption to protect all communications.
+              We also provide advanced privacy controls that give you complete control over your personal information. You can choose what to share, when to share it, and with whom. Our platform never sells your data to third parties, and we use bank-level encryption to protect all communications, messages, and sensitive information from unauthorized access.
             </p>
 
             <p>
-              For added peace of mind, we offer safety tools like emergency contact sharing, location-based safety check-ins, and direct access to our safety team. If you ever feel uncomfortable in a conversation, you can report issues instantly, and our team reviews every report within 24 hours.
+              For added peace of mind, we offer comprehensive safety tools like emergency contact sharing, location-based safety check-ins for first dates, and direct access to our dedicated safety team. If you ever feel uncomfortable in a conversation or encounter suspicious behavior, you can report issues instantly, and our trained safety team reviews every report within 24 hours and takes appropriate action.
             </p>
 
             <p>
-              Dating safely also means dating smart. That's why we provide educational resources about online safety, red flags to watch for, and tips for successful first dates. Our goal is not just to help you find love, but to ensure that journey is safe and positive.
+              Dating safely also means dating smart. That's why we provide educational resources about online dating safety, red flags to watch for, tips for safe first dates, and guidance for protecting your privacy. Our goal is not just to help you find love, but to ensure that your journey is safe, positive, and empowering every step of the way.
             </p>
           </motion.div>
         </div>
@@ -714,9 +738,9 @@ const Home = () => {
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 transform -translate-x-1/2 translate-y-1/2"></div>
             
             <div className="relative z-10">
-              <h2 className="text-3xl font-extrabold text-white mb-6">Ready to find your Elovia Love?</h2>
+              <h2 className="text-3xl font-extrabold text-white mb-6">Ready to Find Your Perfect Match on India's Best Dating App?</h2>
               <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10">
-                Join thousands of singles who are taking the stress out of dating and focusing on real connections.
+                Join thousands of verified Indian singles who are taking the stress out of online dating and focusing on real connections. Start your journey to finding love, meaningful relationships, and your life partner today.
               </p>
               <Link
                 to="/signup"
