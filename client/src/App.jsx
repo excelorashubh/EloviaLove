@@ -36,6 +36,13 @@ const Notifications = lazy(() => import('./pages/Notifications'));
 const Chats = lazy(() => import('./pages/Chats'));
 const SubscriptionSuccess = lazy(() => import('./pages/SubscriptionSuccess'));
 const Verify = lazy(() => import('./pages/Verify'));
+const CityPage = lazy(() => import('./pages/CityPage'));
+const SafetyHub = lazy(() => import('./pages/SafetyHub'));
+const VerificationGuide = lazy(() => import('./pages/VerificationGuide'));
+const DatingSafetyIndia = lazy(() => import('./pages/DatingSafetyIndia'));
+const ReportAbuse = lazy(() => import('./pages/ReportAbuse'));
+const CommunityGuidelines = lazy(() => import('./pages/CommunityGuidelines'));
+const SafeFirstDates = lazy(() => import('./pages/SafeFirstDates'));
 
 // ── Lazy loaded admin pages ────────────────────────────────────────────────────
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -161,7 +168,17 @@ function App() {
           <Route path="/chats" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Chats /></Suspense></ProtectedRoute></MainLayout>} />
           <Route path="/subscription/success" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><SubscriptionSuccess /></Suspense></ProtectedRoute></MainLayout>} />
           <Route path="/verify" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Verify /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/verify-email" element={<MainLayout><Verify /></MainLayout>} />
+          <Route path="/dating-in-:city" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><CityPage /></Suspense></MainLayout>} />
+          
+          {/* Safety Hub Routes */}
+          <Route path="/safety" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><SafetyHub /></Suspense></MainLayout>} />
+          <Route path="/how-verification-works" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><VerificationGuide /></Suspense></MainLayout>} />
+          <Route path="/online-dating-safety-india" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><DatingSafetyIndia /></Suspense></MainLayout>} />
+          <Route path="/report-abuse" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><ReportAbuse /></Suspense></MainLayout>} />
+          <Route path="/community-guidelines" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><CommunityGuidelines /></Suspense></MainLayout>} />
+          <Route path="/safe-first-date-tips" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><SafeFirstDates /></Suspense></MainLayout>} />
+
+          <Route path="/verify-email" element={<MainLayout showNav><Verify /></MainLayout>} />
         </Routes>
       </Router>
     </AuthProvider>

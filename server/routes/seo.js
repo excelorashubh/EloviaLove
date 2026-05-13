@@ -9,6 +9,84 @@ const path = require('path');
 // REMOVED: Puppeteer prerendering (causes deployment failures on Render)
 // REMOVED: Canvas OG image generation (heavy dependency, not critical)
 // 
+const Blog = require('../models/Blog');
+
+// ── Dynamic Sitemap Logic ───────────────────────────────────────────────────
+
+/**
+ * Generates XML sitemap content
+ */
+const generateSitemap = async (baseUrl) => {
+  // 1. Define Static Routes
+  const staticRoutes = [
+    '',
+    '/about',
+    '/blog',
+    '/contact',
+    '/pricing',
+    '/signup',
+    '/login',
+    '/privacy',
+    '/terms',
+    '/safety',
+    '/how-verification-works',
+    '/online-dating-safety-india',
+    '/report-abuse',
+    '/community-guidelines',
+    '/safe-first-date-tips',
+    '/dating-safety',
+    '/community-guidelines',
+    '/dating-in-delhi',
+    '/dating-in-mumbai',
+    '/dating-in-bangalore',
+    '/dating-in-kolkata',
+    '/dating-in-ranchi',
+    '/dating-in-chennai',
+    '/dating-in-hyderabad',
+    '/dating-in-pune',
+    '/dating-in-ahmedabad',
+    '/verified-profiles',
+    '/private-chat',
+    '/video-chat',
+    '/safe-dating',
+    '/serious-relationships'
+  ];
+
+  // 2. Fetch Dynamic Blog Routes
+  const blogs = await Blog.find({ isPublished: true }).select('slug updatedAt').lean();
+  
+  const blogRoutes = blogs.map(blog => ({
+    url: `/blog/${blog.slug}`,
+    lastmod: blog.updatedAt.toISOString().split('T')[0],
+    priority: 0.8
+  }));
+
+  // 3. Combine and Format XML
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+  // Add static routes
+  staticRoutes.forEach(route => {
+    xml += '  <url>\n';
+    xml += `    <loc>${baseUrl}${route}</loc>\n`;
+    xml += `    <changefreq>weekly</changefreq>\n`;
+    xml += `    <priority>${route === '' ? '1.0' : '0.7'}</priority>\n`;
+    xml += '  </url>\n';
+  });
+
+  // Add blog routes
+  blogRoutes.forEach(route => {
+    xml += '  <url>\n';
+    xml += `    <loc>${baseUrl}${route.url}</loc>\n`;
+    xml += `    <lastmod>${route.lastmod}</lastmod>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>${route.priority}</priority>\n`;
+    xml += '  </url>\n';
+  });
+
+  xml += '</urlset>';
+  return xml;
+};
 // REASON: Render free tier doesn't support Chromium/Puppeteer reliably
 // SOLUTION: Use react-helmet-async for client-side SEO (already implemented)
 //           Google crawls React SPAs natively since 2019
@@ -142,5 +220,6 @@ router.use((err, req, res, next) => {
 
 module.exports = {
   router,
-  prerenderMiddleware
+  prerenderMiddleware,
+  generateSitemap
 };

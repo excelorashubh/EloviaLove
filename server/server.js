@@ -243,118 +243,15 @@ io.on('connection', (socket) => {
 
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const Blog = require('./models/Blog');
-    const posts = await Blog.find({ isPublished: true })
-      .select('slug updatedAt')
-      .sort({ updatedAt: -1 })
-      .lean();
-    
     const baseUrl = 'https://elovialove.onrender.com';
-
-    const staticUrls = [
-      '/',
-      '/blog',
-      '/blog/dating-tips',
-      '/about',
-      '/contact',
-      '/pricing',
-      '/privacy',
-      '/terms',
-      '/safety',
-      '/community-guidelines',
-      '/dating-safety',
-      '/report-abuse',
-      '/help',
-      '/faq',
-      '/dating-in-delhi',
-      '/dating-in-mumbai',
-      '/dating-in-bangalore',
-      '/dating-in-kolkata',
-      '/dating-in-ranchi',
-      '/verified-profiles',
-      '/private-chat',
-      '/video-chat',
-      '/safe-dating',
-      '/serious-relationships'
-    ];
-
-    const blogSlugs = [
-      'dating-profile-tips',
-      'online-dating-safety',
-      'first-message-examples',
-      'how-to-find-real-love',
-      'red-flags-in-online-dating',
-      'long-distance-relationship-advice',
-      'how-to-avoid-fake-profiles',
-      'best-dating-app-tips',
-      'how-to-start-a-conversation'
-    ];
-
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
-
-    // Add static URLs
-    staticUrls.forEach((path) => {
-      xml += `
-  <url>
-    <loc>${baseUrl}${path}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-    });
-
-    // Track existing URLs to avoid duplicates
-    const existingUrls = new Set(staticUrls.map(path => `${baseUrl}${path}`));
+    const xml = await seoModule.generateSitemap(baseUrl);
     
-    // Add predefined blog slugs
-    blogSlugs.forEach((slug) => {
-      const url = `${baseUrl}/blog/${slug}`;
-      existingUrls.add(url);
-      xml += `
-  <url>
-    <loc>${url}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
-  </url>`;
-    });
-
-    // Add dynamic blog posts from database
-    posts.forEach(post => {
-      const url = `${baseUrl}/blog/${post.slug}`;
-      if (existingUrls.has(url)) return; // Skip duplicates
-      
-      xml += `
-  <url>
-    <loc>${url}</loc>
-    <lastmod>${post.updatedAt.toISOString().split('T')[0]}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
-    });
-
-    xml += `
-</urlset>`;
-
     res.header('Content-Type', 'application/xml; charset=UTF-8');
     res.header('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
     res.send(xml);
-    
   } catch (err) {
     console.error('Sitemap generation error:', err);
-    
-    // Fallback sitemap on error
-    const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://elovialove.onrender.com/</loc></url>
-  <url><loc>https://elovialove.onrender.com/blog</loc></url>
-  <url><loc>https://elovialove.onrender.com/about</loc></url>
-  <url><loc>https://elovialove.onrender.com/contact</loc></url>
-  <url><loc>https://elovialove.onrender.com/pricing</loc></url>
-</urlset>`;
-    
-    res.status(200)
-      .header('Content-Type', 'application/xml; charset=UTF-8')
-      .send(fallbackXml);
+    res.status(500).send('Error generating sitemap');
   }
 });
 
