@@ -179,8 +179,8 @@ mongoose.connection.on('disconnected', () => {
 app.set('io', io);
 
 // ── SEO Middleware (Lightweight Crawler Detection) ────────────────────────────
-const { prerenderMiddleware } = require('./routes/seo');
-app.use(prerenderMiddleware);
+const seoModule = require('./routes/seo');
+app.use(seoModule.prerenderMiddleware);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // API ROUTES
@@ -197,7 +197,7 @@ app.use('/api/subscription', require('./routes/subscription'));
 app.use('/api/verify', require('./routes/verify'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/blog', require('./routes/blog'));
-app.use('/api/seo', require('./routes/seo'));
+app.use('/api/seo', seoModule.router);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SOCKET.IO REAL-TIME CHAT
