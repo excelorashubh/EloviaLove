@@ -90,8 +90,14 @@ const Blog = () => {
     if (tag) params.set('tag', tag);
     if (q)   params.set('q', q);
     api.get(`/blog?${params}`)
-      .then(r => { setPosts(r.data.posts); setTotal(r.data.total); setPages(r.data.pages); })
-      .catch(() => {})
+      .then(r => { 
+        setPosts(r.data?.posts || []); 
+        setTotal(r.data?.total || 0); 
+        setPages(r.data?.pages || 1); 
+      })
+      .catch((err) => {
+        console.error('[Blog API Error]:', err);
+      })
       .finally(() => setLoading(false));
   }, [page, tag, q]);
 
@@ -121,13 +127,20 @@ const Blog = () => {
   };
 
   const mergedPosts = useMemo(() => {
-    const combined = [...posts];
-    STATIC_BLOG_POST_LIST.forEach((staticPost) => {
-      if (!combined.some((post) => post.slug === staticPost.slug)) {
-        combined.push(staticPost);
+    try {
+      const combined = Array.isArray(posts) ? [...posts] : [];
+      if (Array.isArray(STATIC_BLOG_POST_LIST)) {
+        STATIC_BLOG_POST_LIST.forEach((staticPost) => {
+          if (!combined.some((post) => post.slug === staticPost.slug)) {
+            combined.push(staticPost);
+          }
+        });
       }
-    });
-    return combined;
+      return combined;
+    } catch (e) {
+      console.error('[Blog Merge Error]:', e);
+      return STATIC_BLOG_POST_LIST || [];
+    }
   }, [posts]);
 
   const visibleCount = Math.max(total, mergedPosts.length);

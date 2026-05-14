@@ -98,4 +98,17 @@ const sitemapHandler = async (req, res) => {
   }
 };
 
-module.exports = { sitemapHandler };
+const express = require('express');
+const router = express.Router();
+
+const prerenderMiddleware = (req, res, next) => {
+  next();
+};
+
+router.get('/sitemap', sitemapHandler);
+
+module.exports = { 
+  sitemapHandler,
+  prerenderMiddleware,
+  router
+};
