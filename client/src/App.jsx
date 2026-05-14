@@ -1,62 +1,46 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  Link
+} from 'react-router-dom';
+
 import { AuthProvider } from './context/AuthContext';
 import { useEffect, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
+
 import GlobalNavbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
+import CookieConsent from './components/CookieConsent';
+import ErrorBoundary from './components/ErrorBoundary';
+
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import AdminRoute from './components/AdminRoute';
-import Footer from './components/layout/Footer';
-import CookieConsent from './components/CookieConsent';
-import api from './services/api';
-import ErrorBoundary from './components/ErrorBoundary';
-import { SEO_PAGE_SLUGS } from './data/seoContent';
 
-// ── Eagerly loaded pages (above-the-fold, critical) ──────────────────────────
+import api from './services/api';
+
+// ─────────────────────────────────────────────────────────────
+// SAFE EAGER IMPORTS
+// ─────────────────────────────────────────────────────────────
 import Home from './pages/Home';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 
-// ── Lazy loaded pages (public, non-critical) ──────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// SAFE LAZY IMPORTS
+// ─────────────────────────────────────────────────────────────
 const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Pricing = lazy(() => import('./pages/Pricing'));
-const DatingTips = lazy(() => import('./pages/DatingTips'));
-const SeoPage = lazy(() => import('./pages/SeoPage'));
 
-// ── Lazy loaded authenticated pages ────────────────────────────────────────────
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Discover = lazy(() => import('./pages/Discover'));
-const Matches = lazy(() => import('./pages/Matches'));
-const Chat = lazy(() => import('./pages/Chat'));
-const Profile = lazy(() => import('./pages/Profile'));
-const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
-const Notifications = lazy(() => import('./pages/Notifications'));
-const Chats = lazy(() => import('./pages/Chats'));
-const SubscriptionSuccess = lazy(() => import('./pages/SubscriptionSuccess'));
-const Verify = lazy(() => import('./pages/Verify'));
-const CityPage = lazy(() => import('./pages/CityPage'));
-const SafetyHub = lazy(() => import('./pages/SafetyHub'));
-const VerificationGuide = lazy(() => import('./pages/VerificationGuide'));
-const DatingSafetyIndia = lazy(() => import('./pages/DatingSafetyIndia'));
-const ReportAbuse = lazy(() => import('./pages/ReportAbuse'));
-const CommunityGuidelines = lazy(() => import('./pages/CommunityGuidelines'));
-const SafeFirstDates = lazy(() => import('./pages/SafeFirstDates'));
-
-// ── Lazy loaded admin pages ────────────────────────────────────────────────────
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
-const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
-const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
-const AdminRevenue = lazy(() => import('./pages/admin/AdminRevenue'));
-const AdminVisitors = lazy(() => import('./pages/admin/AdminVisitors'));
-const AdminAds = lazy(() => import('./pages/admin/AdminAds'));
-const AdminPlans = lazy(() => import('./pages/admin/AdminPlans'));
-const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'));
-
-// ── Loading fallback component ─────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// LOADING FALLBACK
+// ─────────────────────────────────────────────────────────────
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen bg-slate-50">
     <div className="text-center">
@@ -66,150 +50,263 @@ const LoadingFallback = () => (
   </div>
 );
 
-// ── Google Analytics page view helper ────────────────────────────────────────
-const trackPageView = (path) => {
-  if (typeof window.gtag === 'function') {
-    window.gtag('config', import.meta.env.VITE_GA_MEASUREMENT_ID, { page_path: path });
-  }
-};
-
-// ── Visitor tracker + GA page view — fires on every route change ──────────────
+// ─────────────────────────────────────────────────────────────
+// PAGE TRACKER
+// ─────────────────────────────────────────────────────────────
 const VisitorTracker = () => {
   const location = useLocation();
+
   useEffect(() => {
     let visitorId = localStorage.getItem('visitorId');
+
     if (!visitorId) {
-      visitorId = `v_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      visitorId = `v_${Date.now()}_${Math.random()
+        .toString(36)
+        .slice(2, 8)}`;
+
       localStorage.setItem('visitorId', visitorId);
     }
-    api.post('/analytics/track', { visitorId, page: location.pathname }).catch(() => {});
-    trackPageView(location.pathname);
+
+    api
+      .post('/analytics/track', {
+        visitorId,
+        page: location.pathname,
+      })
+      .catch(() => {});
+
   }, [location.pathname]);
+
   return null;
 };
 
-// Default SEO wrapper for all routes
+// ─────────────────────────────────────────────────────────────
+// SEO DEFAULTS
+// ─────────────────────────────────────────────────────────────
 const SeoDefaults = () => {
   const location = useLocation();
-  const url = `https://elovialove.onrender.com${location.pathname === '/' ? '' : location.pathname}`;
+
+  const url =
+    `https://elovialove.onrender.com${
+      location.pathname === '/' ? '' : location.pathname
+    }`;
+
   return (
     <Helmet>
       <link rel="canonical" href={url} />
+
       <meta property="og:site_name" content="Elovia Love" />
       <meta property="og:url" content={url} />
       <meta property="og:type" content="website" />
-      <meta property="og:image" content="https://elovialove.onrender.com/EloviaLoveWB_small.png" />
-      <meta property="og:image:alt" content="Elovia Love logo" />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:image" content="https://elovialove.onrender.com/EloviaLoveWB_small.png" />
-      <meta name="twitter:image:alt" content="Elovia Love logo" />
+
+      <meta
+        property="og:image"
+        content="https://elovialove.onrender.com/EloviaLoveWB_small.png"
+      />
+
+      <meta
+        name="twitter:card"
+        content="summary_large_image"
+      />
     </Helmet>
   );
 };
 
-// Layout wrapper for public/user pages
-const MainLayout = ({ children, showNav = false }) => (
-  <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
-    <SeoDefaults />
-    {showNav && <GlobalNavbar />}
-    <main className="grow">{children}</main>
-    <Footer />
-  </div>
-);
+// ─────────────────────────────────────────────────────────────
+// MAIN LAYOUT
+// ─────────────────────────────────────────────────────────────
+const MainLayout = ({ children, showNav = false }) => {
+  return (
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      <SeoDefaults />
 
-// 404 Page
-const NotFound = () => (
-  <MainLayout showNav>
-    <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 pt-32">
-      <h1 className="text-6xl font-extrabold text-primary-600 mb-4">404</h1>
-      <h2 className="text-2xl font-bold text-slate-800 mb-4">Page Not Found</h2>
-      <p className="text-slate-600 max-w-md mb-8">
-        Oops! The page you are looking for might have been moved or doesn't exist.
-      </p>
-      <Link to="/" className="px-8 py-3 bg-primary-600 text-white rounded-full font-bold hover:bg-primary-700 transition-colors">
-        Go Back Home
-      </Link>
+      {showNav && <GlobalNavbar />}
+
+      <main className="grow">
+        {children}
+      </main>
+
+      <Footer />
     </div>
-  </MainLayout>
-);
+  );
+};
 
+// ─────────────────────────────────────────────────────────────
+// 404 PAGE
+// ─────────────────────────────────────────────────────────────
+const NotFound = () => {
+  return (
+    <MainLayout showNav>
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
+
+        <h1 className="text-6xl font-bold text-primary-600 mb-4">
+          404
+        </h1>
+
+        <p className="text-slate-600 mb-6">
+          Page not found
+        </p>
+
+        <Link
+          to="/"
+          className="px-6 py-3 bg-primary-600 text-white rounded-xl"
+        >
+          Go Home
+        </Link>
+
+      </div>
+    </MainLayout>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+// APP
+// ─────────────────────────────────────────────────────────────
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <VisitorTracker />
-        <ErrorBoundary>
-          <Routes>
-          {/* Admin — full screen with own sidebar layout */}
-          <Route path="/admin" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></AdminRoute>} />
-          <Route path="/admin/users" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminUsers /></Suspense></AdminRoute>} />
-          <Route path="/admin/reports" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminReports /></Suspense></AdminRoute>} />
-          <Route path="/admin/revenue" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminRevenue /></Suspense></AdminRoute>} />
-          <Route path="/admin/analytics" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminAnalytics /></Suspense></AdminRoute>} />
-          <Route path="/admin/visitors"  element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminVisitors /></Suspense></AdminRoute>} />
-          <Route path="/admin/ads"      element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminAds /></Suspense></AdminRoute>} />
-          <Route path="/admin/plans"    element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminPlans /></Suspense></AdminRoute>} />
-          <Route path="/admin/blog"     element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminBlog /></Suspense></AdminRoute>} />
+    <ErrorBoundary>
 
-          {/* Public & user routes with Navbar + Footer via MainLayout */}
-          <Route path="/" element={<MainLayout showNav><Home /></MainLayout>} />
-          <Route path="/about" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><About /></Suspense></MainLayout>} />
-          <Route path="/contact" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Contact /></Suspense></MainLayout>} />
-          <Route path="/login" element={<MainLayout showNav><GuestRoute><Suspense fallback={<LoadingFallback />}><Login /></Suspense></GuestRoute></MainLayout>} />
-          <Route path="/signup" element={<MainLayout showNav><GuestRoute><Suspense fallback={<LoadingFallback />}><Signup /></Suspense></GuestRoute></MainLayout>} />
-          <Route path="/pricing" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Pricing /></Suspense></MainLayout>} />
-          
-          {/* Blog Routes */}
-          <Route path="/blog" element={<MainLayout showNav><Blog /></MainLayout>} />
-          <Route path="/blog/" element={<Navigate to="/blog" replace />} />
-          <Route path="/blog/dating-tips" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><DatingTips /></Suspense></MainLayout>} />
-          <Route path="/blog/:slug" element={<MainLayout showNav><BlogPost /></MainLayout>} />
-          
-          {/* SEO Dynamic Routes */}
-          {SEO_PAGE_SLUGS.map((slug) => (
-            <Route
-              key={slug}
-              path={`/${slug}`}
-              element={(
-                <MainLayout showNav>
-                  <Suspense fallback={<LoadingFallback />}>
-                    <SeoPage slug={slug} />
-                  </Suspense>
-                </MainLayout>
-              )}
-            />
-          ))}
-          
-          {/* Protected App Routes */}
-          <Route path="/dashboard" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Dashboard /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/discover" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Discover /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/matches" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Matches /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/chat/:userId" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Chat /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/profile" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Profile /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/profile/edit" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><ProfileEdit /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/notifications" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Notifications /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/chats" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Chats /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/subscription/success" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><SubscriptionSuccess /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/verify" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Verify /></Suspense></ProtectedRoute></MainLayout>} />
-          <Route path="/dating-in-:city" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><CityPage /></Suspense></MainLayout>} />
-          
-          {/* Safety Hub Routes */}
-          <Route path="/safety" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><SafetyHub /></Suspense></MainLayout>} />
-          <Route path="/how-verification-works" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><VerificationGuide /></Suspense></MainLayout>} />
-          <Route path="/online-dating-safety-india" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><DatingSafetyIndia /></Suspense></MainLayout>} />
-          <Route path="/report-abuse" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><ReportAbuse /></Suspense></MainLayout>} />
-          <Route path="/community-guidelines" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><CommunityGuidelines /></Suspense></MainLayout>} />
-          <Route path="/safe-first-date-tips" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><SafeFirstDates /></Suspense></MainLayout>} />
+      <AuthProvider>
 
-          <Route path="/verify-email" element={<MainLayout showNav><Verify /></MainLayout>} />
-          
-          {/* Catch-all 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        </ErrorBoundary>
-        <CookieConsent />
-      </Router>
-    </AuthProvider>
+        <Router>
+
+          <VisitorTracker />
+
+          <Suspense fallback={<LoadingFallback />}>
+
+            <Routes>
+
+              {/* HOME */}
+              <Route
+                path="/"
+                element={
+                  <MainLayout showNav>
+                    <Home />
+                  </MainLayout>
+                }
+              />
+
+              {/* BLOG */}
+              <Route
+                path="/blog"
+                element={
+                  <MainLayout showNav>
+                    <Blog />
+                  </MainLayout>
+                }
+              />
+
+              <Route
+                path="/blog/:slug"
+                element={
+                  <MainLayout showNav>
+                    <BlogPost />
+                  </MainLayout>
+                }
+              />
+
+              {/* ABOUT */}
+              <Route
+                path="/about"
+                element={
+                  <MainLayout showNav>
+                    <About />
+                  </MainLayout>
+                }
+              />
+
+              {/* CONTACT */}
+              <Route
+                path="/contact"
+                element={
+                  <MainLayout showNav>
+                    <Contact />
+                  </MainLayout>
+                }
+              />
+
+              {/* LOGIN */}
+              <Route
+                path="/login"
+                element={
+                  <MainLayout showNav>
+                    <GuestRoute>
+                      <Login />
+                    </GuestRoute>
+                  </MainLayout>
+                }
+              />
+
+              {/* SIGNUP */}
+              <Route
+                path="/signup"
+                element={
+                  <MainLayout showNav>
+                    <GuestRoute>
+                      <Signup />
+                    </GuestRoute>
+                  </MainLayout>
+                }
+              />
+
+              {/* PRICING */}
+              <Route
+                path="/pricing"
+                element={
+                  <MainLayout showNav>
+                    <Pricing />
+                  </MainLayout>
+                }
+              />
+
+              {/* DASHBOARD */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <div className="p-10">
+                        Dashboard
+                      </div>
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* ADMIN */}
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <div className="p-10">
+                      Admin Dashboard
+                    </div>
+                  </AdminRoute>
+                }
+              />
+
+              {/* REDIRECT */}
+              <Route
+                path="/blog/"
+                element={<Navigate to="/blog" replace />}
+              />
+
+              {/* 404 */}
+              <Route
+                path="*"
+                element={<NotFound />}
+              />
+
+            </Routes>
+
+          </Suspense>
+
+          <CookieConsent />
+
+        </Router>
+
+      </AuthProvider>
+
+    </ErrorBoundary>
   );
 }
 
