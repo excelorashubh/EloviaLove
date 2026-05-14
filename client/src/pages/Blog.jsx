@@ -10,7 +10,18 @@ import { STATIC_BLOG_POST_LIST } from '../data/seoContent';
 
 const BASE_URL = 'https://elovialove.onrender.com';
 
-const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+const formatDate = (d) => {
+  if (!d) return 'Recently';
+  const date = new Date(d);
+  if (isNaN(date.getTime())) {
+    return 'Recently';
+  }
+  return date.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+};
 
 function readingTime(content) {
   const words = (content || '').replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length;
@@ -24,12 +35,12 @@ const PostCard = ({ post, idx }) => (
     transition={{ delay: idx * 0.06 }}
     className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all group"
   >
-    <Link to={`/blog/${post.slug}`}>
+    <Link to={post.slug ? `/blog/${post.slug}` : '/blog'}>
       <div className="aspect-video bg-gradient-to-br from-primary-100 to-pink-100 overflow-hidden">
         {post.featuredImage ? (
           <img
             src={post.featuredImage}
-            alt={post.title}
+            alt={post.title || 'Blog post image'}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
@@ -41,18 +52,18 @@ const PostCard = ({ post, idx }) => (
       </div>
     </Link>
     <div className="p-5">
-      {post.tags?.length > 0 && (
+      {Array.isArray(post.tags) && post.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-3">
-          {post.tags.slice(0, 3).map(t => (
-            <span key={t} className="text-[10px] font-semibold px-2 py-0.5 bg-primary-50 text-primary-600 rounded-full uppercase tracking-wide">
+          {post.tags.slice(0, 3).map((t, i) => (
+            <span key={`${t}-${i}`} className="text-[10px] font-semibold px-2 py-0.5 bg-primary-50 text-primary-600 rounded-full uppercase tracking-wide">
               {t}
             </span>
           ))}
         </div>
       )}
-      <Link to={`/blog/${post.slug}`}>
+      <Link to={post.slug ? `/blog/${post.slug}` : '/blog'}>
         <h2 className="font-bold text-slate-900 text-lg leading-snug mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
-          {post.title}
+          {post.title || 'Untitled Post'}
         </h2>
       </Link>
       {post.excerpt && (
@@ -64,7 +75,7 @@ const PostCard = ({ post, idx }) => (
           <span className="flex items-center gap-1"><Eye size={12} />{post.views || 0}</span>
           {post.readingTime && <span className="flex items-center gap-1"><Clock size={12} />{post.readingTime} min</span>}
         </div>
-        <Link to={`/blog/${post.slug}`} className="flex items-center gap-1 text-primary-600 font-semibold hover:gap-2 transition-all text-xs">
+        <Link to={post.slug ? `/blog/${post.slug}` : '/blog'} className="flex items-center gap-1 text-primary-600 font-semibold hover:gap-2 transition-all text-xs">
           Read <ArrowRight size={12} />
         </Link>
       </div>
@@ -86,18 +97,27 @@ const Blog = () => {
 
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams({ page, limit: 9 });
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: '9',
+    });
     if (tag) params.set('tag', tag);
     if (q)   params.set('q', q);
     api.get(`/blog?${params}`)
-      .then(r => { 
-        console.log('[Blog API Success]:', r.data?.posts?.length, 'posts fetched');
-        setPosts(r.data?.posts || []); 
-        setTotal(r.data?.total || 0); 
-        setPages(r.data?.pages || 1); 
+      .then((r) => {
+        console.log('[Blog API Success]:', r.data);
+        const postsData = Array.isArray(r.data?.posts)
+          ? r.data.posts
+          : [];
+        setPosts(postsData);
+        setTotal(Number(r.data?.total) || 0);
+        setPages(Number(r.data?.pages) || 1);
       })
       .catch((err) => {
         console.error('[Blog API Error]:', err);
+        setPosts([]);
+        setTotal(0);
+        setPages(1);
       })
       .finally(() => setLoading(false));
   }, [page, tag, q]);
@@ -145,6 +165,8 @@ const Blog = () => {
   }, [posts]);
 
   const visibleCount = Math.max(total, mergedPosts.length);
+
+  console.log('Merged Posts:', mergedPosts);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -333,7 +355,21 @@ const Blog = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mergedPosts.map((post, i) => <PostCard key={post._id} post={post} idx={i} />)}
+            {Array.isArray(mergedPosts) &&
+              mergedPosts
+                .filter(post =>
+                  post &&
+                  typeof post === 'object' &&
+                  post.slug &&
+                  post.title
+                )
+                .map((post, i) => (
+                  <PostCard
+                    key={post._id || post.slug || i}
+                    post={post}
+                    idx={i}
+                  />
+                ))}
           </div>
         )}
 
