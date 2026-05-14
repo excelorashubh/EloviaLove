@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Calendar, Eye, Tag, ArrowLeft, ArrowRight, Heart, Share2, Loader2, Clock } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 import FAQAccordion from '../components/FAQAccordion';
 import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
@@ -171,7 +170,27 @@ const BlogPost = () => {
       isPartOf:         { '@type': 'Blog', name: 'Elovia Love Blog', url: `${BASE_URL}/blog` },
     };
 
-    const graph = [blogPosting];
+    const organization = {
+      '@type': 'Organization',
+      '@id':   `${BASE_URL}/#organization`,
+      name:    'Elovia Love',
+      url:     BASE_URL,
+      logo:    { '@type': 'ImageObject', url: `${BASE_URL}/EloviaLoveWB_small.png` },
+      sameAs:  [
+        'https://facebook.com/elovialove',
+        'https://instagram.com/elovialove'
+      ]
+    };
+
+    const website = {
+      '@type': 'WebSite',
+      '@id':   `${BASE_URL}/#website`,
+      url:     BASE_URL,
+      name:    'Elovia Love',
+      publisher: { '@id': `${BASE_URL}/#organization` },
+    };
+
+    const graph = [organization, website, blogPosting];
 
     // Add FAQPage only if post has faqs
     const faqs = post.faqs || [];
@@ -284,8 +303,7 @@ const BlogPost = () => {
         )}
       </Helmet>
 
-      <div className="min-h-screen bg-slate-50">
-        <Navbar />
+      <div className="min-h-screen bg-slate-50 pt-20">
 
         {/* Featured image */}
         {post.featuredImage && (

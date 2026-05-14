@@ -3,7 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Target, Heart, Shield, Users, Globe, ArrowRight } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 import BannerAd from '../components/ads/BannerAd';
 import AdWrapper from '../components/ads/AdWrapper';
 import personalPhoto from '../assets/PersonalPhoto.jpeg';
@@ -22,8 +21,7 @@ const About = () => {
         <meta name="description" content="Learn about Elovia Love's mission to create a safer, verified dating platform for serious relationships in India." />
         <link rel="canonical" href="https://elovialove.onrender.com/about" />
       </Helmet>
-      <div className=" pb-12 overflow-hidden bg-slate-50">
-        <Navbar />
+      <div className="pb-12 overflow-hidden bg-slate-50 pt-20">
       
       {/* Hero Header */}
       <section className="relative py-20 lg:py-32">

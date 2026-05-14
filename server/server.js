@@ -241,19 +241,7 @@ io.on('connection', (socket) => {
 // DYNAMIC SITEMAP.XML (SEO)
 // ══════════════════════════════════════════════════════════════════════════════
 
-app.get('/sitemap.xml', async (req, res) => {
-  try {
-    const baseUrl = 'https://elovialove.onrender.com';
-    const xml = await seoModule.generateSitemap(baseUrl);
-    
-    res.header('Content-Type', 'application/xml; charset=UTF-8');
-    res.header('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
-    res.send(xml);
-  } catch (err) {
-    console.error('Sitemap generation error:', err);
-    res.status(500).send('Error generating sitemap');
-  }
-});
+app.get('/sitemap.xml', seoModule.sitemapHandler);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // STATIC FILE SERVING (React Build)

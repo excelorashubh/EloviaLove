@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Heart, Star, Shield, Zap, MessageCircle, MapPin, Users, HeartHandshake, Quote } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 import { WebSiteSchema, OrganizationSchema, BreadcrumbSchema } from '../components/seo/SchemaComponents';
 
 const FAQAccordion = React.lazy(() => import('../components/FAQAccordion'));
@@ -149,7 +148,6 @@ const Home = () => {
         </script>
       </Helmet>
     <div className="overflow-hidden">
-      <Navbar />
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 min-h-screen flex items-center justify-center bg-slate-50">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1920&auto=format&fm=webp')] bg-cover bg-center opacity-5" />
@@ -399,120 +397,78 @@ const Home = () => {
         </div>
       </section>
 
-      {/* What is Elovia Love */}
-      <section className="py-24 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">What is Elovia Love? India's Most Trusted Dating Platform</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">India's premier online dating platform designed specifically for serious relationships, meaningful connections, and marriage-minded singles.</p>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="prose prose-lg max-w-none text-slate-700 leading-relaxed"
-          >
-            <p>
-              Elovia Love is more than just another dating app – it's a revolutionary platform built from the ground up to address the real challenges of finding genuine love in today's digital world. Launched in 2024, we've quickly become India's most trusted dating service for singles who are serious about finding lasting relationships, life partners, and marriage.
-            </p>
-
-            <p>
-              Unlike generic dating apps that prioritize quantity over quality, Elovia Love focuses on creating authentic connections through verified profiles and AI-powered matching. Our platform combines advanced matchmaking technology with a deep understanding of Indian culture, values, family expectations, and relationship dynamics. We believe that real love starts with real conversations, which is why we've eliminated superficial swiping in favor of meaningful interactions based on compatibility and shared life goals.
-            </p>
-
-            <p>
-              Every aspect of Elovia Love is designed with your safety and success in mind. From our rigorous profile verification process to our innovative conversation starters and comprehensive safety features, we ensure that you can focus on what matters most – finding someone who truly complements your life, shares your vision for the future, and is ready for a serious, committed relationship.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Why Different */}
+      {/* Trust & Safety Section — Condensed for Conversion */}
       <section className="py-24 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Why Elovia Love is Different from Other Dating Apps</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">We're not just another dating app – we're a relationship-focused platform built specifically for India's modern singles seeking serious, long-term partnerships.</p>
-          </motion.div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+            <div className="lg:w-1/2">
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeIn}
+              >
+                <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">India's Safest Space to Find Real Love</h2>
+                <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                  We believe serious relationships are built on a foundation of trust. That's why Elovia Love is the first dating platform in India to prioritize manual verification and advanced safety tools over simple swiping.
+                </p>
+                
+                <div className="space-y-6 mb-10">
+                  <div className="flex gap-4">
+                    <div className="bg-primary-50 p-2 rounded-lg h-fit"><Shield className="text-primary-600" size={24} /></div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">100% Identity Verification</h4>
+                      <p className="text-slate-600 text-sm">Every profile is manually reviewed to prevent catfishing and scams.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="bg-pink-50 p-2 rounded-lg h-fit"><HeartHandshake className="text-pink-600" size={24} /></div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">Serious Relationship Intent</h4>
+                      <p className="text-slate-600 text-sm">Our community is built for those seeking life partners, not casual encounters.</p>
+                    </div>
+                  </div>
+                </div>
 
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="prose prose-lg max-w-none text-slate-700 leading-relaxed"
-          >
-            <p>
-              The dating app landscape in India has been dominated by platforms that treat relationships like commodities and promote casual hookup culture. Elovia Love changes that paradigm by prioritizing genuine connections over endless scrolling and superficial swiping. Our approach is simple but powerful: we focus on quality matches based on deep compatibility rather than quantity of matches based on looks alone.
-            </p>
-
-            <p>
-              What sets us apart is our commitment to cultural relevance and understanding Indian dating dynamics. We understand the unique aspects of Indian dating – from family values and parental expectations to religious preferences and regional backgrounds. Our safe dating platform respects these cultural nuances while embracing modern relationship ideals. Whether you're looking for a partner who shares your religious beliefs, regional background, career ambitions, or simply your outlook on life and marriage, our smart matching algorithm considers all these factors to find your perfect match.
-            </p>
-
-            <p>
-              Safety is not an afterthought – it's our foundation. Every profile on Elovia Love undergoes a comprehensive verification process with government ID validation, giving you complete peace of mind as you explore potential connections. We also provide advanced safety tools and educational resources to help you navigate the online dating process safely and confidently, avoiding scams, fake profiles, and catfishing.
-            </p>
-
-            <p>
-              Most importantly, we're serious about helping you find serious relationships. While other apps might be fine for casual dating and hookups, Elovia Love is designed exclusively for people who want to find their life partner and build something real and lasting. Our features, from detailed compatibility questionnaires to relationship-focused conversation prompts and marriage-minded matching, are all geared toward helping you build a meaningful, long-term partnership.
-            </p>
-          </motion.div>
+                <Link to="/safety" className="inline-flex items-center gap-2 text-primary-600 font-bold hover:gap-3 transition-all">
+                  Explore our Safety Hub <Zap size={18} />
+                </Link>
+              </motion.div>
+            </div>
+            <div className="lg:w-1/2 grid grid-cols-2 gap-4">
+              <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&auto=format&fm=webp&fit=crop" alt="Happy Couple" className="rounded-3xl shadow-xl mt-8" />
+              <img src="https://images.unsplash.com/photo-1522851259500-2eac44e7cde2?w=600&auto=format&fm=webp&fit=crop" alt="Secure Dating" className="rounded-3xl shadow-xl" />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Safety Features */}
-      <section className="py-24 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Online Dating Safety & Verification Features</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">Your safety is our top priority. Here's how we protect you while you search for love on India's safest dating platform.</p>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="prose prose-lg max-w-none text-slate-700 leading-relaxed"
-          >
-            <p>
-              Online dating should be exciting, not scary. At Elovia Love, we've implemented multiple layers of security to ensure you can focus on finding love without worrying about your safety. Our comprehensive safety features are designed to protect you from the common risks associated with online dating in India, including fake profiles, catfishing, scams, and harassment.
-            </p>
-
-            <p>
-              Profile verification is at the heart of our safe dating platform. Every user must complete a thorough verification process that includes government-issued identity confirmation, photo validation, and background checks. This rigorous process eliminates fake profiles, prevents catfishing attempts, and ensures you're connecting with real people who are genuinely interested in serious relationships. Our verified badge system lets you instantly identify authentic profiles.
-            </p>
-
-            <p>
-              We also provide advanced privacy controls that give you complete control over your personal information. You can choose what to share, when to share it, and with whom. Our platform never sells your data to third parties, and we use bank-level encryption to protect all communications, messages, and sensitive information from unauthorized access.
-            </p>
-
-            <p>
-              For added peace of mind, we offer comprehensive safety tools like emergency contact sharing, location-based safety check-ins for first dates, and direct access to our dedicated safety team. If you ever feel uncomfortable in a conversation or encounter suspicious behavior, you can report issues instantly, and our trained safety team reviews every report within 24 hours and takes appropriate action.
-            </p>
-
-            <p>
-              Dating safely also means dating smart. That's why we provide educational resources about online dating safety, red flags to watch for, tips for safe first dates, and guidance for protecting your privacy. Our goal is not just to help you find love, but to ensure that your journey is safe, positive, and empowering every step of the way.
-            </p>
-          </motion.div>
+      {/* Popular Cities Section — SEO Internal Linking */}
+      <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary-600/10 rounded-full blur-3xl"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Find Love in Your City</h2>
+            <p className="text-slate-400">Discover genuine singles across India's most vibrant metropolitan areas.</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            {['Delhi', 'Mumbai', 'Bangalore', 'Kolkata', 'Ranchi'].map((city) => (
+              <Link 
+                key={city} 
+                to={`/dating-in-${city.toLowerCase()}`}
+                className="group relative h-48 rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 hover:border-primary-500 transition-all duration-500"
+              >
+                <div className="absolute inset-0 bg-slate-800 group-hover:bg-primary-900 transition-colors"></div>
+                <div className="relative z-10 text-center">
+                  <MapPin className="mx-auto mb-2 text-primary-400 group-hover:scale-125 transition-transform" />
+                  <span className="font-bold text-lg">{city}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-12 text-center">
+            <Link to="/discover" className="text-sm text-slate-400 hover:text-white underline underline-offset-4">Browse all cities</Link>
+          </div>
         </div>
       </section>
 

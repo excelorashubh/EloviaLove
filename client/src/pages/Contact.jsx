@@ -2,7 +2,6 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
@@ -18,7 +17,6 @@ const Contact = () => {
         <link rel="canonical" href="https://elovialove.onrender.com/contact" />
       </Helmet>
       <div className="pt-24 pb-12 min-h-screen bg-slate-50 relative overflow-hidden">
-        <Navbar />
 
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-y-1/2 translate-x-1/4" />

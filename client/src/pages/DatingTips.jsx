@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Calendar, Eye, Tag, ArrowRight, Loader2, Heart, Clock, BookOpen } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
@@ -153,8 +152,7 @@ const DatingTips = () => {
         </script>
       </Helmet>
 
-      <div className="min-h-screen bg-slate-50">
-        <Navbar />
+      <div className="min-h-screen bg-slate-50 pt-20">
 
         <div className="max-w-7xl mx-auto px-4 py-12">
           {/* Header */}

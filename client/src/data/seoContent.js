@@ -412,6 +412,46 @@ export const CITY_SEO_PAGES = {
       { title: 'Profile tips', url: '/blog/dating-profile-tips' }
     ]
   },
+  'dating-in-chennai': {
+    slug: 'dating-in-chennai',
+    title: 'Dating in Chennai | Elovia Love',
+    description: 'Connect with genuine singles in Chennai. Safe dating advice and local relationship opportunities for Chennai professionals on Elovia Love.',
+    h1: 'Dating in Chennai',
+    intro: 'Chennai combines tradition with modern dating. Elovia Love helps you find serious relationships while keeping safety and respect at the forefront.',
+    sections: [{ title: 'Dating in the cultural capital', body: ['Meet people who share your values and vision for the future.'] }],
+    cta: { heading: 'Find matches in Chennai', text: 'Start your journey today.', buttonText: 'Join Now', buttonUrl: '/signup' },
+    relatedLinks: [{ title: 'Safety tips', url: '/safety' }]
+  },
+  'dating-in-hyderabad': {
+    slug: 'dating-in-hyderabad',
+    title: 'Dating in Hyderabad | Elovia Love',
+    description: 'Find real connections in the City of Pearls. Hyderabad dating guide for serious relationships and safe meetings.',
+    h1: 'Dating in Hyderabad',
+    intro: 'Hyderabad is a hub for ambitious professionals. Elovia Love helps you match with people who understand your lifestyle and serious intent.',
+    sections: [{ title: 'Serious dating in Hyderabad', body: ['Connect with verified singles who are ready for real commitment.'] }],
+    cta: { heading: 'Join Hyderabad Singles', text: 'Meet genuine people today.', buttonText: 'Sign Up', buttonUrl: '/signup' },
+    relatedLinks: [{ title: 'Verified profiles', url: '/verified-profiles' }]
+  },
+  'dating-in-pune': {
+    slug: 'dating-in-pune',
+    title: 'Dating in Pune | Elovia Love',
+    description: 'Meet like-minded singles in Pune. Safe dating tips and local match suggestions for Pune’s vibrant community.',
+    h1: 'Dating in Pune',
+    intro: 'Pune’s educational and tech spirit makes it a great place to find thoughtful matches. Elovia Love supports your search for real love.',
+    sections: [{ title: 'Find your match in Pune', body: ['Discover local singles who value authenticity and respect.'] }],
+    cta: { heading: 'Start Dating in Pune', text: 'Safe and meaningful connections await.', buttonText: 'Get Started', buttonUrl: '/signup' },
+    relatedLinks: [{ title: 'Safety guide', url: '/dating-safety' }]
+  },
+  'dating-in-ahmedabad': {
+    slug: 'dating-in-ahmedabad',
+    title: 'Dating in Ahmedabad | Elovia Love',
+    description: 'Connect with genuine singles in Ahmedabad. Local dating advice for building serious relationships safely.',
+    h1: 'Dating in Ahmedabad',
+    intro: 'Ahmedabad is a city of values and growth. Elovia Love helps you find partners who share your commitment to a stable future.',
+    sections: [{ title: 'Meaningful dating in Ahmedabad', body: ['Match with verified members who are looking for real connection.'] }],
+    cta: { heading: 'Find Love in Ahmedabad', text: 'Join a community of serious relationship seekers.', buttonText: 'Join Now', buttonUrl: '/signup' },
+    relatedLinks: [{ title: 'Trust & safety', url: '/safety' }]
+  },
   'dating-in-mumbai': {
     slug: 'dating-in-mumbai',
     title: 'Dating in Mumbai | Elovia Love',
@@ -783,6 +823,56 @@ export const FEATURE_SEO_PAGES = {
       { title: 'First message examples', url: '/blog/first-message-examples' },
       { title: 'Verified profiles', url: '/verified-profiles' }
     ]
+  },
+  'relationship-matching': {
+    slug: 'relationship-matching',
+    title: 'Relationship Matching System | Elovia Love',
+    description: 'Learn how Elovia Love uses compatibility factors to help you find long-term partners instead of just casual dates.',
+    h1: 'Meaningful Relationship Matching',
+    intro: 'Our matching system is designed for depth. We look beyond basic swipes to help you find someone who matches your values and life goals.',
+    sections: [{ title: 'How we match you', body: ['We use a combination of profile data, verified preferences, and relationship intent to suggest the best matches.'] }],
+    cta: { heading: 'Get matched today', text: 'Complete your profile to see your top compatibility matches.', buttonText: 'Start Matching', buttonUrl: '/signup' },
+    relatedLinks: [{ title: 'Verified profiles', url: '/verified-profiles' }]
+  },
+  'guides/dating-tips': {
+    slug: 'guides/dating-tips',
+    title: 'Dating Tips Guide | Elovia Love',
+    description: 'A comprehensive guide to dating success, from first messages to long-term relationship building.',
+    h1: 'The Ultimate Dating Tips Guide',
+    intro: 'Master the art of online dating with our expert tips for better conversations and stronger connections.',
+    sections: [{ title: 'First Impressions', body: ['Learn how to create a profile that tells your story and attracts genuine interest.'] }],
+    cta: { heading: 'Level up your dating', text: 'Read our latest blog posts for more detailed advice.', buttonText: 'Visit Blog', buttonUrl: '/blog' },
+    relatedLinks: [{ title: 'Dating profile tips', url: '/blog/dating-profile-tips' }]
+  },
+  'guides/safety': {
+    slug: 'guides/safety',
+    title: 'Comprehensive Safety Guide | Elovia Love',
+    description: 'Your master resource for staying safe at every stage of your dating journey.',
+    h1: 'Trust & Safety Master Guide',
+    intro: 'Your safety is our priority. This guide covers everything from protecting your data to meeting safely in person.',
+    sections: [{ title: 'Core Safety Principles', body: ['Stay in control of your journey with verification, privacy tools, and local safety tips.'] }],
+    cta: { heading: 'Explore Safety Hub', text: 'Access all our safety resources in one place.', buttonText: 'Visit Safety Center', buttonUrl: '/safety' },
+    relatedLinks: [{ title: 'Report abuse', url: '/report-abuse' }]
+  },
+  'guides/relationships': {
+    slug: 'guides/relationships',
+    title: 'Relationship Building Guide | Elovia Love',
+    description: 'Expert advice on moving from a first match to a serious, committed relationship.',
+    h1: 'Building Serious Relationships',
+    intro: 'Navigating the path to commitment requires honesty and effort. This guide helps you build a strong foundation.',
+    sections: [{ title: 'From First Chat to Commitment', body: ['Understand how to communicate your needs and grow a healthy relationship.'] }],
+    cta: { heading: 'Find real love', text: 'Connect with singles who are ready for the next level.', buttonText: 'Start Matching', buttonUrl: '/signup' },
+    relatedLinks: [{ title: 'How to find real love', url: '/blog/how-to-find-real-love' }]
+  },
+  'guides/profile-optimization': {
+    slug: 'guides/profile-optimization',
+    title: 'Profile Optimization Guide | Elovia Love',
+    description: 'Maximize your dating success with a high-performing, authentic profile.',
+    h1: 'Optimize Your Profile for Success',
+    intro: 'A great profile is your best asset. Learn how to highlight your best self and attract compatible matches.',
+    sections: [{ title: 'The Anatomy of a Great Profile', body: ['Photos, bios, and prompts—learn what works and what to avoid.'] }],
+    cta: { heading: 'Improve your profile', text: 'Go to your profile edit page and apply these tips now.', buttonText: 'Edit Profile', buttonUrl: '/profile/edit' },
+    relatedLinks: [{ title: 'Dating profile tips', url: '/blog/dating-profile-tips' }]
   }
 };
 
@@ -1121,11 +1211,20 @@ export const SEO_PAGE_SLUGS = [
   'dating-in-bangalore',
   'dating-in-kolkata',
   'dating-in-ranchi',
+  'dating-in-chennai',
+  'dating-in-hyderabad',
+  'dating-in-pune',
+  'dating-in-ahmedabad',
   'verified-profiles',
   'private-chat',
   'video-chat',
   'safe-dating',
-  'serious-relationships'
+  'serious-relationships',
+  'relationship-matching',
+  'guides/dating-tips',
+  'guides/safety',
+  'guides/relationships',
+  'guides/profile-optimization'
 ];
 
 export const ALL_SEO_PAGES = {

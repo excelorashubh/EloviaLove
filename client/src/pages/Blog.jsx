@@ -3,7 +3,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Search, Calendar, Eye, Tag, ArrowRight, Loader2, Heart, Clock } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
@@ -146,10 +145,8 @@ const Blog = () => {
         <meta property="og:type"        content="website" />
         <meta property="og:image"       content="https://elovialove.onrender.com/EloviaLoveWB_small.png" />
       </Helmet>
-      <Navbar />
-
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-primary-600 via-pink-600 to-rose-500 text-white py-16 px-4">
+      {/* Hero — adjusted padding for fixed navbar */}
+      <section className="bg-gradient-to-br from-primary-600 via-pink-600 to-rose-500 text-white pt-32 pb-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}>
             <span className="inline-block text-xs font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full mb-4">

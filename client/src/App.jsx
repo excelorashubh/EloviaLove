@@ -116,12 +116,27 @@ const MainLayout = ({ children, showNav = false }) => (
   </div>
 );
 
+// 404 Page
+const NotFound = () => (
+  <MainLayout showNav>
+    <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 pt-32">
+      <h1 className="text-6xl font-extrabold text-primary-600 mb-4">404</h1>
+      <h2 className="text-2xl font-bold text-slate-800 mb-4">Page Not Found</h2>
+      <p className="text-slate-600 max-w-md mb-8">
+        Oops! The page you are looking for might have been moved or doesn't exist.
+      </p>
+      <Link to="/" className="px-8 py-3 bg-primary-600 text-white rounded-full font-bold hover:bg-primary-700 transition-colors">
+        Go Back Home
+      </Link>
+    </div>
+  </MainLayout>
+);
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <VisitorTracker />
-        <CookieConsent />
         <Routes>
           {/* Admin — full screen with own sidebar layout */}
           <Route path="/admin" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></AdminRoute>} />
@@ -134,17 +149,21 @@ function App() {
           <Route path="/admin/plans"    element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminPlans /></Suspense></AdminRoute>} />
           <Route path="/admin/blog"     element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminBlog /></Suspense></AdminRoute>} />
 
-          {/* Public & user routes with Navbar + Footer */}
+          {/* Public & user routes with Navbar + Footer via MainLayout */}
           <Route path="/" element={<MainLayout showNav><Home /></MainLayout>} />
           <Route path="/about" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><About /></Suspense></MainLayout>} />
           <Route path="/contact" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Contact /></Suspense></MainLayout>} />
           <Route path="/login" element={<MainLayout showNav><GuestRoute><Suspense fallback={<LoadingFallback />}><Login /></Suspense></GuestRoute></MainLayout>} />
           <Route path="/signup" element={<MainLayout showNav><GuestRoute><Suspense fallback={<LoadingFallback />}><Signup /></Suspense></GuestRoute></MainLayout>} />
           <Route path="/pricing" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Pricing /></Suspense></MainLayout>} />
+          
+          {/* Blog Routes */}
           <Route path="/blog" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Blog /></Suspense></MainLayout>} />
           <Route path="/blog/" element={<Navigate to="/blog" replace />} />
           <Route path="/blog/dating-tips" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><DatingTips /></Suspense></MainLayout>} />
           <Route path="/blog/:slug" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><BlogPost /></Suspense></MainLayout>} />
+          
+          {/* SEO Dynamic Routes */}
           {SEO_PAGE_SLUGS.map((slug) => (
             <Route
               key={slug}
@@ -158,6 +177,8 @@ function App() {
               )}
             />
           ))}
+          
+          {/* Protected App Routes */}
           <Route path="/dashboard" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Dashboard /></Suspense></ProtectedRoute></MainLayout>} />
           <Route path="/discover" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Discover /></Suspense></ProtectedRoute></MainLayout>} />
           <Route path="/matches" element={<MainLayout><ProtectedRoute><Suspense fallback={<LoadingFallback />}><Matches /></Suspense></ProtectedRoute></MainLayout>} />
@@ -179,7 +200,11 @@ function App() {
           <Route path="/safe-first-date-tips" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><SafeFirstDates /></Suspense></MainLayout>} />
 
           <Route path="/verify-email" element={<MainLayout showNav><Verify /></MainLayout>} />
+          
+          {/* Catch-all 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
+        <CookieConsent />
       </Router>
     </AuthProvider>
   );
