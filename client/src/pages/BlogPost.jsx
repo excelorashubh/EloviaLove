@@ -3,11 +3,11 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Calendar, Eye, Tag, ArrowLeft, ArrowRight, Heart, Share2, Loader2, Clock } from 'lucide-react';
+import Navbar from '../components/layout/Navbar';
 import FAQAccordion from '../components/FAQAccordion';
 import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
-import { STATIC_BLOG_POSTS } from '../data/seoContent';
 
 const BASE_URL = 'https://elovialove.onrender.com';
 
@@ -92,36 +92,27 @@ const BlogPost = () => {
   const [copied, setCopied]     = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    setNotFound(false);
-    setPost(null);
-    api.get(`/blog/${slug}`)
-      .then(r => { setPost(r.data.post); setRelated(r.data.related || []); })
-      .catch((e) => {
-        if (e.response?.status === 404) {
-          const staticPost = STATIC_BLOG_POSTS[slug];
-          if (staticPost) {
-            setPost(staticPost);
-            const relatedStatic = Object.values(STATIC_BLOG_POSTS)
-              .filter((item) => item.slug !== slug && item.tags?.some((tag) => staticPost.tags.includes(tag)))
-              .slice(0, 3)
-              .map((item) => ({
-                _id: item.slug,
-                title: item.title,
-                slug: item.slug,
-                excerpt: item.excerpt,
-                featuredImage: item.featuredImage,
-                publishedAt: item.publishedAt,
-              }));
-            setRelated(relatedStatic);
-          } else {
-            setNotFound(true);
-          }
-        } else {
-          setNotFound(true);
-        }
-      })
-      .finally(() => setLoading(false));
+    const fetchPost = async () => {
+      try {
+        setLoading(true);
+        setNotFound(false);
+        setPost(null);
+        console.log('[BlogPost] Fetching post:', slug);
+        
+        const response = await api.get(`/blog/${slug}`);
+        console.log('[BlogPost API Success]:', response.data);
+        
+        setPost(response.data.post);
+        setRelated(Array.isArray(response.data.related) ? response.data.related : []);
+      } catch (error) {
+        console.error('[BlogPost API Error]:', error);
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPost();
     window.scrollTo({ top: 0 });
   }, [slug]);
 

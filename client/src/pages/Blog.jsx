@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
@@ -6,7 +6,6 @@ import { Search, Calendar, Eye, Tag, ArrowRight, Loader2, Heart, Clock } from 'l
 import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
-import { STATIC_BLOG_POST_LIST } from '../data/seoContent';
 
 const BASE_URL = 'https://elovialove.onrender.com';
 
@@ -96,30 +95,40 @@ const Blog = () => {
   const q    = searchParams.get('q')   || '';
 
   useEffect(() => {
-    setLoading(true);
-    const params = new URLSearchParams({
-      page: String(page),
-      limit: '9',
-    });
-    if (tag) params.set('tag', tag);
-    if (q)   params.set('q', q);
-    api.get(`/blog?${params}`)
-      .then((r) => {
-        console.log('[Blog API Success]:', r.data);
-        const postsData = Array.isArray(r.data?.posts)
-          ? r.data.posts
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        console.log('[Blog] Fetching posts...');
+        
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: '9',
+        });
+        
+        if (tag) params.set('tag', tag);
+        if (q) params.set('q', q);
+        
+        const response = await api.get(`/blog?${params}`);
+        console.log('[Blog API Success]:', response.data);
+        
+        const postsData = Array.isArray(response.data?.posts)
+          ? response.data.posts
           : [];
+        
         setPosts(postsData);
-        setTotal(Number(r.data?.total) || 0);
-        setPages(Number(r.data?.pages) || 1);
-      })
-      .catch((err) => {
-        console.error('[Blog API Error]:', err);
+        setTotal(Number(response.data?.total) || 0);
+        setPages(Number(response.data?.pages) || 1);
+      } catch (error) {
+        console.error('[Blog API Error]:', error);
         setPosts([]);
         setTotal(0);
         setPages(1);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchBlogs();
   }, [page, tag, q]);
 
   // Update document title for SEO — handled by Helmet below
@@ -147,29 +156,12 @@ const Blog = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const mergedPosts = useMemo(() => {
-    try {
-      const combined = Array.isArray(posts) ? [...posts] : [];
-      if (Array.isArray(STATIC_BLOG_POST_LIST)) {
-        STATIC_BLOG_POST_LIST.forEach((staticPost) => {
-          if (staticPost && staticPost.slug && !combined.some((p) => p && p.slug === staticPost.slug)) {
-            combined.push(staticPost);
-          }
-        });
-      }
-      // Strict filter to ensure every post object is valid before it reaches ANY map/render logic
-      return combined.filter(p => p && typeof p === 'object' && p.slug && p.title);
-    } catch (e) {
-      console.error('[Blog Merge Error]:', e);
-      return Array.isArray(STATIC_BLOG_POST_LIST) 
-        ? STATIC_BLOG_POST_LIST.filter(p => p && p.slug && p.title) 
-        : [];
-    }
-  }, [posts]);
+  // Safe post filtering
+  const safePosts = Array.isArray(posts)
+    ? posts.filter(p => p && typeof p === 'object' && p.slug && p.title)
+    : [];
 
-  const visibleCount = Math.max(total, mergedPosts.length);
-
-  console.log('Merged Posts:', mergedPosts);
+  console.log('[Blog] Rendering with', safePosts.length, 'posts');
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -252,29 +244,29 @@ const Blog = () => {
           <div className="mx-auto max-w-4xl mb-8 text-left">
             <h3 className="text-xl font-semibold text-slate-900 mb-4">Explore our latest posts</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {mergedPosts.slice(0, 12).map(post => (
+              {safePosts.slice(0, 12).map((post, idx) => (
                 <Link
-                  key={post._id || post.slug}
-                  to={post.slug ? `/blog/${post.slug}` : '/blog'}
+                  key={post._id || post.slug || idx}
+                  to={`/blog/${post.slug}`}
                   className="text-primary-600 hover:text-primary-700 font-medium"
                 >
-                  • {post.title || 'Untitled Post'}
+                  • {post.title}
                 </Link>
               ))}
-              {!mergedPosts.length && (
+              {safePosts.length === 0 && (
                 <p className="text-slate-500">Recent posts will appear here once they are loaded.</p>
               )}
             </div>
           </div>
           <div className="grid gap-4 text-left mx-auto max-w-4xl">
-             {mergedPosts.length > 0 ? (
-              mergedPosts.slice(0, 4).map((post, index) => (
+            {safePosts.length > 0 ? (
+              safePosts.slice(0, 4).map((post, index) => (
                 <Link
                   key={post._id || post.slug || index}
-                  to={post.slug ? `/blog/${post.slug}` : '/blog'}
+                  to={`/blog/${post.slug}`}
                   className="block rounded-3xl border border-slate-200 p-4 text-slate-700 hover:border-primary-300 hover:bg-primary-50 transition-colors"
                 >
-                  <span className="font-semibold">{post.title || 'Untitled Post'}</span>
+                  <span className="font-semibold">{post.title}</span>
                 </Link>
               ))
             ) : (
@@ -339,7 +331,9 @@ const Blog = () => {
                 <button onClick={() => setSearchParams({})} className="ml-1 hover:text-red-500">×</button>
               </span>
             )}
-            <span className="text-sm text-slate-400">{visibleCount} result{visibleCount !== 1 ? 's' : ''}</span>
+            {(q || tag) && (
+              <span className="text-sm text-slate-400">{total} result{total !== 1 ? 's' : ''}</span>
+            )}
           </div>
         )}
 
@@ -348,7 +342,7 @@ const Blog = () => {
           <div className="flex justify-center py-20">
             <Loader2 size={36} className="text-primary-500 animate-spin" />
           </div>
-        ) : (Array.isArray(mergedPosts) && mergedPosts.length === 0) ? (
+        ) : safePosts.length === 0 ? (
           <div className="text-center py-20">
             <Heart size={48} className="text-slate-200 mx-auto mb-4" />
             <p className="text-slate-500 text-lg font-medium">No posts found</p>
@@ -358,26 +352,18 @@ const Blog = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.isArray(mergedPosts) &&
-              mergedPosts
-                .filter(post =>
-                  post &&
-                  typeof post === 'object' &&
-                  post.slug &&
-                  post.title
-                )
-                .map((post, i) => (
-                  <PostCard
-                    key={post._id || post.slug || i}
-                    post={post}
-                    idx={i}
-                  />
-                ))}
+            {safePosts.map((post, i) => (
+              <PostCard
+                key={post._id || post.slug || i}
+                post={post}
+                idx={i}
+              />
+            ))}
           </div>
         )}
 
         {/* Ad */}
-        {!loading && mergedPosts.length > 0 && (
+        {!loading && safePosts.length > 0 && (
           <div className="py-8 flex justify-center">
             <AdWrapper showUpgradeNudge><BannerAd slot="9876543210" /></AdWrapper>
           </div>
