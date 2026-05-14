@@ -152,15 +152,18 @@ const Blog = () => {
       const combined = Array.isArray(posts) ? [...posts] : [];
       if (Array.isArray(STATIC_BLOG_POST_LIST)) {
         STATIC_BLOG_POST_LIST.forEach((staticPost) => {
-          if (!combined.some((post) => post.slug === staticPost.slug)) {
+          if (staticPost && staticPost.slug && !combined.some((p) => p && p.slug === staticPost.slug)) {
             combined.push(staticPost);
           }
         });
       }
-      return combined;
+      // Strict filter to ensure every post object is valid before it reaches ANY map/render logic
+      return combined.filter(p => p && typeof p === 'object' && p.slug && p.title);
     } catch (e) {
       console.error('[Blog Merge Error]:', e);
-      return STATIC_BLOG_POST_LIST || [];
+      return Array.isArray(STATIC_BLOG_POST_LIST) 
+        ? STATIC_BLOG_POST_LIST.filter(p => p && p.slug && p.title) 
+        : [];
     }
   }, [posts]);
 
@@ -251,11 +254,11 @@ const Blog = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {mergedPosts.slice(0, 12).map(post => (
                 <Link
-                  key={post._id}
-                  to={`/blog/${post.slug}`}
+                  key={post._id || post.slug}
+                  to={post.slug ? `/blog/${post.slug}` : '/blog'}
                   className="text-primary-600 hover:text-primary-700 font-medium"
                 >
-                  • {post.title}
+                  • {post.title || 'Untitled Post'}
                 </Link>
               ))}
               {!mergedPosts.length && (
@@ -264,14 +267,14 @@ const Blog = () => {
             </div>
           </div>
           <div className="grid gap-4 text-left mx-auto max-w-4xl">
-            {mergedPosts.length > 0 ? (
+             {mergedPosts.length > 0 ? (
               mergedPosts.slice(0, 4).map((post, index) => (
                 <Link
-                  key={post._id}
-                  to={`/blog/${post.slug}`}
+                  key={post._id || post.slug || index}
+                  to={post.slug ? `/blog/${post.slug}` : '/blog'}
                   className="block rounded-3xl border border-slate-200 p-4 text-slate-700 hover:border-primary-300 hover:bg-primary-50 transition-colors"
                 >
-                  <span className="font-semibold">{post.title}</span>
+                  <span className="font-semibold">{post.title || 'Untitled Post'}</span>
                 </Link>
               ))
             ) : (

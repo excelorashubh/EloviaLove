@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Shield, MapPin, AlertCircle, CheckCircle, Heart, Phone } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 import { Link } from 'react-router-dom';
 
 const DatingSafetyIndia = () => {
@@ -38,7 +37,6 @@ const DatingSafetyIndia = () => {
       </Helmet>
 
       <div className="bg-slate-900 min-h-screen text-slate-100">
-        <Navbar />
 
         {/* Hero Section */}
         <section className="pt-32 pb-20 bg-gradient-to-b from-slate-800 to-slate-900 border-b border-slate-700/50">

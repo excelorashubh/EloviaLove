@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Heart, Shield, MapPin, Star, MessageCircle, Info } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 
 // Programmatic City Data
 const CITY_DATA = {
@@ -71,7 +70,6 @@ const CityPage = () => {
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">
-        <Navbar />
         
         {/* Hero Section */}
         <section className="pt-32 pb-20 bg-gradient-to-b from-white to-slate-50 border-b border-slate-200">

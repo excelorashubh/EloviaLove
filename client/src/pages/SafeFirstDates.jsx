@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Coffee, MapPin, Phone, ShieldCheck, Heart, UserCheck } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 import { Link } from 'react-router-dom';
 
 const SafeFirstDates = () => {
@@ -37,7 +36,6 @@ const SafeFirstDates = () => {
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">
-        <Navbar />
 
         <section className="pt-32 pb-20 bg-gradient-to-r from-pink-500 to-primary-600 text-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

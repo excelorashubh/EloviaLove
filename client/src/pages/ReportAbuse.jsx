@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { AlertTriangle, Shield, Flag, Send, CheckCircle } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 import { Link } from 'react-router-dom';
 
 const ReportAbuse = () => {
@@ -14,7 +13,6 @@ const ReportAbuse = () => {
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">
-        <Navbar />
 
         <section className="pt-32 pb-20 bg-white border-b border-slate-100">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

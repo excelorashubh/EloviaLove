@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Heart, Shield, Users, MessageSquare, HandMetal, Check } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 
 const CommunityGuidelines = () => {
   const guidelines = [
@@ -36,7 +35,6 @@ const CommunityGuidelines = () => {
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">
-        <Navbar />
 
         <section className="pt-32 pb-20 bg-primary-600 text-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

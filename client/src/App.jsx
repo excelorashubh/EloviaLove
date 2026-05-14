@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AuthProvider } from './context/AuthContext';
 import { useEffect, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
-import Navbar from './components/layout/Navbar';
+import GlobalNavbar from './components/layout/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import AdminRoute from './components/AdminRoute';
@@ -14,6 +14,8 @@ import { SEO_PAGE_SLUGS } from './data/seoContent';
 
 // ── Eagerly loaded pages (above-the-fold, critical) ──────────────────────────
 import Home from './pages/Home';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 
 // ── Lazy loaded pages (public, non-critical) ──────────────────────────────────
 const Login = lazy(() => import('./pages/Login'));
@@ -21,8 +23,6 @@ const Signup = lazy(() => import('./pages/Signup'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Pricing = lazy(() => import('./pages/Pricing'));
-const Blog = lazy(() => import('./pages/Blog'));
-const BlogPost = lazy(() => import('./pages/BlogPost'));
 const DatingTips = lazy(() => import('./pages/DatingTips'));
 const SeoPage = lazy(() => import('./pages/SeoPage'));
 
@@ -111,7 +111,7 @@ const SeoDefaults = () => {
 const MainLayout = ({ children, showNav = false }) => (
   <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
     <SeoDefaults />
-    {showNav && <Navbar />}
+    {showNav && <GlobalNavbar />}
     <main className="grow">{children}</main>
     <Footer />
   </div>
@@ -160,10 +160,10 @@ function App() {
           <Route path="/pricing" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Pricing /></Suspense></MainLayout>} />
           
           {/* Blog Routes */}
-          <Route path="/blog" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><Blog /></Suspense></MainLayout>} />
+          <Route path="/blog" element={<MainLayout showNav><Blog /></MainLayout>} />
           <Route path="/blog/" element={<Navigate to="/blog" replace />} />
           <Route path="/blog/dating-tips" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><DatingTips /></Suspense></MainLayout>} />
-          <Route path="/blog/:slug" element={<MainLayout showNav><Suspense fallback={<LoadingFallback />}><BlogPost /></Suspense></MainLayout>} />
+          <Route path="/blog/:slug" element={<MainLayout showNav><BlogPost /></MainLayout>} />
           
           {/* SEO Dynamic Routes */}
           {SEO_PAGE_SLUGS.map((slug) => (

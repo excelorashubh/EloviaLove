@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Shield, Lock, Eye, AlertTriangle, CheckCircle, UserCheck, MessageSquare, PhoneCall } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
 
 const SafetyHub = () => {
   const safetyResources = [
@@ -69,7 +68,6 @@ const SafetyHub = () => {
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">
-        <Navbar />
 
         {/* Hero Section */}
         <section className="pt-32 pb-20 bg-slate-900 text-white relative overflow-hidden">
