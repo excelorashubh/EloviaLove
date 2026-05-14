@@ -91,6 +91,7 @@ const Blog = () => {
     if (q)   params.set('q', q);
     api.get(`/blog?${params}`)
       .then(r => { 
+        console.log('[Blog API Success]:', r.data?.posts?.length, 'posts fetched');
         setPosts(r.data?.posts || []); 
         setTotal(r.data?.total || 0); 
         setPages(r.data?.pages || 1); 
@@ -322,7 +323,7 @@ const Blog = () => {
           <div className="flex justify-center py-20">
             <Loader2 size={36} className="text-primary-500 animate-spin" />
           </div>
-        ) : mergedPosts.length === 0 ? (
+        ) : (Array.isArray(mergedPosts) && mergedPosts.length === 0) ? (
           <div className="text-center py-20">
             <Heart size={48} className="text-slate-200 mx-auto mb-4" />
             <p className="text-slate-500 text-lg font-medium">No posts found</p>

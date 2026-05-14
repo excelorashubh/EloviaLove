@@ -9,6 +9,7 @@ import AdminRoute from './components/AdminRoute';
 import Footer from './components/layout/Footer';
 import CookieConsent from './components/CookieConsent';
 import api from './services/api';
+import ErrorBoundary from './components/ErrorBoundary';
 import { SEO_PAGE_SLUGS } from './data/seoContent';
 
 // ── Eagerly loaded pages (above-the-fold, critical) ──────────────────────────
@@ -137,7 +138,8 @@ function App() {
     <AuthProvider>
       <Router>
         <VisitorTracker />
-        <Routes>
+        <ErrorBoundary>
+          <Routes>
           {/* Admin — full screen with own sidebar layout */}
           <Route path="/admin" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></AdminRoute>} />
           <Route path="/admin/users" element={<AdminRoute><Suspense fallback={<LoadingFallback />}><AdminUsers /></Suspense></AdminRoute>} />
@@ -204,6 +206,7 @@ function App() {
           {/* Catch-all 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </ErrorBoundary>
         <CookieConsent />
       </Router>
     </AuthProvider>

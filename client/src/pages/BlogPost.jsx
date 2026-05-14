@@ -242,7 +242,6 @@ const BlogPost = () => {
     <>
       <Helmet><title>Loading... — Elovia Love</title></Helmet>
       <div className="min-h-screen bg-slate-50">
-        <Navbar />
         <div className="flex justify-center items-center py-32">
           <Loader2 size={40} className="text-primary-500 animate-spin" />
         </div>
@@ -257,7 +256,6 @@ const BlogPost = () => {
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
-        <Navbar />
         <div className="max-w-2xl mx-auto px-4 py-32 text-center">
           <Heart size={56} className="text-slate-200 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-slate-800 mb-2">Post not found</h1>
