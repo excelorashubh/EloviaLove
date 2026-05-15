@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
@@ -18,96 +18,6 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import api from '../services/api';
-
-// Dummy blog data for development
-const DUMMY_POSTS = [
-  {
-    _id: '1',
-    slug: 'first-date-tips-confidence',
-    title: '10 Confidence-Boosting First Date Tips That Actually Work',
-    excerpt: 'Master the art of first dates with psychology-backed techniques to build genuine connection and leave lasting impressions.',
-    category: 'Dating Advice',
-    author: 'Priya Sharma',
-    publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    views: 3450,
-    readTime: 8,
-    featuredImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=500&fit=crop',
-    excerpt_long: 'Learn psychology-backed first date strategies that build confidence and genuine connection with your potential partner.',
-    tags: ['dating', 'confidence', 'first-date', 'psychology'],
-    comments: 45,
-  },
-  {
-    _id: '2',
-    slug: 'emotional-intimacy-guide',
-    title: 'Building Emotional Intimacy: The Foundation of Lasting Love',
-    excerpt: 'Discover how emotional vulnerability creates deep bonds and transforms relationships into something truly special.',
-    category: 'Relationship Tips',
-    author: 'Arjun Kapoor',
-    publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    views: 5230,
-    readTime: 12,
-    featuredImage: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&h=500&fit=crop',
-    tags: ['intimacy', 'relationships', 'emotional-connection', 'vulnerability'],
-    comments: 78,
-    isFeatured: true,
-  },
-  {
-    _id: '3',
-    slug: 'healing-heartbreak-recovery',
-    title: 'Heartbreak Recovery: A 30-Day Emotional Healing Journey',
-    excerpt: 'Navigate the pain of heartbreak with compassionate, practical steps designed to help you heal and grow stronger.',
-    category: 'Breakup Recovery',
-    author: 'Meera Desai',
-    publishedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-    views: 8900,
-    readTime: 15,
-    featuredImage: 'https://images.unsplash.com/photo-1516627145497-ae6968895b06?w=800&h=500&fit=crop',
-    tags: ['heartbreak', 'healing', 'recovery', 'self-love'],
-    comments: 156,
-  },
-  {
-    _id: '4',
-    slug: 'love-compatibility-astrology',
-    title: 'Love & Astrology: Understanding Zodiac Compatibility',
-    excerpt: 'Explore how zodiac signs influence relationships and discover your true cosmic compatibility with your partner.',
-    category: 'Love Stories',
-    author: 'Rishab Joshi',
-    publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    views: 4560,
-    readTime: 10,
-    featuredImage: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=500&fit=crop',
-    tags: ['astrology', 'compatibility', 'zodiac', 'love'],
-    comments: 92,
-  },
-  {
-    _id: '5',
-    slug: 'self-love-journey-empowerment',
-    title: 'The Self-Love Journey: Empowerment Before Partnership',
-    excerpt: 'Understand why loving yourself first is the secret to attracting healthy, fulfilling relationships into your life.',
-    category: 'Self Love',
-    author: 'Neha Singh',
-    publishedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-    views: 6780,
-    readTime: 11,
-    featuredImage: 'https://images.unsplash.com/photo-1505228395891-9a51e7e86e81?w=800&h=500&fit=crop',
-    tags: ['self-love', 'empowerment', 'mental-health', 'wellness'],
-    comments: 134,
-  },
-  {
-    _id: '6',
-    slug: 'communication-secrets-healthy-relationships',
-    title: 'Communication Secrets: How to Talk About Anything With Your Partner',
-    excerpt: 'Master the art of meaningful conversations that deepen understanding and resolve conflicts gracefully.',
-    category: 'Relationship Tips',
-    author: 'Vikram Mishra',
-    publishedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    views: 7120,
-    readTime: 13,
-    featuredImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=500&fit=crop',
-    tags: ['communication', 'relationships', 'conflict-resolution', 'intimacy'],
-    comments: 203,
-  },
-];
 
 const CATEGORIES = [
   'All Articles',
@@ -148,12 +58,15 @@ const BlogCard = ({ post, index }) => {
 
   return (
     <motion.div
-      variants={cardVariants}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
       whileHover="hover"
-      variants={hoverVariants}
+      variants={{
+        hidden: cardVariants.hidden,
+        visible: cardVariants.visible,
+        hover: hoverVariants.hover,
+      }}
     >
       <Link
         to={`/blog/${post.slug}`}
@@ -163,9 +76,9 @@ const BlogCard = ({ post, index }) => {
         {/* Glass Morphism Card */}
         <div className="h-full bg-white/60 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/40 shadow-lg hover:shadow-2xl transition-shadow duration-500 flex flex-col">
           {/* Featured Image */}
-          <div className="relative aspect-video bg-gradient-to-br from-rose-100 via-pink-100 to-purple-100 overflow-hidden">
+          <div className="relative aspect-video bg-linear-to-br from-rose-100 via-pink-100 to-purple-100 overflow-hidden">
             {/* Decorative gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
 
             {post.featuredImage ? (
               <motion.img
@@ -177,14 +90,14 @@ const BlogCard = ({ post, index }) => {
                 whileHover="hover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-200 to-pink-200">
+              <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-rose-200 to-pink-200">
                 <Heart size={48} className="text-rose-400" strokeWidth={1.5} />
               </div>
             )}
 
             {/* Category Badge */}
             <div className="absolute top-4 left-4 z-20">
-              <span className="inline-block px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-lg backdrop-blur-sm">
+              <span className="inline-block px-4 py-2 bg-linear-to-r from-rose-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-lg backdrop-blur-sm">
                 {post.category}
               </span>
             </div>
@@ -230,7 +143,7 @@ const BlogCard = ({ post, index }) => {
                 {post.tags.slice(0, 2).map((tag) => (
                   <span
                     key={tag}
-                    className="px-3 py-1 bg-gradient-to-r from-rose-50 to-pink-50 text-rose-700 text-xs font-medium rounded-full border border-rose-100"
+                    className="px-3 py-1 bg-linear-to-r from-rose-50 to-pink-50 text-rose-700 text-xs font-medium rounded-full border border-rose-100"
                   >
                     #{tag}
                   </span>
@@ -279,13 +192,13 @@ const FeaturedArticle = ({ post }) => {
       viewport={{ once: true }}
       className="mb-16"
     >
-      <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl overflow-hidden shadow-2xl border border-slate-100">
+      <div className="bg-linear-to-br from-white to-slate-50 rounded-3xl overflow-hidden shadow-2xl border border-slate-100">
         <div className="grid lg:grid-cols-2 gap-0">
           {/* Image */}
           <div className="relative aspect-video lg:aspect-auto overflow-hidden">
             {/* Animated background */}
             <motion.div
-              className="absolute inset-0 bg-gradient-to-br from-rose-200 via-pink-200 to-purple-200"
+              className="absolute inset-0 bg-linear-to-br from-rose-200 via-pink-200 to-purple-200"
               animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
               transition={{ duration: 15, repeat: Infinity, repeatType: 'reverse' }}
             />
@@ -302,7 +215,7 @@ const FeaturedArticle = ({ post }) => {
 
             {/* Badge */}
             <div className="absolute top-6 left-6 z-20">
-              <span className="inline-block px-5 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-xl">
+              <span className="inline-block px-5 py-2 bg-linear-to-r from-rose-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-xl">
                 ⭐ Featured Article
               </span>
             </div>
@@ -326,7 +239,7 @@ const FeaturedArticle = ({ post }) => {
 
             {/* Author Info */}
             <div className="flex items-center gap-3 mb-8 pb-8 border-b border-slate-200">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-400 to-pink-400 flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-12 h-12 rounded-full bg-linear-to-br from-rose-400 to-pink-400 flex items-center justify-center text-white font-bold text-lg">
                 {post.author.charAt(0)}
               </div>
               <div>
@@ -359,7 +272,7 @@ const FeaturedArticle = ({ post }) => {
               >
                 <Link
                   to={`/blog/${post.slug}`}
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-linear-to-r from-rose-500 to-pink-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300"
                 >
                   Read Full Story
                   <ArrowRight size={18} />
@@ -400,20 +313,23 @@ const Blog = () => {
       try {
         setLoading(true);
         setError(null);
+        console.log('[Blog] Fetching posts from server...');
 
-        // Try to fetch from API, fallback to dummy data
-        try {
-          const res = await api.get('/blog?page=1&limit=50');
-          const apiPosts = Array.isArray(res.data?.posts) ? res.data.posts : [];
-          setPosts(apiPosts.length > 0 ? apiPosts : DUMMY_POSTS);
-        } catch (apiErr) {
-          console.log('[Blog] Using dummy data');
-          setPosts(DUMMY_POSTS);
+        const res = await api.get('/blog?page=1&limit=50');
+        console.log('[Blog] API Response:', res.data);
+
+        const apiPosts = Array.isArray(res.data?.posts) ? res.data.posts : [];
+
+        if (apiPosts.length === 0) {
+          setError('No blog posts available');
+          setPosts([]);
+        } else {
+          setPosts(apiPosts);
         }
       } catch (err) {
         console.error('[Blog] Fetch error:', err);
-        setError(err.message);
-        setPosts(DUMMY_POSTS);
+        setError(err.message || 'Failed to load blog posts. Please try again later.');
+        setPosts([]);
       } finally {
         setLoading(false);
       }
@@ -617,7 +533,7 @@ const Blog = () => {
         </script>
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50 to-pink-50 overflow-hidden">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-rose-50 to-pink-50 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
           <motion.div
@@ -647,7 +563,7 @@ const Blog = () => {
         >
           {/* Animated gradient background */}
           <div className="absolute inset-0 -z-10">
-            <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 via-pink-500/5 to-purple-500/5 backdrop-blur-3xl" />
+            <div className="absolute inset-0 bg-linear-to-br from-rose-500/5 via-pink-500/5 to-purple-500/5 backdrop-blur-3xl" />
           </div>
 
           <div className="max-w-4xl mx-auto text-center">
@@ -658,7 +574,7 @@ const Blog = () => {
               transition={{ delay: 0.2 }}
               className="mb-6"
             >
-              <span className="inline-block px-4 py-2 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 text-xs font-bold uppercase tracking-widest rounded-full border border-rose-200">
+              <span className="inline-block px-4 py-2 bg-linear-to-r from-rose-100 to-pink-100 text-rose-700 text-xs font-bold uppercase tracking-widest rounded-full border border-rose-200">
                 💕 Love & Relationships
               </span>
             </motion.div>
@@ -671,7 +587,7 @@ const Blog = () => {
               className="text-4xl md:text-6xl font-black text-slate-900 mb-6 leading-tight"
             >
               Love Stories,{' '}
-              <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-rose-500 via-pink-500 to-purple-600 bg-clip-text text-transparent">
                 Relationship Advice
               </span>{' '}
               & Emotional Insights
@@ -697,7 +613,7 @@ const Blog = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow"
+                className="px-8 py-4 bg-linear-to-r from-rose-500 to-pink-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow"
               >
                 Explore Articles
               </motion.button>
@@ -799,7 +715,7 @@ const Blog = () => {
                       onClick={() => setSelectedCategory(category)}
                       className={`px-4 py-2 rounded-full font-semibold text-sm transition-all ${
                         selectedCategory === category
-                          ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg'
+                          ? 'bg-linear-to-r from-rose-500 to-pink-500 text-white shadow-lg'
                           : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                       }`}
                     >
@@ -935,7 +851,7 @@ const Blog = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setDisplayLimit(displayLimit + 6)}
-                  className="px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow inline-flex items-center gap-2"
+                  className="px-8 py-4 bg-linear-to-r from-rose-500 to-pink-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow inline-flex items-center gap-2"
                 >
                   Load More Stories
                   <ArrowRight size={18} />
@@ -975,7 +891,7 @@ const Blog = () => {
                       className="group block p-4 rounded-2xl hover:bg-rose-50 transition-colors"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-pink-400 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-rose-400 to-pink-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
                           {index + 1}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -999,7 +915,7 @@ const Blog = () => {
           <div className="lg:col-span-2 space-y-8">
             {/* Newsletter */}
             <motion.div
-              className="bg-gradient-to-br from-rose-500/10 via-pink-500/10 to-purple-500/10 rounded-3xl p-8 border border-rose-200/30 backdrop-blur-md"
+              className="bg-linear-to-br from-rose-500/10 via-pink-500/10 to-purple-500/10 rounded-3xl p-8 border border-rose-200/30 backdrop-blur-md"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -1025,7 +941,7 @@ const Blog = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-full hover:shadow-lg transition-shadow"
+                  className="px-6 py-3 bg-linear-to-r from-rose-500 to-pink-500 text-white font-bold rounded-full hover:shadow-lg transition-shadow"
                 >
                   Subscribe
                 </motion.button>
@@ -1086,7 +1002,7 @@ const Blog = () => {
           <div className="relative rounded-3xl overflow-hidden">
             {/* Animated background */}
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600"
+              className="absolute inset-0 bg-linear-to-r from-rose-500 via-pink-500 to-purple-600"
               animate={{
                 backgroundPosition: ['0% 0%', '100% 100%'],
               }}
