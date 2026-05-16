@@ -13,5 +13,8 @@ if (rootElement) {
       </HelmetProvider>
     </StrictMode>,
   );
+  if (typeof window !== 'undefined') {
+    window.__MAIN_RENDERED__ = true;
+  }
 }
 

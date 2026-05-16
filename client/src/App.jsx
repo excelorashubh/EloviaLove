@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 
 import { AuthProvider } from './context/AuthContext';
-import { useEffect, Suspense, lazy } from 'react';
+import { Children, useEffect, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 
 import GlobalNavbar from './components/layout/Navbar';
@@ -126,6 +126,10 @@ const SeoDefaults = () => {
 // MAIN LAYOUT
 // ─────────────────────────────────────────────────────────────
 const MainLayout = ({ children, showNav = false }) => {
+  if (typeof window !== 'undefined') {
+    console.log('[MainLayout] rendering', { showNav, childCount: Children.count(children) });
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       <SeoDefaults />
@@ -173,20 +177,26 @@ const NotFound = () => {
 // APP
 // ─────────────────────────────────────────────────────────────
 function App() {
+  if (typeof window !== 'undefined') {
+    console.log('[App] render start', window.location.pathname);
+  }
+
   return (
     <ErrorBoundary>
 
       <AuthProvider>
 
         <Router>
+          {import.meta.env.DEV && typeof window !== 'undefined' && (
+            <div className="fixed top-2 left-2 z-[999] rounded-xl border border-slate-200 bg-white/95 px-3 py-2 text-[11px] font-semibold text-slate-900 shadow-lg shadow-slate-200">
+              APP LOADED {window.location.pathname}
+            </div>
+          )}
 
           <VisitorTracker />
 
           <Suspense fallback={<LoadingFallback />}>
-
             <Routes>
-
-              {/* HOME */}
               <Route
                 path="/"
                 element={
@@ -196,12 +206,69 @@ function App() {
                 }
               />
 
-              {/* BLOG */}
               <Route
                 path="/blog"
                 element={
                   <MainLayout showNav>
                     <Blog />
+                  </MainLayout>
+                }
+              />
+
+              <Route
+                path="/about"
+                element={
+                  <MainLayout showNav>
+                    <About />
+                  </MainLayout>
+                }
+              />
+
+              <Route
+                path="/contact"
+                element={
+                  <MainLayout showNav>
+                    <Contact />
+                  </MainLayout>
+                }
+              />
+
+              <Route
+                path="/login"
+                element={
+                  <MainLayout showNav>
+                    <GuestRoute>
+                      <Login />
+                    </GuestRoute>
+                  </MainLayout>
+                }
+              />
+
+              <Route
+                path="/signup"
+                element={
+                  <MainLayout showNav>
+                    <GuestRoute>
+                      <Signup />
+                    </GuestRoute>
+                  </MainLayout>
+                }
+              />
+
+              <Route
+                path="/pricing"
+                element={
+                  <MainLayout showNav>
+                    <Pricing />
+                  </MainLayout>
+                }
+              />
+
+              <Route
+                path="/discover"
+                element={
+                  <MainLayout showNav>
+                    <Discover />
                   </MainLayout>
                 }
               />
@@ -215,71 +282,6 @@ function App() {
                 }
               />
 
-              {/* ABOUT */}
-              <Route
-                path="/about"
-                element={
-                  <MainLayout showNav>
-                    <About />
-                  </MainLayout>
-                }
-              />
-
-              {/* CONTACT */}
-              <Route
-                path="/contact"
-                element={
-                  <MainLayout showNav>
-                    <Contact />
-                  </MainLayout>
-                }
-              />
-
-              {/* LOGIN */}
-              <Route
-                path="/login"
-                element={
-                  <MainLayout showNav>
-                    <GuestRoute>
-                      <Login />
-                    </GuestRoute>
-                  </MainLayout>
-                }
-              />
-
-              {/* SIGNUP */}
-              <Route
-                path="/signup"
-                element={
-                  <MainLayout showNav>
-                    <GuestRoute>
-                      <Signup />
-                    </GuestRoute>
-                  </MainLayout>
-                }
-              />
-
-              {/* PRICING */}
-              <Route
-                path="/pricing"
-                element={
-                  <MainLayout showNav>
-                    <Pricing />
-                  </MainLayout>
-                }
-              />
-
-              {/* DISCOVER */}
-              <Route
-                path="/discover"
-                element={
-                  <MainLayout showNav>
-                    <Discover />
-                  </MainLayout>
-                }
-              />
-
-              {/* DASHBOARD */}
               <Route
                 path="/dashboard"
                 element={
@@ -291,7 +293,6 @@ function App() {
                 }
               />
 
-              {/* ADMIN */}
               <Route
                 path="/admin"
                 element={
@@ -365,20 +366,16 @@ function App() {
                 }
               />
 
-              {/* REDIRECT */}
               <Route
                 path="/blog/"
                 element={<Navigate to="/blog" replace />}
               />
 
-              {/* 404 */}
               <Route
                 path="*"
                 element={<NotFound />}
               />
-
             </Routes>
-
           </Suspense>
 
           <CookieConsent />

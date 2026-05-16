@@ -34,9 +34,9 @@ const CookieConsent = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-50"
+          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-50 pointer-events-none"
         >
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-5">
+          <div className="pointer-events-auto bg-white rounded-2xl shadow-2xl border border-slate-200 p-5">
             <div className="flex items-start gap-3 mb-3">
               <Cookie size={20} className="text-primary-500 shrink-0 mt-0.5" />
               <div className="flex-1">

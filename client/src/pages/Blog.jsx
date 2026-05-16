@@ -162,6 +162,10 @@ const FeaturedArticle = ({ post }) => {
 };
 
 const Blog = () => {
+  if (typeof window !== 'undefined') {
+    console.log('[Blog] rendering');
+  }
+
   const posts = useMemo(() => getBlogPosts(), []);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Articles');
