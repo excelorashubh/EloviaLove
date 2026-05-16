@@ -16,7 +16,9 @@ export const SeoWrapper = ({
   children
 }) => {
   const siteUrl = 'https://elovialove.onrender.com';
-  const fullCanonical = canonical ? `${siteUrl}${canonical}` : `${siteUrl}${window.location.pathname}`;
+  const isBrowser = typeof window !== 'undefined';
+  const currentPath = isBrowser ? window.location.pathname : '';
+  const fullCanonical = canonical ? `${siteUrl}${canonical}` : `${siteUrl}${currentPath}`;
   const fullOgImage = ogImage ? `${siteUrl}${ogImage}` : `${siteUrl}/og-default.jpg`;
 
   return (
@@ -74,30 +76,34 @@ export const BlogPostSeo = ({
   wordCount,
   readingTime
 }) => {
+  const isBrowser = typeof window !== 'undefined';
+  const origin = isBrowser ? window.location.origin : 'https://elovialove.onrender.com';
+  const href = isBrowser ? window.location.href : `${origin}/blog/${post.slug}`;
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "headline": post.title,
     "description": post.description,
-    "image": post.ogImage || `${window.location.origin}/og-default.jpg`,
+    "image": post.ogImage || `${origin}/og-default.jpg`,
     "author": {
       "@type": "Person",
       "name": author.name,
-      "url": `${window.location.origin}/author/${author.slug}`
+      "url": `${origin}/author/${author.slug}`
     },
     "publisher": {
       "@type": "Organization",
       "name": "Elovia Love",
       "logo": {
         "@type": "ImageObject",
-        "url": `${window.location.origin}/logo.png`
+        "url": `${origin}/logo.png`
       }
     },
     "datePublished": publishedTime,
     "dateModified": modifiedTime,
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": window.location.href
+      "@id": href
     },
     "articleSection": categories?.[0] || "Dating Tips",
     "keywords": tags?.join(", "),
@@ -120,15 +126,19 @@ export const BlogPostSeo = ({
 
 // 3. City Page SEO Component
 export const CityPageSeo = ({ city, stats, features }) => {
+  const siteUrl = 'https://elovialove.onrender.com';
   const title = `Find Love in ${city.name} | Dating in ${city.name} | Elovia Love`;
   const description = `Meet singles in ${city.name}. ${stats.activeUsers}+ active members. Safe, verified dating for serious relationships in ${city.name}. Join ${city.name}'s trusted dating community.`;
+
+  const isBrowser = typeof window !== 'undefined';
+  const href = isBrowser ? window.location.href : `${siteUrl}/dating-in-${city.slug}`;
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "name": title,
     "description": description,
-    "url": window.location.href,
+    "url": href,
     "isPartOf": {
       "@type": "WebSite",
       "name": "Elovia Love",
@@ -163,12 +173,16 @@ export const CityPageSeo = ({ city, stats, features }) => {
 
 // 4. Trust/Safety Page SEO Component
 export const TrustPageSeo = ({ pageData, lastUpdated }) => {
+  const siteUrl = 'https://elovialove.onrender.com';
+  const isBrowser = typeof window !== 'undefined';
+  const href = isBrowser ? window.location.href : `${siteUrl}/${pageData.slug}`;
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "name": pageData.title,
     "description": pageData.description,
-    "url": window.location.href,
+    "url": href,
     "dateModified": lastUpdated,
     "publisher": {
       "@type": "Organization",

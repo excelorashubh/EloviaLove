@@ -12,9 +12,10 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+  const isBrowser = typeof window !== 'undefined';
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(() => (isBrowser ? localStorage.getItem('token') : null));
 
   useEffect(() => {
     if (token) {
@@ -23,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, isBrowser]);
 
   const loadUser = async () => {
     try {

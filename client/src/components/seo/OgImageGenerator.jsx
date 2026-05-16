@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
-// ── Dynamic OG Image Generation System ────────────────────────────────────────
+const getOrigin = () =>
+  typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://elovialove.onrender.com';
 
-// 1. OG Image Generator Hook
 export const useOgImage = () => {
   const [ogImageUrl, setOgImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +18,9 @@ export const useOgImage = () => {
         body: JSON.stringify({ type, ...params })
       });
 
-      if (!response.ok) throw new Error('Failed to generate OG image');
+      if (!response.ok) {
+        throw new Error('Failed to generate OG image');
+      }
 
       const data = await response.json();
       setOgImageUrl(data.imageUrl);
@@ -29,10 +33,22 @@ export const useOgImage = () => {
     }
   };
 
-  return { ogImageUrl, loading, generateOgImage };
+  return {
+    ogImageUrl,
+    loading,
+    generateOgImage,
+    origin: getOrigin()
+  };
 };
 
-// 2. Blog Post OG Image Component
+const PreviewShell = ({ label }) => (
+  <div className="og-image-preview">
+    <div className="animate-pulse bg-gray-200 h-32 w-full rounded-lg flex items-center justify-center">
+      <span className="text-gray-500">{label}</span>
+    </div>
+  </div>
+);
+
 export const BlogOgImage = ({ post, onImageGenerated }) => {
   const { generateOgImage, ogImageUrl, loading } = useOgImage();
 
@@ -57,22 +73,23 @@ export const BlogOgImage = ({ post, onImageGenerated }) => {
     }
   }, [post, generateOgImage, ogImageUrl, onImageGenerated]);
 
-  return loading ? (
-    <div className="og-image-preview">
-      <div className="animate-pulse bg-gray-200 h-32 w-full rounded-lg flex items-center justify-center">
-        <span className="text-gray-500">Generating OG Image...</span>
-      </div>
-    </div>
-  ) : ogImageUrl ? (
+  if (loading) {
+    return <PreviewShell label="Generating OG Image..." />;
+  }
+
+  if (!ogImageUrl) {
+    return null;
+  }
+
+  return (
     <div className="og-image-preview">
       <img src={ogImageUrl} alt="OG Image Preview" className="rounded-lg shadow-md" />
     </div>
-  ) : null;
+  );
 };
 
-// 3. City Page OG Image Component
 export const CityOgImage = ({ city, stats }) => {
-  const { generateOgImage, ogImageUrl, loading } = useOgImage();
+  const { generateOgImage, ogImageUrl, loading, origin } = useOgImage();
 
   useEffect(() => {
     const generate = async () => {
@@ -89,18 +106,27 @@ export const CityOgImage = ({ city, stats }) => {
     }
   }, [city, stats, generateOgImage, ogImageUrl]);
 
-  return ogImageUrl || `${window.location.origin}/og/city-default.jpg`;
+  const fallback = `${origin}/og/city-default.jpg`;
+
+  if (loading) {
+    return <PreviewShell label="Generating City OG Image..." />;
+  }
+
+  return (
+    <div className="og-image-preview">
+      <img src={ogImageUrl || fallback} alt="City OG Image Preview" className="rounded-lg shadow-md" />
+    </div>
+  );
 };
 
-// 4. Quote Card OG Image Component
 export const QuoteOgImage = ({ quote, author, category }) => {
-  const { generateOgImage, ogImageUrl } = useOgImage();
+  const { generateOgImage, ogImageUrl, loading, origin } = useOgImage();
 
   useEffect(() => {
     const generate = async () => {
       await generateOgImage('quote', {
-        quote: quote,
-        author: author,
+        quote,
+        author,
         category: category || 'Dating Advice',
         backgroundColor: '#FF6B9D',
         textColor: '#FFFFFF'
@@ -112,12 +138,21 @@ export const QuoteOgImage = ({ quote, author, category }) => {
     }
   }, [quote, author, category, generateOgImage, ogImageUrl]);
 
-  return ogImageUrl;
+  const fallback = `${origin}/og/quote-default.jpg`;
+
+  if (loading) {
+    return <PreviewShell label="Generating Quote OG Image..." />;
+  }
+
+  return (
+    <div className="og-image-preview">
+      <img src={ogImageUrl || fallback} alt="Quote OG Image Preview" className="rounded-lg shadow-md" />
+    </div>
+  );
 };
 
-// 5. Feature Page OG Image Component
 export const FeatureOgImage = ({ feature, benefits }) => {
-  const { generateOgImage, ogImageUrl } = useOgImage();
+  const { generateOgImage, ogImageUrl, loading, origin } = useOgImage();
 
   useEffect(() => {
     const generate = async () => {
@@ -134,8 +169,19 @@ export const FeatureOgImage = ({ feature, benefits }) => {
     }
   }, [feature, benefits, generateOgImage, ogImageUrl]);
 
-  return ogImageUrl || `${window.location.origin}/og/feature-default.jpg`;
+  const fallback = `${origin}/og/feature-default.jpg`;
+
+  if (loading) {
+    return <PreviewShell label="Generating Feature OG Image..." />;
+  }
+
+  return (
+    <div className="og-image-preview">
+      <img src={ogImageUrl || fallback} alt="Feature OG Image Preview" className="rounded-lg shadow-md" />
+    </div>
+  );
 };
+
 
 // ── Server-side OG Image Generation API (Node.js/Express) ────────────────────
 /*
