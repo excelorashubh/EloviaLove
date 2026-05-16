@@ -196,7 +196,7 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/subscription', require('./routes/subscription'));
 app.use('/api/verify', require('./routes/verify'));
 app.use('/api/analytics', require('./routes/analytics'));
-app.use('/api/blog', require('./routes/blog'));
+app.use('/api/blogs', require('./routes/blog'));
 app.use('/api/seo', seoModule.router);
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -365,7 +365,7 @@ process.on('unhandledRejection', (reason, promise) => {
 if (process.env.NODE_ENV === 'production') {
   const https = require('https');
   setInterval(() => {
-    https.get('https://elovialove.onrender.com/api/blog?limit=1', (res) => {
+    https.get('https://elovialove.onrender.com/api/blogs?limit=1', (res) => {
       console.log(`[Keep-Alive] Ping status: ${res.statusCode}`);
     }).on('error', (err) => {
       console.error('[Keep-Alive] Ping failed:', err.message);

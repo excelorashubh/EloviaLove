@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
@@ -16,7 +16,6 @@ import {
   ChevronDown,
   Loader2,
 } from 'lucide-react';
-import { getBlogPosts } from '../data/blogData';
 
 const CATEGORIES = [
   'All Articles',
@@ -166,12 +165,35 @@ const Blog = () => {
     console.log('[Blog] rendering');
   }
 
-  const posts = useMemo(() => getBlogPosts(), []);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Articles');
   const [sortBy, setSortBy] = useState('latest');
   const [displayLimit, setDisplayLimit] = useState(9);
   const searchInputRef = useRef(null);
+
+  React.useEffect(() => {
+    fetch('/api/blogs')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch blogs');
+        return res.json();
+      })
+      .then(data => {
+        // Assume data might be an array or { data: array, success: true }
+        const fetchedPosts = Array.isArray(data) ? data : (data.data || []);
+        // Only keep published posts if necessary, assuming backend handles it
+        setPosts(fetchedPosts);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
 
   const filteredPosts = useMemo(() => {
     let results = posts;
@@ -283,7 +305,30 @@ const Blog = () => {
             </p>
           </div>
 
-          <div className="grid gap-10 xl:grid-cols-[1.5fr_0.8fr]">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="h-10 w-10 animate-spin text-rose-500 mb-4" />
+              <p className="text-slate-500">Loading stories...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="text-rose-500 mb-4 bg-rose-50 p-4 rounded-full">
+                <Heart size={32} className="text-rose-400" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">Oops! Something went wrong</h2>
+              <p className="text-slate-500">{error}</p>
+              <button onClick={() => window.location.reload()} className="mt-6 rounded-full bg-slate-900 px-6 py-2 text-white text-sm">Try Again</button>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="text-rose-500 mb-4 bg-rose-50 p-4 rounded-full">
+                <BookmarkPlus size={32} className="text-rose-400" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">No blog posts available yet</h2>
+              <p className="text-slate-500">Check back later for fresh insights, safety tips, and relationship stories.</p>
+            </div>
+          ) : (
+            <div className="grid gap-10 xl:grid-cols-[1.5fr_0.8fr]">
             <div className="space-y-10">
               {featured && <FeaturedArticle post={featured} />}
 
@@ -433,6 +478,7 @@ const Blog = () => {
               </div>
             </aside>
           </div>
+          )}
         </div>
       </div>
     </>

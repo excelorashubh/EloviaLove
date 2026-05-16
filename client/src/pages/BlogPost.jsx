@@ -1,15 +1,51 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Calendar, Eye, Heart } from 'lucide-react';
-import { getBlogPostBySlug, getRelatedPosts } from '../data/blogData';
+import { ArrowLeft, Calendar, Eye, Heart, Loader2 } from 'lucide-react';
 
 const BlogPost = () => {
   const { slug } = useParams();
-  const post = useMemo(() => getBlogPostBySlug(slug), [slug]);
-  const relatedPosts = useMemo(() => (post ? getRelatedPosts(slug) : []), [post, slug]);
+  const [post, setPost] = React.useState(null);
+  const [relatedPosts, setRelatedPosts] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
 
-  if (!post) {
+  React.useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetch(`/api/blogs/${slug}`)
+      .then((res) => {
+        if (!res.ok) {
+          if (res.status === 404) throw new Error('not_found');
+          throw new Error('Failed to fetch blog post');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        const fetchedPost = data.data || data;
+        setPost(fetchedPost);
+        setRelatedPosts(data.related || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-24">
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 className="h-10 w-10 animate-spin text-rose-500 mb-4" />
+          <p className="text-slate-500">Loading story...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error === 'not_found' || !post) {
     return (
       <>
         <Helmet>
