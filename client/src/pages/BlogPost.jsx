@@ -11,27 +11,31 @@ const BlogPost = () => {
   const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetch(`/api/blogs/${slug}`)
-      .then((res) => {
-        if (!res.ok) {
-          if (res.status === 404) throw new Error('not_found');
+    const fetchPost = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiUrl}/api/blogs/${slug}`);
+
+        if (!response.ok) {
+          if (response.status === 404) throw new Error('not_found');
           throw new Error('Failed to fetch blog post');
         }
-        return res.json();
-      })
-      .then((data) => {
-        const fetchedPost = data.data || data;
+
+        const data = await response.json();
+        const fetchedPost = data.post || data.data || data;
         setPost(fetchedPost);
         setRelatedPosts(data.related || []);
         setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error(err);
         setError(err.message);
         setLoading(false);
-      });
+      }
+    };
+
+    fetchPost();
   }, [slug]);
 
   if (loading) {

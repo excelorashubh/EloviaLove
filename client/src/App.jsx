@@ -7,8 +7,23 @@ import BlogPost from './pages/BlogPost';
 import Contact from './pages/Contact';
 import Discover from './pages/Discover';
 import Dashboard from './pages/Dashboard';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import NotFound from './pages/NotFound';
+
+import Login from './pages/Login';
+import Register from './pages/Signup';
+import FAQ from './pages/FAQ';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminReports from './pages/admin/AdminReports';
+import AdminRevenue from './pages/admin/AdminRevenue';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminVisitors from './pages/admin/AdminVisitors';
+import AdminPlans from './pages/admin/AdminPlans';
+import AdminBlog from './pages/admin/AdminBlog';
+import AdminAds from './pages/admin/AdminAds';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
@@ -35,6 +50,12 @@ function App() {
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/discover" element={<Discover />} />
+              
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
 
               {/* Protected */}
               <Route
@@ -55,6 +76,14 @@ function App() {
                   </AdminRoute>
                 }
               />
+              <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+              <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
+              <Route path="/admin/revenue" element={<AdminRoute><AdminRevenue /></AdminRoute>} />
+              <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+              <Route path="/admin/visitors" element={<AdminRoute><AdminVisitors /></AdminRoute>} />
+              <Route path="/admin/plans" element={<AdminRoute><AdminPlans /></AdminRoute>} />
+              <Route path="/admin/blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
+              <Route path="/admin/ads" element={<AdminRoute><AdminAds /></AdminRoute>} />
 
               {/* 404 MUST BE LAST */}
               <Route path="*" element={<NotFound />} />

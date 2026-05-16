@@ -176,23 +176,30 @@ const Blog = () => {
   const searchInputRef = useRef(null);
 
   React.useEffect(() => {
-    fetch('/api/blogs')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch blogs');
-        return res.json();
-      })
-      .then(data => {
-        // Assume data might be an array or { data: array, success: true }
-        const fetchedPosts = Array.isArray(data) ? data : (data.data || []);
-        // Only keep published posts if necessary, assuming backend handles it
+    const fetchBlogs = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiUrl}/api/blogs`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch blogs');
+        }
+
+        const data = await response.json();
+        // Assume data might be an array or { success: true, posts: array }
+        // blog.js controller returns: { success: true, posts: [...], total, page, pages }
+        const fetchedPosts = Array.isArray(data) ? data : (data.posts || data.data || []);
+        
         setPosts(fetchedPosts);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error(err);
         setError(err.message);
         setLoading(false);
-      });
+      }
+    };
+
+    fetchBlogs();
   }, []);
 
   const filteredPosts = useMemo(() => {

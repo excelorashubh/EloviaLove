@@ -144,9 +144,9 @@ const BlogModal = ({ post, onClose, onSave }) => {
     setSaving(true); setError('');
     try {
       if (isNew) {
-        await api.post('/blog', form);
+        await api.post('/blogs', form);
       } else {
-        await api.put(`/blog/${post._id}`, form);
+        await api.put(`/blogs/${post._id}`, form);
       }
       onSave();
     } catch (e) {
@@ -442,7 +442,7 @@ const AdminBlog = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await api.get('/blog/admin/all');
+      const r = await api.get('/blogs/admin/all');
       const postsWithMeta = r.data.posts.map(p => ({
         ...p,
         wordCount: (p.content || '').replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length,
@@ -458,7 +458,7 @@ const AdminBlog = () => {
   const openEdit = async (post) => {
     setLoadingEdit(post._id);
     try {
-      const r = await api.get(`/blog/admin/${post._id}`);
+      const r = await api.get(`/blogs/admin/${post._id}`);
       setModal(r.data.post);
     } catch (e) {
       alert('Failed to load post for editing');
@@ -471,7 +471,7 @@ const AdminBlog = () => {
     if (!window.confirm(`Delete "${post.title}"? This cannot be undone.`)) return;
     setDeleting(post._id);
     try {
-      await api.delete(`/blog/${post._id}`);
+      await api.delete(`/blogs/${post._id}`);
       load();
     } catch (e) { alert(e.response?.data?.message || 'Delete failed'); }
     finally { setDeleting(null); }
@@ -479,7 +479,7 @@ const AdminBlog = () => {
 
   const togglePublish = async (post) => {
     try {
-      await api.put(`/blog/${post._id}`, { isPublished: !post.isPublished });
+      await api.put(`/blogs/${post._id}`, { isPublished: !post.isPublished });
       load();
     } catch (e) { console.error(e); }
   };

@@ -19,6 +19,14 @@ export default defineConfig(({ mode }) => {
         },
       },
     ],
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5000',
+          changeOrigin: true
+        }
+      }
+    },
     build: {
       // Intelligent code splitting to reduce initial bundle
       rollupOptions: {
