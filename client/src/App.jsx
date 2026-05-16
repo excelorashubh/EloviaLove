@@ -37,6 +37,17 @@ const Signup = lazy(() => import('./pages/Signup'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Pricing = lazy(() => import('./pages/Pricing'));
+const Discover = lazy(() => import('./pages/Discover'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
+const AdminRevenue = lazy(() => import('./pages/admin/AdminRevenue'));
+const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
+const AdminVisitors = lazy(() => import('./pages/admin/AdminVisitors'));
+const AdminPlans = lazy(() => import('./pages/admin/AdminPlans'));
+const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'));
+const AdminAds = lazy(() => import('./pages/admin/AdminAds'));
 
 // ─────────────────────────────────────────────────────────────
 // LOADING FALLBACK
@@ -258,15 +269,23 @@ function App() {
                 }
               />
 
+              {/* DISCOVER */}
+              <Route
+                path="/discover"
+                element={
+                  <MainLayout showNav>
+                    <Discover />
+                  </MainLayout>
+                }
+              />
+
               {/* DASHBOARD */}
               <Route
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
-                    <MainLayout>
-                      <div className="p-10">
-                        Dashboard
-                      </div>
+                    <MainLayout showNav>
+                      <Dashboard />
                     </MainLayout>
                   </ProtectedRoute>
                 }
@@ -277,9 +296,71 @@ function App() {
                 path="/admin"
                 element={
                   <AdminRoute>
-                    <div className="p-10">
-                      Admin Dashboard
-                    </div>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminRoute>
+                    <AdminUsers />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/reports"
+                element={
+                  <AdminRoute>
+                    <AdminReports />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/revenue"
+                element={
+                  <AdminRoute>
+                    <AdminRevenue />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/analytics"
+                element={
+                  <AdminRoute>
+                    <AdminAnalytics />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/visitors"
+                element={
+                  <AdminRoute>
+                    <AdminVisitors />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/plans"
+                element={
+                  <AdminRoute>
+                    <AdminPlans />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/blog"
+                element={
+                  <AdminRoute>
+                    <AdminBlog />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/ads"
+                element={
+                  <AdminRoute>
+                    <AdminAds />
                   </AdminRoute>
                 }
               />
