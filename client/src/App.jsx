@@ -13,6 +13,9 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
+import Chats from './pages/Chats';
+import Chat from './pages/Chat';
+import Matches from './pages/Matches';
 import ProfileEdit from './pages/ProfileEdit';
 import Settings from './pages/Settings';
 import SalesmanSection from './pages/salesman/SalesmanSection';
@@ -104,6 +107,30 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Notifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/matches"
+            element={
+              <ProtectedRoute>
+                <Matches />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chats"
+            element={
+              <ProtectedRoute>
+                <Chats />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat/:userId"
+            element={
+              <ProtectedRoute>
+                <Chat />
               </ProtectedRoute>
             }
           />
