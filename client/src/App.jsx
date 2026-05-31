@@ -6,6 +6,7 @@ import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Contact from './pages/Contact';
 import Discover from './pages/Discover';
+import CityPage from './pages/CityPage';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
@@ -59,6 +60,7 @@ function AppContent() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/discover" element={<Discover />} />
+          <Route path="/dating-in-:city" element={<CityPage />} />
           
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
