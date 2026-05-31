@@ -162,7 +162,7 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
         {/* ── Confirm step ── */}
         {step === 'confirm' && (
           <>
-            <div className={`bg-gradient-to-br ${isAddon ? 'from-primary-600 to-pink-500' : item.gradient || 'from-primary-600 to-pink-500'} p-6 text-white text-center`}>
+            <div className={`bg-linear-to-br ${isAddon ? 'from-primary-600 to-pink-500' : item.gradient || 'from-primary-600 to-pink-500'} p-6 text-white text-center`}>
               <div className="text-4xl mb-2">{isAddon ? item.icon : <Icon size={36} className="mx-auto" />}</div>
               <h2 className="text-xl font-extrabold">{label}</h2>
               <p className="text-white/80 text-sm mt-1">{isAddon ? item.desc : 'Auto-renews monthly · Cancel anytime'}</p>
@@ -188,7 +188,7 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
 
               <button
                 onClick={startPayment}
-                className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-pink-500 text-white font-bold rounded-2xl hover:shadow-lg hover:shadow-pink-500/30 transition-all text-sm"
+                className="w-full py-3.5 bg-linear-to-r from-primary-600 to-pink-500 text-white font-bold rounded-2xl hover:shadow-lg hover:shadow-pink-500/30 transition-all text-sm"
               >
                 Pay ₹{Math.round(price * 1.18)} →
               </button>
@@ -308,13 +308,13 @@ const Pricing = () => {
   const allFeatureLabels = [...new Set(plans.flatMap(p => p.features?.map(f => f.label) || []))];
 
   if (plansLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 via-pink-50 to-purple-50">
       <Loader2 size={36} className="text-primary-500 animate-spin" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-pink-50 to-purple-50 pb-16">
       <Helmet>
         <title>Excelora Classes Pricing — Verified Dating Plans for Serious Singles</title>
         <meta name="description" content="Compare Excelora Classes plans and choose the subscription that helps you meet verified singles and build meaningful relationships." />
@@ -330,7 +330,7 @@ const Pricing = () => {
         {/* Hero */}
         <div className="text-center mb-10">
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}>
-            <span className="inline-block px-4 py-1.5 bg-gradient-to-r from-primary-600 to-pink-500 text-white text-xs font-bold rounded-full mb-4 uppercase tracking-wider">
+            <span className="inline-block px-4 py-1.5 bg-linear-to-r from-primary-600 to-pink-500 text-white text-xs font-bold rounded-full mb-4 uppercase tracking-wider">
               🎁 10 Days FREE Premium on Signup
             </span>
             <h1 className="text-4xl font-extrabold text-slate-900 mb-3">Choose Your Plan</h1>
@@ -339,7 +339,7 @@ const Pricing = () => {
 
           {isTrial && trialDaysLeft > 0 && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-              className="mt-6 inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-400 to-orange-400 text-white rounded-2xl font-semibold shadow-lg shadow-orange-200"
+              className="mt-6 inline-flex items-center gap-2 px-5 py-3 bg-linear-to-r from-amber-400 to-orange-400 text-white rounded-2xl font-semibold shadow-lg shadow-orange-200"
             >
               ⏳ Free trial ends in {trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} — upgrade to keep premium access
             </motion.div>
@@ -368,7 +368,7 @@ const Pricing = () => {
                 transition={{ delay: i * 0.07 }}
                 className={`relative rounded-3xl p-6 flex flex-col border-2 transition-all ${
                   isPop
-                    ? 'border-primary-500 bg-gradient-to-b from-primary-600 to-pink-600 text-white shadow-2xl shadow-primary-500/30 scale-105'
+                    ? 'border-primary-500 bg-linear-to-b from-primary-600 to-pink-600 text-white shadow-2xl shadow-primary-500/30 scale-105'
                     : isCurrent
                       ? 'border-primary-300 bg-white shadow-lg'
                       : 'border-slate-200 bg-white shadow-sm hover:shadow-md'
@@ -459,7 +459,7 @@ const Pricing = () => {
                     className={`w-full py-3 rounded-2xl text-sm font-bold transition-all active:scale-95 ${
                       isPop
                         ? 'bg-white text-primary-600 hover:bg-primary-50 shadow-lg'
-                        : 'bg-gradient-to-r from-primary-600 to-pink-500 text-white hover:shadow-lg hover:shadow-pink-500/30'
+                        : 'bg-linear-to-r from-primary-600 to-pink-500 text-white hover:shadow-lg hover:shadow-pink-500/30'
                     }`}
                   >
                     Upgrade to {plan.name}
@@ -510,7 +510,7 @@ const Pricing = () => {
                   <span className="text-xl font-extrabold text-slate-900">₹{a.price}</span>
                   <button
                     onClick={() => openModal(a, true)}
-                    className="px-4 py-2 bg-gradient-to-r from-primary-600 to-pink-500 text-white rounded-xl text-sm font-semibold hover:shadow-md active:scale-95 transition-all"
+                    className="px-4 py-2 bg-linear-to-r from-primary-600 to-pink-500 text-white rounded-xl text-sm font-semibold hover:shadow-md active:scale-95 transition-all"
                   >
                     Buy Now
                   </button>

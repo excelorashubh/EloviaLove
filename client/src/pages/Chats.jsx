@@ -228,7 +228,7 @@ const Chats = () => {
               </>
             ) : (
               <>
-                <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-pink-100 rounded-full flex items-center justify-center mb-5">
+                <div className="w-20 h-20 bg-linear-to-br from-primary-100 to-pink-100 rounded-full flex items-center justify-center mb-5">
                   <MessageCircle className="w-9 h-9 text-primary-400" />
                 </div>
                 <h2 className="text-xl font-bold text-slate-800 mb-2">No chats yet</h2>
@@ -237,7 +237,7 @@ const Chats = () => {
                 </p>
                 <Link
                   to="/matches"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-pink-500 text-white rounded-xl font-medium text-sm shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-primary-600 to-pink-500 text-white rounded-xl font-medium text-sm shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 transition-all"
                 >
                   <Sparkles size={15} /> View Matches
                 </Link>
@@ -288,7 +288,7 @@ const Chats = () => {
                           <motion.span
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 px-1 bg-primary-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white"
+                            className="absolute -top-0.5 -right-0.5 min-w-5 h-5 px-1 bg-primary-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white"
                           >
                             {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
                           </motion.span>

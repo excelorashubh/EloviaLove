@@ -65,9 +65,9 @@ const MessageBubble = React.memo(({ item, isMe, isGrouped, otherAvatar, otherUse
         <div
           onClick={() => item.failed && retryFailed(item)}
           className={[
-            'px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words',
+            'px-4 py-2.5 rounded-2xl text-sm leading-relaxed wrap-break-word',
             isMe
-              ? `bg-gradient-to-br from-primary-600 to-pink-500 text-white shadow-md shadow-pink-500/20
+              ? `bg-linear-to-br from-primary-600 to-pink-500 text-white shadow-md shadow-pink-500/20
                  ${item.failed ? 'opacity-50 cursor-pointer' : ''}
                  ${item.pending ? 'opacity-80' : ''}`
               : 'bg-white text-slate-900 border border-slate-100 shadow-sm',
@@ -478,7 +478,7 @@ const Chat = () => {
               type="submit"
               disabled={!input.trim() || sending}
               whileTap={{ scale: 0.92 }}
-              className="p-3 bg-gradient-to-br from-primary-600 to-pink-500 text-white rounded-2xl hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+              className="p-3 bg-linear-to-br from-primary-600 to-pink-500 text-white rounded-2xl hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
             >
               <Send size={18} />
             </motion.button>

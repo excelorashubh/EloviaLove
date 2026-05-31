@@ -67,7 +67,7 @@ const SubscriptionCard = ({ subStatus, loading }) => {
       {/* Plan header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${cfg.gradient} flex items-center justify-center shadow-sm`}>
+          <div className={`w-9 h-9 rounded-xl bg-linear-to-br ${cfg.gradient} flex items-center justify-center shadow-sm`}>
             <Icon size={17} className="text-white" />
           </div>
           <div>
@@ -120,21 +120,21 @@ const SubscriptionCard = ({ subStatus, loading }) => {
       {plan === 'free' ? (
         <Link
           to="/pricing"
-          className={`flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r ${cfg.gradient} hover:shadow-md transition-all`}
+          className={`flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-bold text-white bg-linear-to-r ${cfg.gradient} hover:shadow-md transition-all`}
         >
           <Sparkles size={14} /> Upgrade Now
         </Link>
       ) : isTrial ? (
         <Link
           to="/pricing"
-          className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-primary-600 to-pink-500 hover:shadow-md transition-all"
+          className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-bold text-white bg-linear-to-r from-primary-600 to-pink-500 hover:shadow-md transition-all"
         >
           <Crown size={14} /> Keep Premium Access
         </Link>
       ) : subStatus?.subscriptionStatus === 'cancelled' ? (
         <div className="space-y-2">
           <p className="text-xs text-center text-amber-600 font-medium">Cancelled — access until period end</p>
-          <Link to="/pricing" className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-primary-600 to-pink-500 hover:shadow-md transition-all">
+          <Link to="/pricing" className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-linear-to-r from-primary-600 to-pink-500 hover:shadow-md transition-all">
             Resubscribe
           </Link>
         </div>
@@ -257,7 +257,7 @@ const Dashboard = () => {
                 className="grid grid-cols-2 gap-4"
               >
                 <Link to="/discover"
-                  className="bg-gradient-to-r from-primary-600 to-pink-500 text-white p-5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 group"
+                  className="bg-linear-to-r from-primary-600 to-pink-500 text-white p-5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 group"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -388,7 +388,7 @@ const Dashboard = () => {
                 </div>
                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-primary-500 to-pink-500 rounded-full transition-all duration-700"
+                    className="h-full bg-linear-to-r from-primary-500 to-pink-500 rounded-full transition-all duration-700"
                     style={{ width: `${completionPct}%` }}
                   />
                 </div>

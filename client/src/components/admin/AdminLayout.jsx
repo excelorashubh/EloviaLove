@@ -30,7 +30,7 @@ const AdminLayout = ({ children }) => {
     <aside className="flex flex-col h-full bg-slate-900 text-white w-64">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-700">
-        <div className="bg-gradient-to-tr from-primary-600 to-pink-500 p-2 rounded-xl">
+        <div className="bg-linear-to-tr from-primary-600 to-pink-500 p-2 rounded-xl">
           <Heart size={20} fill="currentColor" />
         </div>
         <div>
@@ -86,7 +86,7 @@ const AdminLayout = ({ children }) => {
   return (
     <div className="flex h-screen bg-slate-100 overflow-hidden">
       {/* Desktop sidebar */}
-      <div className="hidden md:flex flex-shrink-0">
+      <div className="hidden md:flex shrink-0">
         <Sidebar />
       </div>
 

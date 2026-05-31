@@ -151,7 +151,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 min-h-screen flex items-center justify-center bg-slate-50">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1920&auto=format&fm=webp')] bg-cover bg-center opacity-5" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/50 to-white/95" />
+        <div className="absolute inset-0 bg-linear-to-b from-white/80 via-white/50 to-white/95" />
         <div className="absolute top-20 left-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
         <div className="absolute top-40 right-10 w-72 h-72 bg-primary-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
         <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000" />
@@ -175,7 +175,7 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8"
           >
-            Find Real Love on <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-pink-500">India's Verified Dating App</span> for Serious Relationships
+            Find Real Love on <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-600 to-pink-500">India's Verified Dating App</span> for Serious Relationships
           </motion.h1>
 
           <motion.p 
@@ -195,7 +195,7 @@ const Home = () => {
           >
             <Link
               to="/signup"
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-primary-600 to-pink-500 text-white rounded-full font-bold text-lg shadow-xl shadow-pink-500/30 hover:shadow-pink-500/50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 bg-linear-to-r from-primary-600 to-pink-500 text-white rounded-full font-bold text-lg shadow-xl shadow-pink-500/30 hover:shadow-pink-500/50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
             >
               Join Now It's Free <HeartHandshake size={20} />
             </Link>
@@ -488,7 +488,7 @@ const Home = () => {
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-12 lg:gap-24 relative">
              {/* Connection Line (Desktop) */}
-            <div className="hidden md:block absolute top-[60px] left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-slate-200 via-primary-300 to-slate-200 z-0"></div>
+            <div className="hidden md:block absolute top-15 left-1/6 right-1/6 h-0.5 bg-linear-to-r from-slate-200 via-primary-300 to-slate-200 z-0"></div>
 
             {[
               { icon: Users, step: "1", title: "Create Profile", desc: "Sign up and tell us about yourself, your interests, and what you're looking for." },
@@ -501,7 +501,7 @@ const Home = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.2 }}
-                className="relative z-10 flex flex-col items-center max-w-[280px]"
+                className="relative z-10 flex flex-col items-center max-w-70"
               >
                 <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-primary-50 mb-6 relative group">
                   <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">
@@ -700,7 +700,7 @@ const Home = () => {
               </p>
               <Link
                 to="/signup"
-                className="inline-flex items-center gap-2 px-10 py-5 bg-gradient-to-r from-primary-500 to-pink-500 text-white rounded-full font-bold text-xl shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 hover:scale-105 transition-all duration-300"
+                className="inline-flex items-center gap-2 px-10 py-5 bg-linear-to-r from-primary-500 to-pink-500 text-white rounded-full font-bold text-xl shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 hover:scale-105 transition-all duration-300"
               >
                 Create Free Account
               </Link>

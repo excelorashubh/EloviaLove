@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 lg:gap-8 mb-16">
           <div className="md:col-span-1 border-r border-slate-800 pr-8">
             <Link to="/" className="flex items-center gap-2 mb-6 group">
-              <div className="bg-gradient-to-tr from-primary-500 to-pink-500 text-white p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300">
+              <div className="bg-linear-to-tr from-primary-500 to-pink-500 text-white p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300">
                 <Heart size={20} fill="currentColor" />
               </div>
               <span className="text-xl font-bold tracking-tight text-white hover:text-pink-400 transition-colors">
