@@ -1,4 +1,4 @@
-# 🚀 Render Deployment Guide - Elovia Love
+# 🚀 Render Deployment Guide - Excelora Classes
 
 ## ✅ Deployment Checklist
 
@@ -11,7 +11,7 @@ NODE_ENV=production
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
-CLIENT_URL=https://elovialove.onrender.com
+CLIENT_URL=https://exceloraclasses.com
 RAZORPAY_KEY_ID=your_razorpay_key
 RAZORPAY_KEY_SECRET=your_razorpay_secret
 CLOUDINARY_CLOUD_NAME=your_cloudinary_name
@@ -39,7 +39,7 @@ cd server && npm start
 
 ### 3. Health Check Endpoint
 
-Render will ping: `https://elovialove.onrender.com/api/blog?limit=1`
+Render will ping: `https://exceloraclasses.com/api/blog?limit=1`
 
 This endpoint is lightweight and confirms:
 - Server is running
@@ -128,10 +128,10 @@ HTML files are not cached (for SPA routing).
 ## 🎯 Post-Deployment Verification
 
 ### 1. Test Core Functionality
-- [ ] Homepage loads: https://elovialove.onrender.com/
-- [ ] API responds: https://elovialove.onrender.com/api/blog?limit=1
-- [ ] Sitemap works: https://elovialove.onrender.com/sitemap.xml
-- [ ] Robots.txt works: https://elovialove.onrender.com/robots.txt
+- [ ] Homepage loads: https://exceloraclasses.com/
+- [ ] API responds: https://exceloraclasses.com/api/blog?limit=1
+- [ ] Sitemap works: https://exceloraclasses.com/sitemap.xml
+- [ ] Robots.txt works: https://exceloraclasses.com/robots.txt
 
 ### 2. Test SEO
 - [ ] View page source shows meta tags
@@ -195,4 +195,4 @@ When deployment is successful, you should see:
 ═══════════════════════════════════════════════════════════
 ```
 
-Your site should be live at: https://elovialove.onrender.com
+Your site should be live at: https://exceloraclasses.com

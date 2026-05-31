@@ -11,7 +11,7 @@ const SeoPage = ({ slug }) => {
     return (
       <div className="min-h-screen bg-slate-50">
         <Helmet>
-          <title>Page Not Found | Elovia Love</title>
+          <title>Page Not Found | Excelora Classes</title>
           <meta name="robots" content="noindex" />
         </Helmet>
         <div className="max-w-3xl mx-auto px-4 py-24 text-center">
@@ -36,7 +36,7 @@ const SeoPage = ({ slug }) => {
         <meta property="og:url" content={url} />
         <meta property="og:type" content="article" />
         <meta property="og:image" content={page.ogImage || `${SITE_URL}/EloviaLoveWB_small.png`} />
-        <meta property="og:site_name" content="Elovia Love" />
+        <meta property="og:site_name" content="Excelora Classes" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={page.title} />
         <meta name="twitter:description" content={page.description} />
@@ -51,7 +51,7 @@ const SeoPage = ({ slug }) => {
         </nav>
 
         <header className="mb-12">
-          <p className="text-sm uppercase tracking-[0.4em] text-primary-600 mb-3">Elovia Love SEO Content</p>
+          <p className="text-sm uppercase tracking-[0.4em] text-primary-600 mb-3">Excelora Classes SEO Content</p>
           <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-5">
             {page.h1}
           </h1>

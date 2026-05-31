@@ -7,7 +7,7 @@ import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
 
-const BASE_URL = 'https://elovialove.onrender.com';
+const BASE_URL = 'https://exceloraclasses.com';
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -92,7 +92,7 @@ const DatingTips = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const pageTitle = 'Dating Tips & Relationship Advice — Elovia Love';
+  const pageTitle = 'Dating Tips & Relationship Advice — Excelora Classes';
   const pageDescription = 'Expert dating tips and relationship advice for Indians. Learn how to find love, build healthy relationships, and navigate modern dating in India.';
   const pageUrl = `${BASE_URL}/blog/dating-tips`;
   const pageImage = `${BASE_URL}/EloviaLoveWB_small.png`;
@@ -111,7 +111,7 @@ const DatingTips = () => {
         <meta property="og:description" content={pageDescription} />
         <meta property="og:url" content={pageUrl} />
         <meta property="og:image" content={pageImage} />
-        <meta property="og:site_name" content="Elovia Love" />
+        <meta property="og:site_name" content="Excelora Classes" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -139,13 +139,13 @@ const DatingTips = () => {
                   headline: post.title,
                   url: `${BASE_URL}/blog/${post.slug}`,
                   datePublished: post.publishedAt,
-                  author: { '@type': 'Person', name: post.author || 'Elovia Love Team' },
+                  author: { '@type': 'Person', name: post.author || 'Excelora Classes Team' },
                 },
               })),
             },
             publisher: {
               '@type': 'Organization',
-              name: 'Elovia Love',
+              name: 'Excelora Classes',
               logo: { '@type': 'ImageObject', url: `${BASE_URL}/EloviaLoveWB_small.png` },
             },
           })}
@@ -244,13 +244,13 @@ const DatingTips = () => {
             <Heart size={36} className="mx-auto mb-3 fill-white/30" />
             <h3 className="text-2xl font-extrabold mb-2">Ready to Apply These Tips?</h3>
             <p className="text-white/80 mb-5 text-sm max-w-md mx-auto">
-              Join thousands of Indians finding real love on Elovia Love. Start your free trial today.
+              Join thousands of Indians finding real love on Excelora Classes. Start your free trial today.
             </p>
             <Link
               to="/signup"
               className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary-600 font-bold rounded-2xl hover:bg-primary-50 transition-colors text-sm"
             >
-              Join Elovia Love Free <ArrowRight size={16} />
+              Join Excelora Classes Free <ArrowRight size={16} />
             </Link>
           </motion.div>
         </div>

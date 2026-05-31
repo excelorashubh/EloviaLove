@@ -134,9 +134,9 @@ const ProfileEdit = () => {
   return (
     <>
       <Helmet>
-        <title>Edit Profile — Elovia Love</title>
-        <meta name="description" content="Update your profile details and preferences on Elovia Love." />
-        <link rel="canonical" href="https://elovialove.onrender.com/profile/edit" />
+        <title>Edit Profile — Excelora Classes</title>
+        <meta name="description" content="Update your profile details and preferences on Excelora Classes." />
+        <link rel="canonical" href="https://exceloraclasses.com/profile/edit" />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
       {/* Header */}

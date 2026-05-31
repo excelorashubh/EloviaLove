@@ -7,7 +7,7 @@ const CommunityGuidelines = () => {
   const guidelines = [
     {
       title: "Be Respectful",
-      desc: "Treat everyone with kindness and respect. Harassment, hate speech, and bullying have no place on Elovia Love.",
+      desc: "Treat everyone with kindness and respect. Harassment, hate speech, and bullying have no place on Excelora Classes.",
       icon: Heart
     },
     {
@@ -30,8 +30,8 @@ const CommunityGuidelines = () => {
   return (
     <>
       <Helmet>
-        <title>Community Guidelines | Elovia Love</title>
-        <meta name="description" content="Our guidelines ensure a safe, respectful, and genuine environment for everyone seeking serious relationships on Elovia Love." />
+        <title>Community Guidelines | Excelora Classes</title>
+        <meta name="description" content="Our guidelines ensure a safe, respectful, and genuine environment for everyone seeking serious relationships on Excelora Classes." />
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">

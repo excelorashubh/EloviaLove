@@ -15,7 +15,7 @@ export const SeoWrapper = ({
   noindex = false,
   children
 }) => {
-  const siteUrl = 'https://elovialove.onrender.com';
+  const siteUrl = 'https://exceloraclasses.com';
   const isBrowser = typeof window !== 'undefined';
   const currentPath = isBrowser ? window.location.pathname : '';
   const fullCanonical = canonical ? `${siteUrl}${canonical}` : `${siteUrl}${currentPath}`;
@@ -38,7 +38,7 @@ export const SeoWrapper = ({
         <meta property="og:image" content={fullOgImage} />
         <meta property="og:url" content={fullCanonical} />
         <meta property="og:type" content={ogType} />
-        <meta property="og:site_name" content="Elovia Love" />
+        <meta property="og:site_name" content="Excelora Classes" />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content={twitterCard} />
@@ -77,7 +77,7 @@ export const BlogPostSeo = ({
   readingTime
 }) => {
   const isBrowser = typeof window !== 'undefined';
-  const origin = isBrowser ? window.location.origin : 'https://elovialove.onrender.com';
+  const origin = isBrowser ? window.location.origin : 'https://exceloraclasses.com';
   const href = isBrowser ? window.location.href : `${origin}/blog/${post.slug}`;
 
   const structuredData = {
@@ -93,7 +93,7 @@ export const BlogPostSeo = ({
     },
     "publisher": {
       "@type": "Organization",
-      "name": "Elovia Love",
+      "name": "Excelora Classes",
       "logo": {
         "@type": "ImageObject",
         "url": `${origin}/logo.png`
@@ -114,7 +114,7 @@ export const BlogPostSeo = ({
 
   return (
     <SeoWrapper
-      title={`${post.title} | Elovia Love Dating Blog`}
+      title={`${post.title} | Excelora Classes Dating Blog`}
       description={post.description}
       canonical={`/blog/${post.slug}`}
       ogImage={post.ogImage}
@@ -126,8 +126,8 @@ export const BlogPostSeo = ({
 
 // 3. City Page SEO Component
 export const CityPageSeo = ({ city, stats, features }) => {
-  const siteUrl = 'https://elovialove.onrender.com';
-  const title = `Find Love in ${city.name} | Dating in ${city.name} | Elovia Love`;
+  const siteUrl = 'https://exceloraclasses.com';
+  const title = `Find Love in ${city.name} | Dating in ${city.name} | Excelora Classes`;
   const description = `Meet singles in ${city.name}. ${stats.activeUsers}+ active members. Safe, verified dating for serious relationships in ${city.name}. Join ${city.name}'s trusted dating community.`;
 
   const isBrowser = typeof window !== 'undefined';
@@ -141,8 +141,8 @@ export const CityPageSeo = ({ city, stats, features }) => {
     "url": href,
     "isPartOf": {
       "@type": "WebSite",
-      "name": "Elovia Love",
-      "url": "https://elovialove.onrender.com"
+      "name": "Excelora Classes",
+      "url": "https://exceloraclasses.com"
     },
     "about": {
       "@type": "Place",
@@ -173,7 +173,7 @@ export const CityPageSeo = ({ city, stats, features }) => {
 
 // 4. Trust/Safety Page SEO Component
 export const TrustPageSeo = ({ pageData, lastUpdated }) => {
-  const siteUrl = 'https://elovialove.onrender.com';
+  const siteUrl = 'https://exceloraclasses.com';
   const isBrowser = typeof window !== 'undefined';
   const href = isBrowser ? window.location.href : `${siteUrl}/${pageData.slug}`;
 
@@ -186,18 +186,18 @@ export const TrustPageSeo = ({ pageData, lastUpdated }) => {
     "dateModified": lastUpdated,
     "publisher": {
       "@type": "Organization",
-      "name": "Elovia Love",
-      "url": "https://elovialove.onrender.com",
+      "name": "Excelora Classes",
+      "url": "https://exceloraclasses.com",
       "sameAs": [
-        "https://www.facebook.com/elovialove",
-        "https://www.instagram.com/elovialove"
+        "https://www.facebook.com/exceloraclasses",
+        "https://www.instagram.com/exceloraclasses"
       ]
     }
   };
 
   return (
     <SeoWrapper
-      title={`${pageData.title} | Elovia Love`}
+      title={`${pageData.title} | Excelora Classes`}
       description={pageData.description}
       canonical={`/${pageData.slug}`}
       structuredData={structuredData}

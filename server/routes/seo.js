@@ -87,7 +87,7 @@ const generateSitemap = async (baseUrl) => {
 
 const sitemapHandler = async (req, res) => {
   try {
-    const baseUrl = 'https://elovialove.onrender.com';
+    const baseUrl = 'https://exceloraclasses.com';
     const xml = await generateSitemap(baseUrl);
     res.header('Content-Type', 'application/xml; charset=UTF-8');
     res.header('Cache-Control', 'public, max-age=3600');

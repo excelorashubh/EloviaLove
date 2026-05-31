@@ -46,10 +46,10 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <div className=" text-white p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300">
-              <img src={EloviaLoveWB} alt="Elovia Love logo" className='w-10' />
+              <img src={EloviaLoveWB} alt="Excelora Classes logo" className='w-10' />
             </div>
             <span className={`text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-primary-600 to-pink-600`}>
-              Elovia Love
+              Excelora Classes
             </span>
           </Link>
 

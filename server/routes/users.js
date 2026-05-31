@@ -122,7 +122,7 @@ router.post('/upload-photo', protect, upload.single('photo'), async (req, res) =
       const result = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
-            folder: 'elovialove/profiles',
+            folder: 'exceloraclasses/profiles',
             transformation: [
               { width: 500, height: 500, crop: 'fill' },
               { quality: 'auto' }
@@ -167,7 +167,7 @@ router.post('/upload-photos', protect, upload.array('photos', 5), async (req, re
       return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
-            folder: 'elovialove/photos',
+            folder: 'exceloraclasses/photos',
             transformation: [
               { width: 800, height: 800, crop: 'fill' },
               { quality: 'auto' }

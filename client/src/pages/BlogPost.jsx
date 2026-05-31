@@ -53,7 +53,7 @@ const BlogPost = () => {
     return (
       <>
         <Helmet>
-          <title>Post Not Found | Elovia Love Blog</title>
+          <title>Post Not Found | Excelora Classes Blog</title>
           <meta name="robots" content="noindex" />
         </Helmet>
         <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-24">
@@ -73,9 +73,9 @@ const BlogPost = () => {
     );
   }
 
-  const pageTitle = `${post.title} | Elovia Love`;
+  const pageTitle = `${post.title} | Excelora Classes`;
   const pageDescription = post.metaDescription || post.excerpt;
-  const pageUrl = `https://elovialove.onrender.com/blog/${post.slug}`;
+  const pageUrl = `https://exceloraclasses.com/blog/${post.slug}`;
 
   return (
     <>

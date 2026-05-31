@@ -4,10 +4,10 @@
 // 1. Content Configuration - Central hub for all content metadata
 export const CONTENT_CONFIG = {
   site: {
-    name: 'Elovia Love',
-    url: 'https://elovialove.onrender.com',
+    name: 'Excelora Classes',
+    url: 'https://exceloraclasses.com',
     description: 'Safe, verified dating platform for serious relationships in India',
-    author: 'Elovia Love Team',
+    author: 'Excelora Classes Team',
     language: 'en-US',
     ogImage: '/og-default.jpg'
   },

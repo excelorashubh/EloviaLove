@@ -1,4 +1,4 @@
-# 📝 Blog Post Template - Elovia Love
+# 📝 Blog Post Template - Excelora Classes
 
 **Use this template for all blog posts to ensure SEO optimization and consistency**
 
@@ -10,7 +10,7 @@
 {
   title: "YOUR_TITLE_HERE",
   slug: "your-url-slug-here",
-  author: "Elovia Love Editorial Team",
+  author: "Excelora Classes Editorial Team",
   publishedAt: "2026-05-13",
   updatedAt: "2026-05-13",
   excerpt: "Brief 150-160 character summary of the post",
@@ -102,7 +102,7 @@ showcase their personality effectively or what photos actually work.
 
 In this guide, you'll discover 10 proven dating profile tips that will 
 transform your online dating experience. These strategies have helped 
-thousands of singles on Elovia Love find meaningful connections.
+thousands of singles on Excelora Classes find meaningful connections.
 
 Let's dive in.
 ```
@@ -242,7 +242,7 @@ person will appreciate the real you. Focus on showcasing your personality,
 being specific about your interests, and choosing photos that represent who 
 you truly are.
 
-Ready to put these tips into action? [Join Elovia Love today](#) and create 
+Ready to put these tips into action? [Join Excelora Classes today](#) and create 
 a profile that gets results. Our verified dating platform is designed for 
 serious singles like you who want meaningful connections.
 
@@ -262,8 +262,8 @@ import { ArticleSchema, FAQSchema, BreadcrumbSchema } from '../components/seo/Sc
 
 <ArticleSchema
   title="10 Dating Profile Tips That Actually Work"
-  description="Learn how to create an attractive dating profile with expert tips, examples, and mistakes to avoid. Boost your matches on Elovia Love."
-  author="Elovia Love Editorial Team"
+  description="Learn how to create an attractive dating profile with expert tips, examples, and mistakes to avoid. Boost your matches on Excelora Classes."
+  author="Excelora Classes Editorial Team"
   publishedDate="2026-05-13"
   modifiedDate="2026-05-13"
   image="/images/dating-profile-tips.jpg"
@@ -306,9 +306,9 @@ import { ArticleSchema, FAQSchema, BreadcrumbSchema } from '../components/seo/Sc
 ## INTERNAL LINKING STRATEGY
 
 ### Link to These Pages (High Priority)
-1. **Homepage** - "Join Elovia Love"
+1. **Homepage** - "Join Excelora Classes"
 2. **Signup Page** - "Create your free profile"
-3. **About Page** - "Learn more about Elovia Love"
+3. **About Page** - "Learn more about Excelora Classes"
 4. **Related Blog Posts** - 2-3 contextual links
 5. **Category Pages** - Link to blog category
 
@@ -375,7 +375,7 @@ import { ArticleSchema, FAQSchema, BreadcrumbSchema } from '../components/seo/Sc
 
 ### Alt Text Examples
 ```
-✅ Good: "Woman creating dating profile on Elovia Love app"
+✅ Good: "Woman creating dating profile on Excelora Classes app"
 ✅ Good: "Example of well-written dating bio with personality"
 ✅ Good: "Couple meeting for first date at coffee shop"
 
@@ -419,16 +419,16 @@ For "dating profile tips":
 
 ### Primary CTAs
 ```markdown
-**Join Elovia Love Today**
+**Join Excelora Classes Today**
 Ready to find your perfect match? [Create your free profile](#) on India's 
 most trusted dating platform.
 
 **Start Your Free Trial**
-Put these tips into action. [Join Elovia Love](#) and start connecting with 
+Put these tips into action. [Join Excelora Classes](#) and start connecting with 
 verified singles today.
 
 **Create Your Profile**
-[Sign up now](#) and discover why thousands of Indians trust Elovia Love 
+[Sign up now](#) and discover why thousands of Indians trust Excelora Classes 
 for serious relationships.
 ```
 

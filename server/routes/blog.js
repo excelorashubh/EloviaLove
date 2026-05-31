@@ -157,7 +157,7 @@ router.delete('/:id', protect, isAdmin, async (req, res) => {
 router.get('/sitemap.xml', async (req, res) => {
   try {
     const posts = await Blog.find({ isPublished: true }).select('slug updatedAt').sort({ updatedAt: -1 });
-    const baseUrl = 'https://elovialove.onrender.com';
+    const baseUrl = 'https://exceloraclasses.com';
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

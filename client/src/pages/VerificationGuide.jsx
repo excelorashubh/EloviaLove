@@ -32,8 +32,8 @@ const VerificationGuide = () => {
   return (
     <>
       <Helmet>
-        <title>How Verification Works | Elovia Love Safety</title>
-        <meta name="description" content="Learn about Elovia Love's rigorous 3-step verification process. We combine AI and manual review to ensure 100% real profiles for serious dating in India." />
+        <title>How Verification Works | Excelora Classes Safety</title>
+        <meta name="description" content="Learn about Excelora Classes's rigorous 3-step verification process. We combine AI and manual review to ensure 100% real profiles for serious dating in India." />
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">
@@ -48,7 +48,7 @@ const VerificationGuide = () => {
               <UserCheck className="w-4 h-4" /> 100% Genuine Profiles
             </motion.div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6">Our 3-Step Verification Process</h1>
-            <p className="text-xl text-slate-600">We take your safety seriously. Here is how we ensure every profile on Elovia Love is verified and real.</p>
+            <p className="text-xl text-slate-600">We take your safety seriously. Here is how we ensure every profile on Excelora Classes is verified and real.</p>
           </div>
         </section>
 

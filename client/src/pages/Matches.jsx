@@ -49,9 +49,9 @@ const Matches = () => {
   return (
     <>
       <Helmet>
-        <title>Matches — Elovia Love</title>
-        <meta name="description" content="View your matches and connect with people you're interested in on Elovia Love." />
-        <link rel="canonical" href="https://elovialove.onrender.com/matches" />
+        <title>Matches — Excelora Classes</title>
+        <meta name="description" content="View your matches and connect with people you're interested in on Excelora Classes." />
+        <link rel="canonical" href="https://exceloraclasses.com/matches" />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
       <header className="bg-white shadow-sm border-b border-slate-200">

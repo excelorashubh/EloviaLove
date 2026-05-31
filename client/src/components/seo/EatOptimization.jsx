@@ -3,7 +3,7 @@
 // 1. Author Bios and Expertise Signals
 export const AUTHOR_CONFIG = {
   'elovia-love-team': {
-    name: 'Elovia Love Editorial Team',
+    name: 'Excelora Classes Editorial Team',
     bio: 'Expert dating and relationship advisors with 10+ years of experience helping thousands find meaningful connections. Our team includes certified relationship counselors, dating coaches, and safety experts.',
     credentials: [
       'Certified Relationship Counseling (CRC)',
@@ -12,8 +12,8 @@ export const AUTHOR_CONFIG = {
       'Published Authors in Relationship Psychology'
     ],
     socialProfiles: {
-      linkedin: 'https://linkedin.com/company/elovialove',
-      twitter: 'https://twitter.com/elovialove'
+      linkedin: 'https://linkedin.com/company/exceloraclasses',
+      twitter: 'https://twitter.com/exceloraclasses'
     },
     expertise: ['Dating Advice', 'Relationship Counseling', 'Online Safety', 'Matchmaking'],
     publications: [

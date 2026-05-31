@@ -1,4 +1,4 @@
-# ✅ Deployment Checklist - Elovia Love
+# ✅ Deployment Checklist - Excelora Classes
 
 ## Pre-Deployment
 
@@ -45,7 +45,7 @@
 - [ ] PORT=5000
 - [ ] MONGODB_URI (from MongoDB Atlas)
 - [ ] JWT_SECRET (generate strong secret)
-- [ ] CLIENT_URL=https://elovialove.onrender.com
+- [ ] CLIENT_URL=https://exceloraclasses.com
 - [ ] RAZORPAY_KEY_ID
 - [ ] RAZORPAY_KEY_SECRET
 - [ ] CLOUDINARY_CLOUD_NAME
@@ -84,15 +84,15 @@
 ## Post-Deployment Verification
 
 ### Basic Functionality
-- [ ] Homepage loads: https://elovialove.onrender.com/
+- [ ] Homepage loads: https://exceloraclasses.com/
 - [ ] No 404 errors on React routes
-- [ ] API responds: https://elovialove.onrender.com/api/blog?limit=1
+- [ ] API responds: https://exceloraclasses.com/api/blog?limit=1
 - [ ] Returns JSON response
 
 ### SEO
-- [ ] Sitemap accessible: https://elovialove.onrender.com/sitemap.xml
+- [ ] Sitemap accessible: https://exceloraclasses.com/sitemap.xml
 - [ ] Sitemap contains URLs
-- [ ] Robots.txt accessible: https://elovialove.onrender.com/robots.txt
+- [ ] Robots.txt accessible: https://exceloraclasses.com/robots.txt
 - [ ] View page source shows meta tags
 - [ ] No CSP errors in browser console
 
@@ -137,9 +137,9 @@
 ## Google Search Console
 
 ### Setup
-- [ ] Add property: https://elovialove.onrender.com
+- [ ] Add property: https://exceloraclasses.com
 - [ ] Verify ownership (HTML tag method)
-- [ ] Submit sitemap: https://elovialove.onrender.com/sitemap.xml
+- [ ] Submit sitemap: https://exceloraclasses.com/sitemap.xml
 - [ ] Request indexing for homepage
 
 ### Monitor

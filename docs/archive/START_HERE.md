@@ -1,8 +1,8 @@
-# 🚀 START HERE - Elovia Love Deployment Guide
+# 🚀 START HERE - Excelora Classes Deployment Guide
 
 ## 👋 Welcome!
 
-Your Elovia Love dating website deployment has been **completely fixed and optimized** for production on Render.
+Your Excelora Classes dating website deployment has been **completely fixed and optimized** for production on Render.
 
 **Status:** ✅ **READY FOR DEPLOYMENT**
 
@@ -80,7 +80,7 @@ NODE_ENV=production
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
-CLIENT_URL=https://elovialove.onrender.com
+CLIENT_URL=https://exceloraclasses.com
 # ... (see RENDER_QUICK_START.md for complete list)
 ```
 
@@ -91,10 +91,10 @@ CLIENT_URL=https://elovialove.onrender.com
 - Click "Manual Deploy" in Render dashboard
 
 **Verify:**
-- ✅ https://elovialove.onrender.com/ (homepage)
-- ✅ https://elovialove.onrender.com/api/blog?limit=1 (API)
-- ✅ https://elovialove.onrender.com/sitemap.xml (sitemap)
-- ✅ https://elovialove.onrender.com/robots.txt (robots)
+- ✅ https://exceloraclasses.com/ (homepage)
+- ✅ https://exceloraclasses.com/api/blog?limit=1 (API)
+- ✅ https://exceloraclasses.com/sitemap.xml (sitemap)
+- ✅ https://exceloraclasses.com/robots.txt (robots)
 
 ---
 
@@ -169,7 +169,7 @@ When deployment succeeds, you'll see:
 [Keep-Alive] Ping status: 200
 ```
 
-And your site will be live at: **https://elovialove.onrender.com**
+And your site will be live at: **https://exceloraclasses.com**
 
 ---
 

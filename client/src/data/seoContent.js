@@ -1,17 +1,17 @@
-export const SITE_URL = 'https://elovialove.onrender.com';
+export const SITE_URL = 'https://exceloraclasses.com';
 
 export const STATIC_SEO_PAGES = {
   privacy: {
     slug: 'privacy',
-    title: 'Privacy Policy | Elovia Love',
-    description: 'Elovia Love protects your personal data with strict privacy controls, secure encryption, and transparent data use policies for Indian singles.',
+    title: 'Privacy Policy | Excelora Classes',
+    description: 'Excelora Classes protects your personal data with strict privacy controls, secure encryption, and transparent data use policies for Indian singles.',
     h1: 'Privacy Policy',
-    intro: 'Your privacy is one of our highest priorities. Elovia Love is built to safeguard your personal information while you search for a meaningful relationship.',
+    intro: 'Your privacy is one of our highest priorities. Excelora Classes is built to safeguard your personal information while you search for a meaningful relationship.',
     sections: [
       {
         title: 'What information we collect',
         body: [
-          'Elovia Love collects only the information needed to help you create genuine connections. That includes your contact details, profile preferences, verification information, and the content you choose to share on your profile.',
+          'Excelora Classes collects only the information needed to help you create genuine connections. That includes your contact details, profile preferences, verification information, and the content you choose to share on your profile.',
           'We do not sell your personal data to third parties. Your profile details are shared only with verified members who match your search criteria, and only with the explicit goal of improving your dating experience.'
         ]
       },
@@ -25,7 +25,7 @@ export const STATIC_SEO_PAGES = {
       {
         title: 'Security and encryption',
         body: [
-          'Elovia Love encrypts sensitive information in transit and at rest. We apply industry standard security controls to reduce the chance of unauthorized access, and we continuously monitor for suspicious activity.',
+          'Excelora Classes encrypts sensitive information in transit and at rest. We apply industry standard security controls to reduce the chance of unauthorized access, and we continuously monitor for suspicious activity.',
           'Only authorized team members can access personal data, and we require strong authentication for administrative systems. If you ever believe your account has been compromised, please contact our support team immediately through the Contact page.'
         ]
       },
@@ -51,22 +51,22 @@ export const STATIC_SEO_PAGES = {
   },
   terms: {
     slug: 'terms',
-    title: 'Terms of Service | Elovia Love',
-    description: 'Read the Elovia Love Terms of Service to learn how we support genuine dating, account safety, and respectful member conduct on our platform.',
+    title: 'Terms of Service | Excelora Classes',
+    description: 'Read the Excelora Classes Terms of Service to learn how we support genuine dating, account safety, and respectful member conduct on our platform.',
     h1: 'Terms of Service',
-    intro: 'These terms explain how you may use Elovia Love, what we expect from our members, and how we keep the experience safe and genuine for everyone.',
+    intro: 'These terms explain how you may use Excelora Classes, what we expect from our members, and how we keep the experience safe and genuine for everyone.',
     sections: [
       {
-        title: 'Using Elovia Love',
+        title: 'Using Excelora Classes',
         body: [
-          'When you join Elovia Love, you agree to use the platform honestly and respectfully. This includes representing yourself truthfully, communicating courteously, and avoiding behavior that could hurt other members.',
+          'When you join Excelora Classes, you agree to use the platform honestly and respectfully. This includes representing yourself truthfully, communicating courteously, and avoiding behavior that could hurt other members.',
           'Our verification program is designed to reduce fake accounts and promote trust. Members who violate our rules may have their accounts suspended or removed.'
         ]
       },
       {
         title: 'Account eligibility',
         body: [
-          'Elovia Love is for adults seeking meaningful relationships. You must be at least 18 years old to register and maintain a profile.',
+          'Excelora Classes is for adults seeking meaningful relationships. You must be at least 18 years old to register and maintain a profile.',
           'You may create only one account and may not share login credentials with other people. Multiple accounts or account sharing are grounds for removal under these terms.'
         ]
       },
@@ -74,7 +74,7 @@ export const STATIC_SEO_PAGES = {
         title: 'Content and conduct',
         body: [
           'Respectful communication is required at all times. Messages, profile content, and images must follow our community guidelines and local laws.',
-          'Elovia Love reserves the right to remove content or disable accounts that violate these terms, including abusive language, spam, and attempts to solicit money from other members.'
+          'Excelora Classes reserves the right to remove content or disable accounts that violate these terms, including abusive language, spam, and attempts to solicit money from other members.'
         ]
       },
       {
@@ -87,7 +87,7 @@ export const STATIC_SEO_PAGES = {
     ],
     cta: {
       heading: 'Need help with our terms?',
-      text: 'If anything here seems unclear, our support team is ready to explain how Elovia Love protects your dating experience.',
+      text: 'If anything here seems unclear, our support team is ready to explain how Excelora Classes protects your dating experience.',
       buttonText: 'Get help now',
       buttonUrl: '/help'
     },
@@ -99,22 +99,22 @@ export const STATIC_SEO_PAGES = {
   },
   safety: {
     slug: 'safety',
-    title: 'Safety Tips for Online Dating | Elovia Love',
-    description: 'Find online dating safety tips for meeting genuine singles in India. Learn how Elovia Love protects your privacy, identity, and first date safety.',
+    title: 'Safety Tips for Online Dating | Excelora Classes',
+    description: 'Find online dating safety tips for meeting genuine singles in India. Learn how Excelora Classes protects your privacy, identity, and first date safety.',
     h1: 'Safety First: Online Dating Tips',
-    intro: 'At Elovia Love, safety is the foundation of every connection. These tips help you stay protected while you meet real singles and build meaningful relationships.',
+    intro: 'At Excelora Classes, safety is the foundation of every connection. These tips help you stay protected while you meet real singles and build meaningful relationships.',
     sections: [
       {
         title: 'Start with a verified profile',
         body: [
-          'A verified profile gives you confidence that the person you are talking to is real. Elovia Love uses manual and automated checks to reduce fake accounts and improve matchmaking quality.',
+          'A verified profile gives you confidence that the person you are talking to is real. Excelora Classes uses manual and automated checks to reduce fake accounts and improve matchmaking quality.',
           'Verify your own profile to increase trust and show other members you are serious about finding a genuine connection.'
         ]
       },
       {
         title: 'Keep the conversation on the platform',
         body: [
-          'Use Elovia Love messaging until you feel comfortable enough to exchange contact details. This helps protect your phone number, email, and social media accounts from scammers.',
+          'Use Excelora Classes messaging until you feel comfortable enough to exchange contact details. This helps protect your phone number, email, and social media accounts from scammers.',
           'If someone pressures you to move off-platform too soon, take that as a warning sign. You can always pause the conversation and report the behavior if it feels unsafe.'
         ]
       },
@@ -129,13 +129,13 @@ export const STATIC_SEO_PAGES = {
         title: 'Protect your personal details',
         body: [
           'Avoid sharing sensitive information too quickly. Personal details like your home address, financial data, and routine schedules should wait until trust is established.',
-          'Elovia Love lets you control which profile fields are public. You can keep location details broad while still finding matches in your city.'
+          'Excelora Classes lets you control which profile fields are public. You can keep location details broad while still finding matches in your city.'
         ]
       }
     ],
     cta: {
       heading: 'Stay safe while you search for love',
-      text: 'Use these safety tips every time you interact with new matches on Elovia Love.',
+      text: 'Use these safety tips every time you interact with new matches on Excelora Classes.',
       buttonText: 'Read community guidelines',
       buttonUrl: '/community-guidelines'
     },
@@ -147,10 +147,10 @@ export const STATIC_SEO_PAGES = {
   },
   'community-guidelines': {
     slug: 'community-guidelines',
-    title: 'Community Guidelines | Elovia Love',
-    description: 'Elovia Love community guidelines set the standard for respectful communication, safe dating, and genuine member behavior on our platform.',
+    title: 'Community Guidelines | Excelora Classes',
+    description: 'Excelora Classes community guidelines set the standard for respectful communication, safe dating, and genuine member behavior on our platform.',
     h1: 'Community Guidelines',
-    intro: 'Our community thrives when members treat each other with respect. These guidelines show what behavior is expected from everyone who uses Elovia Love.',
+    intro: 'Our community thrives when members treat each other with respect. These guidelines show what behavior is expected from everyone who uses Excelora Classes.',
     sections: [
       {
         title: 'Be respectful and honest',
@@ -169,7 +169,7 @@ export const STATIC_SEO_PAGES = {
       {
         title: 'No tolerance for harassment',
         body: [
-          'Elovia Love has zero tolerance for harassment, hate speech, threats, or any behavior that makes others feel unsafe. Our moderation team reviews reports promptly and may ban accounts that violate policy.',
+          'Excelora Classes has zero tolerance for harassment, hate speech, threats, or any behavior that makes others feel unsafe. Our moderation team reviews reports promptly and may ban accounts that violate policy.',
           'If you experience harassment, use the Report Abuse page to notify us. We will protect your identity and take action as needed.'
         ]
       },
@@ -195,10 +195,10 @@ export const STATIC_SEO_PAGES = {
   },
   'dating-safety': {
     slug: 'dating-safety',
-    title: 'Dating Safety Guide | Elovia Love',
-    description: 'Stay secure while dating online with Elovia Love. Learn practical dating safety advice for first messages, profile checks, and in-person meetups.',
+    title: 'Dating Safety Guide | Excelora Classes',
+    description: 'Stay secure while dating online with Excelora Classes. Learn practical dating safety advice for first messages, profile checks, and in-person meetups.',
     h1: 'Dating Safety Guide',
-    intro: 'Dating online should feel fun and safe. This guide gives you the practical steps to protect yourself while using Elovia Love to meet genuine singles.',
+    intro: 'Dating online should feel fun and safe. This guide gives you the practical steps to protect yourself while using Excelora Classes to meet genuine singles.',
     sections: [
       {
         title: 'Scan profiles carefully',
@@ -222,10 +222,10 @@ export const STATIC_SEO_PAGES = {
         ]
       },
       {
-        title: 'Use Elovia Love’s support tools',
+        title: 'Use Excelora Classes’s support tools',
         body: [
           'If you encounter suspicious behavior, use the built-in report and help features right away. Our team reviews reports quickly and can take action to protect the community.',
-          'Elovia Love also provides resources on how to recognize fake profiles, handle unwanted advances, and maintain healthy boundaries while dating.'
+          'Excelora Classes also provides resources on how to recognize fake profiles, handle unwanted advances, and maintain healthy boundaries while dating.'
         ]
       }
     ],
@@ -243,10 +243,10 @@ export const STATIC_SEO_PAGES = {
   },
   'report-abuse': {
     slug: 'report-abuse',
-    title: 'Report Abuse | Elovia Love',
-    description: 'Report unsafe behavior, harassment, or fake profiles on Elovia Love. Our trust and safety team reviews reports promptly to protect members.',
+    title: 'Report Abuse | Excelora Classes',
+    description: 'Report unsafe behavior, harassment, or fake profiles on Excelora Classes. Our trust and safety team reviews reports promptly to protect members.',
     h1: 'Report Abuse',
-    intro: 'If you see behavior that violates our policies or makes you uncomfortable, report it immediately. Elovia Love takes abuse reports seriously and acts quickly to keep the community safe.',
+    intro: 'If you see behavior that violates our policies or makes you uncomfortable, report it immediately. Excelora Classes takes abuse reports seriously and acts quickly to keep the community safe.',
     sections: [
       {
         title: 'What to report',
@@ -284,10 +284,10 @@ export const STATIC_SEO_PAGES = {
   },
   help: {
     slug: 'help',
-    title: 'Help Center | Elovia Love',
-    description: 'Find answers to common questions about Elovia Love, account setup, safety, subscriptions, and how to find genuine matches online.',
+    title: 'Help Center | Excelora Classes',
+    description: 'Find answers to common questions about Excelora Classes, account setup, safety, subscriptions, and how to find genuine matches online.',
     h1: 'Help Center',
-    intro: 'Need help using Elovia Love? This page guides you through account setup, verification, safety, subscription questions, and common dating concerns.',
+    intro: 'Need help using Excelora Classes? This page guides you through account setup, verification, safety, subscription questions, and common dating concerns.',
     sections: [
       {
         title: 'Getting started',
@@ -325,21 +325,21 @@ export const STATIC_SEO_PAGES = {
   },
   faq: {
     slug: 'faq',
-    title: 'FAQ | Elovia Love',
-    description: 'Find answers to frequently asked questions about Elovia Love, safety, subscriptions, profile setup, and how to meet genuine singles in India.',
+    title: 'FAQ | Excelora Classes',
+    description: 'Find answers to frequently asked questions about Excelora Classes, safety, subscriptions, profile setup, and how to meet genuine singles in India.',
     h1: 'Frequently Asked Questions',
     intro: 'Here are the answers to the questions we hear most often. If you need extra help, our support team is also ready to assist.',
     faqs: [
       {
-        question: 'Is Elovia Love safe for Indian singles?',
-        answer: 'Yes. Elovia Love focuses on verified profiles, safety guidance, and moderation to help you find genuine matches in India. Use our safety tips and report tools for extra protection.'
+        question: 'Is Excelora Classes safe for Indian singles?',
+        answer: 'Yes. Excelora Classes focuses on verified profiles, safety guidance, and moderation to help you find genuine matches in India. Use our safety tips and report tools for extra protection.'
       },
       {
         question: 'How do I create a strong dating profile?',
         answer: 'Choose clear photos, write an honest bio, and describe what you are looking for in a relationship. Our blog article on dating profile tips offers detailed examples and ideas.'
       },
       {
-        question: 'Can I use Elovia Love for serious relationships?',
+        question: 'Can I use Excelora Classes for serious relationships?',
         answer: 'Absolutely. We are designed for singles who want more than casual chatting. The platform supports serious relationship seekers with verified profiles, video chat, and trust-building features.'
       },
       {
@@ -358,7 +358,7 @@ export const STATIC_SEO_PAGES = {
     ],
     cta: {
       heading: 'Need more help?',
-      text: 'Our support team is happy to answer any question you have about using Elovia Love.',
+      text: 'Our support team is happy to answer any question you have about using Excelora Classes.',
       buttonText: 'Contact support',
       buttonUrl: '/contact'
     },
@@ -373,15 +373,15 @@ export const STATIC_SEO_PAGES = {
 export const CITY_SEO_PAGES = {
   'dating-in-delhi': {
     slug: 'dating-in-delhi',
-    title: 'Dating in Delhi | Elovia Love',
-    description: 'Meet genuine singles in Delhi on Elovia Love. Find safe dating tips, local match suggestions, and real relationship opportunities in India’s capital.',
+    title: 'Dating in Delhi | Excelora Classes',
+    description: 'Meet genuine singles in Delhi on Excelora Classes. Find safe dating tips, local match suggestions, and real relationship opportunities in India’s capital.',
     h1: 'Dating in Delhi',
-    intro: 'Delhi is a busy, modern city where meeting the right person can feel overwhelming. Elovia Love helps Delhi singles find safe, meaningful connections that fit city life.',
+    intro: 'Delhi is a busy, modern city where meeting the right person can feel overwhelming. Excelora Classes helps Delhi singles find safe, meaningful connections that fit city life.',
     sections: [
       {
-        title: 'Why Delhi singles choose Elovia Love',
+        title: 'Why Delhi singles choose Excelora Classes',
         body: [
-          'Elovia Love connects Delhi members who want more than casual swiping. Our verified profile system and smart matching tools help locals discover compatible singles quickly.',
+          'Excelora Classes connects Delhi members who want more than casual swiping. Our verified profile system and smart matching tools help locals discover compatible singles quickly.',
           'With Delhi’s diverse neighborhoods, it is important to match on values, interests, and relationship goals. We focus on helping you meet people who share your intent and lifestyle.'
         ]
       },
@@ -395,14 +395,14 @@ export const CITY_SEO_PAGES = {
       {
         title: 'Real relationship potential',
         body: [
-          'Delhi singles often search for partners who are serious about settling down and building a stable future. Elovia Love supports this by promoting honest profiles and clear relationship expectations.',
+          'Delhi singles often search for partners who are serious about settling down and building a stable future. Excelora Classes supports this by promoting honest profiles and clear relationship expectations.',
           'Use the app to highlight the qualities that matter most to you, such as shared family values, education, and long-term goals.'
         ]
       }
     ],
     cta: {
       heading: 'Looking for matches in Delhi?',
-      text: 'Join Elovia Love and get connected with local singles who want serious relationships and safe dating experiences.',
+      text: 'Join Excelora Classes and get connected with local singles who want serious relationships and safe dating experiences.',
       buttonText: 'Find matches in Delhi',
       buttonUrl: '/signup'
     },
@@ -414,50 +414,50 @@ export const CITY_SEO_PAGES = {
   },
   'dating-in-chennai': {
     slug: 'dating-in-chennai',
-    title: 'Dating in Chennai | Elovia Love',
-    description: 'Connect with genuine singles in Chennai. Safe dating advice and local relationship opportunities for Chennai professionals on Elovia Love.',
+    title: 'Dating in Chennai | Excelora Classes',
+    description: 'Connect with genuine singles in Chennai. Safe dating advice and local relationship opportunities for Chennai professionals on Excelora Classes.',
     h1: 'Dating in Chennai',
-    intro: 'Chennai combines tradition with modern dating. Elovia Love helps you find serious relationships while keeping safety and respect at the forefront.',
+    intro: 'Chennai combines tradition with modern dating. Excelora Classes helps you find serious relationships while keeping safety and respect at the forefront.',
     sections: [{ title: 'Dating in the cultural capital', body: ['Meet people who share your values and vision for the future.'] }],
     cta: { heading: 'Find matches in Chennai', text: 'Start your journey today.', buttonText: 'Join Now', buttonUrl: '/signup' },
     relatedLinks: [{ title: 'Safety tips', url: '/safety' }]
   },
   'dating-in-hyderabad': {
     slug: 'dating-in-hyderabad',
-    title: 'Dating in Hyderabad | Elovia Love',
+    title: 'Dating in Hyderabad | Excelora Classes',
     description: 'Find real connections in the City of Pearls. Hyderabad dating guide for serious relationships and safe meetings.',
     h1: 'Dating in Hyderabad',
-    intro: 'Hyderabad is a hub for ambitious professionals. Elovia Love helps you match with people who understand your lifestyle and serious intent.',
+    intro: 'Hyderabad is a hub for ambitious professionals. Excelora Classes helps you match with people who understand your lifestyle and serious intent.',
     sections: [{ title: 'Serious dating in Hyderabad', body: ['Connect with verified singles who are ready for real commitment.'] }],
     cta: { heading: 'Join Hyderabad Singles', text: 'Meet genuine people today.', buttonText: 'Sign Up', buttonUrl: '/signup' },
     relatedLinks: [{ title: 'Verified profiles', url: '/verified-profiles' }]
   },
   'dating-in-pune': {
     slug: 'dating-in-pune',
-    title: 'Dating in Pune | Elovia Love',
+    title: 'Dating in Pune | Excelora Classes',
     description: 'Meet like-minded singles in Pune. Safe dating tips and local match suggestions for Pune’s vibrant community.',
     h1: 'Dating in Pune',
-    intro: 'Pune’s educational and tech spirit makes it a great place to find thoughtful matches. Elovia Love supports your search for real love.',
+    intro: 'Pune’s educational and tech spirit makes it a great place to find thoughtful matches. Excelora Classes supports your search for real love.',
     sections: [{ title: 'Find your match in Pune', body: ['Discover local singles who value authenticity and respect.'] }],
     cta: { heading: 'Start Dating in Pune', text: 'Safe and meaningful connections await.', buttonText: 'Get Started', buttonUrl: '/signup' },
     relatedLinks: [{ title: 'Safety guide', url: '/dating-safety' }]
   },
   'dating-in-ahmedabad': {
     slug: 'dating-in-ahmedabad',
-    title: 'Dating in Ahmedabad | Elovia Love',
+    title: 'Dating in Ahmedabad | Excelora Classes',
     description: 'Connect with genuine singles in Ahmedabad. Local dating advice for building serious relationships safely.',
     h1: 'Dating in Ahmedabad',
-    intro: 'Ahmedabad is a city of values and growth. Elovia Love helps you find partners who share your commitment to a stable future.',
+    intro: 'Ahmedabad is a city of values and growth. Excelora Classes helps you find partners who share your commitment to a stable future.',
     sections: [{ title: 'Meaningful dating in Ahmedabad', body: ['Match with verified members who are looking for real connection.'] }],
     cta: { heading: 'Find Love in Ahmedabad', text: 'Join a community of serious relationship seekers.', buttonText: 'Join Now', buttonUrl: '/signup' },
     relatedLinks: [{ title: 'Trust & safety', url: '/safety' }]
   },
   'dating-in-mumbai': {
     slug: 'dating-in-mumbai',
-    title: 'Dating in Mumbai | Elovia Love',
-    description: 'Find genuine singles and safe dating advice for Mumbai on Elovia Love. Discover local relationship opportunities in India’s fastest city.',
+    title: 'Dating in Mumbai | Excelora Classes',
+    description: 'Find genuine singles and safe dating advice for Mumbai on Excelora Classes. Discover local relationship opportunities in India’s fastest city.',
     h1: 'Dating in Mumbai',
-    intro: 'Mumbai moves fast, but finding a true connection does not have to be complicated. Elovia Love helps city singles match with trustworthy partners who share their relationship priorities.',
+    intro: 'Mumbai moves fast, but finding a true connection does not have to be complicated. Excelora Classes helps city singles match with trustworthy partners who share their relationship priorities.',
     sections: [
       {
         title: 'Mumbai dating with safety in focus',
@@ -467,9 +467,9 @@ export const CITY_SEO_PAGES = {
         ]
       },
       {
-        title: 'Why Elovia Love works in Mumbai',
+        title: 'Why Excelora Classes works in Mumbai',
         body: [
-          'Elovia Love values authenticity over vanity. Mumbai members who want real relationships can find people who are ready to commit, not just browse.',
+          'Excelora Classes values authenticity over vanity. Mumbai members who want real relationships can find people who are ready to commit, not just browse.',
           'Our verified profile system reduces the noise from spam accounts and gives you more confidence in your matches.'
         ]
       },
@@ -484,7 +484,7 @@ export const CITY_SEO_PAGES = {
     cta: {
       heading: 'Ready to meet local singles in Mumbai?',
       text: 'Create your profile today and begin finding Mumbai matches who share your serious relationship goals.',
-      buttonText: 'Join Elovia Love',
+      buttonText: 'Join Excelora Classes',
       buttonUrl: '/signup'
     },
     relatedLinks: [
@@ -495,10 +495,10 @@ export const CITY_SEO_PAGES = {
   },
   'dating-in-bangalore': {
     slug: 'dating-in-bangalore',
-    title: 'Dating in Bangalore | Elovia Love',
-    description: 'Meet genuine singles in Bangalore on Elovia Love. Safe dating tips, tech-friendly matches, and local relationship advice for Indian professionals.',
+    title: 'Dating in Bangalore | Excelora Classes',
+    description: 'Meet genuine singles in Bangalore on Excelora Classes. Safe dating tips, tech-friendly matches, and local relationship advice for Indian professionals.',
     h1: 'Dating in Bangalore',
-    intro: 'Bangalore is full of ambitious, busy singles. Elovia Love makes it easier to meet people who are serious about building a meaningful connection in the city’s fast-paced environment.',
+    intro: 'Bangalore is full of ambitious, busy singles. Excelora Classes makes it easier to meet people who are serious about building a meaningful connection in the city’s fast-paced environment.',
     sections: [
       {
         title: 'Dating for busy professionals',
@@ -515,7 +515,7 @@ export const CITY_SEO_PAGES = {
         ]
       },
       {
-        title: 'Why Elovia Love matters in Bangalore',
+        title: 'Why Excelora Classes matters in Bangalore',
         body: [
           'Our app is geared toward real relationship seekers in India’s tech capital. Bangalore members can connect with people who want meaningful dating instead of endless chat.',
           'We emphasize safety, verified profiles, and clear intentions so you can build trust from the very first message.'
@@ -536,10 +536,10 @@ export const CITY_SEO_PAGES = {
   },
   'dating-in-kolkata': {
     slug: 'dating-in-kolkata',
-    title: 'Dating in Kolkata | Elovia Love',
-    description: 'Find genuine local matches in Kolkata with Elovia Love. Get safe dating tips, relationship advice, and a supportive community for serious singles.',
+    title: 'Dating in Kolkata | Excelora Classes',
+    description: 'Find genuine local matches in Kolkata with Excelora Classes. Get safe dating tips, relationship advice, and a supportive community for serious singles.',
     h1: 'Dating in Kolkata',
-    intro: 'Kolkata is a city of culture, connection, and meaningful conversations. Elovia Love helps singles in Kolkata find partners who value authenticity and safety.',
+    intro: 'Kolkata is a city of culture, connection, and meaningful conversations. Excelora Classes helps singles in Kolkata find partners who value authenticity and safety.',
     sections: [
       {
         title: 'Culture and connection',
@@ -558,7 +558,7 @@ export const CITY_SEO_PAGES = {
       {
         title: 'Find serious relationships',
         body: [
-          'Many Kolkata singles want a partnership grounded in respect, family values, and future planning. Elovia Love supports this by connecting you with members who are clear about their intentions.',
+          'Many Kolkata singles want a partnership grounded in respect, family values, and future planning. Excelora Classes supports this by connecting you with members who are clear about their intentions.',
           'Whether you prefer a quiet conversation over coffee or a thoughtful virtual meet, our app helps you find like-minded people.'
         ]
       }
@@ -566,7 +566,7 @@ export const CITY_SEO_PAGES = {
     cta: {
       heading: 'Ready to meet Kolkata singles?',
       text: 'Create your profile and start finding local matches who want real connection and safe dating experiences.',
-      buttonText: 'Join Elovia Love',
+      buttonText: 'Join Excelora Classes',
       buttonUrl: '/signup'
     },
     relatedLinks: [
@@ -577,15 +577,15 @@ export const CITY_SEO_PAGES = {
   },
   'dating-in-ranchi': {
     slug: 'dating-in-ranchi',
-    title: 'Dating in Ranchi | Elovia Love',
-    description: 'Find genuine singles in Ranchi on Elovia Love. Use local dating advice, safety tips, and trusted matching to discover meaningful relationships.',
+    title: 'Dating in Ranchi | Excelora Classes',
+    description: 'Find genuine singles in Ranchi on Excelora Classes. Use local dating advice, safety tips, and trusted matching to discover meaningful relationships.',
     h1: 'Dating in Ranchi',
-    intro: 'Ranchi is growing fast and so are the opportunities for meaningful conversations. Elovia Love helps local singles connect with trustworthy partners who share serious relationship goals.',
+    intro: 'Ranchi is growing fast and so are the opportunities for meaningful conversations. Excelora Classes helps local singles connect with trustworthy partners who share serious relationship goals.',
     sections: [
       {
-        title: 'Why Ranchi members love Elovia Love',
+        title: 'Why Ranchi members love Excelora Classes',
         body: [
-          'Elovia Love creates a safe environment for Ranchi singles to meet, communicate, and build trust. Our app gives you control over what you share and who you speak to.',
+          'Excelora Classes creates a safe environment for Ranchi singles to meet, communicate, and build trust. Our app gives you control over what you share and who you speak to.',
           'When matches are aligned with your values and future hopes, it becomes easier to move from chat to a real relationship.'
         ]
       },
@@ -600,7 +600,7 @@ export const CITY_SEO_PAGES = {
         title: 'Finding meaningful matches',
         body: [
           'Use opening conversations to discuss family values, lifestyle preferences, and what you want from a relationship. This helps you find someone who is serious and compatible.',
-          'Elovia Love is designed to support longer-term dating and real commitment, not just casual browsing.'
+          'Excelora Classes is designed to support longer-term dating and real commitment, not just casual browsing.'
         ]
       }
     ],
@@ -621,15 +621,15 @@ export const CITY_SEO_PAGES = {
 export const FEATURE_SEO_PAGES = {
   'verified-profiles': {
     slug: 'verified-profiles',
-    title: 'Verified Profiles | Elovia Love',
-    description: 'Verified profiles on Elovia Love help you connect with real singles and build trust quicker. Learn how verification works and why it matters.',
+    title: 'Verified Profiles | Excelora Classes',
+    description: 'Verified profiles on Excelora Classes help you connect with real singles and build trust quicker. Learn how verification works and why it matters.',
     h1: 'Verified Profiles',
-    intro: 'Verified profiles help you avoid fake accounts and feel confident when you start a new conversation. Elovia Love uses validation to support safer, more trustworthy matching.',
+    intro: 'Verified profiles help you avoid fake accounts and feel confident when you start a new conversation. Excelora Classes uses validation to support safer, more trustworthy matching.',
     sections: [
       {
         title: 'What verification means',
         body: [
-          'A verified profile means Elovia Love has confirmed key profile details using our safety checks. This may include identity verification, photo validation, and activity review.',
+          'A verified profile means Excelora Classes has confirmed key profile details using our safety checks. This may include identity verification, photo validation, and activity review.',
           'When you see a verified badge, you can trust that the profile has passed extra screening and is more likely to represent a real person seeking a genuine relationship.'
         ]
       },
@@ -662,10 +662,10 @@ export const FEATURE_SEO_PAGES = {
   },
   'private-chat': {
     slug: 'private-chat',
-    title: 'Private Chat | Elovia Love',
-    description: 'Use private chat on Elovia Love to message matches securely. Learn how our confidential messaging keeps your dating journey safe and focused.',
+    title: 'Private Chat | Excelora Classes',
+    description: 'Use private chat on Excelora Classes to message matches securely. Learn how our confidential messaging keeps your dating journey safe and focused.',
     h1: 'Private Chat',
-    intro: 'Elovia Love private chat helps you build connection through secure, in-app messaging. Keep conversations confidential while you decide whether to take the next step.',
+    intro: 'Excelora Classes private chat helps you build connection through secure, in-app messaging. Keep conversations confidential while you decide whether to take the next step.',
     sections: [
       {
         title: 'Secure messaging',
@@ -703,10 +703,10 @@ export const FEATURE_SEO_PAGES = {
   },
   'video-chat': {
     slug: 'video-chat',
-    title: 'Video Chat | Elovia Love',
-    description: 'Use video chat on Elovia Love to meet matches face-to-face safely before a first date. Build trust from home with verified members.',
+    title: 'Video Chat | Excelora Classes',
+    description: 'Use video chat on Excelora Classes to meet matches face-to-face safely before a first date. Build trust from home with verified members.',
     h1: 'Video Chat',
-    intro: 'Video chat gives you a safer way to connect before meeting in person. Elovia Love helps you verify chemistry, tone, and compatibility without leaving home.',
+    intro: 'Video chat gives you a safer way to connect before meeting in person. Excelora Classes helps you verify chemistry, tone, and compatibility without leaving home.',
     sections: [
       {
         title: 'Why video chat helps',
@@ -744,15 +744,15 @@ export const FEATURE_SEO_PAGES = {
   },
   'safe-dating': {
     slug: 'safe-dating',
-    title: 'Safe Dating | Elovia Love',
-    description: 'Learn how Elovia Love supports safe dating with verified members, privacy controls, and practical tips for first dates and online conversations.',
+    title: 'Safe Dating | Excelora Classes',
+    description: 'Learn how Excelora Classes supports safe dating with verified members, privacy controls, and practical tips for first dates and online conversations.',
     h1: 'Safe Dating',
-    intro: 'Safe dating is a top priority at Elovia Love. We combine verification tools, privacy features, and clear guidance to help you meet people without compromising your comfort.',
+    intro: 'Safe dating is a top priority at Excelora Classes. We combine verification tools, privacy features, and clear guidance to help you meet people without compromising your comfort.',
     sections: [
       {
         title: 'The foundation of safe dating',
         body: [
-          'Elovia Love helps you create a dating environment where respect and safety are built in. Verified profiles, in-app messaging, and reporting tools make it easier to avoid risky situations.',
+          'Excelora Classes helps you create a dating environment where respect and safety are built in. Verified profiles, in-app messaging, and reporting tools make it easier to avoid risky situations.',
           'We encourage members to keep personal details private until trust has been established, and to meet in public spaces for early dates.'
         ]
       },
@@ -766,7 +766,7 @@ export const FEATURE_SEO_PAGES = {
       {
         title: 'Support for every stage',
         body: [
-          'Whether you are browsing, chatting, or planning a date, Elovia Love gives you the tools to stay in control. Use our help pages and report features whenever you need support.',
+          'Whether you are browsing, chatting, or planning a date, Excelora Classes gives you the tools to stay in control. Use our help pages and report features whenever you need support.',
           'Our goal is to make online dating feel safer, more respectful, and more focused on real connections.'
         ]
       }
@@ -785,15 +785,15 @@ export const FEATURE_SEO_PAGES = {
   },
   'serious-relationships': {
     slug: 'serious-relationships',
-    title: 'Serious Relationships | Elovia Love',
-    description: 'Elovia Love supports singles seeking serious relationships with trusted matches, verified profiles, and communication tools for real commitment.',
+    title: 'Serious Relationships | Excelora Classes',
+    description: 'Excelora Classes supports singles seeking serious relationships with trusted matches, verified profiles, and communication tools for real commitment.',
     h1: 'Serious Relationships',
-    intro: 'If you are looking for a meaningful partnership instead of casual chat, Elovia Love is designed for serious relationships and long-term commitment.',
+    intro: 'If you are looking for a meaningful partnership instead of casual chat, Excelora Classes is designed for serious relationships and long-term commitment.',
     sections: [
       {
         title: 'A platform for commitment',
         body: [
-          'Elovia Love prioritizes quality over quantity. We help you connect with people who are ready to invest time in a real relationship.',
+          'Excelora Classes prioritizes quality over quantity. We help you connect with people who are ready to invest time in a real relationship.',
           'Matches are based on compatibility factors that matter for long-term success, such as communication style, lifestyle goals, and respect for boundaries.'
         ]
       },
@@ -808,7 +808,7 @@ export const FEATURE_SEO_PAGES = {
         title: 'Find a partner who matches your goals',
         body: [
           'Share your intentions clearly on your profile, and look for members who express similar relationship expectations. This reduces the chance of mismatches and wasted time.',
-          'Elovia Love is a good fit for singles who are ready to move beyond casual dating and toward a stable partnership.'
+          'Excelora Classes is a good fit for singles who are ready to move beyond casual dating and toward a stable partnership.'
         ]
       }
     ],
@@ -826,8 +826,8 @@ export const FEATURE_SEO_PAGES = {
   },
   'relationship-matching': {
     slug: 'relationship-matching',
-    title: 'Relationship Matching System | Elovia Love',
-    description: 'Learn how Elovia Love uses compatibility factors to help you find long-term partners instead of just casual dates.',
+    title: 'Relationship Matching System | Excelora Classes',
+    description: 'Learn how Excelora Classes uses compatibility factors to help you find long-term partners instead of just casual dates.',
     h1: 'Meaningful Relationship Matching',
     intro: 'Our matching system is designed for depth. We look beyond basic swipes to help you find someone who matches your values and life goals.',
     sections: [{ title: 'How we match you', body: ['We use a combination of profile data, verified preferences, and relationship intent to suggest the best matches.'] }],
@@ -836,7 +836,7 @@ export const FEATURE_SEO_PAGES = {
   },
   'guides/dating-tips': {
     slug: 'guides/dating-tips',
-    title: 'Dating Tips Guide | Elovia Love',
+    title: 'Dating Tips Guide | Excelora Classes',
     description: 'A comprehensive guide to dating success, from first messages to long-term relationship building.',
     h1: 'The Ultimate Dating Tips Guide',
     intro: 'Master the art of online dating with our expert tips for better conversations and stronger connections.',
@@ -846,7 +846,7 @@ export const FEATURE_SEO_PAGES = {
   },
   'guides/safety': {
     slug: 'guides/safety',
-    title: 'Comprehensive Safety Guide | Elovia Love',
+    title: 'Comprehensive Safety Guide | Excelora Classes',
     description: 'Your master resource for staying safe at every stage of your dating journey.',
     h1: 'Trust & Safety Master Guide',
     intro: 'Your safety is our priority. This guide covers everything from protecting your data to meeting safely in person.',
@@ -856,7 +856,7 @@ export const FEATURE_SEO_PAGES = {
   },
   'guides/relationships': {
     slug: 'guides/relationships',
-    title: 'Relationship Building Guide | Elovia Love',
+    title: 'Relationship Building Guide | Excelora Classes',
     description: 'Expert advice on moving from a first match to a serious, committed relationship.',
     h1: 'Building Serious Relationships',
     intro: 'Navigating the path to commitment requires honesty and effort. This guide helps you build a strong foundation.',
@@ -866,7 +866,7 @@ export const FEATURE_SEO_PAGES = {
   },
   'guides/profile-optimization': {
     slug: 'guides/profile-optimization',
-    title: 'Profile Optimization Guide | Elovia Love',
+    title: 'Profile Optimization Guide | Excelora Classes',
     description: 'Maximize your dating success with a high-performing, authentic profile.',
     h1: 'Optimize Your Profile for Success',
     intro: 'A great profile is your best asset. Learn how to highlight your best self and attract compatible matches.',
@@ -880,15 +880,15 @@ export const BLOG_POSTS = {
   'dating-profile-tips': {
     slug: 'dating-profile-tips',
     title: 'Dating Profile Tips for Genuine Matches',
-    metaDescription: 'Learn the best dating profile tips to attract genuine matches on Elovia Love. Build a safe, authentic online dating profile that stands out in India.',
+    metaDescription: 'Learn the best dating profile tips to attract genuine matches on Excelora Classes. Build a safe, authentic online dating profile that stands out in India.',
     excerpt: 'Build a dating profile that attracts the right people with honest descriptions, strong photos, and clear relationship intentions.',
     featuredImage: `${SITE_URL}/EloviaLoveWB_small.png`,
-    author: 'Elovia Love Team',
+    author: 'Excelora Classes Team',
     tags: ['dating profile', 'dating tips', 'online dating', 'real relationship app'],
     publishedAt: '2026-05-12',
     updatedAt: '2026-05-12',
     content: `
-      <p>A strong dating profile is the foundation of every successful online match. On Elovia Love, your profile should communicate who you are, what you are looking for, and why someone should take the next step toward a meaningful relationship.</p>
+      <p>A strong dating profile is the foundation of every successful online match. On Excelora Classes, your profile should communicate who you are, what you are looking for, and why someone should take the next step toward a meaningful relationship.</p>
       <h2>Choose honest photos with confidence</h2>
       <p>Your first photo should feel natural, confident, and true to who you are. Avoid heavily filtered images and instead select a bright, friendly picture that includes your face clearly.</p>
       <p>Photos that show your interests — a walk in the park, a favourite hobby, or a casual meetup with friends — help your profile feel authentic. When you share a real moment, people are more likely to trust that you are genuine.</p>
@@ -897,7 +897,7 @@ export const BLOG_POSTS = {
       <p>For example, say “I enjoy weekend brunches, travel, and honest communication. I’m looking for a partner who values family, trust, and planning a future together.” This kind of language sets clear expectations.</p>
       <h2>Highlight your relationship intent</h2>
       <p>One of the biggest differences between casual swiping and serious matchmaking is being upfront about your intentions. Use phrases like “looking for a meaningful relationship” or “interested in building a future with the right person.”</p>
-      <p>Elovia Love is built for genuine relationship seekers, so make sure your profile reflects that. Profiles that are transparent about intent attract singles who want the same thing.</p>
+      <p>Excelora Classes is built for genuine relationship seekers, so make sure your profile reflects that. Profiles that are transparent about intent attract singles who want the same thing.</p>
       <h2>Share your interests with depth</h2>
       <p>Instead of listing hobbies in a generic way, explain what they mean to you. Say “I love cooking regional dishes for friends” rather than simply “I like cooking.” Small details make your profile memorable.</p>
       <p>Stories create connection. Mention one or two experiences that show your personality and values, such as a favorite travel memory or an ideal weekend activity.</p>
@@ -918,20 +918,20 @@ export const BLOG_POSTS = {
   'online-dating-safety': {
     slug: 'online-dating-safety',
     title: 'Online Dating Safety Tips for Indian Singles',
-    metaDescription: 'Discover online dating safety tips for Indian singles on Elovia Love. Stay secure while meeting genuine matches, reporting abuse, and planning first dates.',
-    excerpt: 'Learn practical online dating safety tips that help you protect your privacy and build trust on Elovia Love.',
+    metaDescription: 'Discover online dating safety tips for Indian singles on Excelora Classes. Stay secure while meeting genuine matches, reporting abuse, and planning first dates.',
+    excerpt: 'Learn practical online dating safety tips that help you protect your privacy and build trust on Excelora Classes.',
     featuredImage: `${SITE_URL}/EloviaLoveWB_small.png`,
-    author: 'Elovia Love Team',
+    author: 'Excelora Classes Team',
     tags: ['online dating safety', 'safe dating app India', 'dating tips', 'trust signals'],
     publishedAt: '2026-05-12',
     updatedAt: '2026-05-12',
     content: `
-      <p>Online dating can open new doors, but it also requires extra care. On Elovia Love, safety begins with the choices you make before, during, and after you meet someone.</p>
+      <p>Online dating can open new doors, but it also requires extra care. On Excelora Classes, safety begins with the choices you make before, during, and after you meet someone.</p>
       <h2>Start with a strong, honest profile</h2>
       <p>Your safety journey begins with the way you present yourself. Use clear photos, share your values, and avoid over-sharing personal details. A profile that reflects your real life helps you attract genuine matches.</p>
       <p>Profiles that are transparent about serious relationship goals are more likely to connect with members who have similar expectations. This reduces mismatches and improves your overall experience.</p>
       <h2>Keep early conversations in our private chat</h2>
-      <p>Private chat on Elovia Love is built to keep your early conversations contained and secure. Avoid moving to phone or social media until you feel comfortable and trust the person.</p>
+      <p>Private chat on Excelora Classes is built to keep your early conversations contained and secure. Avoid moving to phone or social media until you feel comfortable and trust the person.</p>
       <p>If someone pushes you to share contact details too soon, that is a red flag. Our <a href="/report-abuse">report abuse</a> process exists for behavior like this.</p>
       <h2>Watch for common warning signs</h2>
       <p>Fake profiles may have stock photos, very limited details, or a story that feels inconsistent. They may also ask for money, gifts, or emotional support too quickly.</p>
@@ -944,10 +944,10 @@ export const BLOG_POSTS = {
       <p>Verification is not a guarantee, but it does signal that someone has invested effort into building trust on the platform.</p>
       <h2>Protect your privacy</h2>
       <p>Keep your home address, financial details, and work schedule private until you know the person better. Share only what feels necessary to continue the conversation.</p>
-      <p>Elovia Love lets you control your privacy settings so you can decide how much to reveal and when.</p>
+      <p>Excelora Classes lets you control your privacy settings so you can decide how much to reveal and when.</p>
       <h2>Report unsafe behavior quickly</h2>
       <p>If someone harasses you, behaves aggressively, or violates the community guidelines, report it immediately. Our team reviews reports and takes action to maintain a safe environment.</p>
-      <p>Reporting helps protect you and other members, and it strengthens the trust signals across Elovia Love.</p>
+      <p>Reporting helps protect you and other members, and it strengthens the trust signals across Excelora Classes.</p>
       <h2>Your safety is part of your dating strategy</h2>
       <p>Staying safe is not just about avoiding danger; it is about choosing relationships that feel comfortable, respectful, and worthwhile. Use our safety tips as part of your growth as a thoughtful dater.</p>
       <p>When you date with safety in mind, you are more likely to build a real relationship that lasts.</p>
@@ -956,18 +956,18 @@ export const BLOG_POSTS = {
   'first-message-examples': {
     slug: 'first-message-examples',
     title: 'First Message Examples That Start Real Conversations',
-    metaDescription: 'Read first message examples that help Indian singles on Elovia Love start meaningful conversations with matches and move toward real relationships.',
-    excerpt: 'Use these first message examples to begin safe, thoughtful, and engaging conversations on Elovia Love.',
+    metaDescription: 'Read first message examples that help Indian singles on Excelora Classes start meaningful conversations with matches and move toward real relationships.',
+    excerpt: 'Use these first message examples to begin safe, thoughtful, and engaging conversations on Excelora Classes.',
     featuredImage: `${SITE_URL}/EloviaLoveWB_small.png`,
-    author: 'Elovia Love Team',
+    author: 'Excelora Classes Team',
     tags: ['first message', 'dating tips', 'conversation starters', 'serious relationship platform'],
     publishedAt: '2026-05-12',
     updatedAt: '2026-05-12',
     content: `
-      <p>First impressions matter. A thoughtful first message on Elovia Love can turn a profile match into a real conversation, and from there into something deeper.</p>
+      <p>First impressions matter. A thoughtful first message on Excelora Classes can turn a profile match into a real conversation, and from there into something deeper.</p>
       <h2>Personalize your opening line</h2>
       <p>Instead of a generic “Hi,” mention something specific from their profile. If they enjoy hiking, say “I loved your hiking photo — which trail was that?” This shows you read their profile and are genuinely interested.</p>
-      <p>Personalized messages are more likely to receive a response, especially on a relationship-oriented platform like Elovia Love.</p>
+      <p>Personalized messages are more likely to receive a response, especially on a relationship-oriented platform like Excelora Classes.</p>
       <h2>Ask open questions</h2>
       <p>Open questions invite more than yes/no answers. Try “What do you enjoy most about living in Delhi?” or “Which movie has made you think differently about relationships?”</p>
       <p>These questions encourage real conversation and give the other person room to share something meaningful.</p>
@@ -982,7 +982,7 @@ export const BLOG_POSTS = {
       <p>Say something like “Would love to hear more about your favorite weekend routine when you have time.”</p>
       <h2>Match your message to the other person</h2>
       <p>If their profile is playful, it is okay to be lighthearted. If it is thoughtful and serious, mirror that tone. Matching energy helps create a comfortable conversation from the start.</p>
-      <p>On Elovia Love, people are looking for compatibility, so being authentic in your tone is important.</p>
+      <p>On Excelora Classes, people are looking for compatibility, so being authentic in your tone is important.</p>
       <h2>Learn from every exchange</h2>
       <p>If a message does not get a reply, don’t take it personally. Use it as a chance to refine your approach and focus on matches who are more aligned with your style.</p>
       <p>These first message examples are a starting point — the more you practice, the more natural your conversations will become.</p>
@@ -991,20 +991,20 @@ export const BLOG_POSTS = {
   'how-to-find-real-love': {
     slug: 'how-to-find-real-love',
     title: 'How to Find Real Love Online',
-    metaDescription: 'Discover how to find real love online with practical steps, safety tips, and relationship-focused strategies on Elovia Love.',
+    metaDescription: 'Discover how to find real love online with practical steps, safety tips, and relationship-focused strategies on Excelora Classes.',
     excerpt: 'Learn how to find real love online by prioritizing authenticity, clear intentions, and respectful communication.',
     featuredImage: `${SITE_URL}/EloviaLoveWB_small.png`,
-    author: 'Elovia Love Team',
+    author: 'Excelora Classes Team',
     tags: ['real love', 'relationship', 'online dating app', 'serious relationships'],
     publishedAt: '2026-05-12',
     updatedAt: '2026-05-12',
     content: `
-      <p>Finding real love online takes a different mindset than swiping through profiles. On Elovia Love, the best relationships start with clarity, honesty, and a shared desire for a meaningful connection.</p>
+      <p>Finding real love online takes a different mindset than swiping through profiles. On Excelora Classes, the best relationships start with clarity, honesty, and a shared desire for a meaningful connection.</p>
       <h2>Know what you want</h2>
       <p>Before you start matching, think about the qualities that matter most to you. Do you want someone who values family, has a similar communication style, or shares your long-term goals?</p>
       <p>Knowing your own relationship priorities makes it easier to recognize a good match when you see one.</p>
       <h2>Choose a platform built for commitment</h2>
-      <p>Elovia Love is designed for singles who want more than casual chat. Our focus on verified profiles, thoughtful matches, and safety tools helps attract people who are serious about finding love.</p>
+      <p>Excelora Classes is designed for singles who want more than casual chat. Our focus on verified profiles, thoughtful matches, and safety tools helps attract people who are serious about finding love.</p>
       <p>When a platform supports meaningful connections, it increases your chances of finding the right partner.</p>
       <h2>Be honest in your profile and messages</h2>
       <p>Honesty builds trust from the beginning. Share your true interests, explain your relationship goals, and avoid exaggerating details just to impress someone.</p>
@@ -1029,17 +1029,17 @@ export const BLOG_POSTS = {
   'red-flags-in-online-dating': {
     slug: 'red-flags-in-online-dating',
     title: 'Red Flags in Online Dating You Should Never Ignore',
-    metaDescription: 'Learn red flags in online dating so you can avoid fake profiles, manipulative behavior, and unsafe matches on Elovia Love.',
+    metaDescription: 'Learn red flags in online dating so you can avoid fake profiles, manipulative behavior, and unsafe matches on Excelora Classes.',
     excerpt: 'Recognize the red flags in online dating that signal fake profiles, scams, or unhealthy behavior before you meet someone new.',
     featuredImage: `${SITE_URL}/EloviaLoveWB_small.png`,
-    author: 'Elovia Love Team',
+    author: 'Excelora Classes Team',
     tags: ['red flags', 'online dating safety', 'safe dating app India', 'dating tips'],
     publishedAt: '2026-05-12',
     updatedAt: '2026-05-12',
     content: `
       <p>Online dating can be rewarding, but there are warning signs to watch for. Knowing the red flags helps you protect yourself and focus on matches that are safe, respectful, and sincere.</p>
       <h2>Pressure to move off the app immediately</h2>
-      <p>If someone pushes you to switch to phone, WhatsApp, or social media before you feel comfortable, that is a red flag. Move slower and keep conversations on Elovia Love until trust is built.</p>
+      <p>If someone pushes you to switch to phone, WhatsApp, or social media before you feel comfortable, that is a red flag. Move slower and keep conversations on Excelora Classes until trust is built.</p>
       <p>Our <a href="/blog/online-dating-safety">online dating safety</a> guide explains why staying on the platform early on is one of the safest choices.</p>
       <h2>Inconsistent profile details</h2>
       <p>Beware of profiles where photos, job details, or personal stories do not align. Real members usually share consistent information and respond naturally when asked follow-up questions.</p>
@@ -1058,7 +1058,7 @@ export const BLOG_POSTS = {
       <p>Ask for honest answers and trust your instincts if the responses feel evasive or inconsistent.</p>
       <h2>Ignore the bad signs</h2>
       <p>It is easy to rationalize red flags when you really want a connection. But ignoring warning signs can lead to unhealthy or unsafe experiences.</p>
-      <p>On Elovia Love, it is better to pause, report, and move on than to risk your well-being for a match that does not feel right.</p>
+      <p>On Excelora Classes, it is better to pause, report, and move on than to risk your well-being for a match that does not feel right.</p>
     `
   },
   'long-distance-relationship-advice': {
@@ -1067,7 +1067,7 @@ export const BLOG_POSTS = {
     metaDescription: 'Find long distance relationship advice for online daters looking to build trust, stay connected, and keep their relationship strong across distance.',
     excerpt: 'Use these long distance relationship advice tips to maintain connection, trust, and communication when your relationship spans cities or states.',
     featuredImage: `${SITE_URL}/EloviaLoveWB_small.png`,
-    author: 'Elovia Love Team',
+    author: 'Excelora Classes Team',
     tags: ['long distance', 'relationship advice', 'dating tips', 'real relationship app'],
     publishedAt: '2026-05-12',
     updatedAt: '2026-05-12',
@@ -1099,17 +1099,17 @@ export const BLOG_POSTS = {
   'how-to-avoid-fake-profiles': {
     slug: 'how-to-avoid-fake-profiles',
     title: 'How to Avoid Fake Profiles When Dating Online',
-    metaDescription: 'Learn how to avoid fake profiles on online dating apps. Get practical guidance for spotting scams, verifying matches, and staying safe on Elovia Love.',
-    excerpt: 'Avoid fake profiles with practical tips for verifying matches, identifying warning signs, and using Elovia Love’s safety features.',
+    metaDescription: 'Learn how to avoid fake profiles on online dating apps. Get practical guidance for spotting scams, verifying matches, and staying safe on Excelora Classes.',
+    excerpt: 'Avoid fake profiles with practical tips for verifying matches, identifying warning signs, and using Excelora Classes’s safety features.',
     featuredImage: `${SITE_URL}/EloviaLoveWB_small.png`,
-    author: 'Elovia Love Team',
+    author: 'Excelora Classes Team',
     tags: ['fake profiles', 'dating safety', 'trusted app', 'online dating'],
     publishedAt: '2026-05-12',
     updatedAt: '2026-05-12',
     content: `
       <p>Fake profiles can undermine your online dating experience. Knowing how to spot them helps you stay safer and focus on matches that are real and respectful.</p>
       <h2>Look for verification cues</h2>
-      <p>Elovia Love’s verification features are designed to help you identify genuine members. Verified profiles are a strong signal that the person has gone through additional checks.</p>
+      <p>Excelora Classes’s verification features are designed to help you identify genuine members. Verified profiles are a strong signal that the person has gone through additional checks.</p>
       <p>While verification is helpful, it is still wise to assess the profile as a whole and look for consistency in photos and details.</p>
       <h2>Check for real photos and details</h2>
       <p>Fake profiles often use overly polished or stock-like photos. Look for images that feel natural and include more than one picture. People who are authentic usually include a range of moments rather than repeated professional shots.</p>
@@ -1119,22 +1119,22 @@ export const BLOG_POSTS = {
       <p>Chat behavior is one of the clearest ways to spot fake profiles. Honest people respond naturally and respectfully.</p>
       <h2>Use our report system</h2>
       <p>If you suspect a profile is fake, report it immediately through the <a href="/report-abuse">report abuse</a> page. Our trust and safety team reviews reports and removes suspicious accounts.</p>
-      <p>Reporting helps make Elovia Love safer for everyone, especially people who are new to online dating.</p>
+      <p>Reporting helps make Excelora Classes safer for everyone, especially people who are new to online dating.</p>
       <h2>Trust your instincts</h2>
       <p>If something feels wrong, it probably is. Your instincts are an important safety tool, especially when a profile is new or a conversation seems forced.</p>
       <p>When in doubt, pause the interaction and review the member’s profile more carefully before moving forward.</p>
       <h2>Choose relationships built on transparency</h2>
       <p>Real love grows when both people are open, honest, and respectful. Avoid fake profiles by seeking matches who communicate clearly and are consistent in what they say.</p>
-      <p>Elovia Love is designed to make this easier with verification, reporting, and a focus on meaningful connections.</p>
+      <p>Excelora Classes is designed to make this easier with verification, reporting, and a focus on meaningful connections.</p>
     `
   },
   'best-dating-app-tips': {
     slug: 'best-dating-app-tips',
     title: 'Best Dating App Tips for Genuine Connections',
-    metaDescription: 'Discover the best dating app tips for finding genuine connections on Elovia Love. Learn how to use your profile, messages, and safety features effectively.',
-    excerpt: 'These best dating app tips help you find real matches, stay safe, and make the most of Elovia Love as a trusted relationship platform.',
+    metaDescription: 'Discover the best dating app tips for finding genuine connections on Excelora Classes. Learn how to use your profile, messages, and safety features effectively.',
+    excerpt: 'These best dating app tips help you find real matches, stay safe, and make the most of Excelora Classes as a trusted relationship platform.',
     featuredImage: `${SITE_URL}/EloviaLoveWB_small.png`,
-    author: 'Elovia Love Team',
+    author: 'Excelora Classes Team',
     tags: ['best dating app tips', 'online dating app', 'genuine relationship app', 'dating tips'],
     publishedAt: '2026-05-12',
     updatedAt: '2026-05-12',
@@ -1145,28 +1145,28 @@ export const BLOG_POSTS = {
       <p>Profiles with more detail are also easier for the app’s matching algorithm to connect with compatible people.</p>
       <h2>Set your preferences intentionally</h2>
       <p>Use the app filters to narrow down matches by values, lifestyle, and goals. When you are intentional about preferences, you save time and focus on people who are more likely to be a good fit.</p>
-      <p>Elovia Love is built for people who want serious relationships, so be honest about the kind of connection you want.</p>
+      <p>Excelora Classes is built for people who want serious relationships, so be honest about the kind of connection you want.</p>
       <h2>Send thoughtful first messages</h2>
       <p>The first message is your chance to make a strong impression. Mention something from the other person’s profile and ask an open-ended question to start a real conversation.</p>
       <p>Good first messages are respectful, curious, and authentic.</p>
       <h2>Use in-app features safely</h2>
-      <p>Keep early conversations inside Elovia Love’s messaging system so you can report concerns and preserve your privacy. Only move to phone or video chat when you feel comfortable.</p>
+      <p>Keep early conversations inside Excelora Classes’s messaging system so you can report concerns and preserve your privacy. Only move to phone or video chat when you feel comfortable.</p>
       <p>For more on safety, see our guides on <a href="/dating-safety">dating safety</a> and <a href="/blog/how-to-avoid-fake-profiles">how to avoid fake profiles</a>.</p>
       <h2>Focus on quality, not quantity</h2>
       <p>It is better to have a few thoughtful conversations than many quick chats. Invest in matches that show respect, shared values, and potential for something real.</p>
       <p>Quality conversations often lead to stronger relationships than a high volume of superficial interactions.</p>
       <h2>Stay patient and positive</h2>
       <p>Finding a genuine match takes time. Stay positive and keep learning from each experience. Every message gives you more clarity about what you want.</p>
-      <p>With the right approach, Elovia Love can help you find a connection that is respectful, safe, and meaningful.</p>
+      <p>With the right approach, Excelora Classes can help you find a connection that is respectful, safe, and meaningful.</p>
     `
   },
   'how-to-start-a-conversation': {
     slug: 'how-to-start-a-conversation',
     title: 'How to Start a Conversation on a Dating App',
-    metaDescription: 'Learn how to start a conversation on a dating app with confidence. Use these tips to begin meaningful chats and build trust on Elovia Love.',
-    excerpt: 'These conversation starters help you begin meaningful chats on Elovia Love and build trust with genuine matches.',
+    metaDescription: 'Learn how to start a conversation on a dating app with confidence. Use these tips to begin meaningful chats and build trust on Excelora Classes.',
+    excerpt: 'These conversation starters help you begin meaningful chats on Excelora Classes and build trust with genuine matches.',
     featuredImage: `${SITE_URL}/EloviaLoveWB_small.png`,
-    author: 'Elovia Love Team',
+    author: 'Excelora Classes Team',
     tags: ['conversation starters', 'dating tips', 'online dating app', 'first messages'],
     publishedAt: '2026-05-12',
     updatedAt: '2026-05-12',
@@ -1187,7 +1187,7 @@ export const BLOG_POSTS = {
       <h2>Keep expectations realistic</h2>
       <p>Not every conversation will become a long-term connection, and that is okay. Focus on enjoyable chats and getting to know people without pressuring the outcome.</p>
       <p>Being relaxed and authentic helps you meet people who appreciate the real you.</p>
-      <h2>Use Elovia Love’s relationship focus</h2>
+      <h2>Use Excelora Classes’s relationship focus</h2>
       <p>On a platform designed for serious dating, it is helpful to mention your relationship goals gently. Saying “I’m interested in finding someone who values honesty and commitment” can attract the right kind of response.</p>
       <p>When you match your opening conversation to your true intent, you are more likely to connect with people who want the same thing.</p>
       <h2>Practice and refine</h2>

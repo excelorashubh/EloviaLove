@@ -9,7 +9,7 @@ const CITY_DATA = {
   'delhi': {
     name: 'Delhi',
     title: 'Dating in Delhi | Find Serious Relationships in the Capital',
-    description: 'Looking for real love in Delhi? Join Elovia Love, the most trusted dating app for Delhi singles seeking serious relationships and verified profiles.',
+    description: 'Looking for real love in Delhi? Join Excelora Classes, the most trusted dating app for Delhi singles seeking serious relationships and verified profiles.',
     culture: 'Delhi\'s dating scene is as vibrant and diverse as the city itself. From the historical charm of Old Delhi to the modern vibes of South Delhi, singles here value both tradition and contemporary connections.',
     dateIdeas: [
       'A romantic walk through Lodhi Gardens.',
@@ -21,7 +21,7 @@ const CITY_DATA = {
   'mumbai': {
     name: 'Mumbai',
     title: 'Dating in Mumbai | Find Your Perfect Match in the City of Dreams',
-    description: 'Connect with verified singles in Mumbai. Elovia Love helps Mumbaikars find meaningful connections and serious relationships safely.',
+    description: 'Connect with verified singles in Mumbai. Excelora Classes helps Mumbaikars find meaningful connections and serious relationships safely.',
     culture: 'In the fast-paced life of Mumbai, meaningful connections are highly valued. Whether it\'s a stroll along Marine Drive or a quick meeting at a Bandra cafe, Mumbai singles are looking for partners who share their dreams and hustle.',
     dateIdeas: [
       'Watching the sunset at Marine Drive.',
@@ -33,7 +33,7 @@ const CITY_DATA = {
   'bangalore': {
     name: 'Bangalore',
     title: 'Dating in Bangalore | Serious Relationships for the Silicon Valley of India',
-    description: 'Looking for a compatible partner in Bangalore? Elovia Love uses AI-powered matching to connect Bangalore singles for lasting love.',
+    description: 'Looking for a compatible partner in Bangalore? Excelora Classes uses AI-powered matching to connect Bangalore singles for lasting love.',
     culture: 'Bangalore\'s dating culture is heavily influenced by its tech-savvy, cosmopolitan population. Singles here often look for partners who share their professional ambitions as well as their love for weekend getaways and craft breweries.',
     dateIdeas: [
       'A morning walk at Lalbagh Botanical Garden.',
@@ -55,8 +55,8 @@ const CityPage = () => {
 
   const data = CITY_DATA[cityKey] || {
     name: cityKey.charAt(0).toUpperCase() + cityKey.slice(1),
-    title: `Dating in ${cityKey.charAt(0).toUpperCase() + cityKey.slice(1)} | Elovia Love`,
-    description: `Join Elovia Love to find serious relationships and verified profiles in ${cityKey}.`,
+    title: `Dating in ${cityKey.charAt(0).toUpperCase() + cityKey.slice(1)} | Excelora Classes`,
+    description: `Join Excelora Classes to find serious relationships and verified profiles in ${cityKey}.`,
     culture: `The dating scene in ${cityKey} is growing rapidly, with more singles looking for meaningful connections over casual encounters.`,
     dateIdeas: ['Visit a local park', 'Go for a coffee date', 'Explore a local museum']
   };
@@ -66,7 +66,7 @@ const CityPage = () => {
       <Helmet>
         <title>{data.title}</title>
         <meta name="description" content={data.description} />
-        <link rel="canonical" href={`https://elovialove.onrender.com/dating-in-${cityKey}`} />
+        <link rel="canonical" href={`https://exceloraclasses.com/dating-in-${cityKey}`} />
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">
@@ -150,7 +150,7 @@ const CityPage = () => {
         <section className="py-20 bg-slate-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Top First Date Ideas in {data.name}</h2>
-            <p className="text-lg text-slate-600">Safe, fun, and romantic spots for your first Elovia Love date.</p>
+            <p className="text-lg text-slate-600">Safe, fun, and romantic spots for your first Excelora Classes date.</p>
           </div>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             {data.dateIdeas.map((idea, idx) => (

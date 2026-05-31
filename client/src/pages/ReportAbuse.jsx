@@ -8,7 +8,7 @@ const ReportAbuse = () => {
   return (
     <>
       <Helmet>
-        <title>Report Abuse & Safety Concerns | Elovia Love</title>
+        <title>Report Abuse & Safety Concerns | Excelora Classes</title>
         <meta name="description" content="Report any suspicious behavior, harassment, or fake profiles. Our 24/7 moderation team is here to ensure a safe dating experience for everyone." />
       </Helmet>
 
@@ -25,7 +25,7 @@ const ReportAbuse = () => {
             </motion.div>
             <h1 className="text-4xl font-extrabold text-slate-900 mb-6">Report a Safety Concern</h1>
             <p className="text-xl text-slate-600 leading-relaxed">
-              We have a zero-tolerance policy for harassment, fake profiles, and scams. Your reports help us keep Elovia Love safe for everyone.
+              We have a zero-tolerance policy for harassment, fake profiles, and scams. Your reports help us keep Excelora Classes safe for everyone.
             </p>
           </div>
         </section>
@@ -50,7 +50,7 @@ const ReportAbuse = () => {
                   </div>
                   <div>
                     <h4 className="font-bold mb-1">Email Our Team</h4>
-                    <p className="text-slate-600 text-sm">Send an email to safety@elovialove.onrender.com with details and screenshots.</p>
+                    <p className="text-slate-600 text-sm">Send an email to safety@exceloraclasses.com with details and screenshots.</p>
                   </div>
                 </div>
               </div>

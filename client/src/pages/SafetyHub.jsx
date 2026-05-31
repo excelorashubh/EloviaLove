@@ -43,7 +43,7 @@ const SafetyHub = () => {
   const safetyTips = [
     {
       title: "Stay on the Platform",
-      text: "Keep your conversations within Elovia Love until you've met in person and built trust. Our secure messaging protects your identity."
+      text: "Keep your conversations within Excelora Classes until you've met in person and built trust. Our secure messaging protects your identity."
     },
     {
       title: "Protect Personal Info",
@@ -62,9 +62,9 @@ const SafetyHub = () => {
   return (
     <>
       <Helmet>
-        <title>Trust & Safety Center | Elovia Love India</title>
-        <meta name="description" content="Your safety is our #1 priority. Explore Elovia Love's comprehensive safety features, verification guides, and expert advice for secure online dating in India." />
-        <link rel="canonical" href="https://elovialove.onrender.com/safety" />
+        <title>Trust & Safety Center | Excelora Classes India</title>
+        <meta name="description" content="Your safety is our #1 priority. Explore Excelora Classes's comprehensive safety features, verification guides, and expert advice for secure online dating in India." />
+        <link rel="canonical" href="https://exceloraclasses.com/safety" />
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">
@@ -94,7 +94,7 @@ const SafetyHub = () => {
               transition={{ delay: 0.2 }}
               className="text-xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed"
             >
-              At Elovia Love, we are dedicated to creating the safest dating environment in India. Through advanced technology and human oversight, we ensure your journey to finding love is secure.
+              At Excelora Classes, we are dedicated to creating the safest dating environment in India. Through advanced technology and human oversight, we ensure your journey to finding love is secure.
             </motion.p>
           </div>
         </section>
@@ -160,7 +160,7 @@ const SafetyHub = () => {
             <UserCheck className="w-16 h-16 mx-auto mb-8 opacity-80" />
             <h2 className="text-3xl md:text-5xl font-bold mb-8">100% Verified Community</h2>
             <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto">
-              Every profile on Elovia Love undergoes a rigorous verification process. Look for the blue checkmark to ensure you're connecting with genuine people.
+              Every profile on Excelora Classes undergoes a rigorous verification process. Look for the blue checkmark to ensure you're connecting with genuine people.
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
               <Link to="/how-verification-works" className="px-10 py-5 bg-white text-primary-600 rounded-full font-bold text-lg hover:shadow-2xl transition-all">How it Works</Link>
@@ -185,7 +185,7 @@ const SafetyHub = () => {
               <div className="p-6 border border-slate-200 rounded-3xl">
                 <PhoneCall className="w-8 h-8 text-slate-400 mx-auto mb-4" />
                 <h4 className="font-bold mb-2">Contact Support</h4>
-                <p className="text-sm text-slate-500">Email us at safety@elovialove.onrender.com</p>
+                <p className="text-sm text-slate-500">Email us at safety@exceloraclasses.com</p>
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-# 🚀 Elovia Love - Deployment Documentation
+# 🚀 Excelora Classes - Deployment Documentation
 
 ## 📋 Quick Navigation
 
@@ -58,10 +58,10 @@ cd server && npm start
 
 ### 3. Deploy & Verify
 
-✅ https://elovialove.onrender.com/ (homepage)
-✅ https://elovialove.onrender.com/api/blog?limit=1 (API)
-✅ https://elovialove.onrender.com/sitemap.xml (sitemap)
-✅ https://elovialove.onrender.com/robots.txt (robots)
+✅ https://exceloraclasses.com/ (homepage)
+✅ https://exceloraclasses.com/api/blog?limit=1 (API)
+✅ https://exceloraclasses.com/sitemap.xml (sitemap)
+✅ https://exceloraclasses.com/robots.txt (robots)
 
 ---
 

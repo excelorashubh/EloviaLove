@@ -92,7 +92,7 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
           key:         data.keyId,
           amount:      data.amount,
           currency:    data.currency,
-          name:        'EloviaLove',
+          name:        'ExceloraClasses',
           description: data.addonName,
           order_id:    data.orderId,
           prefill:     { name: user?.name || '', email: user?.email || '' },
@@ -109,7 +109,7 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
         const options = {
           key:             data.keyId,
           subscription_id: data.subscriptionId,
-          name:            'EloviaLove',
+          name:            'ExceloraClasses',
           description:     `${data.planName} Plan — Auto-renews monthly`,
           prefill:         { name: user?.name || '', email: user?.email || '' },
           theme:           { color: '#c026d3' },
@@ -316,9 +316,9 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50 pb-16">
       <Helmet>
-        <title>Elovia Love Pricing — Verified Dating Plans for Serious Singles</title>
-        <meta name="description" content="Compare Elovia Love plans and choose the subscription that helps you meet verified singles and build meaningful relationships." />
-        <link rel="canonical" href="https://elovialove.onrender.com/pricing" />
+        <title>Excelora Classes Pricing — Verified Dating Plans for Serious Singles</title>
+        <meta name="description" content="Compare Excelora Classes plans and choose the subscription that helps you meet verified singles and build meaningful relationships." />
+        <link rel="canonical" href="https://exceloraclasses.com/pricing" />
       </Helmet>
       <div className="max-w-5xl mx-auto px-4 pt-8 pb-4">
 

@@ -123,9 +123,9 @@ const Verify = () => {
   return (
     <>
       <Helmet>
-        <title>Verify Your Account — Elovia Love</title>
-        <meta name="description" content="Complete account verification to increase trust and match success on Elovia Love." />
-        <link rel="canonical" href="https://elovialove.onrender.com/verify" />
+        <title>Verify Your Account — Excelora Classes</title>
+        <meta name="description" content="Complete account verification to increase trust and match success on Excelora Classes." />
+        <link rel="canonical" href="https://exceloraclasses.com/verify" />
       </Helmet>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50 pb-16">
         <div className="max-w-lg mx-auto px-4 pt-8">

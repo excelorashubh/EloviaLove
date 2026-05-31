@@ -10,7 +10,12 @@ import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
 import Login from './pages/Login';
-import Register from './pages/Signup';
+import Signup from './pages/Signup';
+import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
+import ProfileEdit from './pages/ProfileEdit';
+import Settings from './pages/Settings';
+import SalesmanSection from './pages/salesman/SalesmanSection';
 import FAQ from './pages/FAQ';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
@@ -53,10 +58,13 @@ function AppContent() {
           <Route path="/discover" element={<Discover />} />
           
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/register" element={<Navigate to="/signup" replace />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
 
           {/* Protected */}
           <Route
@@ -64,6 +72,134 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/home"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/edit"
+            element={
+              <ProtectedRoute>
+                <ProfileEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Notifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="home" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman/home"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="home" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman/leads"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="leads" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman/follow-ups"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="follow-ups" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman/admissions"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="admissions" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman/students"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="students" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman/reports"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="reports" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman/notifications"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="notifications" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman/chat"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="chat" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman/profile"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="profile" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/salesman/settings"
+            element={
+              <ProtectedRoute>
+                <SalesmanSection section="settings" />
               </ProtectedRoute>
             }
           />

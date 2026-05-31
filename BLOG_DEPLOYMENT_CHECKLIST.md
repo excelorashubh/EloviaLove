@@ -99,7 +99,7 @@ git push origin main
 
 ### Step 3: Monitor Render Deployment
 1. Go to https://dashboard.render.com
-2. Find your Elovia Love service
+2. Find your Excelora Classes service
 3. Watch deployment logs
 4. Wait for "Deploy succeeded" message
 
@@ -115,14 +115,14 @@ git push origin main
 - [ ] Service is "Live"
 
 ### 2. Test Production Blog Page
-- [ ] Visit https://elovialove.onrender.com/blog
+- [ ] Visit https://exceloraclasses.com/blog
 - [ ] Page loads (no white screen)
 - [ ] No JavaScript errors in console
 - [ ] Loading indicator appears
 - [ ] Either posts load OR "No posts found" message shows
 
 ### 3. Test Production Blog Post Page
-- [ ] Visit https://elovialove.onrender.com/blog/test-slug
+- [ ] Visit https://exceloraclasses.com/blog/test-slug
 - [ ] Shows 404 page (expected if no posts)
 - [ ] No Navbar errors
 - [ ] No crashes

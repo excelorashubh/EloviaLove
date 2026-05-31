@@ -35,25 +35,25 @@ const Home = () => {
       ]} />
       
       <Helmet>
-        <title>Elovia Love – India's Verified Dating App for Serious Relationships</title>
+        <title>Excelora Classes – India's Verified Dating App for Serious Relationships</title>
         <meta name="description" content="Find real love on India's most trusted dating platform. Verified profiles, AI-powered matching, and advanced safety features. Join 10,000+ singles finding serious relationships. Start free today." />
-        <link rel="canonical" href="https://elovialove.onrender.com/" />
+        <link rel="canonical" href="https://exceloraclasses.com/" />
         <link rel="preload" as="image" href="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1920&auto=format&fm=webp" fetchpriority="high" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Elovia Love – India's Verified Dating App for Serious Relationships" />
+        <meta property="og:title" content="Excelora Classes – India's Verified Dating App for Serious Relationships" />
         <meta property="og:description" content="Find real love on India's most trusted dating platform. Verified profiles, AI-powered matching, and advanced safety features." />
-        <meta property="og:url" content="https://elovialove.onrender.com/" />
-        <meta property="og:image" content="https://elovialove.onrender.com/EloviaLoveWB.png" />
-        <meta property="og:site_name" content="Elovia Love" />
+        <meta property="og:url" content="https://exceloraclasses.com/" />
+        <meta property="og:image" content="https://exceloraclasses.com/EloviaLoveWB.png" />
+        <meta property="og:site_name" content="Excelora Classes" />
         <meta property="og:locale" content="en_IN" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Elovia Love – India's Verified Dating App" />
+        <meta name="twitter:title" content="Excelora Classes – India's Verified Dating App" />
         <meta name="twitter:description" content="Find real love on India's most trusted dating platform. Verified profiles, AI-powered matching, and advanced safety features." />
-        <meta name="twitter:image" content="https://elovialove.onrender.com/EloviaLoveWB.png" />
+        <meta name="twitter:image" content="https://exceloraclasses.com/EloviaLoveWB.png" />
         
         {/* Keywords */}
         <meta name="keywords" content="online dating India, verified dating app, serious relationships India, safe dating platform, Indian dating site, dating app India, find life partner, meaningful connections, marriage minded singles" />
@@ -65,10 +65,10 @@ const Home = () => {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "Is Elovia Love for serious relationships?",
+                "name": "Is Excelora Classes for serious relationships?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes, Elovia Love is specifically designed for singles seeking serious, long-term relationships. Unlike casual dating apps, we focus on meaningful connections and compatibility matching to help you find a partner who shares your values and life goals."
+                  "text": "Yes, Excelora Classes is specifically designed for singles seeking serious, long-term relationships. Unlike casual dating apps, we focus on meaningful connections and compatibility matching to help you find a partner who shares your values and life goals."
                 }
               },
               {
@@ -76,12 +76,12 @@ const Home = () => {
                 "name": "How does profile verification work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Every profile on Elovia Love goes through a comprehensive verification process. Users must provide government-issued ID, complete a detailed questionnaire, and submit photos that are manually reviewed by our team. This ensures you're connecting with real people who are genuinely interested in relationships."
+                  "text": "Every profile on Excelora Classes goes through a comprehensive verification process. Users must provide government-issued ID, complete a detailed questionnaire, and submit photos that are manually reviewed by our team. This ensures you're connecting with real people who are genuinely interested in relationships."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Is Elovia Love safe for online dating?",
+                "name": "Is Excelora Classes safe for online dating?",
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "Safety is our top priority. We use bank-level encryption for all communications, provide advanced privacy controls, and offer safety tools like emergency contact sharing and location check-ins. Our verification process eliminates fake profiles, and we have a dedicated safety team that responds to reports within 24 hours."
@@ -97,7 +97,7 @@ const Home = () => {
               },
               {
                 "@type": "Question",
-                "name": "Is Elovia Love free to use?",
+                "name": "Is Excelora Classes free to use?",
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "You can create a profile and browse matches for free. Premium features like unlimited messaging, advanced filters, and priority matching are available through our subscription plans. We believe in quality over quantity, so even our free features are designed to help you find meaningful connections."
@@ -105,10 +105,10 @@ const Home = () => {
               },
               {
                 "@type": "Question",
-                "name": "What makes Elovia Love different from other dating apps?",
+                "name": "What makes Excelora Classes different from other dating apps?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Unlike casual dating apps focused on swiping and quick matches, Elovia Love is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for Indian singles who want long-term partnerships rather than casual encounters."
+                  "text": "Unlike casual dating apps focused on swiping and quick matches, Excelora Classes is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for Indian singles who want long-term partnerships rather than casual encounters."
                 }
               },
               {
@@ -121,7 +121,7 @@ const Home = () => {
               },
               {
                 "@type": "Question",
-                "name": "What safety features does Elovia Love offer?",
+                "name": "What safety features does Excelora Classes offer?",
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "We offer comprehensive safety features including emergency contact sharing, location check-ins, photo verification, encrypted messaging, and a 24/7 safety team. You can also block/report suspicious users, and all profiles are manually reviewed before approval."
@@ -129,7 +129,7 @@ const Home = () => {
               },
               {
                 "@type": "Question",
-                "name": "Can I use Elovia Love if I'm looking for marriage?",
+                "name": "Can I use Excelora Classes if I'm looking for marriage?",
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "Absolutely. Many of our users are marriage-minded singles. Our matching algorithm considers relationship goals, and you can specify 'marriage' as your objective in your profile. We help connect people who share similar long-term aspirations."
@@ -137,7 +137,7 @@ const Home = () => {
               },
               {
                 "@type": "Question",
-                "name": "How does Elovia Love handle cultural compatibility?",
+                "name": "How does Excelora Classes handle cultural compatibility?",
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "Our platform is designed with Indian cultural context in mind. We consider factors like family values, religious preferences, and cultural background in our matching algorithm. This helps create more compatible, lasting relationships within the Indian community."
@@ -260,7 +260,7 @@ const Home = () => {
             variants={fadeIn}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">How Elovia Love Works: Your Journey to Finding Love</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">How Excelora Classes Works: Your Journey to Finding Love</h2>
             <p className="text-lg text-slate-600 max-w-3xl mx-auto">
               Our verified dating platform is designed to help serious singles in India find meaningful relationships through a safe, structured process. From profile verification to AI-powered matching, every step is optimized for your success.
             </p>
@@ -323,9 +323,9 @@ const Home = () => {
             transition={{ delay: 0.4 }}
             className="mt-16 text-center"
           >
-            <h3 className="text-2xl font-bold text-slate-900 mb-4">Why Choose Elovia Love Over Other Dating Apps in India?</h3>
+            <h3 className="text-2xl font-bold text-slate-900 mb-4">Why Choose Excelora Classes Over Other Dating Apps in India?</h3>
             <p className="text-slate-600 max-w-4xl mx-auto leading-relaxed mb-8">
-              In a market flooded with casual dating apps, Elovia Love stands out as India's best dating app for serious relationships. We don't just connect people—we help build lasting partnerships through verified profiles and AI-powered matching. Our comprehensive verification process ensures every profile is real, our smart matching algorithm focuses on compatibility and shared values, and our community guidelines promote respectful, meaningful interactions. Unlike apps designed for quick matches and hookups, we create a safe dating platform where Indian singles can take their time to develop genuine connections and find their life partner.
+              In a market flooded with casual dating apps, Excelora Classes stands out as India's best dating app for serious relationships. We don't just connect people—we help build lasting partnerships through verified profiles and AI-powered matching. Our comprehensive verification process ensures every profile is real, our smart matching algorithm focuses on compatibility and shared values, and our community guidelines promote respectful, meaningful interactions. Unlike apps designed for quick matches and hookups, we create a safe dating platform where Indian singles can take their time to develop genuine connections and find their life partner.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               <div className="bg-white p-6 rounded-2xl border border-slate-200">
@@ -368,7 +368,7 @@ const Home = () => {
             variants={fadeIn}
             className="text-center max-w-3xl mx-auto mb-16"
           >
-            <h3 className="text-primary-600 font-semibold tracking-wide uppercase mb-3">Why Elovia Love?</h3>
+            <h3 className="text-primary-600 font-semibold tracking-wide uppercase mb-3">Why Excelora Classes?</h3>
             <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Built for meaningful connections</h3>
             <p className="text-lg text-slate-600">We've designed our platform from the ground up to foster real, authentic conversations rather than endless swiping.</p>
           </motion.div>
@@ -410,7 +410,7 @@ const Home = () => {
               >
                 <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">India's Safest Space to Find Real Love</h2>
                 <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                  We believe serious relationships are built on a foundation of trust. That's why Elovia Love is the first dating platform in India to prioritize manual verification and advanced safety tools over simple swiping.
+                  We believe serious relationships are built on a foundation of trust. That's why Excelora Classes is the first dating platform in India to prioritize manual verification and advanced safety tools over simple swiping.
                 </p>
                 
                 <div className="space-y-6 mb-10">
@@ -534,7 +534,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                text: "I had given up on dating apps until I found Elovia Love. The quality of matches and conversations here is unmatched. We are getting married next month!",
+                text: "I had given up on dating apps until I found Excelora Classes. The quality of matches and conversations here is unmatched. We are getting married next month!",
                 author: "Sarah & David",
                 image: "https://images.unsplash.com/photo-1522851259500-2eac44e7cde2?w=500&auto=format&fm=webp&fit=crop"
               },
@@ -595,21 +595,21 @@ const Home = () => {
             className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Frequently Asked Questions</h2>
-            <p className="text-lg text-slate-600">Everything you need to know about finding love on Elovia Love.</p>
+            <p className="text-lg text-slate-600">Everything you need to know about finding love on Excelora Classes.</p>
           </motion.div>
 
           <React.Suspense fallback={<div className="h-64 w-full bg-slate-100 animate-pulse rounded-xl" />}>
             <FAQAccordion faqs={[
               {
-                question: "Is Elovia Love for serious relationships?",
-                answer: "Yes, Elovia Love is specifically designed for singles seeking serious, long-term relationships. Unlike casual dating apps, we focus on meaningful connections and compatibility matching to help you find a partner who shares your values and life goals."
+                question: "Is Excelora Classes for serious relationships?",
+                answer: "Yes, Excelora Classes is specifically designed for singles seeking serious, long-term relationships. Unlike casual dating apps, we focus on meaningful connections and compatibility matching to help you find a partner who shares your values and life goals."
               },
               {
                 question: "How does profile verification work?",
-                answer: "Every profile on Elovia Love goes through a comprehensive verification process. Users must provide government-issued ID, complete a detailed questionnaire, and submit photos that are manually reviewed by our team. This ensures you're connecting with real people who are genuinely interested in relationships."
+                answer: "Every profile on Excelora Classes goes through a comprehensive verification process. Users must provide government-issued ID, complete a detailed questionnaire, and submit photos that are manually reviewed by our team. This ensures you're connecting with real people who are genuinely interested in relationships."
               },
               {
-                question: "Is Elovia Love safe for online dating?",
+                question: "Is Excelora Classes safe for online dating?",
                 answer: "Safety is our top priority. We use bank-level encryption for all communications, provide advanced privacy controls, and offer safety tools like emergency contact sharing and location check-ins. Our verification process eliminates fake profiles, and we have a dedicated safety team that responds to reports within 24 hours."
               },
               {
@@ -617,27 +617,27 @@ const Home = () => {
                 answer: "Our AI-powered matching system considers multiple factors including your personality traits, values, lifestyle preferences, cultural background, and relationship goals. We go beyond surface-level matching to ensure compatibility that leads to lasting relationships."
               },
               {
-                question: "Is Elovia Love free to use?",
+                question: "Is Excelora Classes free to use?",
                 answer: "You can create a profile and browse matches for free. Premium features like unlimited messaging, advanced filters, and priority matching are available through our subscription plans. We believe in quality over quantity, so even our free features are designed to help you find meaningful connections."
               },
               {
-                question: "What makes Elovia Love different from other dating apps?",
-                answer: "Unlike casual dating apps focused on swiping and quick matches, Elovia Love is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for Indian singles who want long-term partnerships rather than casual encounters."
+                question: "What makes Excelora Classes different from other dating apps?",
+                answer: "Unlike casual dating apps focused on swiping and quick matches, Excelora Classes is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for Indian singles who want long-term partnerships rather than casual encounters."
               },
               {
                 question: "How do I know if someone is verified?",
                 answer: "Verified profiles display a blue checkmark badge next to their name. This badge indicates they've completed our verification process, including ID submission, photo review, and questionnaire completion. You can only match with verified users, ensuring authenticity."
               },
               {
-                question: "What safety features does Elovia Love offer?",
+                question: "What safety features does Excelora Classes offer?",
                 answer: "We offer comprehensive safety features including emergency contact sharing, location check-ins, photo verification, encrypted messaging, and a 24/7 safety team. You can also block/report suspicious users, and all profiles are manually reviewed before approval."
               },
               {
-                question: "Can I use Elovia Love if I'm looking for marriage?",
+                question: "Can I use Excelora Classes if I'm looking for marriage?",
                 answer: "Absolutely. Many of our users are marriage-minded singles. Our matching algorithm considers relationship goals, and you can specify 'marriage' as your objective in your profile. We help connect people who share similar long-term aspirations."
               },
               {
-                question: "How does Elovia Love handle cultural compatibility?",
+                question: "How does Excelora Classes handle cultural compatibility?",
                 answer: "Our platform is designed with Indian cultural context in mind. We consider factors like family values, religious preferences, and cultural background in our matching algorithm. This helps create more compatible, lasting relationships within the Indian community."
               }
             ]} />
@@ -652,7 +652,7 @@ const Home = () => {
           <p className="text-slate-600 mb-8">Read our expert insights and community discussions on trusted platforms.</p>
           <div className="flex flex-wrap justify-center gap-6">
             <a
-              href="https://medium.com/@elovialove"
+              href="https://medium.com/@exceloraclasses"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition-colors"
@@ -668,7 +668,7 @@ const Home = () => {
               <span className="text-slate-700 font-medium">Quora</span>
             </a>
             <a
-              href="https://www.reddit.com/r/elovialove/"
+              href="https://www.reddit.com/r/exceloraclasses/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition-colors"

@@ -82,8 +82,6 @@ app.use(helmet({
         "https://www.google-analytics.com",
         "https://analytics.google.com",
         "https://www.googletagmanager.com",
-        "https://elovialove.onrender.com",
-        "wss://elovialove.onrender.com",
         process.env.CLIENT_URL || "http://localhost:5173"
       ].filter(Boolean),
       frameSrc: [
@@ -156,7 +154,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 
 // ── Database Connection ───────────────────────────────────────────────────────
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/elovialove', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/exceloraclasses', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -364,13 +362,16 @@ process.on('unhandledRejection', (reason, promise) => {
 
 if (process.env.NODE_ENV === 'production') {
   const https = require('https');
-  setInterval(() => {
-    https.get('https://elovialove.onrender.com/api/blogs?limit=1', (res) => {
-      console.log(`[Keep-Alive] Ping status: ${res.statusCode}`);
-    }).on('error', (err) => {
-      console.error('[Keep-Alive] Ping failed:', err.message);
-    });
-  }, 14 * 60 * 1000); // Every 14 minutes
+  const keepAliveUrl = process.env.KEEP_ALIVE_URL || process.env.CLIENT_URL;
+  if (keepAliveUrl) {
+    setInterval(() => {
+      https.get(`${keepAliveUrl}/api/blogs?limit=1`, (res) => {
+        console.log(`[Keep-Alive] Ping status: ${res.statusCode}`);
+      }).on('error', (err) => {
+        console.error('[Keep-Alive] Ping failed:', err.message);
+      });
+    }, 14 * 60 * 1000); // Every 14 minutes
+  }
 }
 
 module.exports = { app, server, io };
