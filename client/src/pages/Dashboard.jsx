@@ -2,11 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Heart, Settings, Bell, Sparkles, MessageCircle, Check, Crown, Zap, Star, Clock } from 'lucide-react';
+import { Heart, Settings, Sparkles, MessageCircle, Check, Crown, Zap, Star, Clock } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import BackButton from '../components/BackButton';
 import SubscriptionBanner from '../components/SubscriptionBanner';
 import BannerAd from '../components/ads/BannerAd';
 import AdWrapper from '../components/ads/AdWrapper';
@@ -155,7 +154,6 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [subStatus, setSubStatus] = useState(null);
   const socketRef = useRef(null);
@@ -171,7 +169,6 @@ const Dashboard = () => {
         if (convRes.data.success) setConversations(convRes.data.conversations.slice(0, 5));
         if (notifRes.data.success) {
           setNotifications(notifRes.data.notifications.slice(0, 3));
-          setUnreadCount(notifRes.data.unreadCount);
         }
         setSubStatus(subRes.data);
       } catch (e) {
@@ -192,7 +189,6 @@ const Dashboard = () => {
     });
     socketRef.current.on('notification', (notif) => {
       setNotifications(prev => [notif, ...prev].slice(0, 3));
-      setUnreadCount(prev => prev + 1);
     });
     return () => socketRef.current?.disconnect();
   }, [user?._id]);
@@ -217,38 +213,6 @@ const Dashboard = () => {
         <link rel="canonical" href="https://elovialove.onrender.com/dashboard" />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center gap-3">
-              <BackButton to="/" />
-              <Link to="/" className="flex items-center gap-2">
-              <div className="bg-gradient-to-tr from-primary-600 to-pink-500 text-white p-2 rounded-xl">
-                <Heart size={22} fill="currentColor" />
-              </div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-pink-600">
-                Elovia Love
-              </span>
-            </Link>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link to="/notifications" aria-label="View notifications" className="relative p-2 text-slate-500 hover:text-primary-600 transition-colors">
-                <Bell size={20} aria-hidden="true" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Link>
-              <Link to="/profile" aria-label="View your profile">
-                <img src={avatarSrc} alt={`${user?.name || 'Your'} profile`} className="w-8 h-8 rounded-full object-cover ring-2 ring-primary-100" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 

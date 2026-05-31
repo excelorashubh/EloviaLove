@@ -36,20 +36,7 @@ import CookieConsent from './components/CookieConsent';
 
 function AppContent() {
   const location = useLocation();
-  const hideGlobalNavbar = (
-    location.pathname.startsWith('/admin') ||
-    location.pathname === '/login' ||
-    location.pathname === '/register' ||
-    location.pathname === '/dashboard' ||
-    location.pathname.startsWith('/dashboard') ||
-    location.pathname.startsWith('/profile') ||
-    location.pathname.startsWith('/discover') ||
-    location.pathname.startsWith('/matches') ||
-    location.pathname.startsWith('/chats') ||
-    location.pathname.startsWith('/chat') ||
-    location.pathname.startsWith('/notifications') ||
-    location.pathname.startsWith('/settings')
-  );
+  const hideGlobalNavbar = location.pathname.startsWith('/admin') || location.pathname === '/login' || location.pathname === '/register';
 
   return (
     <>
