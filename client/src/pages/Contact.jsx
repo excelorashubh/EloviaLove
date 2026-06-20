@@ -1,7 +1,8 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
+import ContactForm from '../components/contact/ContactForm';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
@@ -93,55 +94,7 @@ const Contact = () => {
           >
             <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100">
               <h3 className="text-2xl font-bold text-slate-900 mb-6">Send us a Message</h3>
-              <form className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label htmlFor="name" className="text-sm font-medium text-slate-700">Full Name</label>
-                    <input 
-                      type="text" 
-                      id="name"
-                      placeholder="John Doe"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium text-slate-700">Email Address</label>
-                    <input 
-                      type="email" 
-                      id="email"
-                      placeholder="john@example.com"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="subject" className="text-sm font-medium text-slate-700">Subject</label>
-                  <input 
-                    type="text" 
-                    id="subject"
-                    placeholder="How can we help?"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="message" className="text-sm font-medium text-slate-700">Message</label>
-                  <textarea 
-                    id="message"
-                    rows="5"
-                    placeholder="Tell us more about your inquiry..."
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white resize-none"
-                  ></textarea>
-                </div>
-
-                <button 
-                  type="button"
-                  className="w-full py-4 px-6 bg-linear-to-r from-primary-600 to-pink-500 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
-                >
-                  Send Message <Send size={20} />
-                </button>
-              </form>
+              <ContactForm />
             </div>
           </motion.div>
         </div>

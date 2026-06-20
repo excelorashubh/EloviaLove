@@ -195,6 +195,7 @@ app.use('/api/subscription', require('./routes/subscription'));
 app.use('/api/verify', require('./routes/verify'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/blogs', require('./routes/blog'));
+app.use('/api/contact', require('./routes/contact'));
 app.use('/api/seo', seoModule.router);
 
 // ══════════════════════════════════════════════════════════════════════════════
