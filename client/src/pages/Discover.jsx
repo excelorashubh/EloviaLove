@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import {
   Heart, X, MapPin, SlidersHorizontal, Zap, RotateCcw,
-  Lock, Crown, Sparkles, ChevronRight, Users, CheckCircle2,
+  Lock, Crown, Sparkles, ChevronRight, CheckCircle2,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
@@ -526,6 +526,7 @@ const Discover = () => {
   const { user } = useAuth();
   const userPlan = user?.plan || 'free';
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -544,6 +545,10 @@ const Discover = () => {
   const [filters, setFilters] = useState({
     // free
     gender: '', ageMin: '', ageMax: '', location: '',
+    // desktop filter enhancements
+    distance: 25,
+    sortBy: 'recommended',
+    languages: [],
     // basic
     onlineOnly: false,
     // premium
@@ -726,6 +731,26 @@ const Discover = () => {
     } catch (e) { console.error(e); }
   };
 
+  const activeFilterCount = [
+    filters.gender,
+    filters.ageMin,
+    filters.ageMax,
+    filters.location,
+    filters.onlineOnly,
+    filters.interests?.length,
+    filters.education,
+    filters.profession,
+    filters.relationshipGoals,
+    filters.lifestyle?.smoking,
+    filters.lifestyle?.drinking,
+    filters.heightMin,
+    filters.heightMax,
+    filters.income,
+    filters.religion,
+    filters.isVerified,
+    filters.recentlyActive,
+  ].filter(Boolean).length;
+
   const handleReport = async (targetId) => {
     try {
       const reason = window.prompt('Report reason (brief):');
@@ -774,9 +799,16 @@ const Discover = () => {
 
       {/* Page layout: sidebar + main */}
       <div className="max-w-7xl mx-auto px-4 lg:flex lg:items-start lg:gap-8">
-        <FilterSidebar className="lg:shrink-0">
-          {/* Optionally, keep default placeholders or pass compact controls here */}
-        </FilterSidebar>
+        <FilterSidebar
+          className="lg:shrink-0"
+          filters={filters}
+          onChange={handleFilterChange}
+          onApply={loadFiltered}
+          onReset={() => handleFilterChange('reset')}
+          userPlan={userPlan}
+          activeCount={activeFilterCount}
+          onUpgradeClick={() => navigate('/pricing')}
+        />
 
         {/* Main column */}
         <div className="flex-1">
@@ -1001,7 +1033,7 @@ const Discover = () => {
       </div>
 
         {/* Browse grid view toggle and grid */}
-        <div className="max-w-7xl mx-auto px-4 mt-8">
+        <div id="discover-grid" className="max-w-7xl mx-auto px-4 mt-8">
           <div className="flex items-center justify-between mb-4 max-w-3xl mx-auto">
             <div className="flex items-center gap-3">
               <button onClick={() => setViewMode('stack')} className={`px-3 py-2 rounded-xl ${viewMode === 'stack' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>Stack</button>
@@ -1074,6 +1106,7 @@ const Discover = () => {
         onPass={() => swipe('pass')}
         onLike={() => swipe('like')}
         onSuperLike={() => swipe('super')}
+        onFilters={() => setShowFilter(true)}
       />
     </div>
   );
