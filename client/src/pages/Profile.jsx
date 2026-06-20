@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Edit, MapPin, Heart, Calendar, Camera, Check, X, BadgeCheck, ShieldCheck, Phone, Mail } from 'lucide-react';
+import { Edit, MapPin, Heart, Calendar, Camera, Check, X, ShieldCheck, Phone, Mail } from 'lucide-react';
+import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
@@ -166,7 +167,7 @@ const Profile = () => {
                 />
                 {user?.isVerified && (
                   <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-500 rounded-full border-4 border-white flex items-center justify-center" title="Verified">
-                    <BadgeCheck size={14} className="text-white" />
+                    <VerifiedBadge size={14} className="text-white" />
                   </div>
                 )}
                 <label className="absolute bottom-0 left-0 w-8 h-8 bg-primary-600 rounded-full border-4 border-white flex items-center justify-center cursor-pointer hover:bg-primary-700 transition-colors">
@@ -189,7 +190,7 @@ const Profile = () => {
                     <h2 className="text-3xl font-bold text-slate-900">{user?.name}</h2>
                     {age && <span className="text-xl text-slate-500">{age}</span>}
                     {user?.isVerified && (
-                      <BadgeCheck size={22} className="text-blue-500" title="Verified" />
+                      <VerifiedBadge size={22} />
                     )}
                   </div>
                 )}
@@ -397,10 +398,10 @@ const Profile = () => {
               {/* Blue tick row */}
               <div className="flex justify-between items-center py-3">
                 <div className="flex items-center gap-1.5 text-slate-500 text-sm">
-                  <BadgeCheck size={13} /> Blue Tick
+                  <VerifiedBadge size={13} /> Blue Tick
                 </div>
                 {user?.isVerified
-                  ? <span className="flex items-center gap-1 text-blue-600 text-sm font-medium"><BadgeCheck size={13} /> Verified</span>
+                  ? <span className="flex items-center gap-1 text-blue-600 text-sm font-medium"><VerifiedBadge size={13} /> Verified</span>
                   : user?.blueTickStatus === 'pending'
                     ? <span className="text-xs text-amber-600 font-semibold">Under Review</span>
                     : <Link to="/verify?tab=bluetick" className="text-xs text-primary-600 font-semibold hover:underline">Get Verified →</Link>

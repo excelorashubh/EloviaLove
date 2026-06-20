@@ -224,6 +224,12 @@ router.post('/grant/:userId', protect, async (req, res) => {
           ? 'An admin has granted you a verified blue tick badge!'
           : 'Your blue tick verification has been revoked by an admin.',
       });
+      // Broadcast profile update so clients can refresh UI immediately
+      io.emit('profile_updated', {
+        userId: req.params.userId,
+        isVerified: !!grant,
+        blueTickStatus: grant ? 'approved' : 'none',
+      });
     }
 
     res.json({ success: true, message: grant ? 'Blue tick granted' : 'Blue tick revoked' });

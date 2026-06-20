@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { MessageCircle, Heart, Search } from 'lucide-react';
 import api from '../services/api';
+import VerifiedBadge from '../components/ui/VerifiedBadge';
 
 const formatTime = (ts) => {
   if (!ts) return '';
@@ -32,6 +33,18 @@ const Matches = () => {
       }
     };
     load();
+  }, []);
+
+  // Refresh matches when a profile update occurs
+  useEffect(() => {
+    const handler = async (e) => {
+      try {
+        const res = await api.get('/messages');
+        if (res.data.success) setConversations(res.data.conversations);
+      } catch (err) { console.error('Refresh matches error', err); }
+    };
+    window.addEventListener('profile_updated', handler);
+    return () => window.removeEventListener('profile_updated', handler);
   }, []);
 
   const filtered = useMemo(() => {
@@ -106,7 +119,10 @@ const Matches = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="font-semibold text-slate-900 text-sm">{conv.otherUser.name}</span>
+                      <span className="font-semibold text-slate-900 text-sm flex items-center gap-1">
+                        {conv.otherUser.name}
+                        {conv.otherUser.isVerified && <VerifiedBadge size={14} />}
+                      </span>
                       <span className="text-xs text-slate-400 shrink-0 ml-2">
                         {formatTime(conv.lastMessage?.createdAt)}
                       </span>

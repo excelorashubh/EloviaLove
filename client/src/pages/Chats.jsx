@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { Search, MessageCircle, Check, CheckCheck, Sparkles, X } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+import VerifiedBadge from '../components/ui/VerifiedBadge';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
 
@@ -53,6 +54,21 @@ const Chats = () => {
       }
     };
     load();
+  }, []);
+
+  // Refresh conversations when a profile update occurs
+  useEffect(() => {
+    const handler = async (e) => {
+      try {
+        const res = await api.get('/messages');
+        if (res.data.success) {
+          const withMessages = (res.data.conversations || []).filter(c => c.lastMessage);
+          setConversations(withMessages);
+        }
+      } catch (err) { console.error('Refresh chats error', err); }
+    };
+    window.addEventListener('profile_updated', handler);
+    return () => window.removeEventListener('profile_updated', handler);
   }, []);
 
   // ── Socket: update list in-place without refetch ────────────────────────────
@@ -298,8 +314,9 @@ const Chats = () => {
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-0.5">
-                          <span className={`text-sm truncate ${isUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
+                          <span className={`text-sm truncate ${isUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'} flex items-center gap-1`}>
                             {conv.otherUser.name}
+                            {conv.otherUser.isVerified && <VerifiedBadge size={14} />}
                           </span>
                           <span className={`text-[11px] shrink-0 ml-2 ${isUnread ? 'text-primary-500 font-semibold' : 'text-slate-400'}`}>
                             {formatTime(conv.lastMessage?.createdAt)}

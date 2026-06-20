@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Search, UserCheck, UserX, Trash2, ShieldCheck, ChevronLeft, ChevronRight, BadgeCheck, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Search, UserCheck, UserX, Trash2, ShieldCheck, ChevronLeft, ChevronRight, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import VerifiedBadge from '../../components/ui/VerifiedBadge';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../services/api';
 
@@ -58,7 +59,7 @@ const BlueTickRequests = () => {
 
         {requests.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-center px-4">
-            <BadgeCheck size={36} className="text-slate-200 mb-3" />
+            <VerifiedBadge size={36} className="text-slate-200 mb-3" />
             <p className="text-slate-500 font-medium">No pending requests</p>
             <p className="text-slate-400 text-sm mt-1">All blue tick requests have been reviewed</p>
           </div>
@@ -293,7 +294,7 @@ const AdminUsers = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-slate-100 p-1 rounded-2xl w-fit">
+          <div className="flex gap-1 bg-slate-100 p-1 rounded-2xl w-fit">
           <button
             onClick={() => setTab('users')}
             className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${tab === 'users' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
@@ -304,7 +305,7 @@ const AdminUsers = () => {
             onClick={() => setTab('bluetick')}
             className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-1.5 ${tab === 'bluetick' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
           >
-            <BadgeCheck size={14} className="text-blue-500" />
+              <VerifiedBadge size={14} className="text-blue-500" />
             Blue Tick Requests
             {pendingCount > 0 && (
               <span className="bg-amber-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
@@ -409,7 +410,7 @@ const AdminUsers = () => {
                                         : 'text-slate-400 hover:text-blue-500 hover:bg-blue-50'
                                     }`}
                                   >
-                                    <BadgeCheck size={15} />
+                                      <VerifiedBadge size={15} />
                                   </button>
                                   <button
                                     onClick={() => toggleStatus(u._id, u.isActive)}
@@ -524,7 +525,7 @@ const AdminUsers = () => {
                         : 'bg-blue-500 text-white hover:bg-blue-600'
                     }`}
                   >
-                    <BadgeCheck size={15} />
+                      <VerifiedBadge size={15} />
                     {selectedUser.isVerified ? 'Revoke Blue Tick' : 'Grant Blue Tick'}
                   </button>
 

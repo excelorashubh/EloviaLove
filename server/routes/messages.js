@@ -170,7 +170,7 @@ router.get('/', protect, async (req, res) => {
     // Get all matches for the user
     const matches = await Match.find({
       users: req.user._id
-    }).populate('users', 'name profilePhoto lastActive isActive');
+    }).populate('users', 'name profilePhoto lastActive isActive isVerified');
 
     const conversations = [];
 

@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import api from '../services/api';
+import { io } from 'socket.io-client';
 
 const AuthContext = createContext();
 
@@ -25,6 +26,35 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   }, [token, isBrowser]);
+
+  // Socket for global realtime events (profile updates)
+  const socketRef = useRef(null);
+  useEffect(() => {
+    const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    if (!socketRef.current && token) {
+      socketRef.current = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+      socketRef.current.on('connect', () => {
+        // join personal room when authenticated
+        if (user?._id) socketRef.current.emit('join', user._id);
+      });
+      socketRef.current.on('profile_updated', (payload) => {
+        // Broadcast a window event so pages can reactively refresh or update lists
+        try {
+          window.dispatchEvent(new CustomEvent('profile_updated', { detail: payload }));
+        } catch (e) {
+          // ignore
+        }
+        // If the updated profile is the current user, reload user data
+        if (user?._id && payload?.userId === user._id) {
+          loadUser();
+        }
+      });
+    }
+    return () => {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+    };
+  }, [token, user?._id]);
 
   const loadUser = async () => {
     try {

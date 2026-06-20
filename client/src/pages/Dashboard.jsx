@@ -6,6 +6,7 @@ import { Heart, Settings, Sparkles, MessageCircle, Check, Crown, Zap, Star, Cloc
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import VerifiedBadge from '../components/ui/VerifiedBadge';
 import SubscriptionBanner from '../components/SubscriptionBanner';
 import BannerAd from '../components/ads/BannerAd';
 import AdWrapper from '../components/ads/AdWrapper';
@@ -180,6 +181,22 @@ const Dashboard = () => {
     load();
   }, []);
 
+  // Refresh lists on profile updates
+  useEffect(() => {
+    const handler = async (e) => {
+      try {
+        const [convRes, notifRes] = await Promise.all([
+          api.get('/messages'),
+          api.get('/notifications'),
+        ]);
+        if (convRes.data.success) setConversations(convRes.data.conversations.slice(0, 5));
+        if (notifRes.data.success) setNotifications(notifRes.data.notifications.slice(0, 3));
+      } catch (err) { console.error(err); }
+    };
+    window.addEventListener('profile_updated', handler);
+    return () => window.removeEventListener('profile_updated', handler);
+  }, []);
+
   // Real-time notifications via socket
   useEffect(() => {
     if (!user?._id) return;
@@ -339,7 +356,10 @@ const Dashboard = () => {
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <span className="font-semibold text-slate-900 text-sm">{conv.otherUser.name}</span>
+                            <span className="font-semibold text-slate-900 text-sm flex items-center gap-1">
+                              {conv.otherUser.name}
+                              {conv.otherUser.isVerified && <VerifiedBadge size={14} />}
+                            </span>
                             <span className="text-xs text-slate-400">{formatTime(conv.lastMessage?.createdAt)}</span>
                           </div>
                           <p className={`text-sm truncate mt-0.5 ${conv.unreadCount > 0 ? 'text-slate-900 font-medium' : 'text-slate-500'}`}>

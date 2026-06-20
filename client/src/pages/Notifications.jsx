@@ -49,6 +49,18 @@ const Notifications = () => {
     load();
   }, []);
 
+  // Refresh notifications on profile updates
+  useEffect(() => {
+    const handler = async (e) => {
+      try {
+        const res = await api.get('/notifications');
+        if (res.data.success) setNotifications(res.data.notifications);
+      } catch (err) { console.error('Refresh notifications error', err); }
+    };
+    window.addEventListener('profile_updated', handler);
+    return () => window.removeEventListener('profile_updated', handler);
+  }, []);
+
   const markAsRead = async (id) => {
     try {
       await api.put(`/notifications/${id}/read`);

@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import {
-  Heart, X, MapPin, SlidersHorizontal, Zap, RotateCcw, BadgeCheck,
+  Heart, X, MapPin, SlidersHorizontal, Zap, RotateCcw,
   Lock, Crown, Sparkles, ChevronRight, Users, CheckCircle2,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
@@ -459,7 +460,7 @@ const SwipeCard = React.memo(({ user, onLike, onPass, isTop }) => {
             <h2 className="text-2xl font-bold">{user.name}</h2>
             {user.age && <span className="text-xl font-light mb-0.5">{user.age}</span>}
             {user.isVerified && (
-              <span className="mb-1" title="Verified"><BadgeCheck size={18} className="text-blue-400" /></span>
+              <span className="mb-1" title="Verified"><VerifiedBadge size={18} className="text-blue-400" /></span>
             )}
             {user.likedYou && (
               <span className="mb-0.5 px-2 py-0.5 bg-pink-500/90 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
@@ -582,6 +583,23 @@ const Discover = () => {
   }, [filters]);
 
   useEffect(() => { loadRandom(); }, [loadRandom]);
+
+  // Listen for profile updates (e.g., admin granted blue tick) and refresh lists
+  useEffect(() => {
+    const handler = (e) => {
+      const payload = e.detail;
+      // Refresh appropriate data depending on current view
+      if (tab === 'liked-you') {
+        loadLikedYou();
+      } else if (mode === 'filter') {
+        loadFiltered();
+      } else {
+        loadRandom();
+      }
+    };
+    window.addEventListener('profile_updated', handler);
+    return () => window.removeEventListener('profile_updated', handler);
+  }, [tab, mode, loadRandom, loadFiltered, loadLikedYou]);
 
   useEffect(() => {
     if (tab === 'liked-you') loadLikedYou();

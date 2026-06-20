@@ -452,7 +452,8 @@ router.get('/:userId', protect, async (req, res) => {
         photos: user.photos,
         age: user.age,
         gender: user.gender,
-        lastActive: user.lastActive
+        lastActive: user.lastActive,
+        isVerified: user.isVerified
       }
     });
   } catch (error) {
