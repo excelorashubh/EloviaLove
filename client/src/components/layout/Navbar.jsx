@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Menu, X } from 'lucide-react';
@@ -9,8 +9,26 @@ import VerifiedBadge from '../ui/VerifiedBadge';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const location = useLocation();
   const { isAuthenticated, logout, user } = useAuth();
+  const profileMenuContainerRef = useRef(null);
+  const profileToggleButtonRef = useRef(null);
+
+  const closeProfileMenu = () => {
+    setIsProfileMenuOpen(false);
+    profileToggleButtonRef.current?.focus();
+  };
+
+  const toggleProfileMenu = () => {
+    setIsProfileMenuOpen((prev) => !prev);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    setIsProfileMenuOpen(false);
+    logout();
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,7 +40,36 @@ const Navbar = () => {
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsProfileMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (
+        profileMenuContainerRef.current &&
+        !profileMenuContainerRef.current.contains(event.target) &&
+        !profileToggleButtonRef.current?.contains(event.target)
+      ) {
+        closeProfileMenu();
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        closeProfileMenu();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isProfileMenuOpen]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -72,11 +119,14 @@ const Navbar = () => {
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-4 relative">
             {isAuthenticated ? (
-              <div className="relative">
+              <div className="relative" ref={profileMenuContainerRef}>
                 <button
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  ref={profileToggleButtonRef}
+                  type="button"
+                  aria-haspopup="menu"
+                  aria-expanded={isProfileMenuOpen}
+                  onClick={toggleProfileMenu}
                   className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors"
-                  onMouseDown={e => e.preventDefault()}
                 >
                   <img src={user?.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=e879a0&color=fff`} alt={user?.name}
                     className="w-9 h-9 rounded-full object-cover" />
@@ -88,15 +138,27 @@ const Navbar = () => {
                     <span className="text-xs text-slate-500">{user?.username || ''}</span>
                   </div>
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50">
-                  <Link to="/profile" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">My Profile</Link>
-                  <Link to="/dashboard" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</Link>
-                  <Link to="/discover" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Discover</Link>
-                  <Link to="/matches" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Matches</Link>
-                  <Link to="/chats" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Chats</Link>
-                  <Link to="/settings" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Settings</Link>
-                  <button onClick={logout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-50">Logout</button>
-                </div>
+                <AnimatePresence>
+                  {isProfileMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -8 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50"
+                      role="menu"
+                      aria-label="Profile menu"
+                    >
+                      <Link to="/profile" onClick={() => setIsProfileMenuOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" role="menuitem">My Profile</Link>
+                      <Link to="/dashboard" onClick={() => setIsProfileMenuOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" role="menuitem">Dashboard</Link>
+                      <Link to="/discover" onClick={() => setIsProfileMenuOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" role="menuitem">Discover</Link>
+                      <Link to="/matches" onClick={() => setIsProfileMenuOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" role="menuitem">Matches</Link>
+                      <Link to="/chats" onClick={() => setIsProfileMenuOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" role="menuitem">Chats</Link>
+                      <Link to="/settings" onClick={() => setIsProfileMenuOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" role="menuitem">Settings</Link>
+                      <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-50" role="menuitem">Logout</button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <>
@@ -120,7 +182,10 @@ const Navbar = () => {
           <button
             aria-label="Toggle navigation menu"
             className="md:hidden p-2 text-slate-600"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onClick={() => {
+              setIsMobileMenuOpen((prev) => !prev);
+              setIsProfileMenuOpen(false);
+            }}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
