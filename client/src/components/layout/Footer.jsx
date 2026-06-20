@@ -58,6 +58,17 @@ const Footer = () => {
               <li><Link to="/dating-in-ranchi" className="text-sm hover:text-primary-400 transition-colors">Dating in Ranchi</Link></li>
             </ul>
           </div>
+            <div>
+              <h3 className="text-white font-semibold mb-5 text-sm uppercase tracking-wider">Cities</h3>
+              <ul className="space-y-2">
+                <li><Link to="/dating-in-india" className="text-sm hover:text-primary-400 transition-colors">Dating in India</Link></li>
+                <li><Link to="/dating-in-delhi" className="text-sm hover:text-primary-400 transition-colors">Dating in Delhi</Link></li>
+                <li><Link to="/dating-in-mumbai" className="text-sm hover:text-primary-400 transition-colors">Dating in Mumbai</Link></li>
+                <li><Link to="/dating-in-bangalore" className="text-sm hover:text-primary-400 transition-colors">Dating in Bangalore</Link></li>
+                <li><Link to="/dating-in-kolkata" className="text-sm hover:text-primary-400 transition-colors">Dating in Kolkata</Link></li>
+                <li><Link to="/dating-in-ranchi" className="text-sm hover:text-primary-400 transition-colors">Dating in Ranchi</Link></li>
+              </ul>
+            </div>
 
           <div>
             <h3 className="text-white font-semibold mb-5 text-sm uppercase tracking-wider">Resources</h3>

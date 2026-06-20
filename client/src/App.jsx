@@ -7,6 +7,12 @@ import BlogPost from './pages/BlogPost';
 import Contact from './pages/Contact';
 import Discover from './pages/Discover';
 import CityPage from './pages/CityPage';
+import DatingInIndiaPage from './pages/DatingInIndiaPage';
+import DatingInDelhiPage from './pages/DatingInDelhiPage';
+import DatingInMumbaiPage from './pages/DatingInMumbaiPage';
+import DatingInBangalorePage from './pages/DatingInBangalorePage';
+import DatingInKolkataPage from './pages/DatingInKolkataPage';
+import DatingInRanchiPage from './pages/DatingInRanchiPage';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
@@ -60,6 +66,12 @@ function AppContent() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/discover" element={<Discover />} />
+          <Route path="/dating-in-india" element={<DatingInIndiaPage />} />
+          <Route path="/dating-in-delhi" element={<DatingInDelhiPage />} />
+          <Route path="/dating-in-mumbai" element={<DatingInMumbaiPage />} />
+          <Route path="/dating-in-bangalore" element={<DatingInBangalorePage />} />
+          <Route path="/dating-in-kolkata" element={<DatingInKolkataPage />} />
+          <Route path="/dating-in-ranchi" element={<DatingInRanchiPage />} />
           <Route path="/dating-in-:city" element={<CityPage />} />
           
           <Route path="/login" element={<Login />} />
