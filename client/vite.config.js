@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => {
       // Reduce warning threshold for chunks
       chunkSizeWarningLimit: 500,
       // Source maps only in development
-      sourcemap: mode !== 'production',
+      sourcemap: true,
     },
     // Performance optimizations
     optimizeDeps: {

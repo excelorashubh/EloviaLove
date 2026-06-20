@@ -13,6 +13,7 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '' }) => {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
   const pushed = useRef(false);
+  const clientId = import.meta.env.VITE_ADSENSE_CLIENT_ID;
 
   useEffect(() => {
     if (!isProduction) return;
@@ -25,12 +26,31 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '' }) => {
   }, []);
 
   useEffect(() => {
-    if (!isProduction || !visible || pushed.current) return;
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      pushed.current = true;
-    } catch (e) { /* ignore */ }
-  }, [visible]);
+    if (!isProduction || !visible || pushed.current || !clientId) return;
+
+    let intervalId;
+
+    const pushAd = () => {
+      if (window.adsbygoogle && window.adsbygoogle.loaded) {
+        try {
+          window.adsbygoogle.push({});
+          pushed.current = true;
+        } catch (e) {
+          console.error(`AdSense failed to push ad for slot ${slot}:`, e);
+        }
+        clearInterval(intervalId);
+      }
+    };
+
+    if (window.adsbygoogle && window.adsbygoogle.loaded) {
+      pushAd();
+    } else {
+      intervalId = setInterval(pushAd, 100);
+      setTimeout(() => clearInterval(intervalId), 5000);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [visible, clientId, slot]);
 
   // Dev placeholder — shows ad slot info so you can verify placement
   if (!isProduction) {
@@ -44,13 +64,18 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '' }) => {
     );
   }
 
+  if (!clientId) {
+    console.warn('AdUnit: VITE_ADSENSE_CLIENT_ID is missing. Ad will not be displayed.');
+    return null;
+  }
+
   return (
     <div ref={ref} className={className}>
       {visible && (
         <ins
           className="adsbygoogle"
           style={{ display: 'block', ...style }}
-          data-ad-client={import.meta.env.VITE_ADSENSE_CLIENT_ID}
+          data-ad-client={clientId}
           data-ad-slot={slot}
           data-ad-format={format}
           data-full-width-responsive="true"
