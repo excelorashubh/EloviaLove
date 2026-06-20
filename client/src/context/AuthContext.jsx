@@ -59,6 +59,9 @@ export const AuthProvider = ({ children }) => {
   const loadUser = async () => {
     try {
       const response = await api.get('/auth/me');
+      // Debug logs for verification troubleshooting
+      console.log('Loaded profile:', response.data.user);
+      console.log('Loaded profile.isVerified:', response.data.user?.isVerified);
       setUser(response.data.user);
     } catch (error) {
       console.error('Failed to load user:', error);

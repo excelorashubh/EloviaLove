@@ -222,6 +222,12 @@ const Dashboard = () => {
   const avatarSrc = user?.profilePhoto
     || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&size=128&background=e879a0&color=fff`;
 
+  const usernameHandle = user?.username
+    ? `@${user.username}`
+    : user?.name
+      ? `@${user.name.split(' ')[0].toLowerCase()}`
+      : '';
+
   return (
     <>
       <Helmet>
@@ -243,26 +249,65 @@ const Dashboard = () => {
             <motion.div initial="hidden" animate="visible" variants={fadeIn}
               className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
             >
-              <div className="flex items-center gap-4">
-                <img src={avatarSrc} alt="Profile" className="w-14 h-14 rounded-full object-cover" />
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-900">
-                    Welcome back, {user?.name?.split(' ')[0]}!
-                  </h1>
-                  <p className="text-slate-500 text-sm mt-0.5">
-                    {user?.profileCompleted
-                      ? 'Your profile is complete. Start discovering matches!'
-                      : 'Complete your profile to start matching with others.'}
-                  </p>
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div className="flex items-center gap-4">
+                  <img src={avatarSrc} alt="Profile" className="w-16 h-16 rounded-2xl object-cover shadow-sm" />
+                  <div>
+                    <div className="text-sm text-slate-500 mb-2">Welcome back,</div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h1 className="text-3xl font-bold text-slate-900">
+                        {user?.name}
+                      </h1>
+                      {user?.isVerified && <VerifiedBadge size={22} />}
+                    </div>
+                    <div className="text-sm text-slate-500">{usernameHandle}</div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${user?.isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
+                    {user?.isVerified ? 'Verified Member' : 'Verification Available'}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 bg-slate-100 text-slate-700 text-sm font-medium">
+                    {PLAN_CONFIG[user?.plan || 'free']?.label || 'Free'} Plan
+                  </span>
                 </div>
               </div>
-              {!user?.profileCompleted && (
-                <Link to="/profile/edit"
-                  className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors text-sm font-medium"
+
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500 mb-2">Profile strength</p>
+                  <p className="text-3xl font-bold text-slate-900">{completionPct}%</p>
+                  <div className="h-2 mt-3 rounded-full bg-slate-200 overflow-hidden">
+                    <div className="h-full bg-linear-to-r from-primary-600 to-pink-500 transition-all duration-700" style={{ width: `${completionPct}%` }} />
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500 mb-2">Matches ready</p>
+                  <p className="text-3xl font-bold text-slate-900">{conversations.length}</p>
+                  <p className="text-sm text-slate-500 mt-2">Active chats and match requests in your dashboard.</p>
+                </div>
+              </div>
+
+              <p className="text-slate-500 text-sm mt-5">
+                {user?.profileCompleted
+                  ? 'Your profile is complete and ready to attract quality matches.'
+                  : 'Complete the missing details below to improve visibility and matching results.'}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {!user?.profileCompleted && (
+                  <Link to="/profile/edit"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors text-sm font-medium"
+                  >
+                    <Settings size={14} /> Complete Profile
+                  </Link>
+                )}
+                <Link to="/profile"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors text-sm font-medium"
                 >
-                  <Settings size={14} /> Complete Profile
+                  View Profile
                 </Link>
-              )}
+              </div>
             </motion.div>
 
             {/* Quick Actions */}
@@ -393,6 +438,43 @@ const Dashboard = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+
+            {/* Profile summary card */}
+            <motion.div initial="hidden" animate="visible" variants={fadeIn}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
+            >
+              <div className="flex items-center gap-4">
+                <img src={avatarSrc} alt="Profile" className="w-16 h-16 rounded-2xl object-cover" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center flex-wrap gap-2">
+                    <h3 className="text-xl font-bold text-slate-900 truncate">{user?.name || 'Your profile'}</h3>
+                    {user?.isVerified && <VerifiedBadge size={18} />}
+                  </div>
+                  <p className="text-sm text-slate-500">{usernameHandle}</p>
+                </div>
+              </div>
+              <div className="mt-5 space-y-3 text-sm text-slate-600">
+                <div className="flex items-center justify-between gap-3">
+                  <span>Membership</span>
+                  <span className="font-semibold text-slate-900">{PLAN_CONFIG[user?.plan || 'free']?.label || 'Free'}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span>Status</span>
+                  <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${user?.isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
+                    {user?.isVerified ? 'Verified' : 'Unverified'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span>Profile score</span>
+                  <span className="font-semibold text-slate-900">{completionPct}%</span>
+                </div>
+              </div>
+              <Link to="/profile"
+                className="mt-5 inline-flex items-center justify-center w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                View Profile Details
+              </Link>
+            </motion.div>
 
             {/* Profile Completion */}
             <motion.div initial="hidden" animate="visible" variants={fadeIn}

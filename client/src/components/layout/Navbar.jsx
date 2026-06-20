@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import EloviaLoveWB from "../../assets/EloviaLoveWB_small.png"
+import VerifiedBadge from '../ui/VerifiedBadge';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -69,14 +70,34 @@ const Navbar = () => {
           </nav>
 
           {/* Action Buttons */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4 relative">
             {isAuthenticated ? (
-              <button
-                onClick={logout}
-                className="text-sm font-medium bg-slate-900 text-white px-5 py-2.5 rounded-full hover:bg-primary-600 transition-colors shadow-lg shadow-primary-500/20"
-              >
-                Log out
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors"
+                  onMouseDown={e => e.preventDefault()}
+                >
+                  <img src={user?.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=e879a0&color=fff`} alt={user?.name}
+                    className="w-9 h-9 rounded-full object-cover" />
+                  <div className="text-left">
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-medium text-slate-900">{user?.name}</span>
+                      {user?.isVerified && <VerifiedBadge size={14} />}
+                    </div>
+                    <span className="text-xs text-slate-500">{user?.username || ''}</span>
+                  </div>
+                </button>
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50">
+                  <Link to="/profile" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">My Profile</Link>
+                  <Link to="/dashboard" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</Link>
+                  <Link to="/discover" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Discover</Link>
+                  <Link to="/matches" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Matches</Link>
+                  <Link to="/chats" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Chats</Link>
+                  <Link to="/settings" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Settings</Link>
+                  <button onClick={logout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-50">Logout</button>
+                </div>
+              </div>
             ) : (
               <>
                 <Link
@@ -116,6 +137,19 @@ const Navbar = () => {
             className="md:hidden bg-white border-t border-slate-100 overflow-hidden"
           >
             <div className="px-4 pt-2 pb-6 space-y-1">
+              {isAuthenticated && (
+                <div className="flex items-center gap-3 px-2 py-3 border-b border-slate-100">
+                  <img src={user?.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=e879a0&color=fff`} alt={user?.name}
+                    className="w-11 h-11 rounded-full object-cover" />
+                  <div>
+                    <div className="flex items-center gap-1">
+                      <span className="font-semibold text-slate-900">{user?.name}</span>
+                      {user?.isVerified && <VerifiedBadge size={14} />}
+                    </div>
+                    <div className="text-xs text-slate-500">{user?.username || ''}</div>
+                  </div>
+                </div>
+              )}
               {navLinks.map((link) => (
                 <Link
                   key={link.name}

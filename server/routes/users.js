@@ -229,7 +229,7 @@ router.get('/discover', protect, async (req, res) => {
       isActive: true,
       profileCompleted: true
     })
-    .select('name profilePhoto bio location interests age gender')
+    .select('name profilePhoto bio location interests age gender isVerified')
     .sort({ lastActive: -1 })
     .skip(skip)
     .limit(limit);

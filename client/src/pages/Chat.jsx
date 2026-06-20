@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, ArrowLeft, Check, CheckCheck, WifiOff } from 'lucide-react';
+import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -346,7 +347,7 @@ const Chat = () => {
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-slate-900 text-sm leading-tight truncate">{otherUser?.name}</p>
+              <p className="font-bold text-slate-900 text-sm leading-tight truncate flex items-center gap-1">{otherUser?.name} {otherUser?.isVerified && <VerifiedBadge size={14} />}</p>
               <p className="text-xs text-slate-400 leading-tight">
                 {isTyping ? (
                   <motion.span
