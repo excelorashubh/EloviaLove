@@ -9,6 +9,8 @@ const Report = require('../models/Report');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
+const Bookmark = require('../models/Bookmark');
+const Report = require('../models/Report');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -234,9 +236,15 @@ router.get('/discover', protect, async (req, res) => {
     .skip(skip)
     .limit(limit);
 
+    // Attach a lightweight 'reported' flag for admin reports pending/investigating
+    const usersWithFlags = await Promise.all(users.map(async u => {
+      const reportedCount = await Report.countDocuments({ reportedUser: u._id, status: { $in: ['pending', 'investigating'] } });
+      return { ...u.toObject(), reported: reportedCount > 0 };
+    }));
+
     res.json({
       success: true,
-      users,
+      users: usersWithFlags,
       pagination: {
         page,
         limit,
@@ -357,6 +365,41 @@ router.post('/like/:userId', protect, [
       success: false,
       message: 'Server error'
     });
+  }
+});
+
+// @route   POST /api/users/bookmark/:userId
+// @desc    Bookmark a user (save for later)
+// @access  Private
+router.post('/bookmark/:userId', protect, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (userId === req.user._id.toString()) return res.status(400).json({ success: false, message: 'Cannot bookmark yourself' });
+    const target = await User.findById(userId);
+    if (!target) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const existing = await Bookmark.findOne({ user: req.user._id, targetUser: userId });
+    if (existing) return res.json({ success: true, message: 'Already bookmarked' });
+
+    await Bookmark.create({ user: req.user._id, targetUser: userId });
+    res.json({ success: true, message: 'Bookmarked' });
+  } catch (error) {
+    console.error('Bookmark error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   DELETE /api/users/bookmark/:userId
+// @desc    Remove a bookmark
+// @access  Private
+router.delete('/bookmark/:userId', protect, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    await Bookmark.deleteOne({ user: req.user._id, targetUser: userId });
+    res.json({ success: true, message: 'Bookmark removed' });
+  } catch (error) {
+    console.error('Remove bookmark error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

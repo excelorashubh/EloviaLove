@@ -5,8 +5,12 @@ import {
   Heart, X, MapPin, SlidersHorizontal, Zap, RotateCcw,
   Lock, Crown, Sparkles, ChevronRight, Users, CheckCircle2,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
+import HeroDiscover from '../components/discover/HeroDiscover';
+import FilterSidebar from '../components/discover/FilterSidebar';
+import ProfileCard from '../components/discover/ProfileCard';
+import MobileActions from '../components/discover/MobileActions';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
@@ -218,6 +222,15 @@ const PillGroup = React.memo(({ options, value, onChange, multi = false }) => (
 // ── Filter Panel ─────────────────────────────────────────────────────────────
 const FilterPanel = React.memo(({ filters, onChange, onApply, onClose, userPlan }) => {
   const [upgradeModal, setUpgradeModal] = useState(null); // plan string
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const m = window.matchMedia('(max-width: 768px)');
+    const setVal = () => setIsMobile(m.matches);
+    setVal();
+    m.addEventListener?.('change', setVal);
+    return () => m.removeEventListener?.('change', setVal);
+  }, []);
 
   const field = (key) => ({
     value: filters[key],
@@ -236,9 +249,11 @@ const FilterPanel = React.memo(({ filters, onChange, onApply, onClose, userPlan 
   return (
     <>
       <motion.div
-        initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+        initial={isMobile ? { y: '100%' } : { x: '100%' }}
+        animate={isMobile ? { y: 0 } : { x: 0 }}
+        exit={isMobile ? { y: '100%' } : { x: '100%' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed right-0 top-0 h-full w-[340px] bg-white shadow-2xl z-40 flex flex-col"
+        className={isMobile ? 'fixed left-0 bottom-0 w-full h-[70vh] rounded-t-3xl bg-white shadow-2xl z-40 flex flex-col' : 'fixed right-0 top-0 h-full w-[340px] bg-white shadow-2xl z-40 flex flex-col'}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
@@ -420,7 +435,7 @@ const FilterPanel = React.memo(({ filters, onChange, onApply, onClose, userPlan 
 });
 
 // ── Swipeable Card ────────────────────────────────────────────────────────────
-const SwipeCard = React.memo(({ user, onLike, onPass, isTop }) => {
+const SwipeCard = React.memo(({ user, onLike, onPass, onSuperLike, isTop }) => {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
   const likeOpacity = useTransform(x, [20, 100], [0, 1]);
@@ -440,8 +455,10 @@ const SwipeCard = React.memo(({ user, onLike, onPass, isTop }) => {
       drag={isTop ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
+      onDoubleClick={() => { if (onSuperLike) onSuperLike(); else if (onLike) onLike(); }}
       whileDrag={{ cursor: 'grabbing' }}
       className="bg-white rounded-3xl shadow-xl overflow-hidden select-none"
+      tabIndex={0}
     >
       {/* Like / Pass overlays */}
       <motion.div style={{ opacity: likeOpacity }} className="absolute top-8 left-6 z-10 rotate-[-20deg] border-4 border-green-400 text-green-400 font-extrabold text-2xl px-3 py-1 rounded-xl">
@@ -508,14 +525,19 @@ const SwipeCard = React.memo(({ user, onLike, onPass, isTop }) => {
 const Discover = () => {
   const { user } = useAuth();
   const userPlan = user?.plan || 'free';
+  const location = useLocation();
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [gridPage, setGridPage] = useState(1);
+  const [gridHasMore, setGridHasMore] = useState(true);
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
   const [swiping, setSwiping] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [matchPopup, setMatchPopup] = useState(null);
   const [likeToast, setLikeToast] = useState(null);
   const [tab, setTab] = useState('discover');
+  const [viewMode, setViewMode] = useState('stack'); // 'stack' | 'grid'
   const [likedYouData, setLikedYouData] = useState(null);
   const likeToastTimer = useRef(null);
   const [mode, setMode] = useState('random');
@@ -584,6 +606,42 @@ const Discover = () => {
 
   useEffect(() => { loadRandom(); }, [loadRandom]);
 
+  // Grid pagination fetch
+  const fetchGridPage = useCallback(async (page = 1) => {
+    setLoading(true);
+    try {
+      const res = await api.get('/users/discover', { params: { page } });
+      const fetched = res.data.users || [];
+      if (page === 1) setUsers(fetched);
+      else setUsers(prev => [...prev, ...fetched]);
+      setGridHasMore(res.data.pagination?.hasMore ?? (fetched.length > 0));
+      setGridPage(page);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  }, []);
+
+  // Close filters/popups on route change
+  useEffect(() => {
+    setShowFilter(false);
+    setMatchPopup(null);
+    setLikeToast(null);
+  }, [location]);
+
+  // Keyboard: Escape to close overlays, arrows to swipe
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === 'Escape') {
+        setShowFilter(false);
+        setMatchPopup(null);
+        setLikeToast(null);
+      }
+      if (e.key === 'ArrowLeft') swipe('pass');
+      if (e.key === 'ArrowRight') swipe('like');
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [swipe]);
+
   // Listen for profile updates (e.g., admin granted blue tick) and refresh lists
   useEffect(() => {
     const handler = (e) => {
@@ -604,6 +662,28 @@ const Discover = () => {
   useEffect(() => {
     if (tab === 'liked-you') loadLikedYou();
   }, [tab, loadLikedYou]);
+
+  // When switching to grid view, load first page
+  useEffect(() => {
+    if (viewMode === 'grid') fetchGridPage(1);
+  }, [viewMode, fetchGridPage]);
+
+  // Infinite scroll sentinel for grid view
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sentinel = document.getElementById('grid-sentinel');
+    if (!sentinel) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(ent => {
+        if (ent.isIntersecting && !loading && viewMode === 'grid') {
+          // fetch next page for grid
+          if (gridHasMore) fetchGridPage(gridPage + 1);
+        }
+      });
+    }, { root: null, rootMargin: '200px', threshold: 0.1 });
+    obs.observe(sentinel);
+    return () => obs.disconnect();
+  }, [viewMode, loading, mode, loadFiltered, loadRandom]);
 
   // Preload more when 2 cards left
   useEffect(() => {
@@ -629,6 +709,30 @@ const Discover = () => {
     } catch (e) { console.error(e); }
     setUsers(prev => prev.slice(1));
     setSwiping(false);
+  };
+
+  const handleBookmark = async (targetId) => {
+    try {
+      const exists = bookmarkedIds.has(targetId);
+      if (exists) {
+        await api.delete(`/users/bookmark/${targetId}`);
+        setBookmarkedIds(prev => { const s = new Set(prev); s.delete(targetId); return s; });
+      } else {
+        await api.post(`/users/bookmark/${targetId}`);
+        setBookmarkedIds(prev => new Set(prev).add(targetId));
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleReport = async (targetId) => {
+    try {
+      const reason = window.prompt('Report reason (brief):');
+      if (!reason) return;
+      await api.post(`/users/report/${targetId}`, { reason: 'other', description: reason });
+      // mark locally as reported
+      setUsers(prev => prev.map(u => u._id === targetId ? { ...u, reported: true } : u));
+      alert('Report submitted. Our moderation team will review it.');
+    } catch (e) { console.error(e); alert('Could not submit report'); }
   };
 
   const forceMatch = async () => {
@@ -657,13 +761,27 @@ const Discover = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-pink-50 pt-6 pb-10">
       <Helmet>
-        <title>Discover Matches — Excelora Classes Verified Dating</title>
-        <meta name="description" content="Explore verified profiles, discover compatible singles, and find meaningful matches on Excelora Classes." />
-        <link rel="canonical" href="https://exceloraclasses.com/discover" />
+        <title>Discover — Elovia Love — Find Meaningful Connections</title>
+        <meta name="description" content="Discover meaningful connections on Elovia Love. Explore verified singles, advanced filters and premium matches." />
+        <link rel="canonical" href="https://elovialove.com/discover" />
       </Helmet>
-      {/* Header */}
-      <div className="max-w-md mx-auto px-4 mb-6">
-        <div className="flex items-center justify-between">
+      {/* Hero */}
+      <div className="max-w-7xl mx-auto px-4 mb-8">
+        <HeroDiscover onUpgradeClick={() => setShowFilter(true)} />
+      </div>
+
+      {/* Page layout: sidebar + main */}
+      <div className="max-w-7xl mx-auto px-4 lg:flex lg:items-start lg:gap-8">
+        <FilterSidebar className="lg:shrink-0">
+          {/* Optionally, keep default placeholders or pass compact controls here */}
+        </FilterSidebar>
+
+        {/* Main column */}
+        <div className="flex-1">
+          {/* Header */}
+          <div className="max-w-3xl mx-auto mb-6">
+            {/* Header content (kept from previous layout) */}
+            <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BackButton to="/dashboard" />
             <h1 className="text-2xl font-extrabold text-slate-900">Discover</h1>
@@ -685,8 +803,8 @@ const Discover = () => {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mt-4 bg-slate-100 p-1 rounded-2xl">
+            {/* Tabs */}
+            <div className="flex gap-2 mt-4 bg-slate-100 p-1 rounded-2xl">
           <button
             onClick={() => setTab('discover')}
             className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${tab === 'discover' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
@@ -707,15 +825,15 @@ const Discover = () => {
           </button>
         </div>
 
-        {tab === 'discover' && mode === 'filter' && (
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs text-primary-600 font-medium bg-primary-50 px-2 py-1 rounded-full">Filtered results</span>
-            <button onClick={loadRandom} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1">
-              <RotateCcw size={11} /> Reset
-            </button>
+            {tab === 'discover' && mode === 'filter' && (
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-xs text-primary-600 font-medium bg-primary-50 px-2 py-1 rounded-full">Filtered results</span>
+                <button onClick={loadRandom} className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1">
+                  <RotateCcw size={11} /> Reset
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
       {/* Card Stack / Liked You */}
       <div className="max-w-md mx-auto px-4">
@@ -872,12 +990,51 @@ const Discover = () => {
               {/* Progress dots */}
               <div className="flex justify-center gap-1.5 mt-5">
                 {users.slice(0, Math.min(users.length, 8)).map((_, i) => (
-                  <div key={i} className={`rounded-full transition-all ${i === 0 ? 'w-5 h-1.5 bg-primary-500' : 'w-1.5 h-1.5 bg-slate-200'}`} />
-                ))}
+                    <div key={i} className={`rounded-full transition-all ${i === 0 ? 'w-5 h-1.5 bg-primary-500' : 'w-1.5 h-1.5 bg-slate-200'}`} />
+                  ))}
               </div>
             </>
           )
         )}
+      </div>
+
+        {/* Browse grid view toggle and grid */}
+        <div className="max-w-7xl mx-auto px-4 mt-8">
+          <div className="flex items-center justify-between mb-4 max-w-3xl mx-auto">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setViewMode('stack')} className={`px-3 py-2 rounded-xl ${viewMode === 'stack' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>Stack</button>
+              <button onClick={() => setViewMode('grid')} className={`px-3 py-2 rounded-xl ${viewMode === 'grid' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>Browse</button>
+            </div>
+          </div>
+
+          {viewMode === 'grid' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {loading && users.length === 0 ? (
+                // skeletons
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="animate-pulse bg-white rounded-3xl p-4 border border-slate-100 h-80" />
+                ))
+              ) : (
+                users.map(u => (
+                  <ProfileCard key={u._id} user={u}
+                    onLike={() => swipe('like')}
+                    onPass={() => swipe('pass')}
+                    onSuperLike={() => swipe('super')}
+                    onBookmark={handleBookmark}
+                    onReport={handleReport}
+                    bookmarked={bookmarkedIds.has(u._id)}
+                  />
+                ))
+              )}
+            </div>
+          )}
+
+          {viewMode === 'grid' && (
+            <div id="grid-sentinel" className="h-6" />
+          )}
+        </div>
+
+        </div>
       </div>
 
       {/* Filter Panel */}
@@ -909,6 +1066,13 @@ const Discover = () => {
       <AnimatePresence>
         {likeToast && <LikeToast likedUser={likeToast} onClose={() => { clearTimeout(likeToastTimer.current); setLikeToast(null); }} />}
       </AnimatePresence>
+
+      {/* Mobile actions (thumb friendly) */}
+      <MobileActions
+        onPass={() => swipe('pass')}
+        onLike={() => swipe('like')}
+        onSuperLike={() => swipe('super')}
+      />
     </div>
   );
 };

@@ -1,0 +1,69 @@
+{
+  "tokens": {
+    "color": {
+      "primary": {
+        "50": { "value": "#fdf4ff" },
+        "100": { "value": "#fae8ff" },
+        "200": { "value": "#f5d0fe" },
+        "300": { "value": "#f0abfc" },
+        "400": { "value": "#e879f9" },
+        "500": { "value": "#d946ef" },
+        "600": { "value": "#c026d3" },
+        "700": { "value": "#a21caf" },
+        "800": { "value": "#86198f" },
+        "900": { "value": "#701a75" }
+      },
+      "pink": {
+        "500": { "value": "#ec4899" },
+        "200": { "value": "#fbcfe8" }
+      },
+      "slate": {
+        "50": { "value": "#f8fafc" },
+        "100": { "value": "#f1f5f9" },
+        "200": { "value": "#e2e8f0" },
+        "400": { "value": "#94a3b8" }
+      },
+      "white": { "value": "#ffffff" },
+      "black": { "value": "#000000" },
+      "success": { "value": "#10b981" },
+      "danger": { "value": "#ef4444" },
+      "muted": { "value": "#64748b" }
+    },
+    "typography": {
+      "fontFamily": { "value": "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" },
+      "heading": {
+        "h1": { "value": "48px" },
+        "h2": { "value": "32px" },
+        "h3": { "value": "24px" }
+      },
+      "body": {
+        "lg": { "value": "18px" },
+        "md": { "value": "16px" },
+        "sm": { "value": "14px" }
+      },
+      "weights": {
+        "regular": { "value": "400" },
+        "medium": { "value": "500" },
+        "bold": { "value": "700" }
+      }
+    },
+    "spacing": {
+      "xs": { "value": "4" },
+      "sm": { "value": "8" },
+      "md": { "value": "16" },
+      "lg": { "value": "24" },
+      "xl": { "value": "32" }
+    },
+    "radius": {
+      "sm": { "value": "6" },
+      "md": { "value": "12" },
+      "lg": { "value": "20" },
+      "round": { "value": "9999" }
+    },
+    "shadow": {
+      "sm": { "value": "0 1px 2px rgba(0,0,0,0.06)" },
+      "md": { "value": "0 6px 20px rgba(16,24,40,0.08)" },
+      "primary": { "value": "0 10px 30px rgba(192,38,211,0.12)" }
+    }
+  }
+}
