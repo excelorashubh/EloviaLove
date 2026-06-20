@@ -627,6 +627,25 @@ const Discover = () => {
     setLikeToast(null);
   }, [location]);
 
+  const swipe = useCallback(async (action) => {
+    if (swiping || users.length === 0) return;
+    const target = users[0];
+    setSwiping(true);
+    try {
+      const res = await api.post('/match/swipe', { targetUserId: target._id, action });
+      if (res.data.isMatch) {
+        setMatchPopup(res.data.matchedUser);
+      } else if (action === 'like') {
+        // Show like toast for non-match likes
+        clearTimeout(likeToastTimer.current);
+        setLikeToast(target);
+        likeToastTimer.current = setTimeout(() => setLikeToast(null), 3000);
+      }
+    } catch (e) { console.error(e); }
+    setUsers(prev => prev.slice(1));
+    setSwiping(false);
+  }, [swiping, users, api, setMatchPopup, setLikeToast, setUsers, setSwiping]);
+
   // Keyboard: Escape to close overlays, arrows to swipe
   useEffect(() => {
     const handler = (e) => {
@@ -692,24 +711,7 @@ const Discover = () => {
     }
   }, [users.length]); // eslint-disable-line
 
-  const swipe = async (action) => {
-    if (swiping || users.length === 0) return;
-    const target = users[0];
-    setSwiping(true);
-    try {
-      const res = await api.post('/match/swipe', { targetUserId: target._id, action });
-      if (res.data.isMatch) {
-        setMatchPopup(res.data.matchedUser);
-      } else if (action === 'like') {
-        // Show like toast for non-match likes
-        clearTimeout(likeToastTimer.current);
-        setLikeToast(target);
-        likeToastTimer.current = setTimeout(() => setLikeToast(null), 3000);
-      }
-    } catch (e) { console.error(e); }
-    setUsers(prev => prev.slice(1));
-    setSwiping(false);
-  };
+
 
   const handleBookmark = async (targetId) => {
     try {

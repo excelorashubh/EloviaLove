@@ -20,7 +20,7 @@ import puppeteer from 'puppeteer';
   const routes = ['/', '/dashboard', '/discover', '/profile', '/matches', '/chats'];
   for (const route of routes) {
     try {
-      await page.goto(`http://localhost:4173${route}`, { waitUntil: 'networkidle0' });
+      await page.goto(`http://localhost:5173${route}`, { waitUntil: 'networkidle0' });
       console.log(`Route ${route} loaded successfully.`);
       // wait a bit
       await new Promise(r => setTimeout(r, 500));

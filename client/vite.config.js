@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
         name: 'html-env-inject',
         transformIndexHtml(html) {
           return html
-            .replace(/__ADSENSE_CLIENT_ID__/g, env.VITE_ADSENSE_CLIENT_ID || '')
+            .replace(/__ADSENSE_CLIENT_ID__/g, env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-7967762028283267')
             .replace(/__GA_MEASUREMENT_ID__/g, env.VITE_GA_MEASUREMENT_ID || '')
         },
       },

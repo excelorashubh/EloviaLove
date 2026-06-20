@@ -13,7 +13,7 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '' }) => {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
   const pushed = useRef(false);
-  const clientId = import.meta.env.VITE_ADSENSE_CLIENT_ID;
+  const clientId = import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-7967762028283267';
 
   useEffect(() => {
     if (!isProduction) return;
@@ -26,30 +26,36 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '' }) => {
   }, []);
 
   useEffect(() => {
-    if (!isProduction || !visible || pushed.current || !clientId) return;
+    if (!isProduction || !visible || pushed.current || !clientId || !slot) return;
 
-    let intervalId;
+    let intervalId = null;
+    let timeoutId = null;
 
     const pushAd = () => {
-      if (window.adsbygoogle && window.adsbygoogle.loaded) {
+      if (window.adsbygoogle && typeof window.adsbygoogle.push === 'function') {
         try {
           window.adsbygoogle.push({});
           pushed.current = true;
         } catch (e) {
           console.error(`AdSense failed to push ad for slot ${slot}:`, e);
         }
-        clearInterval(intervalId);
+        if (intervalId) window.clearInterval(intervalId);
+        if (timeoutId) window.clearTimeout(timeoutId);
       }
     };
 
-    if (window.adsbygoogle && window.adsbygoogle.loaded) {
-      pushAd();
-    } else {
-      intervalId = setInterval(pushAd, 100);
-      setTimeout(() => clearInterval(intervalId), 5000);
+    pushAd();
+    if (!pushed.current) {
+      intervalId = window.setInterval(pushAd, 100);
+      timeoutId = window.setTimeout(() => {
+        if (intervalId) window.clearInterval(intervalId);
+      }, 5000);
     }
 
-    return () => clearInterval(intervalId);
+    return () => {
+      if (intervalId) window.clearInterval(intervalId);
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
   }, [visible, clientId, slot]);
 
   // Dev placeholder — shows ad slot info so you can verify placement
