@@ -10,7 +10,6 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 const Bookmark = require('../models/Bookmark');
-const Report = require('../models/Report');
 
 // Configure Cloudinary
 cloudinary.config({
