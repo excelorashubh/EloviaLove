@@ -40,6 +40,13 @@ const PLAN_CONFIG = {
   pro:     { label: 'Pro',     icon: Crown,    gradient: 'from-amber-500 to-orange-500',  bg: 'bg-amber-50',   border: 'border-amber-200', perks: ['Profile Boost 🚀', 'VIP Badge', 'Top visibility'] },
 };
 
+const ICON_MAP = {
+  free: Star,
+  basic: Zap,
+  premium: Sparkles,
+  pro: Crown,
+};
+
 const SubscriptionCard = ({ subStatus, loading, planMap }) => {
   const planKey = subStatus?.plan || 'free';
   const isTrial = subStatus?.isTrial;
@@ -91,7 +98,7 @@ const SubscriptionCard = ({ subStatus, loading, planMap }) => {
             FREE TRIAL
           </span>
         )}
-        {plan !== 'free' && !isTrial && (
+        {planKey !== 'free' && !isTrial && (
           <span className="text-[10px] font-bold px-2 py-1 bg-green-100 text-green-700 rounded-full border border-green-200">
             ACTIVE
           </span>
@@ -99,7 +106,7 @@ const SubscriptionCard = ({ subStatus, loading, planMap }) => {
       </div>
 
       {/* Trial / expiry countdown */}
-      {(isTrial || (plan !== 'free' && daysLeft !== null)) && (
+      {(isTrial || (planKey !== 'free' && daysLeft !== null)) && (
         <div className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-4 ${
           daysLeft <= 2 ? 'bg-red-50 border border-red-200' : 'bg-white/70 border border-slate-200'
         }`}>
@@ -128,7 +135,7 @@ const SubscriptionCard = ({ subStatus, loading, planMap }) => {
       </ul>
 
       {/* CTA */}
-      {plan === 'free' ? (
+      {planKey === 'free' ? (
         <Link
           to="/pricing"
           className={`flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-bold text-white bg-linear-to-r ${cfg.gradient} hover:shadow-md transition-all`}
