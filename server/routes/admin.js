@@ -533,6 +533,7 @@ router.get('/analytics/ads', async (req, res) => {
 
 // ── PLAN CONFIG (dynamic subscription plans) ─────────────────────────────────
 const PlanConfig = require('../models/PlanConfig');
+const subscriptionRoutes = require('./subscription');
 
 // Default seed data — runs once if no plans exist
 const DEFAULT_PLANS = [
@@ -632,7 +633,37 @@ router.post('/plans', async (req, res) => {
       key: key.toLowerCase(), name, price, durationDays: durationDays || 30,
       description, color, isActive, isPopular, sortOrder: sortOrder || 0, features: features || [],
     });
+
+    const io = req.app.get('io');
+    if (io) io.emit('plans_updated');
+
     res.status(201).json({ success: true, plan });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route POST /api/admin/plans/resync-razorpay
+// @desc  Clear stored Razorpay metadata for all plans and in-memory cache
+router.post('/plans/resync-razorpay', async (req, res) => {
+  try {
+    // Clear stored Razorpay plan ids/amounts so next subscription creation re-creates plans
+    await PlanConfig.updateMany({}, { $set: { razorpayPlanId: null, razorpayPlanAmount: null } });
+
+    // Clear in-memory cache in subscription module if available
+    try {
+      if (subscriptionRoutes && typeof subscriptionRoutes.clearRazorpayCache === 'function') {
+        subscriptionRoutes.clearRazorpayCache();
+      }
+    } catch (e) {
+      console.warn('Failed to clear subscription in-memory cache:', e.message || e);
+    }
+
+    const io = req.app.get('io');
+    if (io) io.emit('plans_updated');
+    if (io) io.emit('razorpay_resynced');
+
+    res.json({ success: true, message: 'Razorpay plan metadata cleared. New subscriptions will recreate Razorpay plans.' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -641,13 +672,26 @@ router.post('/plans', async (req, res) => {
 // @route   PUT /api/admin/plans/:planId
 router.put('/plans/:planId', async (req, res) => {
   try {
-    const plan = await PlanConfig.findByIdAndUpdate(
+    const plan = await PlanConfig.findById(req.params.planId);
+    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
+
+    const updateFields = { ...req.body };
+    const shouldResetRazorpay = ['price', 'currency', 'durationDays', 'discount'].some(field => Object.prototype.hasOwnProperty.call(req.body, field));
+    if (shouldResetRazorpay) {
+      updateFields.razorpayPlanId = null;
+      updateFields.razorpayPlanAmount = null;
+    }
+
+    const updatedPlan = await PlanConfig.findByIdAndUpdate(
       req.params.planId,
-      { $set: req.body },
+      { $set: updateFields },
       { new: true, runValidators: true }
     );
-    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
-    res.json({ success: true, plan });
+
+    const io = req.app.get('io');
+    if (io) io.emit('plans_updated');
+
+    res.json({ success: true, plan: updatedPlan });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -660,6 +704,10 @@ router.delete('/plans/:planId', async (req, res) => {
     if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
     if (plan.key === 'free') return res.status(400).json({ success: false, message: 'Cannot delete the free plan' });
     await PlanConfig.findByIdAndDelete(req.params.planId);
+
+    const io = req.app.get('io');
+    if (io) io.emit('plans_updated');
+
     res.json({ success: true, message: 'Plan deleted' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

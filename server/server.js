@@ -130,15 +130,11 @@ app.use('/api/', limiter);
 
 // ── Cache Headers for API Routes ──────────────────────────────────────────────
 app.use('/api/', (req, res, next) => {
-  if (req.method === 'GET') {
-    // Cache GET requests for 5 minutes
-    res.set('Cache-Control', 'public, max-age=300');
-  } else {
-    // No cache for mutations
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-  }
+  // API responses are dynamic and must always reflect the latest database state.
+  // Prevent stale pricing from being served from browser or CDN caches.
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   next();
 });
 

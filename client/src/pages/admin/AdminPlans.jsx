@@ -467,6 +467,27 @@ const AdminPlans = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  // Resync Razorpay button component
+  const ResyncButton = () => {
+    const [busy, setBusy] = useState(false);
+    const handle = async () => {
+      if (!window.confirm('This will clear saved Razorpay plan IDs and force recreation on next purchase. Continue?')) return;
+      setBusy(true);
+      try {
+        const r = await api.post('/admin/plans/resync-razorpay');
+        alert(r.data.message || 'Resync completed');
+        load();
+      } catch (e) {
+        alert(e.response?.data?.message || 'Resync failed');
+      } finally { setBusy(false); }
+    };
+    return (
+      <button onClick={handle} disabled={busy} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 transition-all text-sm">
+        {busy ? <Loader2 size={14} className="animate-spin" /> : <Tag size={14} />} Resync Razorpay
+      </button>
+    );
+  };
+
   const handleToggle = async (plan) => {
     try {
       await api.put(`/admin/plans/${plan._id}`, { isActive: !plan.isActive });
@@ -497,12 +518,15 @@ const AdminPlans = () => {
             <h1 className="text-2xl font-bold text-slate-900">Subscription Plans</h1>
             <p className="text-slate-500 text-sm mt-1">Manage pricing, features, and plan visibility</p>
           </div>
-          <button
-            onClick={() => setModal('new')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-600 to-pink-500 text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-pink-500/30 transition-all"
-          >
-            <Plus size={16} /> New Plan
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setModal('new')}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-600 to-pink-500 text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-pink-500/30 transition-all"
+            >
+              <Plus size={16} /> New Plan
+            </button>
+            <ResyncButton />
+          </div>
         </div>
 
         {/* Info banner */}

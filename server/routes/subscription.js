@@ -48,38 +48,80 @@ function getEffectivePrice(plan) {
 function serializePlan(plan) {
   const obj = plan.toObject ? plan.toObject() : { ...plan };
   obj.effectivePrice = getEffectivePrice(plan);
+  obj.currency = plan.currency || 'INR';
+  obj.buttonText = plan.buttonText || '';
+  obj.buttonColor = plan.buttonColor || '';
+  obj.razorpayPlanId = plan.razorpayPlanId || null;
+  obj.razorpayPlanAmount = plan.razorpayPlanAmount || null;
   return obj;
 }
 
-// Cache for Razorpay plan IDs
+// Cache for Razorpay plan IDs and current pricing metadata
 const razorpayPlanCache = {};
 
-async function getOrCreateRazorpayPlan(planKey) {
-  if (razorpayPlanCache[planKey]) return razorpayPlanCache[planKey];
+function getRazorpayPlanInterval(durationDays) {
+  if (!durationDays || durationDays <= 0) return 1;
+  if (durationDays === 365) return 12;
+  if (durationDays === 90) return 3;
+  return Math.max(1, Math.round(durationDays / 30));
+}
 
-  const envKey = `RAZORPAY_PLAN_ID_${planKey.toUpperCase()}`;
-  if (process.env[envKey]) {
-    razorpayPlanCache[planKey] = process.env[envKey];
-    return process.env[envKey];
-  }
-
-  const planDoc  = await getPlan(planKey);
+async function createRazorpayPlan(planDoc, amount, currency) {
   const razorpay = getRazorpay();
-  const plan = await razorpay.plans.create({
-    period:   'monthly',
-    interval: 1,
+  const normalizedCurrency = (currency || 'INR').toUpperCase();
+  const interval = getRazorpayPlanInterval(planDoc.durationDays);
+
+  const payload = {
+    period: 'monthly',
+    interval,
     item: {
       name:     `EloviaLove ${planDoc.name}`,
-      amount:   getEffectivePrice(planDoc) * 100,
-      currency: 'INR',
+      amount:   Math.round(amount * 100),
+      currency: normalizedCurrency,
     },
-    notes: { plan: planKey },
-  });
+    notes: {
+      plan:   planDoc.key,
+      planId: planDoc._id.toString(),
+    },
+  };
 
-  razorpayPlanCache[planKey] = plan.id;
-  console.log(`Created Razorpay plan for ${planKey}: ${plan.id}`);
-  return plan.id;
+  const plan = await razorpay.plans.create(payload);
+  return plan;
 }
+
+async function getOrCreateRazorpayPlan(planKey) {
+  const planDoc    = await getPlan(planKey);
+  const effectivePrice = getEffectivePrice(planDoc);
+  const currency   = planDoc.currency || 'INR';
+
+  const cached = razorpayPlanCache[planKey];
+  if (cached && cached.amount === effectivePrice && cached.currency === currency) {
+    return cached.id;
+  }
+
+  if (planDoc.razorpayPlanId && planDoc.razorpayPlanAmount === effectivePrice && planDoc.currency === currency) {
+    razorpayPlanCache[planKey] = { id: planDoc.razorpayPlanId, amount: effectivePrice, currency };
+    return planDoc.razorpayPlanId;
+  }
+
+  const razorpayPlan = await createRazorpayPlan(planDoc, effectivePrice, currency);
+
+  await PlanConfig.findByIdAndUpdate(planDoc._id, {
+    razorpayPlanId:     razorpayPlan.id,
+    razorpayPlanAmount: effectivePrice,
+    currency:           currency,
+  }, { runValidators: true });
+
+  razorpayPlanCache[planKey] = { id: razorpayPlan.id, amount: effectivePrice, currency };
+  console.log(`Created Razorpay plan for ${planKey}: ${razorpayPlan.id}`);
+  return razorpayPlan.id;
+}
+
+// Expose a helper to clear in-memory Razorpay plan cache (used by admin resync)
+router.clearRazorpayCache = function clearRazorpayCache() {
+  Object.keys(razorpayPlanCache).forEach(k => delete razorpayPlanCache[k]);
+  console.log('Razorpay plan cache cleared (in-memory)');
+};
 
 // ── GET /api/subscription/plans — public, used by Pricing page ───────────────
 router.get('/plans', async (_req, res) => {
@@ -173,7 +215,7 @@ router.post('/create-subscription', protect, async (req, res) => {
       plan,
       planName:       planDoc.name,
       amount:         getEffectivePrice(planDoc) * 100,
-      currency:       'INR',
+      currency:       planDoc.currency || 'INR',
     });
   } catch (err) {
     console.error('Create subscription error:', err?.error || err?.message || err);
@@ -217,6 +259,7 @@ router.post('/verify-subscription', protect, async (req, res) => {
     );
 
     // Activate user plan
+    const planDoc = await PlanConfig.findOne({ key: plan.toLowerCase() });
     await User.findByIdAndUpdate(req.user._id, {
       plan,
       subscriptionId:     razorpay_subscription_id,
@@ -224,7 +267,7 @@ router.post('/verify-subscription', protect, async (req, res) => {
       subscriptionStart:  startDate,
       subscriptionEnd:    endDate,
       nextBillingDate:    endDate,
-      razorpayPlanId:     razorpayPlanCache[plan] || null,
+      razorpayPlanId:     planDoc?.razorpayPlanId || razorpayPlanCache[plan]?.id || null,
     });
 
     // Log payment

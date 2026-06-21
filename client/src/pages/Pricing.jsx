@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap, Crown, Star, Sparkles, ArrowLeft, X, ShieldCheck, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BannerAd from '../components/ads/BannerAd';
@@ -17,6 +18,8 @@ const ADD_ONS = [
   { key: 'superlike', label: 'Super Like',    price: 49,  icon: '⭐', desc: 'Stand out with a super like'        },
   { key: 'spotlight', label: 'Spotlight',     price: 199, icon: '💡', desc: 'Be featured at the top for 6h'      },
 ];
+
+const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 // ── Discount helpers ─────────────────────────────────────────────────────────
 function getEffectivePrice(plan) {
@@ -272,6 +275,19 @@ const Pricing = () => {
       setPlans(r.data.plans || []);
     }).catch(() => {}).finally(() => setPlansLoading(false));
     api.get('/subscription/status').then(r => setStatus(r.data)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+    socket.on('connect', () => {
+      console.log('Pricing socket connected');
+    });
+    socket.on('plans_updated', () => {
+      api.get('/subscription/plans')
+        .then(r => setPlans(r.data.plans || []))
+        .catch(() => {});
+    });
+    return () => socket.disconnect();
   }, []);
 
   const openModal = (item, isAddon = false) => setModal({ item, isAddon });

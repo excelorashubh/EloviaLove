@@ -40,12 +40,22 @@ const PLAN_CONFIG = {
   pro:     { label: 'Pro',     icon: Crown,    gradient: 'from-amber-500 to-orange-500',  bg: 'bg-amber-50',   border: 'border-amber-200', perks: ['Profile Boost 🚀', 'VIP Badge', 'Top visibility'] },
 };
 
-const SubscriptionCard = ({ subStatus, loading }) => {
-  const plan = subStatus?.plan || 'free';
+const SubscriptionCard = ({ subStatus, loading, planMap }) => {
+  const planKey = subStatus?.plan || 'free';
   const isTrial = subStatus?.isTrial;
   const trialEndDate = subStatus?.trialEndDate;
   const subscriptionEnd = subStatus?.subscriptionEnd;
-  const cfg = PLAN_CONFIG[plan] || PLAN_CONFIG.free;
+  const planData = planMap?.[planKey];
+  const cfg = planData
+    ? {
+        label: planData.name,
+        icon: ICON_MAP[planKey] || Star,
+        gradient: planData.color || 'from-primary-600 to-pink-500',
+        bg: planData.color ? 'bg-white' : 'bg-primary-50',
+        border: planData.color ? 'border-slate-200' : 'border-primary-200',
+        perks: planData.features?.map(f => typeof f.value === 'boolean' ? f.label : `${f.label}: ${f.value}`) || [],
+      }
+    : PLAN_CONFIG[planKey] || PLAN_CONFIG.free;
   const Icon = cfg.icon;
 
   // Calculate days left directly from date — source of truth
@@ -157,21 +167,26 @@ const Dashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [subStatus, setSubStatus] = useState(null);
+  const [planMap, setPlanMap] = useState({});
   const socketRef = useRef(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [convRes, notifRes, subRes] = await Promise.all([
+        const [convRes, notifRes, subRes, plansRes] = await Promise.all([
           api.get('/messages'),
           api.get('/notifications'),
           api.get('/subscription/status'),
+          api.get('/subscription/plans'),
         ]);
         if (convRes.data.success) setConversations(convRes.data.conversations.slice(0, 5));
         if (notifRes.data.success) {
           setNotifications(notifRes.data.notifications.slice(0, 3));
         }
         setSubStatus(subRes.data);
+        if (plansRes.data.success || plansRes.data.plans) {
+          setPlanMap(Object.fromEntries((plansRes.data.plans || []).map(p => [p.key, p])));
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -206,6 +221,14 @@ const Dashboard = () => {
     });
     socketRef.current.on('notification', (notif) => {
       setNotifications(prev => [notif, ...prev].slice(0, 3));
+    });
+    socketRef.current.on('plans_updated', async () => {
+      try {
+        const plansRes = await api.get('/subscription/plans');
+        setPlanMap(Object.fromEntries((plansRes.data.plans || []).map(p => [p.key, p])));
+      } catch (error) {
+        console.error('Failed to refresh plans after update:', error);
+      }
     });
     return () => socketRef.current?.disconnect();
   }, [user?._id]);
@@ -456,7 +479,7 @@ const Dashboard = () => {
               <div className="mt-5 space-y-3 text-sm text-slate-600">
                 <div className="flex items-center justify-between gap-3">
                   <span>Membership</span>
-                  <span className="font-semibold text-slate-900">{PLAN_CONFIG[user?.plan || 'free']?.label || 'Free'}</span>
+                  <span className="font-semibold text-slate-900">{planMap[user?.plan]?.name || PLAN_CONFIG[user?.plan || 'free']?.label || 'Free'}</span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
                   <span>Status</span>
@@ -517,7 +540,7 @@ const Dashboard = () => {
 
             {/* Subscription Plan Card */}
             <motion.div initial="hidden" animate="visible" variants={fadeIn}>
-              <SubscriptionCard subStatus={subStatus} loading={loading} />
+              <SubscriptionCard subStatus={subStatus} loading={loading} planMap={planMap} />
             </motion.div>
 
             {/* Notifications */}

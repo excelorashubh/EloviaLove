@@ -7,9 +7,14 @@ const planConfigSchema = new mongoose.Schema({
   durationDays: { type: Number, default: 30 },
   description:  { type: String, default: '' },
   color:        { type: String, default: 'from-slate-400 to-slate-500' }, // Tailwind gradient
+  buttonText:   { type: String, default: '' },
+  buttonColor:  { type: String, default: 'from-primary-600 to-pink-500' },
+  currency:     { type: String, default: 'INR', uppercase: true, match: /^[A-Z]{3}$/ },
   isActive:     { type: Boolean, default: true },
   isPopular:    { type: Boolean, default: false },
   sortOrder:    { type: Number, default: 0 },
+  razorpayPlanId:    { type: String, default: null },
+  razorpayPlanAmount: { type: Number, default: null },
   features: [
     {
       label:     { type: String, required: true },
