@@ -61,12 +61,20 @@ router.put('/profile', protect, [
     if (interests !== undefined) updateData.interests = interests;
     if (relationshipGoals !== undefined) updateData.relationshipGoals = relationshipGoals;
 
-    // Check if profile is now complete
-    const user = await User.findById(req.user._id);
+    // Check if profile is now complete by combining existing values with submitted updates
+    const user = await User.findById(req.user._id).lean();
+    const mergedProfile = {
+      ...user,
+      ...updateData,
+    };
+
     const requiredFields = ['name', 'bio', 'location', 'interests', 'relationshipGoals'];
     const hasAllFields = requiredFields.every(field => {
-      if (field === 'interests') return user.interests && user.interests.length > 0;
-      return user[field] && user[field].trim() !== '';
+      if (field === 'interests') {
+        return Array.isArray(mergedProfile.interests) && mergedProfile.interests.length > 0;
+      }
+      const value = mergedProfile[field];
+      return typeof value === 'string' ? value.trim() !== '' : Boolean(value);
     });
 
     if (hasAllFields) {
@@ -227,8 +235,7 @@ router.get('/discover', protect, async (req, res) => {
 
     const users = await User.find({
       _id: { $nin: excludeIds },
-      isActive: true,
-      profileCompleted: true
+      isActive: true
     })
       .select('name profilePhoto bio location interests age gender isVerified dateOfBirth lastActive')
       .sort({ lastActive: -1 })

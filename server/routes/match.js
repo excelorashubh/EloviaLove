@@ -155,9 +155,6 @@ router.post('/filter', protect, async (req, res) => {
       }
     }
 
-    // Ensure discover and filter results are consistent with the swiping experience
-    query.profileCompleted = true;
-
     // Who liked me (for boost sorting)
     const likedMeIds = await Like.find({
       toUser: req.user._id, type: 'like',

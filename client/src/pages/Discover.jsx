@@ -565,6 +565,15 @@ const Discover = () => {
       const res = await api.get('/users/discover', { params: { page: pageNum } });
       const fetched = Array.isArray(res.data.users) ? res.data.users : [];
 
+      if (import.meta.env.DEV) {
+        console.log('Discover fetch result:', {
+          page: pageNum,
+          fetchedCount: fetched.length,
+          users: fetched,
+          pagination: res.data.pagination
+        });
+      }
+
       if (pageNum === 1) {
         setUsers(fetched);
       } else {
