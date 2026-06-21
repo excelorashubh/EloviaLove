@@ -355,20 +355,20 @@ const Chat = () => {
     inputRef.current?.focus();
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600" />
-    </div>
-  );
-
   const filteredConversations = useMemo(() => {
-    return conversations.filter(c =>
-      c.otherUser.name.toLowerCase().includes(search.toLowerCase())
+    return (conversations || []).filter(c =>
+      (c.otherUser?.name || '').toLowerCase().includes(search.toLowerCase())
     );
   }, [conversations, search]);
 
   const grouped = groupByDate(messages, myId);
   const otherAvatar = avatarUrl(otherUser);
+
+  if (loading) return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600" />
+    </div>
+  );
 
   return (
     <>

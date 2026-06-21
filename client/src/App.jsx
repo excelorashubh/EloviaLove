@@ -173,6 +173,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          <Route path="/chat" element={<Navigate to="/chats" replace />} />
           <Route
             path="/chat/:userId"
             element={
