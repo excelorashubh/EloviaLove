@@ -8,7 +8,7 @@ export const NoIndexPage = ({ children, title = "Private Page" }) => (
   <>
     <Helmet>
       <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
-      <title>{title} | Excelora Classes</title>
+      <title>{title} | Elovia Love</title>
     </Helmet>
     {children}
   </>

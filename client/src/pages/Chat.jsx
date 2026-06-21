@@ -322,9 +322,9 @@ const Chat = () => {
   return (
     <>
       <Helmet>
-        <title>Chat — Excelora Classes</title>
-        <meta name="description" content="Real-time messaging with your matches on Excelora Classes." />
-        <link rel="canonical" href="https://exceloraclasses.com/chat" />
+        <title>Chat — Elovia Love</title>
+        <meta name="description" content="Real-time messaging with your matches on Elovia Love." />
+        <link rel="canonical" href="https://elovialove.onrender.com/chat" />
       </Helmet>
       <div className="flex flex-col h-screen bg-slate-50">
 
@@ -361,7 +361,7 @@ const Chat = () => {
                 ) : connected ? (
                   <span className="text-green-500 font-medium">Online</span>
                 ) : (
-                  otherUser?.location || 'Excelora Classes member'
+                  otherUser?.location || 'Elovia Love member'
                 )}
               </p>
             </div>

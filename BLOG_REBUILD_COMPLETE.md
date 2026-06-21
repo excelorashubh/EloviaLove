@@ -1,4 +1,4 @@
-# ✅ Blog System Rebuild Complete - Excelora Classes
+# ✅ Blog System Rebuild Complete - Elovia Love
 
 **Date:** May 13, 2026  
 **Status:** PRODUCTION READY  
@@ -235,7 +235,7 @@ git push origin main
 - Verify service is "Live"
 
 **4. Test Production**
-- Visit https://exceloraclasses.com/blog
+- Visit https://elovialove.onrender.com/blog
 - Check console for errors
 - Test loading states
 - Verify no white screen
@@ -457,7 +457,7 @@ git push origin main
     
     {/* CTA */}
     <div className="bg-gradient-to-br from-primary-600 to-pink-600">
-      <Link to="/signup">Join Excelora Classes Free</Link>
+      <Link to="/signup">Join Elovia Love Free</Link>
     </div>
   </div>
 </div>

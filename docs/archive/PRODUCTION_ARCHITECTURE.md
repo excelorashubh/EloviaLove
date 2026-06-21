@@ -1,4 +1,4 @@
-# 🏗️ Excelora Classes - Production Architecture
+# 🏗️ Elovia Love - Production Architecture
 
 ## 📁 Project Structure
 

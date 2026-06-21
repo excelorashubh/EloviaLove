@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 const sections = {
   home: {
     title: 'Sales Dashboard',
-    description: 'Monitor prospects, follow-ups, and conversions from a unified Excelora Classes sales hub.',
+    description: 'Monitor prospects, follow-ups, and conversions from a unified Elovia Love sales hub.',
   },
   leads: {
     title: 'Leads',
@@ -32,7 +32,7 @@ const sections = {
   },
   chat: {
     title: 'Sales Chat',
-    description: 'Continue conversations with prospects and students through the Excelora Classes chat center.',
+    description: 'Continue conversations with prospects and students through the Elovia Love chat center.',
   },
   profile: {
     title: 'Sales Profile',
@@ -74,7 +74,7 @@ const SalesmanSection = ({ section: propSection }) => {
         <div className="rounded-3xl bg-white p-8 shadow-xl shadow-slate-200">
           <h2 className="text-2xl font-semibold text-slate-900 mb-4">Section details</h2>
           <p className="text-slate-600">
-            Use the links above to explore the Excelora Classes salesman tools. The current section is <strong>{activeSection.title}</strong>.
+            Use the links above to explore the Elovia Love salesman tools. The current section is <strong>{activeSection.title}</strong>.
           </p>
         </div>
       </div>

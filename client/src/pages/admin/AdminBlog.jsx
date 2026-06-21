@@ -113,7 +113,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
   const isNew = !post?._id;
   const blank = {
     title: '', slug: '', content: '', excerpt: '', featuredImage: '',
-    author: 'Excelora Classes Team', tags: '', metaTitle: '', metaDescription: '', isPublished: false,
+    author: 'Elovia Love Team', tags: '', metaTitle: '', metaDescription: '', isPublished: false,
     faqs: [],
   };
   const [form, setForm]   = useState(post ? {
@@ -123,7 +123,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
     metaDescription: post.metaDescription || '',
     excerpt:         post.excerpt         || '',
     featuredImage:   post.featuredImage   || '',
-    author:          post.author          || 'Excelora Classes Team',
+    author:          post.author          || 'Elovia Love Team',
     faqs:            post.faqs            || [],
   } : blank);
   const [saving, setSaving] = useState(false);
@@ -303,7 +303,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
                 <p className="text-blue-700 text-base font-medium leading-tight truncate">
                   {form.metaTitle || form.title || 'Your Post Title'}
                 </p>
-                <p className="text-green-700 text-xs mt-0.5">exceloraclasses.com/blog/{form.slug || 'your-post-slug'}</p>
+                <p className="text-green-700 text-xs mt-0.5">elovialove.onrender.com/blog/{form.slug || 'your-post-slug'}</p>
                 <p className="text-slate-600 text-sm mt-1 line-clamp-2">
                   {form.metaDescription || form.excerpt || 'Your meta description will appear here...'}
                 </p>

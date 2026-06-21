@@ -70,7 +70,7 @@ Filters: Location ▼ | Age ▼ | Gender ▼ | Verified ✓ | Sort ▼ | Reset |
 - Only one premium banner
 
 ### 8. Branding Updates
-**Replace ALL instances of "Excelora Classes" with "Elovia Love":**
+**Replace ALL instances of "Elovia Love" with "Elovia Love":**
 - Navbar
 - Footer
 - Logo text

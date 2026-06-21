@@ -53,7 +53,7 @@ const BlogPost = () => {
     return (
       <>
         <Helmet>
-          <title>Post Not Found | Excelora Classes Blog</title>
+          <title>Post Not Found | Elovia Love Blog</title>
           <meta name="robots" content="noindex" />
         </Helmet>
         <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-24">

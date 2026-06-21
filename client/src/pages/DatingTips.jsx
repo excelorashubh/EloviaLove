@@ -244,13 +244,13 @@ const DatingTips = () => {
             <Heart size={36} className="mx-auto mb-3 fill-white/30" />
             <h3 className="text-2xl font-extrabold mb-2">Ready to Apply These Tips?</h3>
             <p className="text-white/80 mb-5 text-sm max-w-md mx-auto">
-              Join thousands of Indians finding real love on Excelora Classes. Start your free trial today.
+              Join thousands of Indians finding real love on Elovia Love. Start your free trial today.
             </p>
             <Link
               to="/signup"
               className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary-600 font-bold rounded-2xl hover:bg-primary-50 transition-colors text-sm"
             >
-              Join Excelora Classes Free <ArrowRight size={16} />
+              Join Elovia Love Free <ArrowRight size={16} />
             </Link>
           </motion.div>
         </div>

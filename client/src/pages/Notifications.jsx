@@ -99,9 +99,9 @@ const Notifications = () => {
   return (
     <>
       <Helmet>
-        <title>Notifications — Excelora Classes</title>
-        <meta name="description" content="View all your notifications from matches, messages, and profile activity on Excelora Classes." />
-        <link rel="canonical" href="https://exceloraclasses.com/notifications" />
+        <title>Notifications — Elovia Love</title>
+        <meta name="description" content="View all your notifications from matches, messages, and profile activity on Elovia Love." />
+        <link rel="canonical" href="https://elovialove.onrender.com/notifications" />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
       <header className="bg-white shadow-sm border-b border-slate-200">

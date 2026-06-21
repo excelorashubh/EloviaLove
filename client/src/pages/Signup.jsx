@@ -94,9 +94,9 @@ const Signup = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-16 sm:px-6 lg:px-8 relative overflow-hidden">
       <Helmet>
-        <title>Sign Up for Excelora Classes — Start Your Verified Dating Profile</title>
-        <meta name="description" content="Create your Excelora Classes profile and connect with verified singles who are serious about relationships." />
-        <link rel="canonical" href="https://exceloraclasses.com/signup" />
+        <title>Sign Up for Elovia Love — Start Your Verified Dating Profile</title>
+        <meta name="description" content="Create your Elovia Love profile and connect with verified singles who are serious about relationships." />
+        <link rel="canonical" href="https://elovialove.onrender.com/signup" />
       </Helmet>
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-150 h-150 bg-linear-to-tr from-pink-200 to-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-x-1/3 -translate-y-1/3" />
@@ -113,7 +113,7 @@ const Signup = () => {
             <Link to="/" className="inline-flex items-center justify-center p-3 bg-linear-to-tr from-primary-500 to-pink-500 rounded-2xl mb-4 group hover:rotate-12 transition-transform duration-300 shadow-xl shadow-pink-500/25">
               <Heart size={32} className="text-white" fill="currentColor" />
             </Link>
-            <h2 className="text-3xl font-extrabold text-slate-900 mb-6">Join Excelora Classes</h2>
+            <h2 className="text-3xl font-extrabold text-slate-900 mb-6">Join Elovia Love</h2>
             <p className="mt-2 text-sm text-slate-600 font-medium">
               Your journey to finding true connection starts here.
             </p>

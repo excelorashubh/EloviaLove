@@ -5,18 +5,18 @@ const Settings = () => {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 px-4 py-10 sm:px-6 lg:px-8">
       <Helmet>
-        <title>Settings | Excelora Classes</title>
+        <title>Settings | Elovia Love</title>
         <meta
           name="description"
-          content="Manage your Excelora Classes account settings, notifications, and profile preferences."
+          content="Manage your Elovia Love account settings, notifications, and profile preferences."
         />
-        <link rel="canonical" href="https://exceloraclasses.com/settings" />
+        <link rel="canonical" href="https://elovialove.onrender.com/settings" />
       </Helmet>
 
       <div className="mx-auto max-w-4xl rounded-3xl bg-white p-8 shadow-xl shadow-slate-200">
         <h1 className="text-3xl font-bold text-slate-900 mb-3">Account Settings</h1>
         <p className="text-slate-600 mb-8">
-          Keep your Excelora Classes account and communication preferences up to date.
+          Keep your Elovia Love account and communication preferences up to date.
         </p>
 
         <section className="space-y-6">

@@ -1,4 +1,4 @@
-# 🔧 Deployment Fix Summary - Excelora Classes
+# 🔧 Deployment Fix Summary - Elovia Love
 
 ## 🚨 Original Problem
 
@@ -201,7 +201,7 @@ NODE_ENV=production
 PORT=5000
 MONGODB_URI=<your_mongodb_uri>
 JWT_SECRET=<your_jwt_secret>
-CLIENT_URL=https://exceloraclasses.com
+CLIENT_URL=https://elovialove.onrender.com
 RAZORPAY_KEY_ID=<your_razorpay_key>
 RAZORPAY_KEY_SECRET=<your_razorpay_secret>
 CLOUDINARY_CLOUD_NAME=<your_cloudinary_name>
@@ -215,10 +215,10 @@ CLOUDINARY_API_SECRET=<your_cloudinary_secret>
 
 ### 4. Verify
 ```bash
-✅ https://exceloraclasses.com/ (homepage)
-✅ https://exceloraclasses.com/sitemap.xml (sitemap)
-✅ https://exceloraclasses.com/robots.txt (robots)
-✅ https://exceloraclasses.com/api/blog?limit=1 (API)
+✅ https://elovialove.onrender.com/ (homepage)
+✅ https://elovialove.onrender.com/sitemap.xml (sitemap)
+✅ https://elovialove.onrender.com/robots.txt (robots)
+✅ https://elovialove.onrender.com/api/blog?limit=1 (API)
 ```
 
 ---
@@ -322,7 +322,7 @@ CLOUDINARY_API_SECRET=<your_cloudinary_secret>
 ✅ Deployment completes without errors
 ✅ Server starts and stays running
 ✅ MongoDB connects successfully
-✅ Homepage loads at https://exceloraclasses.com
+✅ Homepage loads at https://elovialove.onrender.com
 ✅ API responds at /api/blog?limit=1
 ✅ Sitemap generates at /sitemap.xml
 ✅ Robots.txt serves at /robots.txt

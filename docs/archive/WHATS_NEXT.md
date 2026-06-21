@@ -1,4 +1,4 @@
-# 🎯 What's Next - Excelora Classes SEO Implementation
+# 🎯 What's Next - Elovia Love SEO Implementation
 
 **Date:** May 13, 2026  
 **Status:** Phase 1 Complete (40%)  
@@ -37,7 +37,7 @@
 ```bash
 # Test your homepage schema
 1. Go to: https://search.google.com/test/rich-results
-2. Enter: https://exceloraclasses.com/
+2. Enter: https://elovialove.onrender.com/
 3. Verify these schemas appear with no errors:
    - WebSite
    - Organization
@@ -58,17 +58,17 @@
 ```bash
 # If not already set up:
 1. Go to: https://search.google.com/search-console
-2. Add property: https://exceloraclasses.com
+2. Add property: https://elovialove.onrender.com
 3. Verify ownership (DNS or HTML file method)
 
 # Submit sitemap:
 1. Go to Sitemaps section
-2. Submit: https://exceloraclasses.com/sitemap.xml
+2. Submit: https://elovialove.onrender.com/sitemap.xml
 3. Wait for processing (usually 24-48 hours)
 
 # Request indexing:
 1. Go to URL Inspection tool
-2. Enter: https://exceloraclasses.com/
+2. Enter: https://elovialove.onrender.com/
 3. Click "Request Indexing"
 4. Wait for confirmation
 ```
@@ -112,7 +112,7 @@
    
 4. Conclusion (100 words)
    - Recap key points
-   - CTA: Join Excelora Classes
+   - CTA: Join Elovia Love
 ```
 
 **Time Estimate:** 3-4 hours
@@ -129,7 +129,7 @@
 Example:
 <img 
   src="hero.png" 
-  alt="Couple finding love on India's verified dating app Excelora Classes" 
+  alt="Couple finding love on India's verified dating app Elovia Love" 
 />
 ```
 
@@ -175,7 +175,7 @@ Example:
 ```bash
 # Add links from homepage to:
 1. Blog posts (in blog section)
-2. About page (in "What is Excelora Classes" section)
+2. About page (in "What is Elovia Love" section)
 3. Pricing page (in CTA sections)
 4. Safety page (in safety features section)
 

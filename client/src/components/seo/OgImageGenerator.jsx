@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 const getOrigin = () =>
   typeof window !== 'undefined'
     ? window.location.origin
-    : 'https://exceloraclasses.com';
+    : 'https://elovialove.onrender.com';
 
 export const useOgImage = () => {
   const [ogImageUrl, setOgImageUrl] = useState(null);
@@ -57,7 +57,7 @@ export const BlogOgImage = ({ post, onImageGenerated }) => {
       const imageUrl = await generateOgImage('blog', {
         title: post.title,
         excerpt: post.description,
-        author: post.author?.name || 'Excelora Classes',
+        author: post.author?.name || 'Elovia Love',
         category: post.category,
         readTime: post.readingTime,
         publishedAt: post.publishedAt

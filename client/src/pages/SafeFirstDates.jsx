@@ -31,7 +31,7 @@ const SafeFirstDates = () => {
   return (
     <>
       <Helmet>
-        <title>Safe First Date Tips | Excelora Classes Safety</title>
+        <title>Safe First Date Tips | Elovia Love Safety</title>
         <meta name="description" content="Expert advice for your first offline meeting. Learn how to stay safe, set boundaries, and have a positive first date experience." />
       </Helmet>
 

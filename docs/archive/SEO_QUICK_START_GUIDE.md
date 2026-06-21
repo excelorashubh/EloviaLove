@@ -1,4 +1,4 @@
-# 🚀 SEO Quick Start Guide - Excelora Classes
+# 🚀 SEO Quick Start Guide - Elovia Love
 
 **For:** Development Team  
 **Date:** May 13, 2026  
@@ -27,7 +27,7 @@
 
 **Test Homepage Schema:**
 1. Go to [Google Rich Results Test](https://search.google.com/test/rich-results)
-2. Enter: `https://exceloraclasses.com/`
+2. Enter: `https://elovialove.onrender.com/`
 3. Verify these schemas appear:
    - ✅ WebSite
    - ✅ Organization
@@ -47,17 +47,17 @@
 
 **If Not Already Set Up:**
 1. Go to [Google Search Console](https://search.google.com/search-console)
-2. Add property: `https://exceloraclasses.com`
+2. Add property: `https://elovialove.onrender.com`
 3. Verify ownership (DNS or HTML file method)
 
 **Submit Updated Sitemap:**
 1. In Google Search Console, go to Sitemaps
-2. Submit: `https://exceloraclasses.com/sitemap.xml`
+2. Submit: `https://elovialove.onrender.com/sitemap.xml`
 3. Request indexing for homepage
 
 **Request Indexing:**
 1. Go to URL Inspection tool
-2. Enter: `https://exceloraclasses.com/`
+2. Enter: `https://elovialove.onrender.com/`
 3. Click "Request Indexing"
 
 ---
@@ -71,7 +71,7 @@
 - **Target Keyword:** dating profile tips
 - **URL Slug:** `/blog/dating-profile-tips`
 - **H1:** "10 Dating Profile Tips That Actually Work"
-- **Meta Description:** "Learn how to create an attractive dating profile with expert tips, examples, and mistakes to avoid. Boost your matches on Excelora Classes."
+- **Meta Description:** "Learn how to create an attractive dating profile with expert tips, examples, and mistakes to avoid. Boost your matches on Elovia Love."
 
 **Content Structure:**
 ```markdown
@@ -110,7 +110,7 @@
 
 ## Conclusion (200 words)
 - Recap key tips
-- CTA: Join Excelora Classes
+- CTA: Join Elovia Love
 - Internal links to related posts
 ```
 
@@ -119,7 +119,7 @@
 <ArticleSchema
   title="10 Dating Profile Tips That Actually Work"
   description="Learn how to create an attractive dating profile..."
-  author="Excelora Classes Editorial Team"
+  author="Elovia Love Editorial Team"
   publishedDate="2026-05-13"
   slug="dating-profile-tips"
   category="Dating Tips"
@@ -136,9 +136,9 @@
 ```
 
 **Internal Links to Add:**
-- Link to homepage: "Join Excelora Classes"
+- Link to homepage: "Join Elovia Love"
 - Link to signup: "Create your profile"
-- Link to about: "Learn more about Excelora Classes"
+- Link to about: "Learn more about Elovia Love"
 
 ---
 
@@ -156,7 +156,7 @@ grep -r "<img" client/src --include="*.jsx" | grep -v "alt="
 <img src="hero.png" />
 
 // After
-<img src="hero.png" alt="Couple finding love on Excelora Classes dating app" />
+<img src="hero.png" alt="Couple finding love on Elovia Love dating app" />
 ```
 
 **Optimize Image Sizes:**

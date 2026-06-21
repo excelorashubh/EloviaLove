@@ -170,9 +170,9 @@ const Chats = () => {
   return (
     <>
       <Helmet>
-        <title>Messages — Excelora Classes</title>
-        <meta name="description" content="View and manage all your conversations on Excelora Classes." />
-        <link rel="canonical" href="https://exceloraclasses.com/chats" />
+        <title>Messages — Elovia Love</title>
+        <meta name="description" content="View and manage all your conversations on Elovia Love." />
+        <link rel="canonical" href="https://elovialove.onrender.com/chats" />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
       {/* Header */}

@@ -12,7 +12,7 @@ const DatingSafetyIndia = () => {
       icon: MapPin
     },
     {
-      title: "Stay on Excelora Classes",
+      title: "Stay on Elovia Love",
       desc: "Keep your conversations within our encrypted chat. Scammers often try to move the conversation to other platforms quickly to avoid our safety filters.",
       icon: Shield
     },
@@ -31,9 +31,9 @@ const DatingSafetyIndia = () => {
   return (
     <>
       <Helmet>
-        <title>Online Dating Safety in India | Excelora Classes Guide</title>
+        <title>Online Dating Safety in India | Elovia Love Guide</title>
         <meta name="description" content="A comprehensive guide to staying safe while online dating in India. Expert tips on verification, public meetings, and protecting your personal information." />
-        <link rel="canonical" href="https://exceloraclasses.com/online-dating-safety-india" />
+        <link rel="canonical" href="https://elovialove.onrender.com/online-dating-safety-india" />
       </Helmet>
 
       <div className="bg-slate-900 min-h-screen text-slate-100">
@@ -105,7 +105,7 @@ const DatingSafetyIndia = () => {
             <div className="flex-1">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">The Blue Checkmark Advantage</h2>
               <p className="text-xl text-slate-400 mb-8 leading-relaxed">
-                On Excelora Classes, we manually verify every profile using government ID. When you see a blue checkmark, it means that person is **exactly** who they claim to be.
+                On Elovia Love, we manually verify every profile using government ID. When you see a blue checkmark, it means that person is **exactly** who they claim to be.
               </p>
               <div className="space-y-4">
                 {["100% ID Verified", "Live Selfie Matching", "Manual Moderation", "No Bots Allowed"].map((item, i) => (
@@ -132,7 +132,7 @@ const DatingSafetyIndia = () => {
         <section className="py-20 bg-slate-800/50">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl font-bold mb-6">Safe dating starts with a verified profile</h2>
-            <p className="text-lg text-slate-400 mb-10">Join Excelora Classes today and experience the safest digital matchmaking in India.</p>
+            <p className="text-lg text-slate-400 mb-10">Join Elovia Love today and experience the safest digital matchmaking in India.</p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
               <Link to="/signup" className="px-10 py-4 bg-primary-600 text-white rounded-full font-bold hover:bg-primary-700 transition-all shadow-xl shadow-primary-600/20">Get Started Free</Link>
               <Link to="/safety" className="px-10 py-4 bg-slate-700 text-white rounded-full font-bold hover:bg-slate-600 transition-all">Visit Safety Hub</Link>

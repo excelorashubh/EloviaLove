@@ -35,7 +35,7 @@ const AdminLayout = ({ children }) => {
           <Heart size={20} fill="currentColor" />
         </div>
         <div>
-          <p className="font-bold text-sm leading-tight">Excelora Classes</p>
+          <p className="font-bold text-sm leading-tight">Elovia Love</p>
           <p className="text-xs text-slate-400">Admin Panel</p>
         </div>
       </div>

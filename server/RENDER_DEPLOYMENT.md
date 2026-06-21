@@ -129,9 +129,9 @@ HTML files are not cached (for SPA routing).
 
 ### 1. Test Core Functionality
 - [ ] Homepage loads: https://elovialove.onrender.com/
-- [ ] API responds: https://exceloraclasses.com/api/blog?limit=1
-- [ ] Sitemap works: https://exceloraclasses.com/sitemap.xml
-- [ ] Robots.txt works: https://exceloraclasses.com/robots.txt
+- [ ] API responds: https://elovialove.onrender.com/api/blog?limit=1
+- [ ] Sitemap works: https://elovialove.onrender.com/sitemap.xml
+- [ ] Robots.txt works: https://elovialove.onrender.com/robots.txt
 
 ### 2. Test SEO
 - [ ] View page source shows meta tags

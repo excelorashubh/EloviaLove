@@ -4,7 +4,7 @@ export default function PrivacyPolicy() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold mb-6 text-rose-600">Privacy Policy</h1>
         <p className="text-slate-700 leading-7">
-          This is the privacy policy page for Excelora Classes. We take your privacy seriously and ensure that your data is protected.
+          This is the privacy policy page for Elovia Love. We take your privacy seriously and ensure that your data is protected.
         </p>
       </div>
     </div>

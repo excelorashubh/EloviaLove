@@ -2,7 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 // ══════════════════════════════════════════════════════════════════════════════
-// PRODUCTION-READY SCHEMA.ORG COMPONENTS FOR EXCELORA CLASSES
+// PRODUCTION-READY SCHEMA.ORG COMPONENTS FOR ELOVIA LOVE
 // ══════════════════════════════════════════════════════════════════════════════
 
 const SITE_URL = 'https://elovialove.onrender.com';
@@ -182,8 +182,8 @@ export const LocalBusinessSchema = ({ city, region = "India" }) => {
       "closes": "23:59"
     },
     "sameAs": [
-      "https://www.facebook.com/exceloraclasses",
-      "https://www.instagram.com/exceloraclasses"
+      "https://www.facebook.com/elovialove",
+      "https://www.instagram.com/elovialove"
     ]
   };
 
