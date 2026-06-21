@@ -17,7 +17,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed mb-8">
-              Helping students, instructors, and institutions connect with confident course journeys.
+              Connecting curious singles with meaningful relationships and real connections.
             </p>
             <div className="flex gap-4">
               <a
@@ -84,7 +84,7 @@ const Footer = () => {
 
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-slate-500 flex items-center gap-1">
-            © {new Date().getFullYear()} Elovia Love. Made with <Heart size={14} className="text-pink-500" fill="currentColor" /> for learners.
+            © {new Date().getFullYear()} Elovia Love. Made with <Heart size={14} className="text-pink-500" fill="currentColor" /> for heart-led connections.
           </p>
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Sparkles size={14} className="text-primary-400" /> All rights reserved.

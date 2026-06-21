@@ -530,6 +530,7 @@ const Discover = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [mode, setMode] = useState('random');
   const observerTarget = useRef(null);
+  const DISCOVER_PAGE_SIZE = 20;
 
   const [filters, setFilters] = useState({
     gender: '',
@@ -555,15 +556,22 @@ const Discover = () => {
   // Load random users
   const loadRandom = useCallback(async (pageNum = 1) => {
     setLoading(true);
+    if (pageNum === 1) {
+      setPage(1);
+      setHasMore(true);
+    }
+
     try {
       const res = await api.get('/users/discover', { params: { page: pageNum } });
-      const fetched = res.data.users || [];
+      const fetched = Array.isArray(res.data.users) ? res.data.users : [];
+
       if (pageNum === 1) {
         setUsers(fetched);
       } else {
         setUsers(prev => [...prev, ...fetched]);
       }
-      setHasMore(res.data.pagination?.hasMore ?? (fetched.length > 0));
+
+      setHasMore(res.data.pagination?.hasMore ?? (fetched.length === DISCOVER_PAGE_SIZE));
       setMode('random');
     } catch (e) {
       console.error(e);
@@ -575,6 +583,9 @@ const Discover = () => {
   const loadFiltered = useCallback(async () => {
     setLoading(true);
     setShowMobileFilters(false);
+    setPage(1);
+    setHasMore(false);
+
     try {
       const payload = {};
       if (filters.gender) payload.gender = filters.gender;
@@ -595,7 +606,7 @@ const Discover = () => {
       if (filters.recentlyActive) payload.recentlyActive = true;
 
       const res = await api.post('/match/filter', payload);
-      setUsers(res.data.users);
+      setUsers(Array.isArray(res.data.users) ? res.data.users : []);
       setHasMore(false);
       setMode('filter');
     } catch (e) {
@@ -773,7 +784,7 @@ const Discover = () => {
 
       {/* Premium Banner */}
       <section className="bg-linear-to-r from-pink-600 to-rose-500 text-white px-4 py-8 sm:py-10 mt-12">
-        <div className="max-w-7xl mx-auto max-w-sm sm:max-w-md mx-auto text-center">
+        <div className="max-w-sm sm:max-w-md mx-auto text-center">
           <div className="mb-4 text-3xl">⭐</div>
           <h3 className="text-2xl font-extrabold mb-2">Upgrade to Premium</h3>
           <p className="text-white/90 mb-6">

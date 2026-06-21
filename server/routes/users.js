@@ -212,7 +212,7 @@ router.post('/upload-photos', protect, upload.array('photos', 5), async (req, re
 // @access  Private
 router.get('/discover', protect, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = 20;
     const skip = (page - 1) * limit;
 
@@ -230,15 +230,21 @@ router.get('/discover', protect, async (req, res) => {
       isActive: true,
       profileCompleted: true
     })
-    .select('name profilePhoto bio location interests age gender isVerified')
-    .sort({ lastActive: -1 })
-    .skip(skip)
-    .limit(limit);
+      .select('name profilePhoto bio location interests age gender isVerified dateOfBirth lastActive')
+      .sort({ lastActive: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
-    // Attach a lightweight 'reported' flag for admin reports pending/investigating
-    const usersWithFlags = await Promise.all(users.map(async u => {
+    const usersWithFlags = await Promise.all(users.map(async (u) => {
       const reportedCount = await Report.countDocuments({ reportedUser: u._id, status: { $in: ['pending', 'investigating'] } });
-      return { ...u.toObject(), reported: reportedCount > 0 };
+      return {
+        ...u,
+        age: u.dateOfBirth
+          ? Math.floor((Date.now() - new Date(u.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000))
+          : null,
+        reported: reportedCount > 0,
+      };
     }));
 
     res.json({
