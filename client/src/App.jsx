@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import api from './services/api';
 import Home from './pages/Home';
 import About from './pages/About';
 import Blog from './pages/Blog';
@@ -52,9 +53,35 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import CookieConsent from './components/CookieConsent';
 
+const VISITOR_ID_KEY = 'elovia_visitor_id';
+
+const getVisitorId = () => {
+  if (typeof window === 'undefined') return null;
+  let id = window.localStorage.getItem(VISITOR_ID_KEY);
+  if (!id) {
+    id = (window.crypto?.randomUUID?.() || `visitor_${Math.random().toString(36).slice(2, 10)}_${Date.now()}`);
+    window.localStorage.setItem(VISITOR_ID_KEY, id);
+  }
+  return id;
+};
+
+const trackPageVisit = async (page) => {
+  const visitorId = getVisitorId();
+  if (!visitorId) return;
+  try {
+    await api.post('/analytics/track', { visitorId, page });
+  } catch (err) {
+    console.debug('Visitor analytics tracking failed:', err?.message || err);
+  }
+};
+
 function AppContent() {
   const location = useLocation();
   const hideGlobalNavbar = location.pathname.startsWith('/admin') || location.pathname === '/login' || location.pathname === '/register';
+
+  useEffect(() => {
+    trackPageVisit(location.pathname);
+  }, [location.pathname]);
 
   return (
     <>
