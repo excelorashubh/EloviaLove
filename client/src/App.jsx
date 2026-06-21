@@ -78,6 +78,7 @@ const trackPageVisit = async (page) => {
 function AppContent() {
   const location = useLocation();
   const hideGlobalNavbar = location.pathname.startsWith('/admin') || location.pathname === '/login' || location.pathname === '/register';
+  const hideChatInterface = location.pathname === '/chat' || location.pathname.startsWith('/chat/');
 
   useEffect(() => {
     trackPageVisit(location.pathname);
@@ -301,7 +302,7 @@ function AppContent() {
         </Routes>
       </main>
 
-      <Footer />
+      {!hideChatInterface && <Footer />}
       <CookieConsent />
     </>
   );

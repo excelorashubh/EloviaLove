@@ -1,12 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowLeft, Check, CheckCheck, WifiOff } from 'lucide-react';
+import { Send, ArrowLeft, Check, CheckCheck, WifiOff, Phone, Video, MoreVertical, Smile, Paperclip, Image, Gift, Search } from 'lucide-react';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+
+const avatarUrl = (u) =>
+  u?.profilePhoto ||
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(u?.name || 'U')}&background=e879a0&color=fff`;
 
 const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
@@ -108,6 +112,8 @@ const Chat = () => {
 
   const [messages, setMessages]     = useState([]);
   const [otherUser, setOtherUser]   = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [search, setSearch]         = useState('');
   const [input, setInput]           = useState('');
   const [loading, setLoading]       = useState(true);
   const [sending, setSending]       = useState(false);
@@ -122,6 +128,22 @@ const Chat = () => {
   const unreadRef       = useRef(null);
   const typingTimer     = useRef(null);
   const inputRef        = useRef(null);
+  const fileInputRef    = useRef(null);
+
+  const handleEmojiClick = () => {
+    setInput(prev => `${prev}😊`);
+    inputRef.current?.focus();
+  };
+
+  const handleAttachClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    if (e?.target) e.target.value = '';
+    inputRef.current?.focus();
+  };
+  
   // prevent adding duplicate messages from socket echo
   const sentIds         = useRef(new Set());
 
@@ -154,6 +176,26 @@ const Chat = () => {
       setMessages(prev => {
         if (prev.some(m => m._id?.toString() === message._id?.toString())) return prev;
         return [...prev, message];
+      });
+
+      setConversations(prev => {
+        const updatedMsg = {
+          id: message._id,
+          content: message.content,
+          sender: message.sender,
+          createdAt: message.createdAt,
+          isRead: false,
+        };
+        const idx = prev.findIndex(c => (c.otherUser.id || c.otherUser._id)?.toString() === from?.toString());
+        if (idx !== -1) {
+          const updated = [...prev];
+          const conv = { ...updated[idx] };
+          conv.lastMessage = updatedMsg;
+          conv.unreadCount = (conv.unreadCount || 0) + 1;
+          updated.splice(idx, 1);
+          return [conv, ...updated];
+        }
+        return prev;
       });
 
       // Mark as read since chat is open
@@ -190,15 +232,19 @@ const Chat = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [msgRes, userRes] = await Promise.all([
+        const [msgRes, userRes, convRes] = await Promise.all([
           api.get(`/messages/${userId}?page=1`),
           api.get(`/users/${userId}`),
+          api.get('/messages'),
         ]);
         if (msgRes.data.success) {
           setMessages(msgRes.data.messages);
           setHasMore(msgRes.data.pagination.hasMore);
         }
         if (userRes.data.success) setOtherUser(userRes.data.user);
+        if (convRes.data.success) {
+          setConversations((convRes.data.conversations || []).filter(c => c.lastMessage));
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -315,180 +361,245 @@ const Chat = () => {
     </div>
   );
 
+  const filteredConversations = useMemo(() => {
+    return conversations.filter(c =>
+      c.otherUser.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [conversations, search]);
+
   const grouped = groupByDate(messages, myId);
-  const otherAvatar = otherUser?.profilePhoto ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUser?.name || 'U')}&background=e879a0&color=fff`;
+  const otherAvatar = avatarUrl(otherUser);
 
   return (
     <>
       <Helmet>
         <title>Chat — Elovia Love</title>
         <meta name="description" content="Real-time messaging with your matches on Elovia Love." />
-        <link rel="canonical" href="https://elovialove.onrender.com/chat" />
+        <link rel="canonical" href={`https://elovialove.onrender.com/chat/${userId}`} />
       </Helmet>
-      <div className="flex flex-col h-screen bg-slate-50">
+      <div className="h-screen overflow-hidden bg-slate-50">
+        <div className="flex h-full">
 
-      {/* ── Header ── */}
-      <header className="bg-white border-b border-slate-200 shadow-sm shrink-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-3 py-3">
-            <Link
-              to="/chats"
-              className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
-            >
-              <ArrowLeft size={20} />
-            </Link>
-
-            <div className="relative">
-              <img src={otherAvatar} alt={otherUser?.name} className="w-10 h-10 rounded-full object-cover" />
-              {connected && (
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white" />
+          {/* Sidebar */}
+          <aside className="hidden xl:flex flex-col w-96 border-r border-slate-200 bg-white overflow-hidden">
+            <div className="border-b border-slate-200 px-5 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Messages</p>
+                  <p className="text-xs text-slate-500 mt-0.5">All conversations</p>
+                </div>
+                <Link to="/chats" className="text-slate-500 hover:text-slate-900" aria-label="Open conversations list">
+                  <ArrowLeft size={18} />
+                </Link>
+              </div>
+              <div className="mt-4 relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search chats"
+                  className="w-full pl-9 pr-3 py-2.5 text-sm bg-slate-100 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-400"
+                />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {filteredConversations.length === 0 ? (
+                <div className="p-6 text-sm text-slate-500">No conversations found.</div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {filteredConversations.map(conv => {
+                    const isActive = (conv.otherUser.id || conv.otherUser._id)?.toString() === userId;
+                    const lastMsg = conv.lastMessage || {};
+                    const isMeLast = lastMsg?.sender?._id === myId || (lastMsg?.sender || {})?.id === myId;
+                    return (
+                      <Link
+                        key={conv.matchId || conv.otherUser.id}
+                        to={`/chat/${conv.otherUser.id || conv.otherUser._id}`}
+                        className={`flex items-center gap-3 px-5 py-4 hover:bg-slate-50 transition-colors ${isActive ? 'bg-slate-50' : ''}`}
+                      >
+                        <div className="relative shrink-0">
+                          <img src={avatarUrl(conv.otherUser)} alt={conv.otherUser.name} className="w-12 h-12 rounded-2xl object-cover" />
+                          {conv.unreadCount > 0 && (
+                            <span className="absolute -top-0.5 -right-0.5 min-w-[1.4rem] h-5 px-1.5 rounded-full bg-primary-600 text-white text-[10px] font-semibold flex items-center justify-center">
+                              {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-semibold text-slate-900 truncate">{conv.otherUser.name}</p>
+                            <span className="text-[11px] text-slate-400">{new Date(lastMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          <p className="text-sm truncate text-slate-500">
+                            {isMeLast ? 'You: ' : ''}{lastMsg.content || 'No messages yet.'}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
             </div>
+          </aside>
 
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-slate-900 text-sm leading-tight truncate flex items-center gap-1">{otherUser?.name} {otherUser?.isVerified && <VerifiedBadge size={14} />}</p>
-              <p className="text-xs text-slate-400 leading-tight">
-                {isTyping ? (
-                  <motion.span
-                    key="typing"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-primary-500 font-medium"
-                  >
-                    typing...
-                  </motion.span>
-                ) : connected ? (
-                  <span className="text-green-500 font-medium">Online</span>
-                ) : (
-                  otherUser?.location || 'Elovia Love member'
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <header className="flex items-center justify-between gap-4 shrink-0 border-b border-slate-200 bg-white px-4 py-3 sm:px-6 z-20">
+              <div className="flex items-center gap-3">
+                <Link to="/chats" className="flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors xl:hidden">
+                  <ArrowLeft size={20} />
+                </Link>
+                <div className="relative">
+                  <img src={otherAvatar} alt={otherUser?.name} className="w-12 h-12 rounded-2xl object-cover" />
+                  {connected && <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white" />}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-base font-semibold text-slate-900 truncate flex items-center gap-2">
+                    {otherUser?.name}
+                    {otherUser?.isVerified && <VerifiedBadge size={14} />}
+                  </p>
+                  <p className="text-xs text-slate-500 truncate">
+                    {isTyping ? 'Typing...' : connected ? 'Online' : (otherUser?.location || 'Last seen recently')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button type="button" className="hidden sm:inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Voice call">
+                  <Phone size={18} />
+                </button>
+                <button type="button" className="hidden sm:inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Video call">
+                  <Video size={18} />
+                </button>
+                <button type="button" className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="More options">
+                  <MoreVertical size={18} />
+                </button>
+              </div>
+            </header>
+
+            <div className="flex-1 overflow-hidden bg-slate-50">
+              <div className="h-full overflow-y-auto px-4 py-4 sm:px-6">
+                {hasMore && (
+                  <div className="flex justify-center py-3">
+                    <button
+                      onClick={loadMore}
+                      disabled={loadingMore}
+                      className="text-xs text-slate-600 hover:text-slate-900 px-3 py-2 rounded-full border border-slate-200 bg-white shadow-sm transition-colors"
+                    >
+                      {loadingMore ? 'Loading...' : 'Load earlier messages'}
+                    </button>
+                  </div>
                 )}
-              </p>
+
+                {grouped.map((item, idx) => {
+                  if (item.type === 'unread') return (
+                    <div key="unread-divider" ref={unreadRef} className="flex items-center gap-3 py-3 my-1">
+                      <div className="flex-1 h-px bg-pink-200" />
+                      <span className="text-[11px] text-pink-500 font-semibold shrink-0 bg-pink-50 border border-pink-200 px-3 py-1 rounded-full">Unread messages</span>
+                      <div className="flex-1 h-px bg-pink-200" />
+                    </div>
+                  );
+
+                  if (item.type === 'date') return (
+                    <div key={item.key} className="flex items-center gap-3 py-3">
+                      <div className="flex-1 h-px bg-slate-200" />
+                      <span className="text-[11px] text-slate-400 font-medium shrink-0 bg-slate-50 px-2">{item.label}</span>
+                      <div className="flex-1 h-px bg-slate-200" />
+                    </div>
+                  );
+
+                  const isMe = (item.sender?._id || item.sender)?.toString() === myId;
+                  const prev = grouped[idx - 1];
+                  const prevSender = prev?.type === 'message'
+                    ? (prev.sender?._id || prev.sender)?.toString()
+                    : null;
+                  const currSender = (item.sender?._id || item.sender)?.toString();
+                  const isGrouped = prevSender === currSender;
+
+                  return (
+                    <MessageBubble
+                      key={item._id}
+                      item={item}
+                      isMe={isMe}
+                      isGrouped={isGrouped}
+                      otherAvatar={otherAvatar}
+                      otherUser={otherUser}
+                      retryFailed={retryFailed}
+                    />
+                  );
+                })}
+
+                <AnimatePresence>
+                  {isTyping && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      className="flex items-end gap-2 mt-3"
+                    >
+                      <img src={otherAvatar} alt={`${otherUser?.name} is typing`} className="w-7 h-7 rounded-full object-cover shrink-0" />
+                      <div className="bg-white border border-slate-100 shadow-sm px-4 py-3 rounded-2xl rounded-tl-md flex gap-1 items-center">
+                        {[0, 1, 2].map(i => (
+                          <span
+                            key={i}
+                            className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"
+                            style={{ animationDelay: `${i * 0.15}s` }}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div ref={messagesEndRef} />
+              </div>
             </div>
 
-            {!connected && (
-              <div title="Reconnecting..." className="text-slate-400">
-                <WifiOff size={16} />
+            <div className="bg-white border-t border-slate-200 shrink-0">
+              <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
+                <form onSubmit={handleSend} className="flex items-end gap-2">
+                  <button type="button" onClick={handleEmojiClick} className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Add emoji">
+                    <Smile size={18} />
+                  </button>
+                  <button type="button" onClick={handleAttachClick} className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Attach file">
+                    <Paperclip size={18} />
+                  </button>
+                  <button type="button" className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Send image">
+                    <Image size={18} />
+                  </button>
+                  <button type="button" className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="GIFs">
+                    <Gift size={18} />
+                  </button>
+                  <textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={handleTyping}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Type a message..."
+                    rows={1}
+                    className="flex-1 min-h-12 max-h-36 resize-none rounded-3xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                    style={{ lineHeight: '1.5' }}
+                    aria-label="Message input"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || sending}
+                    className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-linear-to-br from-primary-600 to-pink-500 text-white hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    aria-label="Send message"
+                  >
+                    <Send size={18} />
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </form>
+                <p className="text-center text-[10px] text-slate-400 mt-2">Enter to send · Shift+Enter for new line</p>
               </div>
-            )}
+            </div>
           </div>
         </div>
-      </header>
-
-      {/* ── Messages ── */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 space-y-1">
-
-          {/* Load more */}
-          {hasMore && (
-            <div className="text-center mb-4">
-              <button
-                onClick={loadMore}
-                disabled={loadingMore}
-                className="text-xs text-primary-600 hover:underline font-medium disabled:opacity-50"
-              >
-                {loadingMore ? 'Loading...' : 'Load earlier messages'}
-              </button>
-            </div>
-          )}
-
-          {grouped.map((item, idx) => {
-            // Unread divider
-            if (item.type === 'unread') return (
-              <div key="unread-divider" ref={unreadRef} className="flex items-center gap-3 py-3 my-1">
-                <div className="flex-1 h-px bg-pink-200" />
-                <span className="text-[11px] text-pink-500 font-semibold shrink-0 bg-pink-50 border border-pink-200 px-3 py-1 rounded-full">
-                  Unread messages
-                </span>
-                <div className="flex-1 h-px bg-pink-200" />
-              </div>
-            );
-
-            // Date separator
-            if (item.type === 'date') return (
-              <div key={item.key} className="flex items-center gap-3 py-3">
-                <div className="flex-1 h-px bg-slate-200" />
-                <span className="text-[11px] text-slate-400 font-medium shrink-0 bg-slate-50 px-2">{item.label}</span>
-                <div className="flex-1 h-px bg-slate-200" />
-              </div>
-            );
-
-            const isMe = (item.sender?._id || item.sender)?.toString() === myId;
-            const prev = grouped[idx - 1];
-            const prevSender = prev?.type === 'message'
-              ? (prev.sender?._id || prev.sender)?.toString()
-              : null;
-            const currSender = (item.sender?._id || item.sender)?.toString();
-            const isGrouped = prevSender === currSender;
-
-            return (
-              <MessageBubble
-                key={item._id}
-                item={item}
-                isMe={isMe}
-                isGrouped={isGrouped}
-                otherAvatar={otherAvatar}
-                otherUser={otherUser}
-                retryFailed={retryFailed}
-              />
-            );
-          })}
-
-          {/* Typing indicator */}
-          <AnimatePresence>
-            {isTyping && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                className="flex items-end gap-2 mt-3"
-              >
-                <img src={otherAvatar} alt={`${otherUser?.name} is typing`} className="w-7 h-7 rounded-full object-cover shrink-0" />
-                <div className="bg-white border border-slate-100 shadow-sm px-4 py-3 rounded-2xl rounded-tl-md flex gap-1 items-center">
-                  {[0, 1, 2].map(i => (
-                    <span
-                      key={i}
-                      className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"
-                      style={{ animationDelay: `${i * 0.15}s` }}
-                    />
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {/* ── Input ── */}
-      <div className="bg-white border-t border-slate-200 shrink-0">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3">
-          <form onSubmit={handleSend} className="flex items-end gap-3">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={handleTyping}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
-              rows={1}
-              className="flex-1 px-4 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 bg-slate-50 focus:bg-white transition-all text-sm resize-none max-h-32 overflow-y-auto"
-              style={{ lineHeight: '1.5' }}
-            />
-            <motion.button
-              type="submit"
-              disabled={!input.trim() || sending}
-              whileTap={{ scale: 0.92 }}
-              className="p-3 bg-linear-to-br from-primary-600 to-pink-500 text-white rounded-2xl hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
-            >
-              <Send size={18} />
-            </motion.button>
-          </form>
-          <p className="text-[10px] text-slate-400 mt-1.5 text-center">
-            Enter to send · Shift+Enter for new line
-          </p>
-        </div>
-      </div>
       </div>
     </>
   );
