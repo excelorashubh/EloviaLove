@@ -13,7 +13,7 @@ const Footer = () => {
                 <Heart size={20} fill="currentColor" />
               </div>
               <span className="text-xl font-bold tracking-tight text-white hover:text-pink-400 transition-colors">
-                Excelora Classes
+                Elovia Love
               </span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed mb-8">
@@ -84,7 +84,7 @@ const Footer = () => {
 
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-slate-500 flex items-center gap-1">
-            © {new Date().getFullYear()} Excelora Classes. Made with <Heart size={14} className="text-pink-500" fill="currentColor" /> for learners.
+            © {new Date().getFullYear()} Elovia Love. Made with <Heart size={14} className="text-pink-500" fill="currentColor" /> for learners.
           </p>
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Sparkles size={14} className="text-primary-400" /> All rights reserved.

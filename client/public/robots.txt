@@ -14,7 +14,6 @@ Disallow: /admin/*
 Disallow: /dashboard
 Disallow: /profile
 Disallow: /profile/*
-Disallow: /discover
 Disallow: /matches
 Disallow: /chat
 Disallow: /chat/*
@@ -22,7 +21,6 @@ Disallow: /chats
 Disallow: /notifications
 
 # Block search/filter URLs (infinite crawl traps)
-Disallow: /discover?*
 Disallow: /*?filter=*
 Disallow: /*?search=*
 Disallow: /*?page=*

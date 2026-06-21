@@ -1,9 +1,9 @@
-# ❤️ Excelora Classes - Premium Dating Platform
+# ❤️ Elovia Love - Premium Dating Platform
 
-[![Production Status](https://img.shields.io/badge/Production-Live-success)](https://exceloraclasses.com)
+[![Production Status](https://img.shields.io/badge/Production-Live-success)](https://elovialove.com)
 [![License](https://img.shields.io/badge/License-ISC-blue)](LICENSE)
 
-Excelora Classes is a modern, high-performance dating platform built with the MERN stack (MongoDB, Express, React, Node.js). It features real-time matching, instant messaging, and a robust SEO-driven architecture.
+Elovia Love is a modern, high-performance dating platform built with the MERN stack (MongoDB, Express, React, Node.js). It features real-time matching, instant messaging, and a robust SEO-driven architecture.
 
 ---
 
@@ -82,7 +82,7 @@ npm run dev
 
 ## 🌍 SEO Architecture
 
-Excelora Classes is built for organic growth:
+Elovia Love is built for organic growth:
 - **Dynamic Sitemap**: Automatically updated at `/sitemap.xml`.
 - **Robots Control**: Optimized `/robots.txt` to prioritize public landing pages.
 - **Structured Data**: JSON-LD implementation for rich search results.

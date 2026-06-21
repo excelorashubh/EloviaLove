@@ -1,17 +1,17 @@
-export const SITE_URL = 'https://exceloraclasses.com';
+export const SITE_URL = 'https://elovialove.com';
 
 export const STATIC_SEO_PAGES = {
   privacy: {
     slug: 'privacy',
-    title: 'Privacy Policy | Excelora Classes',
-    description: 'Excelora Classes protects your personal data with strict privacy controls, secure encryption, and transparent data use policies for Indian singles.',
+    title: 'Privacy Policy | Elovia Love',
+    description: 'Elovia Love protects your personal data with strict privacy controls, secure encryption, and transparent data use policies for Indian singles.',
     h1: 'Privacy Policy',
-    intro: 'Your privacy is one of our highest priorities. Excelora Classes is built to safeguard your personal information while you search for a meaningful relationship.',
+    intro: 'Your privacy is one of our highest priorities. Elovia Love is built to safeguard your personal information while you search for a meaningful relationship.',
     sections: [
       {
         title: 'What information we collect',
         body: [
-          'Excelora Classes collects only the information needed to help you create genuine connections. That includes your contact details, profile preferences, verification information, and the content you choose to share on your profile.',
+          'Elovia Love collects only the information needed to help you create genuine connections. That includes your contact details, profile preferences, verification information, and the content you choose to share on your profile.',
           'We do not sell your personal data to third parties. Your profile details are shared only with verified members who match your search criteria, and only with the explicit goal of improving your dating experience.'
         ]
       },
@@ -51,15 +51,15 @@ export const STATIC_SEO_PAGES = {
   },
   terms: {
     slug: 'terms',
-    title: 'Terms of Service | Excelora Classes',
-    description: 'Read the Excelora Classes Terms of Service to learn how we support genuine dating, account safety, and respectful member conduct on our platform.',
+    title: 'Terms of Service | Elovia Love',
+    description: 'Read the Elovia Love Terms of Service to learn how we support genuine dating, account safety, and respectful member conduct on our platform.',
     h1: 'Terms of Service',
-    intro: 'These terms explain how you may use Excelora Classes, what we expect from our members, and how we keep the experience safe and genuine for everyone.',
+    intro: 'These terms explain how you may use Elovia Love, what we expect from our members, and how we keep the experience safe and genuine for everyone.',
     sections: [
       {
         title: 'Using Excelora Classes',
         body: [
-          'When you join Excelora Classes, you agree to use the platform honestly and respectfully. This includes representing yourself truthfully, communicating courteously, and avoiding behavior that could hurt other members.',
+          'When you join Elovia Love, you agree to use the platform honestly and respectfully. This includes representing yourself truthfully, communicating courteously, and avoiding behavior that could hurt other members.',
           'Our verification program is designed to reduce fake accounts and promote trust. Members who violate our rules may have their accounts suspended or removed.'
         ]
       },
@@ -99,10 +99,10 @@ export const STATIC_SEO_PAGES = {
   },
   safety: {
     slug: 'safety',
-    title: 'Safety Tips for Online Dating | Excelora Classes',
-    description: 'Find online dating safety tips for meeting genuine singles in India. Learn how Excelora Classes protects your privacy, identity, and first date safety.',
+    title: 'Safety Tips for Online Dating | Elovia Love',
+    description: 'Find online dating safety tips for meeting genuine singles in India. Learn how Elovia Love protects your privacy, identity, and first date safety.',
     h1: 'Safety First: Online Dating Tips',
-    intro: 'At Excelora Classes, safety is the foundation of every connection. These tips help you stay protected while you meet real singles and build meaningful relationships.',
+    intro: 'At Elovia Love, safety is the foundation of every connection. These tips help you stay protected while you meet real singles and build meaningful relationships.',
     sections: [
       {
         title: 'Start with a verified profile',
@@ -150,7 +150,7 @@ export const STATIC_SEO_PAGES = {
     title: 'Community Guidelines | Excelora Classes',
     description: 'Excelora Classes community guidelines set the standard for respectful communication, safe dating, and genuine member behavior on our platform.',
     h1: 'Community Guidelines',
-    intro: 'Our community thrives when members treat each other with respect. These guidelines show what behavior is expected from everyone who uses Excelora Classes.',
+    intro: 'Our community thrives when members treat each other with respect. These guidelines show what behavior is expected from everyone who uses Elovia Love.',
     sections: [
       {
         title: 'Be respectful and honest',
@@ -195,10 +195,10 @@ export const STATIC_SEO_PAGES = {
   },
   'dating-safety': {
     slug: 'dating-safety',
-    title: 'Dating Safety Guide | Excelora Classes',
-    description: 'Stay secure while dating online with Excelora Classes. Learn practical dating safety advice for first messages, profile checks, and in-person meetups.',
+    title: 'Dating Safety Guide | Elovia Love',
+    description: 'Stay secure while dating online with Elovia Love. Learn practical dating safety advice for first messages, profile checks, and in-person meetups.',
     h1: 'Dating Safety Guide',
-    intro: 'Dating online should feel fun and safe. This guide gives you the practical steps to protect yourself while using Excelora Classes to meet genuine singles.',
+    intro: 'Dating online should feel fun and safe. This guide gives you the practical steps to protect yourself while using Elovia Love to meet genuine singles.',
     sections: [
       {
         title: 'Scan profiles carefully',

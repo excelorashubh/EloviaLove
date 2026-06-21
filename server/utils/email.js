@@ -19,7 +19,7 @@ const getTransporter = () => {
 const sendEmail = async ({ to, subject, html, text }) => {
   const transporter = getTransporter();
   const info = await transporter.sendMail({
-    from: process.env.EMAIL_FROM || 'Excelora Classes <noreply@exceloraclasses.com>',
+    from: process.env.EMAIL_FROM || 'Elovia Love <noreply@elovialove.com>',
     to,
     subject,
     text,

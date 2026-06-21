@@ -15,7 +15,7 @@ export const SeoWrapper = ({
   noindex = false,
   children
 }) => {
-  const siteUrl = 'https://exceloraclasses.com';
+  const siteUrl = 'https://elovialove.com';
   const isBrowser = typeof window !== 'undefined';
   const currentPath = isBrowser ? window.location.pathname : '';
   const fullCanonical = canonical ? `${siteUrl}${canonical}` : `${siteUrl}${currentPath}`;
@@ -38,7 +38,7 @@ export const SeoWrapper = ({
         <meta property="og:image" content={fullOgImage} />
         <meta property="og:url" content={fullCanonical} />
         <meta property="og:type" content={ogType} />
-        <meta property="og:site_name" content="Excelora Classes" />
+        <meta property="og:site_name" content="Elovia Love" />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content={twitterCard} />
@@ -77,7 +77,7 @@ export const BlogPostSeo = ({
   readingTime
 }) => {
   const isBrowser = typeof window !== 'undefined';
-  const origin = isBrowser ? window.location.origin : 'https://exceloraclasses.com';
+  const origin = isBrowser ? window.location.origin : 'https://elovialove.com';
   const href = isBrowser ? window.location.href : `${origin}/blog/${post.slug}`;
 
   const structuredData = {
@@ -93,7 +93,7 @@ export const BlogPostSeo = ({
     },
     "publisher": {
       "@type": "Organization",
-      "name": "Excelora Classes",
+      "name": "Elovia Love",
       "logo": {
         "@type": "ImageObject",
         "url": `${origin}/logo.png`
@@ -126,8 +126,8 @@ export const BlogPostSeo = ({
 
 // 3. City Page SEO Component
 export const CityPageSeo = ({ city, stats, features }) => {
-  const siteUrl = 'https://exceloraclasses.com';
-  const title = `Find Love in ${city.name} | Dating in ${city.name} | Excelora Classes`;
+  const siteUrl = 'https://elovialove.com';
+  const title = `Find Love in ${city.name} | Dating in ${city.name} | Elovia Love`;
   const description = `Meet singles in ${city.name}. ${stats.activeUsers}+ active members. Safe, verified dating for serious relationships in ${city.name}. Join ${city.name}'s trusted dating community.`;
 
   const isBrowser = typeof window !== 'undefined';
@@ -139,10 +139,10 @@ export const CityPageSeo = ({ city, stats, features }) => {
     "name": title,
     "description": description,
     "url": href,
-    "isPartOf": {
+      "isPartOf": {
       "@type": "WebSite",
-      "name": "Excelora Classes",
-      "url": "https://exceloraclasses.com"
+      "name": "Elovia Love",
+      "url": "https://elovialove.com"
     },
     "about": {
       "@type": "Place",
@@ -173,7 +173,7 @@ export const CityPageSeo = ({ city, stats, features }) => {
 
 // 4. Trust/Safety Page SEO Component
 export const TrustPageSeo = ({ pageData, lastUpdated }) => {
-  const siteUrl = 'https://exceloraclasses.com';
+  const siteUrl = 'https://elovialove.com';
   const isBrowser = typeof window !== 'undefined';
   const href = isBrowser ? window.location.href : `${siteUrl}/${pageData.slug}`;
 
@@ -186,11 +186,11 @@ export const TrustPageSeo = ({ pageData, lastUpdated }) => {
     "dateModified": lastUpdated,
     "publisher": {
       "@type": "Organization",
-      "name": "Excelora Classes",
-      "url": "https://exceloraclasses.com",
+      "name": "Elovia Love",
+      "url": "https://elovialove.com",
       "sameAs": [
-        "https://www.facebook.com/exceloraclasses",
-        "https://www.instagram.com/exceloraclasses"
+        "https://www.facebook.com/elovialove",
+        "https://www.instagram.com/elovialove"
       ]
     }
   };

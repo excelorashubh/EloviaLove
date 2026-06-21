@@ -7,7 +7,7 @@ import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
 
-const BASE_URL = 'https://exceloraclasses.com';
+const BASE_URL = 'https://elovialove.com';
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -92,7 +92,7 @@ const DatingTips = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const pageTitle = 'Dating Tips & Relationship Advice — Excelora Classes';
+  const pageTitle = 'Dating Tips & Relationship Advice — Elovia Love';
   const pageDescription = 'Expert dating tips and relationship advice for Indians. Learn how to find love, build healthy relationships, and navigate modern dating in India.';
   const pageUrl = `${BASE_URL}/blog/dating-tips`;
   const pageImage = `${BASE_URL}/EloviaLoveWB_small.png`;
@@ -111,7 +111,7 @@ const DatingTips = () => {
         <meta property="og:description" content={pageDescription} />
         <meta property="og:url" content={pageUrl} />
         <meta property="og:image" content={pageImage} />
-        <meta property="og:site_name" content="Excelora Classes" />
+        <meta property="og:site_name" content="Elovia Love" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -139,13 +139,13 @@ const DatingTips = () => {
                   headline: post.title,
                   url: `${BASE_URL}/blog/${post.slug}`,
                   datePublished: post.publishedAt,
-                  author: { '@type': 'Person', name: post.author || 'Excelora Classes Team' },
+                  author: { '@type': 'Person', name: post.author || 'Elovia Love Team' },
                 },
               })),
             },
             publisher: {
               '@type': 'Organization',
-              name: 'Excelora Classes',
+              name: 'Elovia Love',
               logo: { '@type': 'ImageObject', url: `${BASE_URL}/EloviaLoveWB_small.png` },
             },
           })}

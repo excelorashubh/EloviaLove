@@ -427,66 +427,59 @@ const FilterToolbar = React.memo(({ filters, onChange, onApply, onReset, userPla
 // ── Profile Card ──────────────────────────────────────────────────────────────
 const GridProfileCard = React.memo(({ user, onLike, onPass, onSuperLike }) => {
   const avatar = user?.profilePhoto ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=e879a0&color=fff&size=400`;
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=e879a0&color=fff&size=800`;
 
   return (
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ duration: 0.25 }}
-      className="group relative rounded-[24px] overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow"
+      className="group flex flex-col rounded-[24px] overflow-hidden bg-white shadow-md hover:shadow-xl transition-transform duration-250 min-h-[470px] lg:min-h-[500px]"
     >
-      {/* Image Section (65% of height) */}
-      <div className="relative h-64 overflow-hidden bg-slate-100">
+      {/* Top: Large Image */}
+      <div className="w-full overflow-hidden bg-slate-100">
         <img
           src={avatar}
           alt={user?.name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-[300px] lg:h-[325px] object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
-          width="320"
-          height="260"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-
-        {/* Info Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 px-4 py-4 text-white">
-          <div className="flex items-start gap-2 mb-2">
-            <div>
-              <div className="flex items-center gap-1.5 text-lg font-bold">
-                {user?.name}
-                {user?.age && <span className="text-base font-normal">, {user?.age}</span>}
-                {user?.isVerified && <VerifiedBadge size={14} className="text-blue-300" />}
-              </div>
-              {user?.location && (
-                <div className="flex items-center gap-1 text-xs text-white/80 mt-1">
-                  <MapPin size={12} /> {user?.location}
-                </div>
-              )}
-            </div>
-            {user?.match && (
-              <div className="ml-auto text-xs font-semibold bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
-                {user.match}%
-              </div>
-            )}
-          </div>
-          {user?.profession && (
-            <p className="text-xs text-white/90">💼 {user.profession}</p>
-          )}
-        </div>
       </div>
 
-      {/* Content Section */}
-      <div className="p-4 space-y-3">
+      {/* Body */}
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold text-slate-900">{user?.name}{user?.age ? `, ${user.age}` : ''}</h3>
+              {user?.isVerified && <VerifiedBadge size={16} className="text-blue-500" />}
+            </div>
+            {user?.location && (
+              <div className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                <MapPin size={12} /> {user.location}
+              </div>
+            )}
+            {user?.profession && (
+              <div className="text-xs text-slate-500 mt-1">💼 {user.profession}</div>
+            )}
+          </div>
+          {user?.match && (
+            <div className="text-sm font-semibold text-slate-700 bg-slate-100 px-2 py-1 rounded-full">
+              {user.match}%
+            </div>
+          )}
+        </div>
+
         {user?.bio && (
-          <p className="text-xs text-slate-600 line-clamp-2">{user.bio}</p>
+          <p className="text-sm text-slate-600 mt-3 line-clamp-3 flex-1">{user.bio}</p>
         )}
 
         {/* Interest Chips */}
         {user?.interests?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2 mt-3">
             {user.interests.slice(0, 5).map(interest => (
               <span
                 key={interest}
-                className="inline-block px-2.5 py-1 bg-slate-100 text-slate-700 text-[10px] font-semibold rounded-full"
+                className="inline-block px-3 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-full"
               >
                 {interest}
               </span>
@@ -494,28 +487,28 @@ const GridProfileCard = React.memo(({ user, onLike, onPass, onSuperLike }) => {
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
+        {/* Actions */}
+        <div className="mt-4 flex items-center gap-3">
           <button
             onClick={() => onPass && onPass(user._id)}
-            className="flex-1 py-2.5 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors"
+            className="flex-1 py-3 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors"
             title="Pass"
           >
-            <X size={16} className="mx-auto" />
+            <X size={18} className="mx-auto" />
           </button>
           <button
             onClick={() => onLike && onLike(user._id)}
-            className="flex-1 py-2.5 bg-linear-to-r from-pink-600 to-pink-500 text-white rounded-xl text-sm font-semibold hover:shadow-md transition-all"
+            className="flex-1 py-3 bg-linear-to-r from-pink-600 to-pink-500 text-white rounded-xl text-sm font-semibold hover:shadow-md transition-all"
             title="Like"
           >
-            <Heart size={16} className="mx-auto" fill="currentColor" />
+            <Heart size={18} className="mx-auto" fill="currentColor" />
           </button>
           <button
             onClick={() => onSuperLike && onSuperLike(user._id)}
-            className="flex-1 py-2.5 bg-blue-50 text-blue-600 rounded-xl text-sm font-semibold hover:bg-blue-100 transition-colors"
+            className="flex-1 py-3 bg-blue-50 text-blue-600 rounded-xl text-sm font-semibold hover:bg-blue-100 transition-colors"
             title="Super Like"
           >
-            <Sparkles size={16} className="mx-auto" />
+            <Sparkles size={18} className="mx-auto" />
           </button>
         </div>
       </div>
@@ -746,7 +739,7 @@ const Discover = () => {
         ) : (
           <>
             {/* Responsive Grid: 4 cols (desktop) → 3 (laptop) → 2 (tablet) → 1 (mobile) */}
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {users.map((user, idx) => (
                 <React.Fragment key={user._id}>
                   {/* InFeed Ad every 5 profiles */}
