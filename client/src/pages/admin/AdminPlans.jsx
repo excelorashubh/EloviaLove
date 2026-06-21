@@ -572,6 +572,7 @@ const AdminPlans = () => {
                   {['Plan', 'Key', 'Price', 'Duration', 'Features', 'Popular', 'Status', 'Actions'].map(h => (
                     <th key={h} className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
                   ))}
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Razorpay ID</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -620,8 +621,25 @@ const AdminPlans = () => {
                           {plan.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
+                      <td className="px-5 py-3 text-xs text-slate-600">{plan.razorpayPlanId || '—'}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
+                          <button
+                            onClick={async () => {
+                              if (!window.confirm(`Resync Razorpay for ${plan.name}? This will clear stored Razorpay ID and attempt to archive the remote plan.`)) return;
+                              try {
+                                await api.post(`/admin/plans/${plan._id}/resync-razorpay`);
+                                alert('Per-plan resync completed');
+                                load();
+                              } catch (e) {
+                                alert(e.response?.data?.message || 'Resync failed');
+                              }
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-primary-600 transition-colors"
+                            title="Resync Razorpay for this plan"
+                          >
+                            <Tag size={14} />
+                          </button>
                           <button onClick={() => setModal(plan)} className="p-1.5 text-slate-400 hover:text-primary-600 transition-colors">
                             <Pencil size={14} />
                           </button>

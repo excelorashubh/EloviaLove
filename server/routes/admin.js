@@ -644,9 +644,14 @@ router.post('/plans', async (req, res) => {
 });
 
 // @route POST /api/admin/plans/resync-razorpay
-// @desc  Clear stored Razorpay metadata for all plans and in-memory cache
+// @desc  Clear stored Razorpay metadata for all plans and in-memory cache; record audit
 router.post('/plans/resync-razorpay', async (req, res) => {
   try {
+    const AuditLog = require('../models/AuditLog');
+
+    // Collect current plan metadata for audit
+    const existing = await PlanConfig.find({}, 'key name razorpayPlanId razorpayPlanAmount').lean();
+
     // Clear stored Razorpay plan ids/amounts so next subscription creation re-creates plans
     await PlanConfig.updateMany({}, { $set: { razorpayPlanId: null, razorpayPlanAmount: null } });
 
@@ -663,7 +668,75 @@ router.post('/plans/resync-razorpay', async (req, res) => {
     if (io) io.emit('plans_updated');
     if (io) io.emit('razorpay_resynced');
 
+    // Audit log record
+    await AuditLog.create({
+      type: 'razorpay_resync_all',
+      message: 'Admin triggered global Razorpay resync; cleared stored plan IDs',
+      details: { plans: existing, triggeredBy: req.user?.email || req.user?._id || 'unknown' }
+    });
+
     res.json({ success: true, message: 'Razorpay plan metadata cleared. New subscriptions will recreate Razorpay plans.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route POST /api/admin/plans/:planId/resync-razorpay
+// @desc  Clear stored Razorpay metadata for a single plan and attempt to archive remote plan
+router.post('/plans/:planId/resync-razorpay', async (req, res) => {
+  try {
+    const AuditLog = require('../models/AuditLog');
+    const plan = await PlanConfig.findById(req.params.planId);
+    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
+
+    const oldPlanId = plan.razorpayPlanId;
+    // Best-effort: attempt to call Razorpay API to mark plan as archived (if supported)
+    try {
+      const Razorpay = require('razorpay');
+      const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
+      if (oldPlanId) {
+        try {
+          // Try to fetch the plan to confirm existence
+          const fetched = await razorpay.plans.fetch(oldPlanId).catch(() => null);
+          if (fetched) {
+            // Try to update notes to mark archived (Razorpay may not support updating plans; if not, ignore)
+            try {
+              await razorpay.plans.edit(oldPlanId, { notes: { archivedAt: new Date().toISOString(), archivedBy: req.user?.email || req.user?._id || 'admin' } }).catch(() => null);
+            } catch (e) {
+              // ignore failures
+            }
+          }
+        } catch (e) {
+          console.warn('Razorpay fetch/archive attempt failed for', oldPlanId, e?.message || e);
+        }
+      }
+    } catch (e) {
+      console.warn('Razorpay client not configured or failed:', e?.message || e);
+    }
+
+    // Clear stored metadata on DB
+    plan.razorpayPlanId = null;
+    plan.razorpayPlanAmount = null;
+    await plan.save();
+
+    // Clear in-memory cache key
+    try {
+      if (subscriptionRoutes && typeof subscriptionRoutes.clearRazorpayCache === 'function') subscriptionRoutes.clearRazorpayCache();
+    } catch (e) { /* ignore */ }
+
+    // Emit events
+    const io = req.app.get('io');
+    if (io) io.emit('plans_updated');
+    if (io) io.emit('razorpay_resynced', { plan: plan.key });
+
+    // Audit record
+    await AuditLog.create({
+      type: 'razorpay_resync_plan',
+      message: `Resynced Razorpay for plan ${plan.key}`,
+      details: { planId: plan._id.toString(), oldRazorpayPlanId: oldPlanId, triggeredBy: req.user?.email || req.user?._id || 'unknown' }
+    });
+
+    res.json({ success: true, message: 'Plan Razorpay metadata cleared', plan });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
