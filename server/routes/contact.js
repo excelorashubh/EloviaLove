@@ -79,7 +79,7 @@ router.post(
         userAgent
       });
       await sendEmail({
-        to: process.env.ADMIN_NOTIFICATION_EMAIL || 'exceloraclasses@gmail.com',
+        to: process.env.ADMIN_NOTIFICATION_EMAIL || 'support@elovialove.com',
         ...adminMail
       });
 

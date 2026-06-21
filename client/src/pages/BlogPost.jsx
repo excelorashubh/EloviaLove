@@ -73,9 +73,9 @@ const BlogPost = () => {
     );
   }
 
-  const pageTitle = `${post.title} | Excelora Classes`;
+  const pageTitle = `${post.title} | Elovia Love`;
   const pageDescription = post.metaDescription || post.excerpt;
-  const pageUrl = `https://exceloraclasses.com/blog/${post.slug}`;
+  const pageUrl = `https://elovialove.onrender.com/blog/${post.slug}`;
 
   return (
     <>

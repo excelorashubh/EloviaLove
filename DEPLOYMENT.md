@@ -1,6 +1,6 @@
-# 🚀 Excelora Classes - Production Deployment Guide
+# 🚀 Elovia Love - Production Deployment Guide
 
-This document provides everything needed to deploy and maintain Excelora Classes in a production environment, specifically optimized for **Render**.
+This document provides everything needed to deploy and maintain Elovia Love in a production environment, specifically optimized for **Render**.
 
 ## 📋 Table of Contents
 - [Quick Start](#-quick-start)
@@ -40,7 +40,7 @@ Required variables for the **Server** service on Render:
 | `PORT` | Server port | `5000` |
 | `MONGODB_URI` | MongoDB Atlas Connection String | `mongodb+srv://...` |
 | `JWT_SECRET` | Secret key for auth tokens | `your_random_string` |
-| `CLIENT_URL` | Production URL of your app | `https://exceloraclasses.com` |
+| `CLIENT_URL` | Production URL of your app | `https://elovialove.onrender.com` |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary name | `your_name` |
 | `CLOUDINARY_API_KEY` | Cloudinary API Key | `your_key` |
 | `CLOUDINARY_API_SECRET` | Cloudinary API Secret | `your_secret` |
@@ -104,7 +104,7 @@ cd server && npm start
 
 ## 🏗️ Production Architecture
 
-Excelora Classes uses a **Hybrid SPA Architecture**:
+Elovia Love uses a **Hybrid SPA Architecture**:
 - **Frontend:** React 19 (Vite) - Single Page Application.
 - **Backend:** Express.js (Node 22) - API + Static File Server.
 - **SEO:** `react-helmet-async` for dynamic metadata + Server-side sitemap/robots.

@@ -13,9 +13,9 @@ const Contact = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Excelora Classes — Get Help with Your Dating Journey</title>
-        <meta name="description" content="Contact Excelora Classes for support, questions about verified dating, safety, or membership options." />
-        <link rel="canonical" href="https://exceloraclasses.com/contact" />
+        <title>Contact Elovia Love — Get Help with Your Dating Journey</title>
+        <meta name="description" content="Contact Elovia Love for support, questions about verified dating, safety, or membership options." />
+        <link rel="canonical" href="https://elovialove.onrender.com/contact" />
       </Helmet>
       <div className="pt-24 pb-12 min-h-screen bg-slate-50 relative overflow-hidden">
 
@@ -55,7 +55,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-slate-900">Email</h4>
-                    <a href="mailto:exceloraclasses@gmail.com" className="text-slate-600 hover:text-primary-600 transition-colors">exceloraclasses@gmail.com</a>
+                    <a href="mailto:support@elovialove.com" className="text-slate-600 hover:text-primary-600 transition-colors">support@elovialove.com</a>
                   </div>
                 </div>
 

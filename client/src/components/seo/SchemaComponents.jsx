@@ -5,8 +5,8 @@ import { Helmet } from 'react-helmet-async';
 // PRODUCTION-READY SCHEMA.ORG COMPONENTS FOR EXCELORA CLASSES
 // ══════════════════════════════════════════════════════════════════════════════
 
-const SITE_URL = 'https://exceloraclasses.com';
-const SITE_NAME = 'Excelora Classes';
+const SITE_URL = 'https://elovialove.onrender.com';
+const SITE_NAME = 'Elovia Love';
 const LOGO_URL = `${SITE_URL}/EloviaLoveWB.png`;
 
 // ── 1. WEBSITE SCHEMA ─────────────────────────────────────────────────────────
@@ -16,7 +16,7 @@ export const WebSiteSchema = () => {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": SITE_NAME,
-    "alternateName": "Excelora Classes Dating App",
+    "alternateName": "Elovia Love Dating App",
     "url": SITE_URL,
     "description": "India's verified dating platform for serious relationships. No fake profiles. Real connections. Safe dating for meaningful relationships.",
     "publisher": {
@@ -39,11 +39,11 @@ export const WebSiteSchema = () => {
       "query-input": "required name=search_term_string"
     },
     "sameAs": [
-      "https://www.facebook.com/exceloraclasses",
-      "https://www.instagram.com/exceloraclasses",
-      "https://twitter.com/exceloraclasses",
-      "https://www.linkedin.com/company/exceloraclasses",
-      "https://www.youtube.com/@exceloraclasses"
+      "https://www.facebook.com/elovialove",
+      "https://www.instagram.com/elovialove",
+      "https://twitter.com/elovialove",
+      "https://www.linkedin.com/company/elovialove",
+      "https://www.youtube.com/@elovialove"
     ]
   };
 
@@ -63,7 +63,7 @@ export const OrganizationSchema = () => {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": SITE_NAME,
-    "legalName": "Excelora Classes Private Limited",
+    "legalName": "Elovia Love Private Limited",
     "url": SITE_URL,
     "logo": {
       "@type": "ImageObject",
@@ -71,12 +71,12 @@ export const OrganizationSchema = () => {
       "width": 600,
       "height": 60
     },
-    "description": "Excelora Classes is India's most trusted dating platform for serious relationships. We verify every profile, prioritize safety, and use AI-powered matching to help singles find meaningful connections.",
+    "description": "Elovia Love is India's trusted dating platform for serious relationships. We verify every profile, prioritize safety, and use AI-powered matching to help singles find meaningful connections.",
     "foundingDate": "2024",
     "founders": [
       {
         "@type": "Person",
-        "name": "Excelora Classes Team"
+        "name": "Elovia Love Team"
       }
     ],
     "address": {
@@ -95,17 +95,17 @@ export const OrganizationSchema = () => {
       {
         "@type": "ContactPoint",
         "contactType": "customer service",
-        "email": "support@exceloraclasses.com",
+        "email": "support@elovialove.com",
         "areaServed": "IN",
         "availableLanguage": ["English", "Hindi"]
       }
     ],
     "sameAs": [
-      "https://www.facebook.com/exceloraclasses",
-      "https://www.instagram.com/exceloraclasses",
-      "https://twitter.com/exceloraclasses",
-      "https://www.linkedin.com/company/exceloraclasses",
-      "https://www.youtube.com/@exceloraclasses"
+      "https://www.facebook.com/elovialove",
+      "https://www.instagram.com/elovialove",
+      "https://twitter.com/elovialove",
+      "https://www.linkedin.com/company/elovialove",
+      "https://www.youtube.com/@elovialove"
     ],
     "brand": {
       "@type": "Brand",
@@ -240,7 +240,7 @@ export const ArticleSchema = ({
     "image": image || LOGO_URL,
     "author": {
       "@type": "Person",
-      "name": author || "Excelora Classes Editorial Team",
+      "name": author || "Elovia Love Editorial Team",
       "url": `${SITE_URL}/author/${(author || 'elovia-love-team').toLowerCase().replace(/\s+/g, '-')}`
     },
     "publisher": {

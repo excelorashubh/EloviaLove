@@ -154,7 +154,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 
 // ── Database Connection ───────────────────────────────────────────────────────
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/exceloraclasses', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/elovialove', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })

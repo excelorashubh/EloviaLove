@@ -242,10 +242,10 @@ const Blog = () => {
   const blogSchema = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
-    name: 'Excelora Classes Blog',
+    name: 'Elovia Love Blog',
     description:
       'Expert dating advice, relationship tips, and emotional healing guides for modern singles in India.',
-    url: 'https://exceloraclasses.com/blog',
+    url: 'https://elovialove.onrender.com/blog',
   };
 
   const breadcrumbSchema = {
@@ -256,13 +256,13 @@ const Blog = () => {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://exceloraclasses.com',
+        item: 'https://elovialove.onrender.com',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Blog',
-        item: 'https://exceloraclasses.com/blog',
+        item: 'https://elovialove.onrender.com/blog',
       },
     ],
   };
@@ -270,28 +270,28 @@ const Blog = () => {
   return (
     <>
       <Helmet>
-        <title>Love & Relationship Blog | Excelora Classes</title>
+        <title>Love & Relationship Blog | Elovia Love</title>
         <meta
           name="description"
-          content="Discover dating advice, relationship tips, emotional healing guides, and inspiring love stories from Excelora Classes."
+          content="Discover dating advice, relationship tips, emotional healing guides, and inspiring love stories from Elovia Love."
         />
-        <link rel="canonical" href="https://exceloraclasses.com/blog" />
+        <link rel="canonical" href="https://elovialove.onrender.com/blog" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://exceloraclasses.com/blog" />
-        <meta property="og:title" content="Love & Relationship Blog | Excelora Classes" />
+        <meta property="og:url" content="https://elovialove.onrender.com/blog" />
+        <meta property="og:title" content="Love & Relationship Blog | Elovia Love" />
         <meta
           property="og:description"
-          content="Discover dating advice, relationship tips, emotional healing guides, and inspiring love stories from Excelora Classes."
+          content="Discover dating advice, relationship tips, emotional healing guides, and inspiring love stories from Elovia Love."
         />
         <meta
           property="og:image"
           content="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=1200&h=630&fit=crop"
         />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Love & Relationship Blog | Excelora Classes" />
+        <meta name="twitter:title" content="Love & Relationship Blog | Elovia Love" />
         <meta
           name="twitter:description"
-          content="Discover dating advice, relationship tips, emotional healing guides, and inspiring love stories from Excelora Classes."
+          content="Discover dating advice, relationship tips, emotional healing guides, and inspiring love stories from Elovia Love."
         />
         <meta name="twitter:image" content="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=1200&h=630&fit=crop" />
         <script type="application/ld+json">{JSON.stringify(blogSchema)}</script>

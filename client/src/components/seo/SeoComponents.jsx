@@ -15,7 +15,7 @@ export const SeoWrapper = ({
   noindex = false,
   children
 }) => {
-  const siteUrl = 'https://elovialove.com';
+  const siteUrl = 'https://elovialove.onrender.com';
   const isBrowser = typeof window !== 'undefined';
   const currentPath = isBrowser ? window.location.pathname : '';
   const fullCanonical = canonical ? `${siteUrl}${canonical}` : `${siteUrl}${currentPath}`;
@@ -77,7 +77,7 @@ export const BlogPostSeo = ({
   readingTime
 }) => {
   const isBrowser = typeof window !== 'undefined';
-  const origin = isBrowser ? window.location.origin : 'https://elovialove.com';
+  const origin = isBrowser ? window.location.origin : 'https://elovialove.onrender.com';
   const href = isBrowser ? window.location.href : `${origin}/blog/${post.slug}`;
 
   const structuredData = {
@@ -114,7 +114,7 @@ export const BlogPostSeo = ({
 
   return (
     <SeoWrapper
-      title={`${post.title} | Excelora Classes Dating Blog`}
+      title={`${post.title} | Elovia Love Blog`}
       description={post.description}
       canonical={`/blog/${post.slug}`}
       ogImage={post.ogImage}
@@ -126,7 +126,7 @@ export const BlogPostSeo = ({
 
 // 3. City Page SEO Component
 export const CityPageSeo = ({ city, stats, features }) => {
-  const siteUrl = 'https://elovialove.com';
+  const siteUrl = 'https://elovialove.onrender.com';
   const title = `Find Love in ${city.name} | Dating in ${city.name} | Elovia Love`;
   const description = `Meet singles in ${city.name}. ${stats.activeUsers}+ active members. Safe, verified dating for serious relationships in ${city.name}. Join ${city.name}'s trusted dating community.`;
 
@@ -142,7 +142,7 @@ export const CityPageSeo = ({ city, stats, features }) => {
       "isPartOf": {
       "@type": "WebSite",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     },
     "about": {
       "@type": "Place",
@@ -173,7 +173,7 @@ export const CityPageSeo = ({ city, stats, features }) => {
 
 // 4. Trust/Safety Page SEO Component
 export const TrustPageSeo = ({ pageData, lastUpdated }) => {
-  const siteUrl = 'https://elovialove.com';
+  const siteUrl = 'https://elovialove.onrender.com';
   const isBrowser = typeof window !== 'undefined';
   const href = isBrowser ? window.location.href : `${siteUrl}/${pageData.slug}`;
 
@@ -187,7 +187,7 @@ export const TrustPageSeo = ({ pageData, lastUpdated }) => {
     "publisher": {
       "@type": "Organization",
       "name": "Elovia Love",
-      "url": "https://elovialove.com",
+      "url": "https://elovialove.onrender.com",
       "sameAs": [
         "https://www.facebook.com/elovialove",
         "https://www.instagram.com/elovialove"
@@ -197,7 +197,7 @@ export const TrustPageSeo = ({ pageData, lastUpdated }) => {
 
   return (
     <SeoWrapper
-      title={`${pageData.title} | Excelora Classes`}
+      title={`${pageData.title} | Elovia Love`}
       description={pageData.description}
       canonical={`/${pageData.slug}`}
       structuredData={structuredData}
