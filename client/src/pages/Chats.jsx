@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Search, MessageCircle, Check, CheckCheck, Sparkles, X } from 'lucide-react';
 import { io } from 'socket.io-client';
+import { SITE_URL } from '../data/seoContent';
 import { useAuth } from '../context/AuthContext';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
 import api from '../services/api';

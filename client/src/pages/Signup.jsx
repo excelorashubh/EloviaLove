@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Heart, EyeOff, Eye, User, Calendar, ShieldCheck } from 'lucide-react';
+import { SITE_URL } from '../data/seoContent';
 import { useAuth } from '../context/AuthContext';
 
 const Signup = () => {

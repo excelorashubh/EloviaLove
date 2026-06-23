@@ -6,6 +6,7 @@ import {
   Lock, Crown, Sparkles, CheckCircle2, ChevronDown, Plus, Minus,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { SITE_URL } from '../data/seoContent';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';

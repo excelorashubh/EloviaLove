@@ -6,6 +6,7 @@ import {
   Camera, Check, X, ArrowLeft, MapPin, User, FileText,
   Heart, Sparkles, GraduationCap, Briefcase, Ruler, Banknote, BookOpen, Wine,
 } from 'lucide-react';
+import { SITE_URL } from '../data/seoContent';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
