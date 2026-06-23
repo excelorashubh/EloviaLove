@@ -235,26 +235,42 @@ io.on('connection', (socket) => {
 // ══════════════════════════════════════════════════════════════════════════════
 // DYNAMIC SITEMAP.XML (SEO) - Sitemap Index Architecture
 // ══════════════════════════════════════════════════════════════════════════════
-// IMPORTANT: These routes MUST come BEFORE static file serving
+// IMPORTANT: These routes MUST come BEFORE static file serving and React fallback
 
-app.get('/sitemap.xml', seoModule.sitemapHandler);              // Main sitemap index
-app.get('/sitemap-pages.xml', seoModule.pagesHandler);          // Core pages
-app.get('/sitemap-cities.xml', seoModule.citiesHandler);        // City pages
-app.get('/sitemap-blog.xml', seoModule.blogHandler);            // Blog posts (dynamic)
-app.get('/sitemap-images.xml', seoModule.imagesHandler);        // Image sitemap
+console.log('[SITEMAP] Registering sitemap routes...');
+
+app.get('/sitemap.xml', (req, res, next) => {
+  console.log('[SITEMAP] /sitemap.xml route HIT');
+  seoModule.sitemapHandler(req, res, next);
+});
+
+app.get('/sitemap-pages.xml', (req, res, next) => {
+  console.log('[SITEMAP] /sitemap-pages.xml route HIT');
+  seoModule.pagesHandler(req, res, next);
+});
+
+app.get('/sitemap-cities.xml', (req, res, next) => {
+  console.log('[SITEMAP] /sitemap-cities.xml route HIT');
+  seoModule.citiesHandler(req, res, next);
+});
+
+app.get('/sitemap-blog.xml', (req, res, next) => {
+  console.log('[SITEMAP] /sitemap-blog.xml route HIT');
+  seoModule.blogHandler(req, res, next);
+});
+
+app.get('/sitemap-images.xml', (req, res, next) => {
+  console.log('[SITEMAP] /sitemap-images.xml route HIT');
+  seoModule.imagesHandler(req, res, next);
+});
+
+console.log('[SITEMAP] Sitemap routes registered successfully');
 
 // ══════════════════════════════════════════════════════════════════════════════
 // STATIC FILE SERVING (React Build)
 // ══════════════════════════════════════════════════════════════════════════════
 
-// Middleware to block static sitemap files (use dynamic routes instead)
-app.use((req, res, next) => {
-  if (req.path === '/sitemap.xml' || req.path.startsWith('/sitemap-')) {
-    // Let dynamic routes handle these - don't fall through to static
-    return next('route');
-  }
-  next();
-});
+// REMOVED: Blocking middleware not needed - sitemap routes already registered above
 
 // Serve static files from React build with aggressive caching
 app.use(express.static(path.join(__dirname, '../client/dist'), {
@@ -299,7 +315,8 @@ app.use((err, req, res, next) => {
 // REACT SPA FALLBACK (MUST BE LAST)
 // ══════════════════════════════════════════════════════════════════════════════
 
-// Serve React app for all non-API routes (SPA routing)
+// Serve React app for all non-API, non-sitemap routes (SPA routing)
+// IMPORTANT: Sitemaps are handled above, so they won't reach here
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'), (err) => {
     if (err) {
