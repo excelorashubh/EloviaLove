@@ -1,4 +1,10 @@
-export const SITE_URL = 'https://elovialove.com';
+const resolveSiteUrl = () => {
+  if (import.meta.env.VITE_SITE_URL) return import.meta.env.VITE_SITE_URL;
+  if (typeof window !== 'undefined' && window.location?.origin) return window.location.origin;
+  return 'https://elovialove.com';
+};
+
+export const SITE_URL = resolveSiteUrl();
 
 export const STATIC_SEO_PAGES = {
   privacy: {

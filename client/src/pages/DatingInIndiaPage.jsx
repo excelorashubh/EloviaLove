@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
+import { SITE_URL } from '../data/seoContent';
 
 const DatingInIndiaPage = () => {
   return (
@@ -8,10 +9,10 @@ const DatingInIndiaPage = () => {
       <Helmet>
         <title>Dating in India | Find Verified Singles Across India | Elovia Love</title>
         <meta name="description" content="Connect with verified singles across India on Elovia Love. Discover meaningful relationships, local meetups, and safety-first dating resources." />
-        <link rel="canonical" href="https://elovialove.com/dating-in-india" />
+        <link rel="canonical" href={`${SITE_URL}/dating-in-india`} />
         <meta property="og:title" content="Dating in India | Elovia Love" />
         <meta property="og:description" content="Connect with verified singles across India on Elovia Love." />
-        <meta property="og:url" content="https://elovialove.com/dating-in-india" />
+        <meta property="og:url" content={`${SITE_URL}/dating-in-india`} />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
+import { SITE_URL } from '../data/seoContent';
+
 const getOrigin = () =>
   typeof window !== 'undefined'
     ? window.location.origin
-    : 'https://elovialove.onrender.com';
+    : SITE_URL;
 
 export const useOgImage = () => {
   const [ogImageUrl, setOgImageUrl] = useState(null);

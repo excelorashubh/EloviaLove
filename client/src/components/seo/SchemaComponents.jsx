@@ -1,11 +1,11 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { SITE_URL } from '../../data/seoContent';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // PRODUCTION-READY SCHEMA.ORG COMPONENTS FOR ELOVIA LOVE
 // ══════════════════════════════════════════════════════════════════════════════
 
-const SITE_URL = 'https://elovialove.onrender.com';
 const SITE_NAME = 'Elovia Love';
 const LOGO_URL = `${SITE_URL}/EloviaLoveWB.png`;
 

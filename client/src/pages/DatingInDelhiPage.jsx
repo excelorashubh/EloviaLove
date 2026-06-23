@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
+import { SITE_URL } from '../data/seoContent';
 
 const DatingInDelhiPage = () => {
   return (
@@ -8,12 +9,12 @@ const DatingInDelhiPage = () => {
       <Helmet>
         <title>Dating in Delhi | Meet Verified Singles in Delhi | Elovia Love</title>
         <meta name="description" content="Connect with verified singles in Delhi on Elovia Love. Discover meaningful relationships, secure matching, and genuine connections." />
-        <link rel="canonical" href="https://elovialove.com/dating-in-delhi" />
+        <link rel="canonical" href={`${SITE_URL}/dating-in-delhi`} />
         <meta property="og:title" content="Dating in Delhi | Elovia Love" />
         <meta property="og:description" content="Connect with verified singles in Delhi on Elovia Love." />
-        <meta property="og:url" content="https://elovialove.com/dating-in-delhi" />
+        <meta property="og:url" content={`${SITE_URL}/dating-in-delhi`} />
         <meta name="twitter:card" content="summary_large_image" />
-        <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://elovialove.com/"},{"@type":"ListItem","position":2,"name":"Dating in India","item":"https://elovialove.com/dating-in-india"},{"@type":"ListItem","position":3,"name":"Delhi","item":"https://elovialove.com/dating-in-delhi"}]}`}</script>
+        <script type="application/ld+json">{`{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"${SITE_URL}/"},{"@type":"ListItem","position":2,"name":"Dating in India","item":"${SITE_URL}/dating-in-india"},{"@type":"ListItem","position":3,"name":"Delhi","item":"${SITE_URL}/dating-in-delhi"}]}`}</script>
       </Helmet>
 
       <h1 className="text-3xl font-bold mb-4">Dating in Delhi</h1>

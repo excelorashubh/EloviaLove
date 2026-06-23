@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Calendar, Eye, Heart, Loader2 } from 'lucide-react';
+import { SITE_URL } from '../data/seoContent';
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -75,7 +76,7 @@ const BlogPost = () => {
 
   const pageTitle = `${post.title} | Elovia Love`;
   const pageDescription = post.metaDescription || post.excerpt;
-  const pageUrl = `https://elovialove.onrender.com/blog/${post.slug}`;
+  const pageUrl = `${SITE_URL}/blog/${post.slug}`;
 
   return (
     <>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Shield, Lock, Eye, AlertTriangle, CheckCircle, UserCheck, MessageSquare, PhoneCall } from 'lucide-react';
+import { SITE_URL } from '../data/seoContent';
 
 const SafetyHub = () => {
   const safetyResources = [
@@ -64,7 +65,7 @@ const SafetyHub = () => {
       <Helmet>
         <title>Trust & Safety Center | Elovia Love India</title>
         <meta name="description" content="Your safety is our #1 priority. Explore Elovia Love's comprehensive safety features, verification guides, and expert advice for secure online dating in India." />
-        <link rel="canonical" href="https://elovialove.onrender.com/safety" />
+        <link rel="canonical" href={`${SITE_URL}/safety`} />
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">
@@ -185,7 +186,7 @@ const SafetyHub = () => {
               <div className="p-6 border border-slate-200 rounded-3xl">
                 <PhoneCall className="w-8 h-8 text-slate-400 mx-auto mb-4" />
                 <h4 className="font-bold mb-2">Contact Support</h4>
-                <p className="text-sm text-slate-500">Email us at safety@elovialove.onrender.com</p>
+                <p className="text-sm text-slate-500">Email us at safety@elovialove.com</p>
               </div>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Heart, Settings, Sparkles, MessageCircle, Check, Crown, Zap, Star, Clock } from 'lucide-react';
+import { SITE_URL } from '../data/seoContent';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -263,7 +264,7 @@ const Dashboard = () => {
       <Helmet>
         <title>Dashboard — Elovia Love</title>
         <meta name="description" content="Your Elovia Love dashboard. Manage matches, chats, profile status, and subscription details in one place." />
-        <link rel="canonical" href="https://elovialove.onrender.com/dashboard" />
+        <link rel="canonical" href={`${SITE_URL}/dashboard`} />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

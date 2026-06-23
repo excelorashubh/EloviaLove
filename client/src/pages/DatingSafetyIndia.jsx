@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Shield, MapPin, AlertCircle, CheckCircle, Heart, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SITE_URL } from '../data/seoContent';
 
 const DatingSafetyIndia = () => {
   const safetyTips = [
@@ -33,7 +34,7 @@ const DatingSafetyIndia = () => {
       <Helmet>
         <title>Online Dating Safety in India | Elovia Love Guide</title>
         <meta name="description" content="A comprehensive guide to staying safe while online dating in India. Expert tips on verification, public meetings, and protecting your personal information." />
-        <link rel="canonical" href="https://elovialove.onrender.com/online-dating-safety-india" />
+        <link rel="canonical" href={`${SITE_URL}/online-dating-safety-india`} />
       </Helmet>
 
       <div className="bg-slate-900 min-h-screen text-slate-100">

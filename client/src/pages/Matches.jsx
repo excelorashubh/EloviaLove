@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { MessageCircle, Heart, Search } from 'lucide-react';
 import api from '../services/api';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
+import { SITE_URL } from '../data/seoContent';
 
 const formatTime = (ts) => {
   if (!ts) return '';
@@ -64,7 +65,7 @@ const Matches = () => {
       <Helmet>
         <title>Matches — Elovia Love</title>
         <meta name="description" content="View your matches and connect with people you're interested in on Elovia Love." />
-        <link rel="canonical" href="https://elovialove.onrender.com/matches" />
+        <link rel="canonical" href={`${SITE_URL}/matches`} />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
       <header className="bg-white shadow-sm border-b border-slate-200">

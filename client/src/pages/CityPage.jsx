@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Heart, Shield, MapPin, Star, MessageCircle, Info } from 'lucide-react';
+import { SITE_URL } from '../data/seoContent';
 
 // Programmatic City Data
 const CITY_DATA = {
@@ -66,7 +67,7 @@ const CityPage = () => {
       <Helmet>
         <title>{data.title}</title>
         <meta name="description" content={data.description} />
-        <link rel="canonical" href={`https://elovialove.onrender.com/dating-in-${cityKey}`} />
+        <link rel="canonical" href={`${SITE_URL}/dating-in-${cityKey}`} />
       </Helmet>
 
       <div className="bg-slate-50 min-h-screen">

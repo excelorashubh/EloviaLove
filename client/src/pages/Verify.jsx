@@ -5,6 +5,7 @@ import { Phone, Mail, ShieldCheck, CheckCircle2, ArrowLeft, Loader2, BadgeCheck,
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { SITE_URL } from '../data/seoContent';
 
 // ── Step indicator ────────────────────────────────────────────────────────────
 const Step = ({ icon: Icon, label, done, active }) => (
@@ -125,7 +126,8 @@ const Verify = () => {
       <Helmet>
         <title>Verify Your Account — Elovia Love</title>
         <meta name="description" content="Complete account verification to increase trust and match success on Elovia Love." />
-        <link rel="canonical" href="https://elovialove.onrender.com/verify" />
+        <link rel="canonical" href={`${SITE_URL}/verify`} />
+        <meta name="robots" content="noindex,nofollow" />
       </Helmet>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50 pb-16">
         <div className="max-w-lg mx-auto px-4 pt-8">

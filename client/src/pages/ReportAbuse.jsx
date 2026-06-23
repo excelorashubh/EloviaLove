@@ -50,7 +50,7 @@ const ReportAbuse = () => {
                   </div>
                   <div>
                     <h4 className="font-bold mb-1">Email Our Team</h4>
-                    <p className="text-slate-600 text-sm">Send an email to safety@elovialove.onrender.com with details and screenshots.</p>
+                    <p className="text-slate-600 text-sm">Send an email to safety@elovialove.com with details and screenshots.</p>
                   </div>
                 </div>
               </div>

@@ -172,7 +172,7 @@ const Chats = () => {
       <Helmet>
         <title>Messages — Elovia Love</title>
         <meta name="description" content="View and manage all your conversations on Elovia Love." />
-        <link rel="canonical" href="https://elovialove.onrender.com/chats" />
+        <link rel="canonical" href={`${SITE_URL}/chats`} />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
       {/* Header */}

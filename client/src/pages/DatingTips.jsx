@@ -6,8 +6,9 @@ import { Calendar, Eye, Tag, ArrowRight, Loader2, Heart, Clock, BookOpen } from 
 import api from '../services/api';
 import AdWrapper from '../components/ads/AdWrapper';
 import BannerAd from '../components/ads/BannerAd';
+import { SITE_URL } from '../data/seoContent';
 
-const BASE_URL = 'https://elovialove.com';
+const BASE_URL = SITE_URL;
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 

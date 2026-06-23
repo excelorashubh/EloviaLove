@@ -2,6 +2,7 @@ import React, { useMemo, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
+import { SITE_URL } from '../data/seoContent';
 import {
   Search,
   Calendar,
@@ -245,7 +246,7 @@ const Blog = () => {
     name: 'Elovia Love Blog',
     description:
       'Expert dating advice, relationship tips, and emotional healing guides for modern singles in India.',
-    url: 'https://elovialove.onrender.com/blog',
+    url: `${SITE_URL}/blog`,
   };
 
   const breadcrumbSchema = {
@@ -256,13 +257,13 @@ const Blog = () => {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://elovialove.onrender.com',
+        item: SITE_URL,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Blog',
-        item: 'https://elovialove.onrender.com/blog',
+        item: `${SITE_URL}/blog`,
       },
     ],
   };
@@ -275,9 +276,9 @@ const Blog = () => {
           name="description"
           content="Discover dating advice, relationship tips, emotional healing guides, and inspiring love stories from Elovia Love."
         />
-        <link rel="canonical" href="https://elovialove.onrender.com/blog" />
+        <link rel="canonical" href={`${SITE_URL}/blog`} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://elovialove.onrender.com/blog" />
+        <meta property="og:url" content={`${SITE_URL}/blog`} />
         <meta property="og:title" content="Love & Relationship Blog | Elovia Love" />
         <meta
           property="og:description"

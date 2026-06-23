@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { SITE_URL } from '../data/seoContent';
 
 const Settings = () => {
   return (
@@ -10,7 +11,7 @@ const Settings = () => {
           name="description"
           content="Manage your Elovia Love account settings, notifications, and profile preferences."
         />
-        <link rel="canonical" href="https://elovialove.onrender.com/settings" />
+        <link rel="canonical" href={`${SITE_URL}/settings`} />
       </Helmet>
 
       <div className="mx-auto max-w-4xl rounded-3xl bg-white p-8 shadow-xl shadow-slate-200">

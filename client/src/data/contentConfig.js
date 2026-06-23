@@ -1,15 +1,17 @@
 // ── Content Database Architecture ──────────────────────────────────────────────
 // Scalable blog/content management system for dating platform SEO
 
+import { SITE_URL } from './seoContent';
+
 // 1. Content Configuration - Central hub for all content metadata
 export const CONTENT_CONFIG = {
   site: {
     name: 'Elovia Love',
-    url: 'https://elovialove.com',
+    url: SITE_URL,
     description: 'Safe, verified dating platform for meaningful relationships',
     author: 'Elovia Love Team',
     language: 'en-US',
-    ogImage: '/og-default.jpg'
+    ogImage: `${SITE_URL}/og-default.jpg`
   },
 
   categories: {

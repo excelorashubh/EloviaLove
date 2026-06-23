@@ -39,7 +39,7 @@ Allow: /sitemap.xml
 Allow: /api/blog/sitemap.xml
 
 # Sitemap location
-Sitemap: https://elovialove.onrender.com/sitemap.xml
+Sitemap: /sitemap.xml
 
 # ── Crawl Delay (if needed for Render free tier) ──────────────────────────────
 # Crawl-delay: 1

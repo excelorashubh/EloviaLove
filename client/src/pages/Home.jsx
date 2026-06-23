@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Heart, Star, Shield, Zap, MessageCircle, MapPin, Users, HeartHandshake, Quote } from 'lucide-react';
+import { SITE_URL } from '../data/seoContent';
 import { WebSiteSchema, OrganizationSchema, BreadcrumbSchema } from '../components/seo/SchemaComponents';
 
 const FAQAccordion = React.lazy(() => import('../components/FAQAccordion'));
@@ -37,15 +37,15 @@ const Home = () => {
       <Helmet>
         <title>Elovia Love – India's Verified Dating App for Serious Relationships</title>
         <meta name="description" content="Find real love on Elovia Love. Verified profiles, AI-powered matching, and advanced safety features. Join singles finding meaningful relationships." />
-        <link rel="canonical" href="https://elovialove.com/" />
+        <link rel="canonical" href={`${SITE_URL}/`} />
         <link rel="preload" as="image" href="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1920&auto=format&fm=webp" fetchpriority="high" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Elovia Love – India's Verified Dating App for Serious Relationships" />
         <meta property="og:description" content="Find real love on Elovia Love. Verified profiles, AI-powered matching, and advanced safety features." />
-        <meta property="og:url" content="https://elovialove.com/" />
-        <meta property="og:image" content="https://elovialove.com/EloviaLoveWB.png" />
+        <meta property="og:url" content={`${SITE_URL}/`} />
+        <meta property="og:image" content={`${SITE_URL}/EloviaLoveWB.png`} />
         <meta property="og:site_name" content="Elovia Love" />
         <meta property="og:locale" content="en_IN" />
         
@@ -53,7 +53,7 @@ const Home = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Elovia Love – India's Verified Dating App" />
         <meta name="twitter:description" content="Find real love on India's most trusted dating platform. Verified profiles, AI-powered matching, and advanced safety features." />
-        <meta name="twitter:image" content="https://elovialove.com/EloviaLoveWB.png" />
+        <meta name="twitter:image" content={`${SITE_URL}/EloviaLoveWB.png`} />
         
         {/* Keywords */}
         <meta name="keywords" content="online dating India, verified dating app, serious relationships India, safe dating platform, Indian dating site, dating app India, find life partner, meaningful connections, marriage minded singles" />

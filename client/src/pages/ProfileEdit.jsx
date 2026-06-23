@@ -136,7 +136,7 @@ const ProfileEdit = () => {
       <Helmet>
         <title>Edit Profile — Elovia Love</title>
         <meta name="description" content="Update your profile details and preferences on Elovia Love." />
-        <link rel="canonical" href="https://elovialove.onrender.com/profile/edit" />
+        <link rel="canonical" href={`${SITE_URL}/profile/edit`} />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
       {/* Header */}

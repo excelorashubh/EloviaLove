@@ -2,13 +2,15 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Crown, Heart } from 'lucide-react';
+import { SITE_URL } from '../data/seoContent';
 
 const SubscriptionSuccess = () => (
   <>
     <Helmet>
       <title>Subscription Confirmed — Elovia Love</title>
       <meta name="description" content="Your subscription purchase was successful. Enjoy premium features on Elovia Love." />
-      <link rel="canonical" href="https://elovialove.onrender.com/subscription/success" />
+      <link rel="canonical" href={`${SITE_URL}/subscription/success`} />
+      <meta name="robots" content="noindex,nofollow" />
     </Helmet>
     <div className="min-h-screen bg-linear-to-br from-primary-50 to-pink-50 flex items-center justify-center px-4">
     <motion.div

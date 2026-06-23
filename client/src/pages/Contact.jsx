@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import ContactForm from '../components/contact/ContactForm';
+import { SITE_URL } from '../data/seoContent';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
@@ -15,7 +16,7 @@ const Contact = () => {
       <Helmet>
         <title>Contact Elovia Love — Get Help with Your Dating Journey</title>
         <meta name="description" content="Contact Elovia Love for support, questions about verified dating, safety, or membership options." />
-        <link rel="canonical" href="https://elovialove.onrender.com/contact" />
+        <link rel="canonical" href={`${SITE_URL}/contact`} />
       </Helmet>
       <div className="pt-24 pb-12 min-h-screen bg-slate-50 relative overflow-hidden">
 

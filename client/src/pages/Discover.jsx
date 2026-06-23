@@ -694,7 +694,7 @@ const Discover = () => {
       <Helmet>
         <title>Discover — Elovia Love — Find Meaningful Connections</title>
         <meta name="description" content="Discover meaningful connections on Elovia Love. Explore verified singles, advanced filters and premium matches." />
-        <link rel="canonical" href="https://elovialove.com/discover" />
+        <link rel="canonical" href={`${SITE_URL}/discover`} />
       </Helmet>
 
       {/* Header */}

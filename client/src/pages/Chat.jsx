@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SITE_URL } from '../data/seoContent';
 import { Send, ArrowLeft, Check, CheckCheck, WifiOff, Phone, Video, MoreVertical, Smile, Paperclip, Image, Gift, Search } from 'lucide-react';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { io } from 'socket.io-client';
@@ -375,7 +376,7 @@ const Chat = () => {
       <Helmet>
         <title>Chat — Elovia Love</title>
         <meta name="description" content="Real-time messaging with your matches on Elovia Love." />
-        <link rel="canonical" href={`https://elovialove.onrender.com/chat/${userId}`} />
+        <link rel="canonical" href={`${SITE_URL}/chat/${userId}`} />
       </Helmet>
       <div className="h-screen overflow-hidden bg-slate-50">
         <div className="flex h-full">
