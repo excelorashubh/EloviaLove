@@ -172,10 +172,6 @@ mongoose.connection.on('disconnected', () => {
 // ── Socket.io Setup ───────────────────────────────────────────────────────────
 app.set('io', io);
 
-// ── SEO Middleware (Lightweight Crawler Detection) ────────────────────────────
-const seoModule = require('./routes/seo');
-app.use(seoModule.prerenderMiddleware);
-
 // ══════════════════════════════════════════════════════════════════════════════
 // API ROUTES
 // ══════════════════════════════════════════════════════════════════════════════
@@ -192,7 +188,6 @@ app.use('/api/verify', require('./routes/verify'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/blogs', require('./routes/blog'));
 app.use('/api/contact', require('./routes/contact'));
-app.use('/api/seo', seoModule.router);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SOCKET.IO REAL-TIME CHAT
@@ -233,76 +228,10 @@ io.on('connection', (socket) => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// DYNAMIC SITEMAP.XML (SEO) - Sitemap Index Architecture
+// STATIC FILE SERVING (React Build + Static Sitemap)
 // ══════════════════════════════════════════════════════════════════════════════
-// CRITICAL: These routes MUST execute BEFORE static file middleware
-// They MUST return XML, not fall through to React
-
-console.log('[SITEMAP] Registering sitemap routes...');
-
-// Main sitemap index
-app.get('/sitemap.xml', (req, res) => {
-  console.log('[SITEMAP] /sitemap.xml route HIT - returning XML');
-  try {
-    const baseUrl = process.env.CLIENT_URL || 'https://elovialove.onrender.com';
-    const today = new Date().toISOString();
-    
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-    
-    const sitemaps = [
-      { loc: '/sitemap-pages.xml', lastmod: today },
-      { loc: '/sitemap-cities.xml', lastmod: today },
-      { loc: '/sitemap-blog.xml', lastmod: today },
-      { loc: '/sitemap-images.xml', lastmod: today },
-    ];
-    
-    sitemaps.forEach(sitemap => {
-      xml += '  <sitemap>\n';
-      xml += `    <loc>${baseUrl}${sitemap.loc}</loc>\n`;
-      xml += `    <lastmod>${sitemap.lastmod}</lastmod>\n`;
-      xml += '  </sitemap>\n';
-    });
-    
-    xml += '</sitemapindex>';
-    
-    res.set('Content-Type', 'application/xml; charset=UTF-8');
-    res.set('Cache-Control', 'public, max-age=3600');
-    res.send(xml);
-  } catch (err) {
-    console.error('[SITEMAP ERROR]:', err);
-    res.status(500).send('<?xml version="1.0" encoding="UTF-8"?><error>Sitemap generation failed</error>');
-  }
-});
-
-// Child sitemaps - using handlers from seo module
-app.get('/sitemap-pages.xml', (req, res) => {
-  console.log('[SITEMAP] /sitemap-pages.xml route HIT');
-  seoModule.pagesHandler(req, res);
-});
-
-app.get('/sitemap-cities.xml', (req, res) => {
-  console.log('[SITEMAP] /sitemap-cities.xml route HIT');
-  seoModule.citiesHandler(req, res);
-});
-
-app.get('/sitemap-blog.xml', async (req, res) => {
-  console.log('[SITEMAP] /sitemap-blog.xml route HIT');
-  await seoModule.blogHandler(req, res);
-});
-
-app.get('/sitemap-images.xml', async (req, res) => {
-  console.log('[SITEMAP] /sitemap-images.xml route HIT');
-  await seoModule.imagesHandler(req, res);
-});
-
-console.log('[SITEMAP] Sitemap routes registered successfully');
-
-// ══════════════════════════════════════════════════════════════════════════════
-// STATIC FILE SERVING (React Build)
-// ══════════════════════════════════════════════════════════════════════════════
-
-// REMOVED: Blocking middleware not needed - sitemap routes already registered above
+// Note: sitemap.xml is now served as a static file from client/public/
+// This is more reliable than dynamic generation and avoids routing conflicts
 
 // Serve static files from React build with aggressive caching
 app.use(express.static(path.join(__dirname, '../client/dist'), {
@@ -347,15 +276,9 @@ app.use((err, req, res, next) => {
 // REACT SPA FALLBACK (MUST BE LAST)
 // ══════════════════════════════════════════════════════════════════════════════
 
-// Serve React app for all non-API, non-sitemap routes (SPA routing)
-// CRITICAL: Explicitly exclude sitemap routes - they MUST be handled above
+// Serve React app for all non-API routes (SPA routing)
+// Note: sitemap.xml is served by static middleware above (from client/public/)
 app.get('*', (req, res) => {
-  // Safety check: If this is a sitemap request, something went wrong
-  if (req.path === '/sitemap.xml' || req.path.startsWith('/sitemap-')) {
-    console.error('[CRITICAL] Sitemap route reached React fallback! Path:', req.path);
-    return res.status(500).send('Sitemap routing error - contact support');
-  }
-  
   res.sendFile(path.join(__dirname, '../client/dist/index.html'), (err) => {
     if (err) {
       console.error('Error serving index.html:', err);

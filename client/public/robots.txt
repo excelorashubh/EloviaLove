@@ -8,22 +8,22 @@ User-agent: *
 Allow: /
 
 # Block admin pages (waste of crawl budget)
+Disallow: /admin/
 Disallow: /admin
-Disallow: /admin/*
 
 # Block user-specific pages (privacy + crawl waste)
+Disallow: /dashboard/
 Disallow: /dashboard
-Disallow: /dashboard/*
 Disallow: /profile
-Disallow: /profile/*
+Disallow: /profile/
 Disallow: /matches
 Disallow: /chat
-Disallow: /chat/*
+Disallow: /chat/
 Disallow: /chats
 Disallow: /notifications
 Disallow: /settings
 Disallow: /salesman
-Disallow: /salesman/*
+Disallow: /salesman/
 
 # Block authentication pages
 Disallow: /login
@@ -37,18 +37,14 @@ Disallow: /*?page=*
 Disallow: /*?sort=*
 
 # Block API routes (not useful for search engines)
+Disallow: /api/
 Disallow: /api
-Disallow: /api/*
 
 # Block development/debug routes
 Disallow: /verify
 Disallow: /subscription/success
 
-# Allow sitemap architecture
-Allow: /sitemap.xml
-Allow: /sitemap-*.xml
-
-# Sitemap Index (Main Entry Point)
+# Sitemap (Static XML file)
 Sitemap: https://elovialove.onrender.com/sitemap.xml
 
 # ── Specific Bot Instructions ─────────────────────────────────────────────────
