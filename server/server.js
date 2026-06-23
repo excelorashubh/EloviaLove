@@ -235,6 +235,7 @@ io.on('connection', (socket) => {
 // ══════════════════════════════════════════════════════════════════════════════
 // DYNAMIC SITEMAP.XML (SEO) - Sitemap Index Architecture
 // ══════════════════════════════════════════════════════════════════════════════
+// IMPORTANT: These routes MUST come BEFORE static file serving
 
 app.get('/sitemap.xml', seoModule.sitemapHandler);              // Main sitemap index
 app.get('/sitemap-pages.xml', seoModule.pagesHandler);          // Core pages
@@ -245,6 +246,15 @@ app.get('/sitemap-images.xml', seoModule.imagesHandler);        // Image sitemap
 // ══════════════════════════════════════════════════════════════════════════════
 // STATIC FILE SERVING (React Build)
 // ══════════════════════════════════════════════════════════════════════════════
+
+// Middleware to block static sitemap files (use dynamic routes instead)
+app.use((req, res, next) => {
+  if (req.path === '/sitemap.xml' || req.path.startsWith('/sitemap-')) {
+    // Let dynamic routes handle these - don't fall through to static
+    return next('route');
+  }
+  next();
+});
 
 // Serve static files from React build with aggressive caching
 app.use(express.static(path.join(__dirname, '../client/dist'), {
@@ -260,7 +270,7 @@ app.use(express.static(path.join(__dirname, '../client/dist'), {
   }
 }));
 
-// Serve robots.txt and sitemap.xml from public folder
+// Serve robots.txt from public folder (but NOT sitemap.xml - that's dynamic)
 app.use(express.static(path.join(__dirname, '../client/public'), {
   maxAge: '1d',
   index: false // Don't serve index.html from public
