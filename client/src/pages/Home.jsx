@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { HeartHandshake, Star, Shield, Heart, MessageCircle, Zap, MapPin, Users, Quote } from 'lucide-react';
 import { SITE_URL } from '../data/seoContent';
 import { WebSiteSchema, OrganizationSchema, BreadcrumbSchema } from '../components/seo/SchemaComponents';
 
