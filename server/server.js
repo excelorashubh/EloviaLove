@@ -233,10 +233,14 @@ io.on('connection', (socket) => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// DYNAMIC SITEMAP.XML (SEO)
+// DYNAMIC SITEMAP.XML (SEO) - Sitemap Index Architecture
 // ══════════════════════════════════════════════════════════════════════════════
 
-app.get('/sitemap.xml', seoModule.sitemapHandler);
+app.get('/sitemap.xml', seoModule.sitemapHandler);              // Main sitemap index
+app.get('/sitemap-pages.xml', seoModule.pagesHandler);          // Core pages
+app.get('/sitemap-cities.xml', seoModule.citiesHandler);        // City pages
+app.get('/sitemap-blog.xml', seoModule.blogHandler);            // Blog posts (dynamic)
+app.get('/sitemap-images.xml', seoModule.imagesHandler);        // Image sitemap
 
 // ══════════════════════════════════════════════════════════════════════════════
 // STATIC FILE SERVING (React Build)

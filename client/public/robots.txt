@@ -1,6 +1,7 @@
 # ── Elovia Love Robots.txt - Production SEO Optimization ─────────────────────
 # Block admin, user-specific, and low-value pages from crawling
 # Allow all public content pages for maximum indexing
+# Domain: https://elovialove.onrender.com
 
 User-agent: *
 # Allow all public content
@@ -12,6 +13,7 @@ Disallow: /admin/*
 
 # Block user-specific pages (privacy + crawl waste)
 Disallow: /dashboard
+Disallow: /dashboard/*
 Disallow: /profile
 Disallow: /profile/*
 Disallow: /matches
@@ -19,6 +21,14 @@ Disallow: /chat
 Disallow: /chat/*
 Disallow: /chats
 Disallow: /notifications
+Disallow: /settings
+Disallow: /salesman
+Disallow: /salesman/*
+
+# Block authentication pages
+Disallow: /login
+Disallow: /signup
+Disallow: /register
 
 # Block search/filter URLs (infinite crawl traps)
 Disallow: /*?filter=*
@@ -32,17 +42,14 @@ Disallow: /api/*
 
 # Block development/debug routes
 Disallow: /verify
-Disallow: /subscription-success
+Disallow: /subscription/success
 
-# Allow sitemap
+# Allow sitemap architecture
 Allow: /sitemap.xml
-Allow: /api/blog/sitemap.xml
+Allow: /sitemap-*.xml
 
-# Sitemap location
-Sitemap: /sitemap.xml
-
-# ── Crawl Delay (if needed for Render free tier) ──────────────────────────────
-# Crawl-delay: 1
+# Sitemap Index (Main Entry Point)
+Sitemap: https://elovialove.onrender.com/sitemap.xml
 
 # ── Specific Bot Instructions ─────────────────────────────────────────────────
 
@@ -59,6 +66,9 @@ User-agent: AhrefsBot
 Crawl-delay: 10
 
 User-agent: MJ12bot
+Crawl-delay: 10
+
+User-agent: SemrushBot
 Crawl-delay: 10
 
 # ── Mobile Crawlers ──────────────────────────────────────────────────────────
