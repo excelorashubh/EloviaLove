@@ -1,4 +1,6 @@
 import { useAuth } from '../../context/AuthContext';
+import { shouldShowAds } from '../../utils/ads';
+import { Link } from 'react-router-dom';
 
 /**
  * AdWrapper — role-based ad gate.
@@ -6,26 +8,27 @@ import { useAuth } from '../../context/AuthContext';
  * Rules:
  *  - Guest (not logged in)  → show ads (treated as free)
  *  - user.plan === 'free'   → show ads + optional upgrade nudge
- *  - basic / premium / pro  → render nothing (ad-free experience)
+ *  - basic / premium / pro / gold / vip / lifetime  → render nothing (ad-free experience)
  */
-const AdWrapper = ({ children, showUpgradeNudge = false }) => {
+const AdWrapper = ({ children, showUpgradeNudge = false, className = '' }) => {
   const { user } = useAuth();
 
-  // Paid plans get a completely clean, ad-free experience
-  const isPaid = user && user.plan && user.plan !== 'free';
-  if (isPaid) return null;
+  // Check if user should see ads using utility function
+  if (!shouldShowAds(user)) {
+    return null;
+  }
 
   return (
-    <div className="ad-wrapper">
+    <div className={`ad-wrapper ${className}`}>
       {children}
       {showUpgradeNudge && (
-        <p className="text-center text-xs text-slate-400 mt-1">
-          <a
-            href="/pricing"
+        <p className="text-center text-xs text-slate-400 mt-2">
+          <Link
+            to="/pricing"
             className="text-primary-500 hover:text-primary-600 font-medium transition-colors"
           >
             Upgrade to remove ads 🚀
-          </a>
+          </Link>
         </p>
       )}
     </div>
