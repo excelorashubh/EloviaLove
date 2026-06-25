@@ -98,6 +98,87 @@ router.delete('/users/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
 
+    // Find and delete user
+    const user = await User.findByIdAndDelete(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Clean up related data
+    await Promise.all([
+      Match.deleteMany({ $or: [{ user1: userId }, { user2: userId }] }),
+      Message.deleteMany({ $or: [{ sender: userId }, { receiver: userId }] }),
+      Report.deleteMany({ $or: [{ reporter: userId }, { reported: userId }] })
+    ]);
+
+    res.json({
+      success: true,
+      message: 'User and related data deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+// @route   GET /api/admin/analytics/ads
+// @desc    Get ad audience analytics (user plan distribution)
+// @access  Private/Admin
+router.get('/analytics/ads', async (req, res) => {
+  try {
+    // Get user count by plan
+    const byPlan = await User.aggregate([
+      {
+        $group: {
+          _id: '$plan',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Convert to object
+    const planCounts = {};
+    byPlan.forEach(item => {
+      planCounts[item._id || 'free'] = item.count;
+    });
+
+    // Ensure all plans are represented
+    ['free', 'basic', 'premium', 'pro'].forEach(plan => {
+      if (!planCounts[plan]) planCounts[plan] = 0;
+    });
+
+    const total = Object.values(planCounts).reduce((sum, count) => sum + count, 0);
+    const adAudience = planCounts.free || 0; // Only free users see ads
+    const noAdAudience = total - adAudience;
+    
+    const exposureRate = total > 0 ? ((adAudience / total) * 100).toFixed(1) : 0;
+    const upgradeRate = total > 0 ? ((noAdAudience / total) * 100).toFixed(1) : 0;
+
+    res.json({
+      success: true,
+      total,
+      adAudience,
+      noAdAudience,
+      exposureRate: parseFloat(exposureRate),
+      upgradeRate: parseFloat(upgradeRate),
+      byPlan: planCounts
+    });
+  } catch (error) {
+    console.error('Get ad analytics error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
