@@ -99,7 +99,7 @@ router.delete('/users/:userId', async (req, res) => {
     const { userId } = req.params;
 
     // Find and delete user
-    const user = await User.findByIdAndDelete(userId);
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({
@@ -110,6 +110,7 @@ router.delete('/users/:userId', async (req, res) => {
 
     // Clean up related data
     await Promise.all([
+      User.findByIdAndDelete(userId),
       Match.deleteMany({ $or: [{ user1: userId }, { user2: userId }] }),
       Message.deleteMany({ $or: [{ sender: userId }, { receiver: userId }] }),
       Report.deleteMany({ $or: [{ reporter: userId }, { reported: userId }] })
@@ -172,35 +173,6 @@ router.get('/analytics/ads', async (req, res) => {
     });
   } catch (error) {
     console.error('Get ad analytics error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
-  }
-});
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Delete user's data
-    await Promise.all([
-      User.findByIdAndDelete(userId),
-      Report.deleteMany({ $or: [{ reporter: userId }, { reportedUser: userId }] }),
-      Match.deleteMany({ users: userId }),
-      Message.deleteMany({ $or: [{ sender: userId }, { receiver: userId }] })
-    ]);
-
-    res.json({
-      success: true,
-      message: 'User deleted successfully'
-    });
-  } catch (error) {
-    console.error('Delete user error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -579,39 +551,6 @@ router.get('/analytics/conversion', async (req, res) => {
 
 module.exports = router;
 
-// @route   GET /api/admin/analytics/ads
-// @desc    Ad exposure stats — how many users see ads vs don't
-router.get('/analytics/ads', async (req, res) => {
-  try {
-    const [planDist, total] = await Promise.all([
-      User.aggregate([
-        { $group: { _id: '$plan', count: { $sum: 1 } } },
-      ]),
-      User.countDocuments(),
-    ]);
-
-    const byPlan = { free: 0, basic: 0, premium: 0, pro: 0 };
-    planDist.forEach(p => { if (byPlan[p._id] !== undefined) byPlan[p._id] = p.count; });
-
-    const adAudience  = byPlan.free;                                          // sees ads
-    const noAdAudience = byPlan.basic + byPlan.premium + byPlan.pro;          // ad-free
-    const exposureRate = total > 0 ? ((adAudience / total) * 100).toFixed(1) : 0;
-    const upgradeRate  = total > 0 ? ((noAdAudience / total) * 100).toFixed(1) : 0;
-
-    res.json({
-      success: true,
-      total,
-      adAudience,
-      noAdAudience,
-      exposureRate,
-      upgradeRate,
-      byPlan,
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
 // ── PLAN CONFIG (dynamic subscription plans) ─────────────────────────────────
 const PlanConfig = require('../models/PlanConfig');
 const subscriptionRoutes = require('./subscription');
@@ -681,14 +620,17 @@ const DEFAULT_PLANS = [
 ];
 
 // Seed defaults if collection is empty
-async function seedPlansIfEmpty() {
-  const count = await PlanConfig.countDocuments();
-  if (count === 0) {
-    await PlanConfig.insertMany(DEFAULT_PLANS);
-    console.log('Plan configs seeded with defaults');
+(async function seedPlansIfEmpty() {
+  try {
+    const count = await PlanConfig.countDocuments();
+    if (count === 0) {
+      await PlanConfig.insertMany(DEFAULT_PLANS);
+      console.log('✓ Plan configs seeded with defaults');
+    }
+  } catch (error) {
+    console.error('✗ Failed to seed plan configs:', error.message);
   }
-}
-seedPlansIfEmpty().catch(console.error);
+})();
 
 // @route   GET /api/admin/plans
 router.get('/plans', async (req, res) => {
