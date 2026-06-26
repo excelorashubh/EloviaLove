@@ -78,9 +78,7 @@ const trackPageVisit = async (page) => {
 
 function AppContent() {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/register';
-  const hideGlobalNavbar = location.pathname.startsWith('/admin') || isAuthPage;
-  const hideFooter = location.pathname.startsWith('/admin') || isAuthPage;
+  const hideGlobalNavbar = location.pathname.startsWith('/admin');
   const hideChatInterface = location.pathname === '/chat' || location.pathname.startsWith('/chat/');
 
   useEffect(() => {
@@ -307,7 +305,7 @@ function AppContent() {
         </Routes>
       </main>
 
-      {!hideChatInterface && !hideFooter && <Footer />}
+      {!hideChatInterface && <Footer />}
       <CookieConsent />
     </>
   );
