@@ -52,6 +52,7 @@ import Footer from './components/layout/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import CookieConsent from './components/CookieConsent';
+import AdInitializer from './components/ads/AdInitializer';
 
 const VISITOR_ID_KEY = 'elovia_visitor_id';
 
@@ -86,6 +87,7 @@ function AppContent() {
 
   return (
     <>
+      <AdInitializer />
       {!hideGlobalNavbar && <GlobalNavbar />}
 
       <main className={`min-h-screen ${!hideGlobalNavbar ? 'pt-20' : ''}`}>
