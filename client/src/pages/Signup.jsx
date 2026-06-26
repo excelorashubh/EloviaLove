@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Heart, EyeOff, Eye, User, Calendar } from 'lucide-react';
+import { Mail, Lock, Heart, User, Calendar, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { SITE_URL } from '../data/seoContent';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,11 +12,11 @@ const Signup = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    dateOfBirth: '',
+    gender: '',
     password: '',
     confirmPassword: '',
-    dob: '',
-    gender: '',
-    terms: false
+    terms: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,305 +24,375 @@ const Signup = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    // Basic validation
+    
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      setLoading(false);
       return;
     }
 
     if (!formData.terms) {
-      setError('Please accept the Terms of Service and Privacy Policy');
-      setLoading(false);
+      setError('Please accept the Terms of Service');
       return;
     }
 
-    const result = await register({
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      dateOfBirth: formData.dob,
-      gender: formData.gender
-    });
+    setLoading(true);
+    setError('');
 
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setError(result.message);
+    try {
+      const result = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+      });
+
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError('Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <>
       <Helmet>
-        <title>Sign Up — Join Elovia Love Dating App</title>
-        <meta name="description" content="Create your free account on Elovia Love and start connecting with verified singles looking for serious relationships." />
+        <title>Join Elovia Love — Start Your Journey to True Love</title>
+        <meta name="description" content="Create your verified profile and connect with serious singles." />
         <link rel="canonical" href={`${SITE_URL}/signup`} />
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl"
-        >
-          {/* Logo and Header */}
-          <div className="text-center">
-            <Link to="/" className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl mb-4 shadow-lg hover:scale-105 transition-transform">
-              <Heart className="text-white" size={32} fill="currentColor" />
-            </Link>
-            <h2 className="text-3xl font-extrabold text-gray-900">
-              Create Your Account
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Join Elovia Love and find meaningful connections
-            </p>
-          </div>
-
-          {/* Error Message */}
-          {error && (
+      {/* Full-screen container */}
+      <div className="fixed inset-0 overflow-hidden bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50">
+        
+        {/* Floating hearts animation */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+          {[...Array(8)].map((_, i) => (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+              key={i}
+              className="absolute text-pink-400"
+              initial={{ 
+                x: Math.random() * window.innerWidth,
+                y: window.innerHeight + 100,
+                scale: Math.random() * 0.5 + 0.5,
+                opacity: 0.3
+              }}
+              animate={{
+                y: -100,
+                x: Math.random() * window.innerWidth,
+              }}
+              transition={{
+                duration: Math.random() * 10 + 15,
+                repeat: Infinity,
+                ease: "linear",
+                delay: Math.random() * 5,
+              }}
             >
-              {error}
+              <Heart size={24} fill="currentColor" />
             </motion.div>
-          )}
+          ))}
+        </div>
 
-          {/* Signup Form */}
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-            {/* Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                  placeholder="John Doe"
-                />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
-
-            {/* Date of Birth */}
-            <div>
-              <label htmlFor="dob" className="block text-sm font-medium text-gray-700 mb-1">
-                Date of Birth
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Calendar className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="dob"
-                  name="dob"
-                  type="date"
-                  required
-                  value={formData.dob}
-                  onChange={handleInputChange}
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Gender */}
-            <div>
-              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
-                Gender
-              </label>
-              <select
-                id="gender"
-                name="gender"
-                required
-                value={formData.gender}
-                onChange={handleInputChange}
-                className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+        <div className="h-screen w-full flex">
+          
+          {/* Left Side - Hero (55%) */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            className="hidden lg:flex lg:w-[55%] relative bg-gradient-to-br from-pink-200 via-rose-200 to-purple-300 items-center justify-center"
+          >
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/45 to-black/60" />
+            
+            {/* Content */}
+            <div className="relative z-10 text-center px-12 max-w-2xl">
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
               >
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Non-binary">Non-binary</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
+                {/* Main Heading */}
+                <h1 className="text-6xl font-bold text-white mb-6 leading-tight tracking-tight">
+                  Every Love Story<br />Begins With One Hello ❤️
+                </h1>
+                
+                {/* Subtitle */}
+                <p className="text-xl text-white/90 mb-12 font-light">
+                  Find meaningful relationships with verified singles across India
+                </p>
 
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                {/* Trust Badges - Single Row */}
+                <div className="grid grid-cols-4 gap-4 text-white/90">
+                  <div className="text-center">
+                    <CheckCircle2 className="mx-auto mb-2" size={20} />
+                    <p className="text-sm font-medium">Verified<br />Profiles</p>
+                  </div>
+                  <div className="text-center">
+                    <CheckCircle2 className="mx-auto mb-2" size={20} />
+                    <p className="text-sm font-medium">AI<br />Matchmaking</p>
+                  </div>
+                  <div className="text-center">
+                    <CheckCircle2 className="mx-auto mb-2" size={20} />
+                    <p className="text-sm font-medium">Safe &<br />Secure</p>
+                  </div>
+                  <div className="text-center">
+                    <CheckCircle2 className="mx-auto mb-2" size={20} />
+                    <p className="text-sm font-medium">Serious<br />Relationship</p>
+                  </div>
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                  placeholder="Create a strong password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Right Side - Signup Card (45%) */}
+          <div className="w-full lg:w-[45%] flex items-center justify-center p-8 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="w-full max-w-[430px] my-8"
+            >
+              {/* Glassmorphism Card */}
+              <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl shadow-pink-200/50 p-10">
+                
+                {/* Logo */}
+                <Link
+                  to="/"
+                  className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#FF4E7A] to-[#FF7AA8] rounded-2xl mb-8 shadow-lg hover:scale-105 transition-transform duration-300"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-            </div>
+                  <Heart size={28} className="text-white" fill="currentColor" />
+                </Link>
 
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                  placeholder="Confirm your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-            </div>
+                {/* Header */}
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  Create Your Account
+                </h2>
+                <p className="text-gray-600 mb-8">
+                  Join thousands finding meaningful connections
+                </p>
 
-            {/* Terms and Conditions */}
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  checked={formData.terms}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="terms" className="text-gray-700 cursor-pointer">
-                  I agree to the{' '}
-                  <Link to="/terms-of-service" className="text-pink-600 hover:text-pink-500 font-medium">
-                    Terms of Service
-                  </Link>
-                  {' '}and{' '}
-                  <Link to="/privacy-policy" className="text-pink-600 hover:text-pink-500 font-medium">
-                    Privacy Policy
-                  </Link>
-                </label>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
-              >
-                {loading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Creating account...
-                  </span>
-                ) : (
-                  'Create Account'
+                {/* Error Message */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm"
+                  >
+                    {error}
+                  </motion.div>
                 )}
-              </button>
-            </div>
-          </form>
 
-          {/* Login Link */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="font-medium text-pink-600 hover:text-pink-500">
-                Sign in here
-              </Link>
-            </p>
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  
+                  {/* Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all bg-white"
+                        placeholder="John Doe"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all bg-white"
+                        placeholder="you@example.com"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Date of Birth */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Date of Birth
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                      <input
+                        type="date"
+                        name="dateOfBirth"
+                        value={formData.dateOfBirth}
+                        onChange={handleChange}
+                        required
+                        className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Gender */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Gender
+                    </label>
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all bg-white"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Non-binary">Non-binary</option>
+                    </select>
+                  </div>
+
+                  {/* Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                        className="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all bg-white"
+                        placeholder="Create a strong password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        required
+                        className="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all bg-white"
+                        placeholder="Confirm your password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Terms */}
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="terms"
+                      checked={formData.terms}
+                      onChange={handleChange}
+                      className="mt-1 w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500"
+                    />
+                    <span className="text-sm text-gray-600">
+                      I agree to the{' '}
+                      <Link to="/terms-of-service" className="text-pink-600 hover:text-pink-700 font-semibold">
+                        Terms of Service
+                      </Link>{' '}
+                      and{' '}
+                      <Link to="/privacy-policy" className="text-pink-600 hover:text-pink-700 font-semibold">
+                        Privacy Policy
+                      </Link>
+                    </span>
+                  </label>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-[#FF4E7A] to-[#FF7AA8] text-white py-4 rounded-full font-semibold text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      <>
+                        <Heart size={18} fill="currentColor" />
+                        Create My Profile
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Login Link */}
+                <p className="mt-8 text-center text-sm text-gray-600">
+                  Already have an account?{' '}
+                  <Link to="/login" className="text-pink-600 hover:text-pink-700 font-semibold">
+                    Sign In
+                  </Link>
+                </p>
+
+                {/* Minimal Footer */}
+                <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-center gap-3 text-xs text-gray-500">
+                  <Link to="/privacy-policy" className="hover:text-pink-600">Privacy</Link>
+                  <span>·</span>
+                  <Link to="/terms-of-service" className="hover:text-pink-600">Terms</Link>
+                  <span>·</span>
+                  <Link to="/contact" className="hover:text-pink-600">Support</Link>
+                </div>
+                <p className="text-center text-xs text-gray-400 mt-2">
+                  © 2026 Elovia Love
+                </p>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </>
   );
