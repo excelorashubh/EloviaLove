@@ -15,13 +15,21 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     const { receiverId, callType = 'video' } = req.body;
     const callerId = req.user._id;
 
+    console.log(`[API] [Call Initiate] User ${callerId} attempting to call ${receiverId} (type: ${callType})`);
+
     // Validation
     if (!receiverId) {
-      return res.status(400).json({ error: 'Receiver ID is required' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'Receiver ID is required' 
+      });
     }
 
     if (callerId.toString() === receiverId) {
-      return res.status(400).json({ error: 'Cannot call yourself' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'Cannot call yourself' 
+      });
     }
 
     // Get both users
@@ -31,7 +39,11 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     ]);
 
     if (!receiver) {
-      return res.status(404).json({ error: 'User not found' });
+      console.log(`[API] [Call Initiate] Receiver ${receiverId} not found`);
+      return res.status(404).json({ 
+        success: false,
+        error: 'User not found' 
+      });
     }
 
     // SECURITY CHECKS (Same as can-call endpoint)
@@ -40,7 +52,9 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     if (caller.callStats?.isBannedFromCalling) {
       const banExpiry = caller.callStats.callBanExpiry;
       if (banExpiry && banExpiry > new Date()) {
+        console.log(`[API] [Call Initiate] Caller ${callerId} is banned until ${banExpiry}`);
         return res.status(403).json({ 
+          success: false,
           error: 'You are temporarily banned from making calls' 
         });
       }
@@ -48,7 +62,11 @@ router.post('/initiate', authenticateToken, async (req, res) => {
 
     // 2. Check if receiver is suspended
     if (!receiver.isActive) {
-      return res.status(403).json({ error: 'This user account is suspended' });
+      console.log(`[API] [Call Initiate] Receiver ${receiverId} account suspended`);
+      return res.status(403).json({ 
+        success: false,
+        error: 'This user account is suspended' 
+      });
     }
 
     // 3. Check if users are matched
@@ -57,7 +75,9 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     });
 
     if (!match) {
+      console.log(`[API] [Call Initiate] Users ${callerId} and ${receiverId} not matched`);
       return res.status(403).json({ 
+        success: false,
         error: 'You can only call matched users',
         code: 'NOT_MATCHED'
       });
@@ -65,12 +85,18 @@ router.post('/initiate', authenticateToken, async (req, res) => {
 
     // 4. Check if either user has blocked the other
     if (caller.blockedUsers?.includes(receiverId) || receiver.blockedUsers?.includes(callerId)) {
-      return res.status(403).json({ error: 'Cannot call blocked users' });
+      console.log(`[API] [Call Initiate] Block exists between ${callerId} and ${receiverId}`);
+      return res.status(403).json({ 
+        success: false,
+        error: 'Cannot call blocked users' 
+      });
     }
 
     // 5. Check receiver privacy settings
     if (receiver.privacy?.videoCalls?.enabled === false) {
+      console.log(`[API] [Call Initiate] Receiver ${receiverId} has video calls disabled`);
       return res.status(403).json({ 
+        success: false,
         error: 'This user has disabled incoming video calls',
         code: 'CALLS_DISABLED'
       });
@@ -78,7 +104,9 @@ router.post('/initiate', authenticateToken, async (req, res) => {
 
     // 6. Check verification requirement
     if (receiver.privacy?.videoCalls?.verifiedOnly && !caller.isVerified) {
+      console.log(`[API] [Call Initiate] Receiver requires verification, caller ${callerId} not verified`);
       return res.status(403).json({
+        success: false,
         error: 'This user only accepts calls from verified members',
         code: 'VERIFICATION_REQUIRED'
       });
@@ -87,7 +115,9 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     // 7. Check spam limits
     const spamCheck = await Call.checkSpamLimit(callerId);
     if (!spamCheck.allowed) {
+      console.log(`[API] [Call Initiate] Spam limit reached for ${callerId}: ${spamCheck.reason}`);
       return res.status(429).json({ 
+        success: false,
         error: spamCheck.reason,
         code: 'SPAM_LIMIT'
       });
@@ -96,7 +126,9 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     // 8. Check cooldown
     const cooldownCheck = await Call.checkCooldown(callerId, receiverId);
     if (!cooldownCheck.allowed) {
+      console.log(`[API] [Call Initiate] Cooldown active for ${callerId} calling ${receiverId}`);
       return res.status(429).json({
+        success: false,
         error: cooldownCheck.reason,
         code: 'COOLDOWN'
       });
@@ -112,7 +144,9 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     ]);
 
     if (callerActiveCall) {
+      console.log(`[API] [Call Initiate] Caller ${callerId} already in call ${callerActiveCall._id}`);
       return res.status(409).json({ 
+        success: false,
         error: 'You are already in a call', 
         status: 'busy',
         code: 'BUSY'
@@ -120,7 +154,9 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     }
 
     if (receiverActiveCall) {
+      console.log(`[API] [Call Initiate] Receiver ${receiverId} already in call ${receiverActiveCall._id}`);
       return res.status(409).json({ 
+        success: false,
         error: 'User is already in a call', 
         status: 'busy',
         code: 'BUSY'
@@ -136,6 +172,8 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     });
 
     await call.save();
+
+    console.log(`[API] [Call Initiate] Call ${call._id} created successfully (status: initiated)`);
 
     // Update caller stats
     await User.findByIdAndUpdate(callerId, {
@@ -155,8 +193,11 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Call initiation error:', error);
-    res.status(500).json({ error: 'Failed to initiate call' });
+    console.error('[API] [Call Initiate] Error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to initiate call' 
+    });
   }
 });
 
