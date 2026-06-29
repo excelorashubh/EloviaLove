@@ -9,6 +9,22 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
+// ══════════════════════════════════════════════════════════════════════════════
+// STARTUP VALIDATION
+// ══════════════════════════════════════════════════════════════════════════════
+
+const StartupValidator = require('./utils/startupValidator');
+const validator = new StartupValidator();
+
+// Run validation asynchronously
+(async () => {
+  const result = await validator.validate();
+  if (!result.success) {
+    console.error('❌ Startup validation failed. Check errors above.');
+    process.exit(1);
+  }
+})();
+
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -172,26 +188,76 @@ mongoose.connection.on('disconnected', () => {
 // ── Socket.io Setup ───────────────────────────────────────────────────────────
 app.set('io', io);
 
-// ══════════════════════════════════════════════════════════════════════════════
-// API ROUTES
-// ══════════════════════════════════════════════════════════════════════════════
-
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/match', require('./routes/match'));
-app.use('/api/matches', require('./routes/matches'));
-app.use('/api/messages', require('./routes/messages'));
-app.use('/api/notifications', require('./routes/notifications'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/subscription', require('./routes/subscription'));
-app.use('/api/verify', require('./routes/verify'));
-app.use('/api/analytics', require('./routes/analytics'));
-app.use('/api/blogs', require('./routes/blog'));
-app.use('/api/contact', require('./routes/contact'));
-app.use('/api/ads', require('./routes/ads'));
+// Import video call signaling (with error handling)
+let setupCallSignaling;
+try {
+  const callSignaling = require('./utils/callSignaling');
+  setupCallSignaling = callSignaling.setupCallSignaling;
+  console.log('✓ Video call signaling module loaded');
+} catch (error) {
+  console.warn('⚠️  Video call signaling module not available:', error.message);
+  setupCallSignaling = () => console.log('Video calling disabled (module not found)');
+}
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SOCKET.IO REAL-TIME CHAT
+// API ROUTES (WITH ERROR HANDLING)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Health check endpoint (for Render monitoring)
+app.get('/health', (req, res) => {
+  const healthStatus = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    memory: {
+      used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+      total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+    }
+  };
+  res.json(healthStatus);
+});
+
+// Helper function to safely load routes
+const safeLoadRoute = (path, routePath) => {
+  try {
+    app.use(routePath, require(path));
+    console.log(`✓ Loaded route: ${routePath}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Failed to load route ${routePath}:`, error.message);
+    // Create a fallback route that returns 503
+    app.use(routePath, (req, res) => {
+      res.status(503).json({ 
+        error: 'Service temporarily unavailable',
+        route: routePath 
+      });
+    });
+    return false;
+  }
+};
+
+// Load all routes with error handling
+console.log('\n📍 Loading API Routes...');
+safeLoadRoute('./routes/auth', '/api/auth');
+safeLoadRoute('./routes/users', '/api/users');
+safeLoadRoute('./routes/match', '/api/match');
+safeLoadRoute('./routes/matches', '/api/matches');
+safeLoadRoute('./routes/messages', '/api/messages');
+safeLoadRoute('./routes/notifications', '/api/notifications');
+safeLoadRoute('./routes/admin', '/api/admin');
+safeLoadRoute('./routes/subscription', '/api/subscription');
+safeLoadRoute('./routes/verify', '/api/verify');
+safeLoadRoute('./routes/analytics', '/api/analytics');
+safeLoadRoute('./routes/blog', '/api/blogs');
+safeLoadRoute('./routes/contact', '/api/contact');
+safeLoadRoute('./routes/ads', '/api/ads');
+safeLoadRoute('./routes/call', '/api/calls'); // VIDEO CALLING ROUTES
+console.log('✓ All routes loaded\n');
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SOCKET.IO REAL-TIME CHAT & VIDEO CALLING
 // ══════════════════════════════════════════════════════════════════════════════
 
 io.on('connection', (socket) => {
@@ -227,6 +293,9 @@ io.on('connection', (socket) => {
     console.log('User disconnected:', socket.id);
   });
 });
+
+// Setup video call signaling
+setupCallSignaling(io);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // STATIC FILE SERVING (React Build + Static Sitemap)
@@ -294,11 +363,43 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
+// Log startup information
+console.log('═══════════════════════════════════════════════════════════');
+console.log('🚀 Starting Elovia Love Server...');
+console.log('═══════════════════════════════════════════════════════════');
+console.log(`📦 Node Version: ${process.version}`);
+console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`🔌 Port: ${PORT}`);
+console.log(`🗄️  MongoDB URI: ${process.env.MONGODB_URI ? '✓ Configured' : '✗ Missing'}`);
+console.log(`🔑 JWT Secret: ${process.env.JWT_SECRET ? '✓ Configured' : '✗ Missing'}`);
+console.log(`🌐 Client URL: ${process.env.CLIENT_URL || 'Not set'}`);
+console.log('───────────────────────────────────────────────────────────');
+
 server.listen(PORT, () => {
   console.log('═══════════════════════════════════════════════════════════');
   console.log(`✓ Server running on port ${PORT}`);
   console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`✓ MongoDB: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
+  console.log(`✓ Socket.IO: Initialized`);
+  console.log(`✓ Video Calling: Signaling Active`);
+  console.log(`✓ Health Check: http://localhost:${PORT}/health`);
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log('📍 Routes Registered:');
+  console.log('   /api/auth        - Authentication');
+  console.log('   /api/users       - User Management');
+  console.log('   /api/match       - Matching');
+  console.log('   /api/matches     - Match List');
+  console.log('   /api/messages    - Messaging');
+  console.log('   /api/notifications - Notifications');
+  console.log('   /api/admin       - Admin Panel');
+  console.log('   /api/subscription - Subscriptions');
+  console.log('   /api/verify      - Verification');
+  console.log('   /api/analytics   - Analytics');
+  console.log('   /api/blogs       - Blog Posts');
+  console.log('   /api/contact     - Contact Form');
+  console.log('   /api/ads         - Advertisements');
+  console.log('   /api/calls       - Video Calling');
+  console.log('   /health          - Health Check');
   console.log('═══════════════════════════════════════════════════════════');
 });
 
@@ -330,19 +431,41 @@ process.on('SIGINT', () => {
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  // In production, you might want to restart the process
+  console.error('═══════════════════════════════════════════════════════════');
+  console.error('❌ UNCAUGHT EXCEPTION - Server Crash Prevented');
+  console.error('═══════════════════════════════════════════════════════════');
+  console.error('Error:', err.message);
+  console.error('Stack:', err.stack);
+  console.error('═══════════════════════════════════════════════════════════');
+  
+  // In production, attempt graceful recovery or restart
   if (process.env.NODE_ENV === 'production') {
-    process.exit(1);
+    console.log('🔄 Attempting graceful shutdown...');
+    server.close(() => {
+      console.log('Server closed. Exiting process.');
+      process.exit(1);
+    });
+    
+    // Force exit if server doesn't close in 10 seconds
+    setTimeout(() => {
+      console.error('❌ Forced shutdown after timeout');
+      process.exit(1);
+    }, 10000);
   }
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // In production, you might want to restart the process
+  console.error('═══════════════════════════════════════════════════════════');
+  console.error('❌ UNHANDLED PROMISE REJECTION');
+  console.error('═══════════════════════════════════════════════════════════');
+  console.error('Promise:', promise);
+  console.error('Reason:', reason);
+  console.error('═══════════════════════════════════════════════════════════');
+  
+  // In production, log but don't crash
   if (process.env.NODE_ENV === 'production') {
-    process.exit(1);
+    console.log('⚠️  Server continuing despite unhandled rejection');
   }
 });
 
