@@ -54,7 +54,11 @@ const callSchema = new mongoose.Schema({
     network: {
       callerConnection: String,
       receiverConnection: String
-    }
+    },
+    seen: { type: Boolean, default: false },
+    isSpam: { type: Boolean, default: false },
+    reportedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    reportReason: String,
   }
 }, {
   timestamps: true
@@ -117,6 +121,59 @@ callSchema.statics.markMissedCallsAsSeen = async function(userId) {
     { receiverId: userId, status: 'missed' },
     { $set: { 'metadata.seen': true } }
   );
+};
+
+// Static method to check spam limits
+callSchema.statics.checkSpamLimit = async function(callerId) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const callsToday = await this.countDocuments({
+    callerId,
+    createdAt: { $gte: today }
+  });
+  
+  const rejectionsToday = await this.countDocuments({
+    callerId,
+    status: 'rejected',
+    createdAt: { $gte: today }
+  });
+  
+  // Limits: 50 calls per day, or more than 10 rejections
+  if (callsToday >= 50) {
+    return { allowed: false, reason: 'Daily call limit reached (50 calls)' };
+  }
+  
+  if (rejectionsToday >= 10) {
+    return { allowed: false, reason: 'Too many rejected calls today. Try again tomorrow.' };
+  }
+  
+  return { allowed: true };
+};
+
+// Static method to check cooldown (prevent spam calling same person)
+callSchema.statics.checkCooldown = async function(callerId, receiverId) {
+  const lastCall = await this.findOne({
+    callerId,
+    receiverId,
+    status: { $in: ['rejected', 'missed', 'cancelled'] }
+  }).sort({ createdAt: -1 });
+  
+  if (lastCall) {
+    const timeSinceLastCall = Date.now() - lastCall.createdAt.getTime();
+    const cooldownMinutes = 15;
+    const cooldownMs = cooldownMinutes * 60 * 1000;
+    
+    if (timeSinceLastCall < cooldownMs) {
+      const remainingMinutes = Math.ceil((cooldownMs - timeSinceLastCall) / 60000);
+      return {
+        allowed: false,
+        reason: `Please wait ${remainingMinutes} minute(s) before calling again`
+      };
+    }
+  }
+  
+  return { allowed: true };
 };
 
 // Pre-save hook to validate call data

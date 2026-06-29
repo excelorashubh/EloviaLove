@@ -55,6 +55,7 @@ import { VideoCallProvider } from './context/VideoCallContext';
 import CookieConsent from './components/CookieConsent';
 import AdInitializer from './components/ads/AdInitializer';
 import IncomingCallModal from './components/videocall/IncomingCallModal';
+import OutgoingCallScreen from './components/videocall/OutgoingCallScreen';
 import VideoCallScreen from './components/videocall/VideoCallScreen';
 import { useVideoCall } from './context/VideoCallContext';
 
@@ -94,12 +95,13 @@ function VideoCallHandler() {
     isReconnecting,
     acceptCall,
     rejectCall,
+    cancelCall,
     endCall,
     toggleVideo,
     toggleAudio,
   } = useVideoCall();
 
-  // Incoming call modal
+  // Incoming call modal (receiver side)
   if (incomingCall && !activeCall) {
     return (
       <IncomingCallModal
@@ -110,8 +112,18 @@ function VideoCallHandler() {
     );
   }
 
-  // Active call screen
-  if (activeCall && callStatus === 'connected') {
+  // Outgoing call screen (caller side - waiting for answer)
+  if (activeCall && (callStatus === 'calling' || callStatus === 'ringing') && !remoteStream) {
+    return (
+      <OutgoingCallScreen
+        receiver={activeCall.receiverInfo || {}}
+        onCancel={() => cancelCall(activeCall._id)}
+      />
+    );
+  }
+
+  // Active call screen (both sides - call connected)
+  if (activeCall && callStatus === 'connected' && remoteStream) {
     return (
       <VideoCallScreen
         localStream={localStream}

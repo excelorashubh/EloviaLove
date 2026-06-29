@@ -120,6 +120,33 @@ const userSchema = new mongoose.Schema({
   },
   nextBillingDate: { type: Date },
   razorpayPlanId:  { type: String }, // Razorpay plan_id used for this subscription
+
+  // ── Privacy Settings ──────────────────────────────────────────────────────
+  privacy: {
+    videoCalls: {
+      enabled: { type: Boolean, default: true },
+      matchesOnly: { type: Boolean, default: true },
+      verifiedOnly: { type: Boolean, default: false },
+    },
+    voiceCalls: {
+      enabled: { type: Boolean, default: true },
+      matchesOnly: { type: Boolean, default: true },
+      verifiedOnly: { type: Boolean, default: false },
+    },
+    cameraDefaultOn: { type: Boolean, default: true },
+    microphoneDefaultOn: { type: Boolean, default: true },
+    muteIncomingCalls: { type: Boolean, default: false },
+  },
+
+  // ── Call Statistics (for spam detection) ──────────────────────────────────
+  callStats: {
+    lastCallAt: { type: Date },
+    callsInitiatedToday: { type: Number, default: 0 },
+    callsRejectedToday: { type: Number, default: 0 },
+    spamScore: { type: Number, default: 0 }, // Increases with rejections
+    isBannedFromCalling: { type: Boolean, default: false },
+    callBanExpiry: { type: Date },
+  },
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

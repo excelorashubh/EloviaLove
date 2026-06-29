@@ -9,7 +9,7 @@ const { authenticateToken } = require('../middleware/auth');
 // VIDEO CALLING ROUTES - PRODUCTION READY
 // ══════════════════════════════════════════════════════════════════════════════
 
-// ── Initiate Call ─────────────────────────────────────────────────────────────
+// ── Initiate Call (WITH COMPREHENSIVE SECURITY) ───────────────────────────────
 router.post('/initiate', authenticateToken, async (req, res) => {
   try {
     const { receiverId, callType = 'video' } = req.body;
@@ -24,13 +24,34 @@ router.post('/initiate', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Cannot call yourself' });
     }
 
-    // Check if receiver exists
-    const receiver = await User.findById(receiverId);
+    // Get both users
+    const [caller, receiver] = await Promise.all([
+      User.findById(callerId),
+      User.findById(receiverId)
+    ]);
+
     if (!receiver) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Check if users are matched (platform rule)
+    // SECURITY CHECKS (Same as can-call endpoint)
+    
+    // 1. Check if caller is banned
+    if (caller.callStats?.isBannedFromCalling) {
+      const banExpiry = caller.callStats.callBanExpiry;
+      if (banExpiry && banExpiry > new Date()) {
+        return res.status(403).json({ 
+          error: 'You are temporarily banned from making calls' 
+        });
+      }
+    }
+
+    // 2. Check if receiver is suspended
+    if (!receiver.isActive) {
+      return res.status(403).json({ error: 'This user account is suspended' });
+    }
+
+    // 3. Check if users are matched
     const match = await Match.findOne({
       $or: [
         { user1: callerId, user2: receiverId, status: 'accepted' },
@@ -39,15 +60,52 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     });
 
     if (!match) {
-      return res.status(403).json({ error: 'You can only call matched users' });
+      return res.status(403).json({ 
+        error: 'You can only call matched users',
+        code: 'NOT_MATCHED'
+      });
     }
 
-    // Check if receiver has video calls enabled
-    if (receiver.settings?.videoCallsDisabled) {
-      return res.status(403).json({ error: 'This user has disabled video calls' });
+    // 4. Check if either user has blocked the other
+    if (caller.blockedUsers?.includes(receiverId) || receiver.blockedUsers?.includes(callerId)) {
+      return res.status(403).json({ error: 'Cannot call blocked users' });
     }
 
-    // Check for active calls
+    // 5. Check receiver privacy settings
+    if (receiver.privacy?.videoCalls?.enabled === false) {
+      return res.status(403).json({ 
+        error: 'This user has disabled incoming video calls',
+        code: 'CALLS_DISABLED'
+      });
+    }
+
+    // 6. Check verification requirement
+    if (receiver.privacy?.videoCalls?.verifiedOnly && !caller.isVerified) {
+      return res.status(403).json({
+        error: 'This user only accepts calls from verified members',
+        code: 'VERIFICATION_REQUIRED'
+      });
+    }
+
+    // 7. Check spam limits
+    const spamCheck = await Call.checkSpamLimit(callerId);
+    if (!spamCheck.allowed) {
+      return res.status(429).json({ 
+        error: spamCheck.reason,
+        code: 'SPAM_LIMIT'
+      });
+    }
+
+    // 8. Check cooldown
+    const cooldownCheck = await Call.checkCooldown(callerId, receiverId);
+    if (!cooldownCheck.allowed) {
+      return res.status(429).json({
+        error: cooldownCheck.reason,
+        code: 'COOLDOWN'
+      });
+    }
+
+    // 9. Check for active calls
     const activeCall = await Call.findOne({
       $or: [
         { callerId, status: { $in: ['initiated', 'ringing', 'accepted'] } },
@@ -58,10 +116,14 @@ router.post('/initiate', authenticateToken, async (req, res) => {
     });
 
     if (activeCall) {
-      return res.status(409).json({ error: 'User is already in a call', status: 'busy' });
+      return res.status(409).json({ 
+        error: 'User is already in a call', 
+        status: 'busy',
+        code: 'BUSY'
+      });
     }
 
-    // Create call record
+    // ALL CHECKS PASSED - Create call record
     const call = new Call({
       callerId,
       receiverId,
@@ -71,10 +133,16 @@ router.post('/initiate', authenticateToken, async (req, res) => {
 
     await call.save();
 
+    // Update caller stats
+    await User.findByIdAndUpdate(callerId, {
+      $inc: { 'callStats.callsInitiatedToday': 1 },
+      $set: { 'callStats.lastCallAt': new Date() }
+    });
+
     // Populate user details
     await call.populate([
-      { path: 'callerId', select: 'name profilePicture isVerified' },
-      { path: 'receiverId', select: 'name profilePicture isVerified' }
+      { path: 'callerId', select: 'name profilePhoto isVerified' },
+      { path: 'receiverId', select: 'name profilePhoto isVerified' }
     ]);
 
     res.status(201).json({
@@ -341,19 +409,52 @@ router.get('/missed-count', authenticateToken, async (req, res) => {
   }
 });
 
-// ── Check Call Permission ─────────────────────────────────────────────────────
+// ── Check Call Permission (COMPREHENSIVE) ─────────────────────────────────────
 router.get('/can-call/:userId', authenticateToken, async (req, res) => {
   try {
     const callerId = req.user.userId;
     const { userId: receiverId } = req.params;
 
-    // Check if receiver exists
-    const receiver = await User.findById(receiverId);
+    // Get both users
+    const [caller, receiver] = await Promise.all([
+      User.findById(callerId),
+      User.findById(receiverId)
+    ]);
+
+    // 1. Check if receiver exists
     if (!receiver) {
-      return res.json({ canCall: false, reason: 'User not found' });
+      return res.json({ 
+        canCall: false, 
+        reason: 'User not found',
+        shortReason: 'Unavailable',
+        icon: 'error'
+      });
     }
 
-    // Check if users are matched
+    // 2. Check if caller is banned from calling
+    if (caller.callStats?.isBannedFromCalling) {
+      const banExpiry = caller.callStats.callBanExpiry;
+      if (banExpiry && banExpiry > new Date()) {
+        return res.json({
+          canCall: false,
+          reason: 'You are temporarily banned from making calls due to spam reports',
+          shortReason: 'Banned',
+          icon: 'ban'
+        });
+      }
+    }
+
+    // 3. Check if receiver is suspended
+    if (!receiver.isActive) {
+      return res.json({
+        canCall: false,
+        reason: 'This user account is currently suspended',
+        shortReason: 'Suspended',
+        icon: 'shield'
+      });
+    }
+
+    // 4. Check if users are matched (CRITICAL REQUIREMENT)
     const match = await Match.findOne({
       $or: [
         { user1: callerId, user2: receiverId, status: 'accepted' },
@@ -362,15 +463,67 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     });
 
     if (!match) {
-      return res.json({ canCall: false, reason: 'Not matched' });
+      return res.json({ 
+        canCall: false, 
+        reason: 'Video calls are available after you both match',
+        shortReason: 'Not Matched',
+        icon: 'lock'
+      });
     }
 
-    // Check if receiver has video calls enabled
-    if (receiver.settings?.videoCallsDisabled) {
-      return res.json({ canCall: false, reason: 'Video calls disabled' });
+    // 5. Check if either user has blocked the other
+    if (caller.blockedUsers?.includes(receiverId) || receiver.blockedUsers?.includes(callerId)) {
+      return res.json({
+        canCall: false,
+        reason: 'Cannot call blocked users',
+        shortReason: 'Blocked',
+        icon: 'block'
+      });
     }
 
-    // Check for active calls
+    // 6. Check receiver's privacy settings - video calls enabled
+    if (receiver.privacy?.videoCalls?.enabled === false) {
+      return res.json({ 
+        canCall: false, 
+        reason: 'This member has disabled incoming video calls',
+        shortReason: 'Calls Disabled',
+        icon: 'lock'
+      });
+    }
+
+    // 7. Check if receiver requires verified callers only
+    if (receiver.privacy?.videoCalls?.verifiedOnly && !caller.isVerified) {
+      return res.json({
+        canCall: false,
+        reason: 'This user only accepts calls from verified members. Complete verification to call.',
+        shortReason: 'Verification Required',
+        icon: 'shield'
+      });
+    }
+
+    // 8. Check spam limits
+    const spamCheck = await Call.checkSpamLimit(callerId);
+    if (!spamCheck.allowed) {
+      return res.json({
+        canCall: false,
+        reason: spamCheck.reason,
+        shortReason: 'Limit Reached',
+        icon: 'ban'
+      });
+    }
+
+    // 9. Check cooldown period (prevent repeated calling same person)
+    const cooldownCheck = await Call.checkCooldown(callerId, receiverId);
+    if (!cooldownCheck.allowed) {
+      return res.json({
+        canCall: false,
+        reason: cooldownCheck.reason,
+        shortReason: 'Wait',
+        icon: 'clock'
+      });
+    }
+
+    // 10. Check if receiver is already in another call
     const activeCall = await Call.findOne({
       $or: [
         { callerId: receiverId, status: { $in: ['initiated', 'ringing', 'accepted'] } },
@@ -379,14 +532,170 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     });
 
     if (activeCall) {
-      return res.json({ canCall: false, reason: 'User is busy' });
+      return res.json({ 
+        canCall: false, 
+        reason: 'The user is currently in another call',
+        shortReason: 'Busy',
+        icon: 'clock'
+      });
     }
 
-    res.json({ canCall: true });
+    // 11. Check if caller is already in another call
+    const callerActiveCall = await Call.findOne({
+      $or: [
+        { callerId, status: { $in: ['initiated', 'ringing', 'accepted'] } },
+        { receiverId: callerId, status: { $in: ['initiated', 'ringing', 'accepted'] } }
+      ]
+    });
+
+    if (callerActiveCall) {
+      return res.json({
+        canCall: false,
+        reason: 'You are already in another call',
+        shortReason: 'In Call',
+        icon: 'clock'
+      });
+    }
+
+    // ALL CHECKS PASSED ✓
+    res.json({ 
+      canCall: true,
+      receiverInfo: {
+        name: receiver.name,
+        profilePicture: receiver.profilePhoto,
+        isVerified: receiver.isVerified
+      }
+    });
 
   } catch (error) {
     console.error('Call permission check error:', error);
-    res.status(500).json({ error: 'Failed to check call permission' });
+    res.status(500).json({ 
+      canCall: false,
+      error: 'Failed to check call permission',
+      reason: 'Unable to verify permissions. Please try again.',
+      shortReason: 'Error',
+      icon: 'error'
+    });
+  }
+});
+
+// ── Report Call as Spam ───────────────────────────────────────────────────────
+router.post('/report/:callId', authenticateToken, async (req, res) => {
+  try {
+    const { callId } = req.params;
+    const userId = req.user.userId;
+    const { reason } = req.body;
+
+    const call = await Call.findById(callId);
+    
+    if (!call) {
+      return res.status(404).json({ error: 'Call not found' });
+    }
+
+    // Verify user was part of the call
+    const isParticipant = call.callerId.toString() === userId || 
+                          call.receiverId.toString() === userId;
+    
+    if (!isParticipant) {
+      return res.status(403).json({ error: 'Unauthorized to report this call' });
+    }
+
+    // Mark call as spam
+    call.metadata.isSpam = true;
+    call.metadata.reportReason = reason;
+    if (!call.metadata.reportedBy) {
+      call.metadata.reportedBy = [];
+    }
+    call.metadata.reportedBy.push(userId);
+    await call.save();
+
+    // Increment spam score of the other user
+    const reportedUserId = call.callerId.toString() === userId 
+      ? call.receiverId 
+      : call.callerId;
+    
+    const reportedUser = await User.findById(reportedUserId);
+    if (reportedUser) {
+      reportedUser.callStats = reportedUser.callStats || {};
+      reportedUser.callStats.spamScore = (reportedUser.callStats.spamScore || 0) + 1;
+      
+      // Ban if spam score exceeds threshold
+      if (reportedUser.callStats.spamScore >= 5) {
+        reportedUser.callStats.isBannedFromCalling = true;
+        reportedUser.callStats.callBanExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+      }
+      
+      await reportedUser.save();
+    }
+
+    res.json({
+      success: true,
+      message: 'Call reported successfully'
+    });
+
+  } catch (error) {
+    console.error('Call report error:', error);
+    res.status(500).json({ error: 'Failed to report call' });
+  }
+});
+
+// ── Update Privacy Settings ───────────────────────────────────────────────────
+router.put('/settings', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { videoCalls, voiceCalls, cameraDefaultOn, microphoneDefaultOn, muteIncomingCalls } = req.body;
+
+    const updateData = {};
+    
+    if (videoCalls !== undefined) {
+      updateData['privacy.videoCalls'] = videoCalls;
+    }
+    if (voiceCalls !== undefined) {
+      updateData['privacy.voiceCalls'] = voiceCalls;
+    }
+    if (cameraDefaultOn !== undefined) {
+      updateData['privacy.cameraDefaultOn'] = cameraDefaultOn;
+    }
+    if (microphoneDefaultOn !== undefined) {
+      updateData['privacy.microphoneDefaultOn'] = microphoneDefaultOn;
+    }
+    if (muteIncomingCalls !== undefined) {
+      updateData['privacy.muteIncomingCalls'] = muteIncomingCalls;
+    }
+
+    await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true });
+
+    res.json({
+      success: true,
+      message: 'Privacy settings updated'
+    });
+
+  } catch (error) {
+    console.error('Settings update error:', error);
+    res.status(500).json({ error: 'Failed to update settings' });
+  }
+});
+
+// ── Get Privacy Settings ──────────────────────────────────────────────────────
+router.get('/settings', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId).select('privacy');
+
+    res.json({
+      success: true,
+      settings: user.privacy || {
+        videoCalls: { enabled: true, matchesOnly: true, verifiedOnly: false },
+        voiceCalls: { enabled: true, matchesOnly: true, verifiedOnly: false },
+        cameraDefaultOn: true,
+        microphoneDefaultOn: true,
+        muteIncomingCalls: false
+      }
+    });
+
+  } catch (error) {
+    console.error('Settings fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch settings' });
   }
 });
 
