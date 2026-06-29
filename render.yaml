@@ -8,6 +8,8 @@ services:
     branch: main
     buildCommand: cd client && npm install && npm run build && cd ../server && npm install
     startCommand: cd server && npm start
+    healthCheckPath: /health
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
@@ -37,5 +39,5 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
-    healthCheckPath: /health
-    autoDeploy: true
+      - key: KEEP_ALIVE_URL
+        sync: false
