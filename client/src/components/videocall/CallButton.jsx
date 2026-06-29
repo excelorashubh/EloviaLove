@@ -95,9 +95,10 @@ const CallButton = ({
         <button
           disabled
           aria-label="Checking call permissions"
-          className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-400 cursor-wait focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500"
+          className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-100 text-slate-400 cursor-wait focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500"
         >
-          <Loader2 size={18} className="animate-spin" />
+          <Loader2 size={16} className="animate-spin sm:hidden" />
+          <Loader2 size={18} className="animate-spin hidden sm:block" />
         </button>
       );
     }
@@ -135,14 +136,15 @@ const CallButton = ({
             onClick={isError ? handleCall : undefined}
             disabled={!isError && loading}
             aria-label={isError ? "Retry checking video call permissions" : permission.reason}
-            className={`inline-flex items-center justify-center w-10 h-10 rounded-2xl transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+            className={`inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 ${
               isError
                 ? 'bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 cursor-pointer'
                 : 'bg-slate-100 text-slate-400 cursor-not-allowed'
             }`}
             title={permission.reason}
           >
-            {getIcon()}
+            <Video size={16} className="sm:hidden" />
+            <Video size={18} className="hidden sm:block" />
           </button>
           {showTooltip && (
             <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 max-w-xs">
@@ -158,10 +160,11 @@ const CallButton = ({
         onClick={handleCall}
         disabled={loading}
         aria-label="Start Video Call"
-        className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-green-50 hover:text-green-600 cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-green-50 hover:text-green-600 cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         title="Start Video Call"
       >
-        {getIcon()}
+        <Video size={16} className="sm:hidden" />
+        <Video size={18} className="hidden sm:block" />
       </button>
     );
   }

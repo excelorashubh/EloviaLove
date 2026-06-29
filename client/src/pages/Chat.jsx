@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SITE_URL } from '../data/seoContent';
-import { Send, ArrowLeft, Check, CheckCheck, WifiOff, Phone, Video, MoreVertical, Smile, Paperclip, Image, Gift, Search } from 'lucide-react';
+import { Send, ArrowLeft, Check, CheckCheck, Phone, MoreVertical, Smile, Paperclip, Image, Gift, Search } from 'lucide-react';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
@@ -497,32 +497,40 @@ const Chat = () => {
           </aside>
 
           <div className="flex-1 flex flex-col overflow-hidden">
-            <header className="flex items-center justify-between gap-4 shrink-0 border-b border-slate-200 bg-white px-4 py-3 sm:px-6 z-20">
-              <div className="flex items-center gap-3">
-                <Link to="/chats" className="flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors xl:hidden">
-                  <ArrowLeft size={20} />
+            <header className="flex items-center justify-between gap-2 sm:gap-4 shrink-0 border-b border-slate-200 bg-white px-3 py-3 sm:px-6 z-20">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <Link to="/chats" className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors xl:hidden shrink-0">
+                  <ArrowLeft size={18} className="sm:hidden" />
+                  <ArrowLeft size={20} className="hidden sm:block" />
                 </Link>
-                <div className="relative">
-                  <img src={otherAvatar} alt={otherUser?.name} className="w-12 h-12 rounded-2xl object-cover" />
-                  {connected && <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white" />}
+                <div className="relative shrink-0">
+                  <img src={otherAvatar} alt={otherUser?.name} className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl object-cover" />
+                  {connected && <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-400 border-2 border-white" />}
                 </div>
-                <div className="min-w-0">
-                  <p className="text-base font-semibold text-slate-900 truncate flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm sm:text-base font-semibold text-slate-900 truncate flex items-center gap-1.5 sm:gap-2">
                     {otherUser?.name}
-                    {otherUser?.isVerified && <VerifiedBadge size={14} />}
+                    {otherUser?.isVerified && <VerifiedBadge size={12} className="sm:hidden" />}
+                    {otherUser?.isVerified && <VerifiedBadge size={14} className="hidden sm:inline" />}
                   </p>
-                  <p className="text-xs text-slate-500 truncate">
+                  <p className="text-[11px] sm:text-xs text-slate-500 truncate">
                     {isTyping ? 'Typing...' : connected ? 'Online' : (otherUser?.location || 'Last seen recently')}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button type="button" className="hidden sm:inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Voice call">
-                  <Phone size={18} />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {/* Voice Call Button - Smaller on mobile */}
+                <button 
+                  type="button" 
+                  className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" 
+                  aria-label="Voice call"
+                >
+                  <Phone size={16} className="sm:hidden" />
+                  <Phone size={18} className="hidden sm:block" />
                 </button>
-                {/* Video Call Button */}
-                <div className="hidden sm:block">
+                {/* Video Call Button - Always visible, smaller on mobile */}
+                <div className="shrink-0">
                   <CallButton 
                     userId={userId}
                     userInfo={otherUser}
@@ -534,12 +542,13 @@ const Chat = () => {
                   <button 
                     type="button" 
                     onClick={() => setShowMenu(!showMenu)}
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" 
+                    className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" 
                     aria-label="More options"
                     aria-expanded={showMenu}
                     aria-haspopup="true"
                   >
-                    <MoreVertical size={18} />
+                    <MoreVertical size={16} className="sm:hidden" />
+                    <MoreVertical size={18} className="hidden sm:block" />
                   </button>
                   
                   {/* Dropdown Menu */}
@@ -560,16 +569,6 @@ const Chat = () => {
                         </svg>
                         View Profile
                       </button>
-
-                      {/* Mobile-only: Show video call in menu */}
-                      <div className="sm:hidden">
-                        <CallButton 
-                          userId={userId}
-                          userInfo={otherUser}
-                          variant="secondary"
-                          label="Video Call"
-                        />
-                      </div>
 
                       <button
                         onClick={handleClearChat}
@@ -687,19 +686,23 @@ const Chat = () => {
             </div>
 
             <div className="bg-white border-t border-slate-200 shrink-0">
-              <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
-                <form onSubmit={handleSend} className="flex items-end gap-2">
-                  <button type="button" onClick={handleEmojiClick} className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Add emoji">
-                    <Smile size={18} />
+              <div className="max-w-5xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+                <form onSubmit={handleSend} className="flex items-end gap-1.5 sm:gap-2">
+                  <button type="button" onClick={handleEmojiClick} className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors shrink-0 hidden xs:flex items-center justify-center" aria-label="Add emoji">
+                    <Smile size={16} className="sm:hidden" />
+                    <Smile size={18} className="hidden sm:block" />
                   </button>
-                  <button type="button" onClick={handleAttachClick} className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Attach file">
-                    <Paperclip size={18} />
+                  <button type="button" onClick={handleAttachClick} className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors shrink-0 hidden xs:flex items-center justify-center" aria-label="Attach file">
+                    <Paperclip size={16} className="sm:hidden" />
+                    <Paperclip size={18} className="hidden sm:block" />
                   </button>
-                  <button type="button" className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Send image">
-                    <Image size={18} />
+                  <button type="button" className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors shrink-0 hidden md:flex items-center justify-center" aria-label="Send image">
+                    <Image size={16} className="sm:hidden" />
+                    <Image size={18} className="hidden sm:block" />
                   </button>
-                  <button type="button" className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="GIFs">
-                    <Gift size={18} />
+                  <button type="button" className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors shrink-0 hidden md:flex items-center justify-center" aria-label="GIFs">
+                    <Gift size={16} className="sm:hidden" />
+                    <Gift size={18} className="hidden sm:block" />
                   </button>
                   <textarea
                     ref={inputRef}
@@ -708,17 +711,18 @@ const Chat = () => {
                     onKeyDown={handleKeyDown}
                     placeholder="Type a message..."
                     rows={1}
-                    className="flex-1 min-h-12 max-h-36 resize-none rounded-3xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                    className="flex-1 min-h-10 sm:min-h-12 max-h-36 resize-none rounded-3xl border border-slate-200 bg-slate-100 px-3 sm:px-4 py-2.5 sm:py-3 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
                     style={{ lineHeight: '1.5' }}
                     aria-label="Message input"
                   />
                   <button
                     type="submit"
                     disabled={!input.trim() || sending}
-                    className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-linear-to-br from-primary-600 to-pink-500 text-white hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="inline-flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-linear-to-br from-primary-600 to-pink-500 text-white hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
                     aria-label="Send message"
                   >
-                    <Send size={18} />
+                    <Send size={16} className="sm:hidden" />
+                    <Send size={18} className="hidden sm:block" />
                   </button>
                   <input
                     ref={fileInputRef}
@@ -727,7 +731,7 @@ const Chat = () => {
                     onChange={handleFileChange}
                   />
                 </form>
-                <p className="text-center text-[10px] text-slate-400 mt-2">Enter to send · Shift+Enter for new line</p>
+                <p className="text-center text-[10px] text-slate-400 mt-2 hidden sm:block">Enter to send · Shift+Enter for new line</p>
               </div>
             </div>
           </div>
