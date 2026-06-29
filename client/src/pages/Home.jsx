@@ -9,6 +9,10 @@ import { WebSiteSchema, OrganizationSchema, BreadcrumbSchema } from '../componen
 const FAQAccordion = React.lazy(() => import('../components/FAQAccordion'));
 const BannerAd = React.lazy(() => import('../components/ads/BannerAd'));
 const AdWrapper = React.lazy(() => import('../components/ads/AdWrapper'));
+const GlobalStats = React.lazy(() => import('../components/home/GlobalStats'));
+const CountriesGrid = React.lazy(() => import('../components/home/CountriesGrid'));
+const GlobalCitiesGrid = React.lazy(() => import('../components/home/GlobalCitiesGrid'));
+const GlobalTestimonials = React.lazy(() => import('../components/home/GlobalTestimonials'));
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -36,28 +40,28 @@ const Home = () => {
       ]} />
       
       <Helmet>
-        <title>Elovia Love – India's Verified Dating App for Serious Relationships</title>
-        <meta name="description" content="Find real love on Elovia Love. Verified profiles, AI-powered matching, and advanced safety features. Join singles finding meaningful relationships." />
+        <title>Elovia Love — Verified Dating Platform | Find Genuine Singles Worldwide</title>
+        <meta name="description" content="Join verified singles from 50+ countries including India, USA, UK, Canada, and Australia. AI-powered matching, advanced safety features, and meaningful connections. Start your relationship journey today." />
         <link rel="canonical" href={`${SITE_URL}/`} />
         <link rel="preload" as="image" href="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1920&auto=format&fm=webp" fetchpriority="high" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Elovia Love – India's Verified Dating App for Serious Relationships" />
-        <meta property="og:description" content="Find real love on Elovia Love. Verified profiles, AI-powered matching, and advanced safety features." />
+        <meta property="og:title" content="Elovia Love — Verified Dating Platform for Serious Relationships Worldwide" />
+        <meta property="og:description" content="Connect with verified singles across 50+ countries. Advanced AI matching and safety features for meaningful relationships." />
         <meta property="og:url" content={`${SITE_URL}/`} />
         <meta property="og:image" content={`${SITE_URL}/EloviaLoveWB.png`} />
         <meta property="og:site_name" content="Elovia Love" />
-        <meta property="og:locale" content="en_IN" />
+        <meta property="og:locale" content="en_US" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Elovia Love – India's Verified Dating App" />
-        <meta name="twitter:description" content="Find real love on India's most trusted dating platform. Verified profiles, AI-powered matching, and advanced safety features." />
+        <meta name="twitter:title" content="Elovia Love — Verified Dating Platform Worldwide" />
+        <meta name="twitter:description" content="Find meaningful connections with verified singles across 50+ countries. AI-powered matching for serious relationships." />
         <meta name="twitter:image" content={`${SITE_URL}/EloviaLoveWB.png`} />
         
         {/* Keywords */}
-        <meta name="keywords" content="online dating India, verified dating app, serious relationships India, safe dating platform, Indian dating site, dating app India, find life partner, meaningful connections, marriage minded singles" />
+        <meta name="keywords" content="verified dating app, online dating worldwide, serious relationships, safe dating platform, international dating, find life partner, meaningful connections, marriage minded singles, dating app USA, dating app UK, dating app Canada, dating app Australia, dating app India" />
         
         <script type="application/ld+json">
           {JSON.stringify({
@@ -90,18 +94,10 @@ const Home = () => {
               },
               {
                 "@type": "Question",
-                "name": "How does the matching algorithm work?",
+                "name": "Which countries is Elovia Love available in?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Our AI-powered matching system considers multiple factors including your personality traits, values, lifestyle preferences, cultural background, and relationship goals. We go beyond surface-level matching to ensure compatibility that leads to lasting relationships."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Is Elovia Love free to use?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "You can create a profile and browse matches for free. Premium features like unlimited messaging, advanced filters, and priority matching are available through our subscription plans. We believe in quality over quantity, so even our free features are designed to help you find meaningful connections."
+                  "text": "Elovia Love is available in 50+ countries worldwide including India, United States, Canada, United Kingdom, Australia, United Arab Emirates, Singapore, Germany, France, Japan, and many more. Our largest community is in India with coverage across all major cities."
                 }
               },
               {
@@ -109,39 +105,7 @@ const Home = () => {
                 "name": "What makes Elovia Love different from other dating apps?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Unlike casual dating apps focused on swiping and quick matches, Elovia Love is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for Indian singles who want long-term partnerships rather than casual encounters."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How do I know if someone is verified?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Verified profiles display a blue checkmark badge next to their name. This badge indicates they've completed our verification process, including ID submission, photo review, and questionnaire completion. You can only match with verified users, ensuring authenticity."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What safety features does Elovia Love offer?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "We offer comprehensive safety features including emergency contact sharing, location check-ins, photo verification, encrypted messaging, and a 24/7 safety team. You can also block/report suspicious users, and all profiles are manually reviewed before approval."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Can I use Elovia Love if I'm looking for marriage?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Absolutely. Many of our users are marriage-minded singles. Our matching algorithm considers relationship goals, and you can specify 'marriage' as your objective in your profile. We help connect people who share similar long-term aspirations."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does Elovia Love handle cultural compatibility?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Our platform is designed with Indian cultural context in mind. We consider factors like family values, religious preferences, and cultural background in our matching algorithm. This helps create more compatible, lasting relationships within the Indian community."
+                  "text": "Unlike casual dating apps focused on swiping and quick matches, Elovia Love is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations."
                 }
               }
             ]
@@ -176,7 +140,7 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8"
           >
-            Find Real Love on <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-600 to-pink-500">India's Verified Dating App</span> for Serious Relationships
+            Find Meaningful Relationships with <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-600 to-pink-500">Verified Singles Worldwide</span>
           </motion.h1>
 
           <motion.p 
@@ -185,7 +149,7 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="mt-4 text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed font-light"
           >
-            Join India's safest online dating platform with verified profiles, AI-powered matching, and advanced safety features. Start meaningful conversations with singles seeking serious relationships today.
+            Join verified singles from India and around the world. Whether you're looking for friendship, dating, or a long-term relationship, Elovia Love helps you connect safely with genuine people through AI-powered matching and advanced safety features.
           </motion.p>
 
           <motion.div 
@@ -198,7 +162,7 @@ const Home = () => {
               to="/signup"
               className="w-full sm:w-auto px-8 py-4 bg-linear-to-r from-primary-600 to-pink-500 text-white rounded-full font-bold text-lg shadow-xl shadow-pink-500/30 hover:shadow-pink-500/50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
             >
-              Join Now It's Free <HeartHandshake size={20} />
+              Create Your Free Profile <HeartHandshake size={20} />
             </Link>
             <Link
               to="/login"
@@ -251,6 +215,15 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Global Statistics Section */}
+      <section className="py-16 bg-white border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <React.Suspense fallback={<div className="h-32 w-full bg-slate-50 animate-pulse rounded-xl" />}>
+            <GlobalStats />
+          </React.Suspense>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <section className="py-24 bg-slate-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -263,7 +236,7 @@ const Home = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">How Elovia Love Works: Your Journey to Finding Love</h2>
             <p className="text-lg text-slate-600 max-w-3xl mx-auto">
-              Our verified dating platform is designed to help serious singles in India find meaningful relationships through a safe, structured process. From profile verification to AI-powered matching, every step is optimized for your success.
+              Our verified dating platform is designed to help serious singles worldwide find meaningful relationships through a safe, structured process. From profile verification to AI-powered matching, every step is optimized for your success.
             </p>
           </motion.div>
 
@@ -324,9 +297,9 @@ const Home = () => {
             transition={{ delay: 0.4 }}
             className="mt-16 text-center"
           >
-            <h3 className="text-2xl font-bold text-slate-900 mb-4">Why Choose Elovia Love Over Other Dating Apps in India?</h3>
+            <h3 className="text-2xl font-bold text-slate-900 mb-4">Why Choose Elovia Love Over Other Dating Apps?</h3>
             <p className="text-slate-600 max-w-4xl mx-auto leading-relaxed mb-8">
-              In a market flooded with casual dating apps, Elovia Love stands out as India's best dating app for serious relationships. We don't just connect people—we help build lasting partnerships through verified profiles and AI-powered matching. Our comprehensive verification process ensures every profile is real, our smart matching algorithm focuses on compatibility and shared values, and our community guidelines promote respectful, meaningful interactions. Unlike apps designed for quick matches and hookups, we create a safe dating platform where Indian singles can take their time to develop genuine connections and find their life partner.
+              In a market flooded with casual dating apps, Elovia Love stands out as a trusted platform for serious relationships. We don't just connect people—we help build lasting partnerships through verified profiles and AI-powered matching. Our comprehensive verification process ensures every profile is real, our smart matching algorithm focuses on compatibility and shared values, and our community guidelines promote respectful, meaningful interactions. Unlike apps designed for quick matches and hookups, we create a safe dating platform where singles can take their time to develop genuine connections and find their life partner.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               <div className="bg-white p-6 rounded-2xl border border-slate-200">
@@ -342,8 +315,8 @@ const Home = () => {
                 <p className="text-slate-600 text-sm">Bank-level encryption, emergency contact sharing, location check-ins, and 24/7 safety monitoring. Your online dating safety is our top priority.</p>
               </div>
               <div className="bg-white p-6 rounded-2xl border border-slate-200">
-                <h4 className="font-semibold text-slate-900 mb-2">Cultural Compatibility Matching</h4>
-                <p className="text-slate-600 text-sm">Our AI algorithm considers Indian cultural values, family expectations, religious preferences, and regional backgrounds for better compatibility.</p>
+                <h4 className="font-semibold text-slate-900 mb-2">Global Compatibility Matching</h4>
+                <p className="text-slate-600 text-sm">Our AI algorithm considers cultural values, family expectations, religious preferences, and backgrounds for better compatibility worldwide.</p>
               </div>
             </div>
           </motion.div>
@@ -409,9 +382,9 @@ const Home = () => {
                 viewport={{ once: true }}
                 variants={fadeIn}
               >
-                <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">India's Safest Space to Find Real Love</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Your Safety Is Our Priority</h2>
                 <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                  We believe serious relationships are built on a foundation of trust. That's why Elovia Love is the first dating platform in India to prioritize manual verification and advanced safety tools over simple swiping.
+                  We believe serious relationships are built on a foundation of trust. That's why Elovia Love prioritizes manual verification and advanced safety tools over simple swiping, creating a secure space for genuine connections worldwide.
                 </p>
                 
                 <div className="space-y-6 mb-10">
@@ -444,32 +417,30 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Popular Cities Section — SEO Internal Linking */}
+      {/* Global Cities Section */}
       <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary-600/10 rounded-full blur-3xl"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Find Love in Your City</h2>
-            <p className="text-slate-400">Discover genuine singles across India's most vibrant metropolitan areas.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Find Love in Popular Cities Worldwide</h2>
+            <p className="text-slate-400">Connect with verified singles across major cities globally</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-            {['Delhi', 'Mumbai', 'Bangalore', 'Kolkata', 'Ranchi'].map((city) => (
-              <Link 
-                key={city} 
-                to={`/dating-in-${city.toLowerCase()}`}
-                className="group relative h-48 rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 hover:border-primary-500 transition-all duration-500"
-              >
-                <div className="absolute inset-0 bg-slate-800 group-hover:bg-primary-900 transition-colors"></div>
-                <div className="relative z-10 text-center">
-                  <MapPin className="mx-auto mb-2 text-primary-400 group-hover:scale-125 transition-transform" />
-                  <span className="font-bold text-lg">{city}</span>
-                </div>
-              </Link>
-            ))}
+          <React.Suspense fallback={<div className="h-64 w-full bg-slate-800 animate-pulse rounded-xl" />}>
+            <GlobalCitiesGrid />
+          </React.Suspense>
+        </div>
+      </section>
+
+      {/* Countries Grid Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Explore Dating by Country</h2>
+            <p className="text-lg text-slate-600">Available in 50+ countries with verified singles worldwide</p>
           </div>
-          <div className="mt-12 text-center">
-            <Link to="/discover" className="text-sm text-slate-400 hover:text-white underline underline-offset-4">Browse all cities</Link>
-          </div>
+          <React.Suspense fallback={<div className="h-96 w-full bg-slate-50 animate-pulse rounded-xl" />}>
+            <CountriesGrid />
+          </React.Suspense>
         </div>
       </section>
 
@@ -528,51 +499,13 @@ const Home = () => {
             variants={fadeIn}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Success Stories</h2>
-            <p className="text-lg text-slate-600">Real couples who found their spark here.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Success Stories from Around the World</h2>
+            <p className="text-lg text-slate-600">Real couples who found meaningful connections on Elovia Love</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                text: "I had given up on dating apps until I found Elovia Love. The quality of matches and conversations here is unmatched. We are getting married next month!",
-                author: "Sarah & David",
-                image: "https://images.unsplash.com/photo-1522851259500-2eac44e7cde2?w=500&auto=format&fm=webp&fit=crop"
-              },
-              {
-                text: "The verification process made me feel so much safer. I met Alex within my first week and we hit it off instantly. Thank you for this amazing platform.",
-                author: "Emily & Alex",
-                image: "https://images.unsplash.com/photo-1543854589-9892c554e950?w=500&auto=format&fm=webp&fit=crop"
-              },
-              {
-                text: "What I loved most were the icebreakers. It made starting that first conversation so easy. Now we've been together for 2 years and adopted a dog!",
-                author: "Jessica & Michael",
-                image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=500&auto=format&fm=webp&fit=crop"
-              }
-            ].map((testimonial, idx) => (
-              <motion.div 
-                key={idx}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="bg-slate-50 p-8 rounded-3xl relative"
-              >
-                <Quote className="absolute top-6 right-8 text-primary-200 w-12 h-12" />
-                <div className="flex gap-1 mb-6">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={16} className="text-yellow-400" fill="currentColor" />)}
-                </div>
-                <p className="text-slate-700 italic mb-8 relative z-10 leading-relaxed font-medium">"{testimonial.text}"</p>
-                <div className="flex items-center gap-4">
-                  <img src={testimonial.image} alt={testimonial.author} loading="lazy" width="56" height="56" className="w-14 h-14 rounded-full object-cover shadow-md border-2 border-white" />
-                  <div>
-                    <h5 className="font-bold text-slate-900">{testimonial.author}</h5>
-                    <p className="text-sm text-primary-600 font-medium">Matched 2024</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          <React.Suspense fallback={<div className="h-96 w-full bg-slate-50 animate-pulse rounded-xl" />}>
+            <GlobalTestimonials />
+          </React.Suspense>
         </div>
       </section>
 
@@ -623,7 +556,11 @@ const Home = () => {
               },
               {
                 question: "What makes Elovia Love different from other dating apps?",
-                answer: "Unlike casual dating apps focused on swiping and quick matches, Elovia Love is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for Indian singles who want long-term partnerships rather than casual encounters."
+                answer: "Unlike casual dating apps focused on swiping and quick matches, Elovia Love is built for serious relationships. We verify every profile, use compatibility-based matching, and provide tools for meaningful conversations. Our platform is designed for singles who want long-term partnerships rather than casual encounters."
+              },
+              {
+                question: "Which countries is Elovia Love available in?",
+                answer: "Elovia Love is available in 50+ countries worldwide including India, United States, Canada, United Kingdom, Australia, United Arab Emirates, Singapore, Germany, France, Japan, and many more. Our largest community is in India with coverage across all major cities."
               },
               {
                 question: "How do I know if someone is verified?",
@@ -636,10 +573,6 @@ const Home = () => {
               {
                 question: "Can I use Elovia Love if I'm looking for marriage?",
                 answer: "Absolutely. Many of our users are marriage-minded singles. Our matching algorithm considers relationship goals, and you can specify 'marriage' as your objective in your profile. We help connect people who share similar long-term aspirations."
-              },
-              {
-                question: "How does Elovia Love handle cultural compatibility?",
-                answer: "Our platform is designed with Indian cultural context in mind. We consider factors like family values, religious preferences, and cultural background in our matching algorithm. This helps create more compatible, lasting relationships within the Indian community."
               }
             ]} />
           </React.Suspense>
@@ -695,17 +628,17 @@ const Home = () => {
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 transform -translate-x-1/2 translate-y-1/2"></div>
             
             <div className="relative z-10">
-              <h2 className="text-3xl font-extrabold text-white mb-6">Ready to Find Your Perfect Match on India's Best Dating App?</h2>
+              <h2 className="text-3xl font-extrabold text-white mb-6">Ready to Find Your Perfect Match?</h2>
               <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10">
-                Join thousands of verified Indian singles who are taking the stress out of online dating and focusing on real connections. Start your journey to finding love, meaningful relationships, and your life partner today.
+                Join thousands of verified singles worldwide who are finding meaningful connections and building lasting relationships. Start your journey to love today.
               </p>
               <Link
                 to="/signup"
                 className="inline-flex items-center gap-2 px-10 py-5 bg-linear-to-r from-primary-500 to-pink-500 text-white rounded-full font-bold text-xl shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 hover:scale-105 transition-all duration-300"
               >
-                Create Free Account
+                Create Your Free Profile
               </Link>
-              <p className="mt-6 text-sm text-slate-400">It only takes 2 minutes to set up your profile.</p>
+              <p className="mt-6 text-sm text-slate-400">Setup takes only 2 minutes. Start connecting today.</p>
             </div>
           </motion.div>
         </div>
