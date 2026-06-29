@@ -7,6 +7,7 @@ import { Send, ArrowLeft, Check, CheckCheck, WifiOff, Phone, Video, MoreVertical
 import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+import CallButton from '../components/videocall/CallButton';
 import api from '../services/api';
 
 const avatarUrl = (u) =>
@@ -468,9 +469,14 @@ const Chat = () => {
                 <button type="button" className="hidden sm:inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Voice call">
                   <Phone size={18} />
                 </button>
-                <button type="button" className="hidden sm:inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Video call">
-                  <Video size={18} />
-                </button>
+                {/* Video Call Button */}
+                <div className="hidden sm:block">
+                  <CallButton 
+                    userId={userId}
+                    userInfo={otherUser}
+                    variant="icon"
+                  />
+                </div>
                 <button type="button" className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="More options">
                   <MoreVertical size={18} />
                 </button>

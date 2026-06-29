@@ -51,8 +51,12 @@ import GlobalNavbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
+import { VideoCallProvider } from './context/VideoCallContext';
 import CookieConsent from './components/CookieConsent';
 import AdInitializer from './components/ads/AdInitializer';
+import IncomingCallModal from './components/videocall/IncomingCallModal';
+import VideoCallScreen from './components/videocall/VideoCallScreen';
+import { useVideoCall } from './context/VideoCallContext';
 
 const VISITOR_ID_KEY = 'elovia_visitor_id';
 
@@ -76,6 +80,61 @@ const trackPageVisit = async (page) => {
   }
 };
 
+// Global Video Call Handler Component
+function VideoCallHandler() {
+  const {
+    incomingCall,
+    activeCall,
+    callStatus,
+    localStream,
+    remoteStream,
+    isVideoEnabled,
+    isAudioEnabled,
+    connectionQuality,
+    isReconnecting,
+    acceptCall,
+    rejectCall,
+    endCall,
+    toggleVideo,
+    toggleAudio,
+  } = useVideoCall();
+
+  // Incoming call modal
+  if (incomingCall && !activeCall) {
+    return (
+      <IncomingCallModal
+        caller={incomingCall.callerInfo}
+        onAccept={acceptCall}
+        onReject={rejectCall}
+      />
+    );
+  }
+
+  // Active call screen
+  if (activeCall && callStatus === 'connected') {
+    return (
+      <VideoCallScreen
+        localStream={localStream}
+        remoteStream={remoteStream}
+        callStatus={callStatus}
+        isVideoEnabled={isVideoEnabled}
+        isAudioEnabled={isAudioEnabled}
+        connectionQuality={connectionQuality}
+        isReconnecting={isReconnecting}
+        otherUser={activeCall.receiverId === incomingCall?.callerInfo?._id 
+          ? incomingCall.callerInfo 
+          : activeCall.receiverInfo}
+        onToggleVideo={toggleVideo}
+        onToggleAudio={toggleAudio}
+        onEndCall={() => endCall('good')}
+        callStartTime={activeCall.startedAt}
+      />
+    );
+  }
+
+  return null;
+}
+
 function AppContent() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/register';
@@ -91,6 +150,9 @@ function AppContent() {
     <>
       <AdInitializer />
       {!hideGlobalNavbar && <GlobalNavbar />}
+      
+      {/* Global Video Call Handler */}
+      <VideoCallHandler />
 
       <main className={`min-h-screen ${!hideGlobalNavbar ? 'pt-20' : ''}`}>
         <Routes>
@@ -317,9 +379,11 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <VideoCallProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </VideoCallProvider>
       </AuthProvider>
     </ErrorBoundary>
   );

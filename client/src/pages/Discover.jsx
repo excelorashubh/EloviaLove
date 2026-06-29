@@ -8,6 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { SITE_URL } from '../data/seoContent';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
+import CallButton from '../components/videocall/CallButton';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
