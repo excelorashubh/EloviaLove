@@ -1,6 +1,17 @@
 import { Heart, MapPin, CheckCircle, Quote } from 'lucide-react';
+import { globalTestimonials } from '../../data/homeData';
 
-const GlobalTestimonials = ({ testimonials }) => {
+const GlobalTestimonials = ({ testimonials = globalTestimonials }) => {
+  // Defensive programming: ensure we have valid data
+  const safeTestimonials = Array.isArray(testimonials) && testimonials.length > 0 
+    ? testimonials 
+    : globalTestimonials || [];
+
+  if (safeTestimonials.length === 0) {
+    console.warn('[GlobalTestimonials] No testimonial data available');
+    return null; // Gracefully hide component if no data
+  }
+
   return (
     <section className="py-20 bg-gradient-to-br from-pink-50 to-purple-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,7 +28,7 @@ const GlobalTestimonials = ({ testimonials }) => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
+          {safeTestimonials.map((testimonial, index) => (
             <div 
               key={index}
               className="bg-white rounded-2xl p-8 hover:shadow-xl transition-all duration-300 border border-pink-100 relative"
@@ -29,20 +40,20 @@ const GlobalTestimonials = ({ testimonials }) => {
               <div className="relative z-10">
                 <div className="flex items-center space-x-2 mb-2">
                   <h3 className="text-xl font-bold text-slate-900">
-                    {testimonial.names}
+                    {testimonial?.names || 'Anonymous'}
                   </h3>
-                  {testimonial.verified && (
+                  {testimonial?.verified && (
                     <CheckCircle className="w-5 h-5 text-green-500" />
                   )}
                 </div>
 
                 <div className="flex items-center text-slate-500 mb-4">
                   <MapPin className="w-4 h-4 mr-1" />
-                  <span className="text-sm">{testimonial.location}</span>
+                  <span className="text-sm">{testimonial?.location || 'Worldwide'}</span>
                 </div>
 
                 <p className="text-slate-700 leading-relaxed italic">
-                  "{testimonial.story}"
+                  "{testimonial?.story || 'Found love through Elovia Love'}"
                 </p>
 
                 <div className="flex space-x-1 mt-4">

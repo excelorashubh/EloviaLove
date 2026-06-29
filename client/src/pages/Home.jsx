@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { HeartHandshake, Star, Shield, Heart, MessageCircle, Zap, MapPin, Users, Quote } from 'lucide-react';
 import { SITE_URL } from '../data/seoContent';
 import { WebSiteSchema, OrganizationSchema, BreadcrumbSchema } from '../components/seo/SchemaComponents';
+import { globalStats } from '../data/homeData';
 
 const FAQAccordion = React.lazy(() => import('../components/FAQAccordion'));
 const BannerAd = React.lazy(() => import('../components/ads/BannerAd'));
@@ -219,7 +220,7 @@ const Home = () => {
       <section className="py-16 bg-white border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <React.Suspense fallback={<div className="h-32 w-full bg-slate-50 animate-pulse rounded-xl" />}>
-            <GlobalStats />
+            <GlobalStats stats={globalStats} />
           </React.Suspense>
         </div>
       </section>
