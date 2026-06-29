@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { io } from 'socket.io-client';
+import api from '../services/api';
 
 const VideoCallContext = createContext();
 
@@ -90,14 +91,9 @@ export const VideoCallProvider = ({ children }) => {
 
   const fetchMissedCallsCount = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/calls/missed-count`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setMissedCallsCount(data.count);
+      const response = await api.get('/calls/missed-count');
+      if (response.data.success) {
+        setMissedCallsCount(response.data.count);
       }
     } catch (error) {
       console.error('Failed to fetch missed calls count:', error);
@@ -120,22 +116,12 @@ export const VideoCallProvider = ({ children }) => {
       setCallStatus('calling');
       
       // Create call in database
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/calls/initiate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ receiverId, callType })
+      const response = await api.post('/calls/initiate', {
+        receiverId,
+        callType
       });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to initiate call');
-      }
-
-      const call = data.call;
+      const call = response.data.call;
       setActiveCall(call);
 
       // Emit socket event
@@ -174,20 +160,10 @@ export const VideoCallProvider = ({ children }) => {
       stopRingtone();
       
       // Update call in database
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/calls/accept/${incomingCall.callId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
+      const response = await api.post(`/calls/accept/${incomingCall.callId}`);
 
-      const data = await response.json();
-      
-      if (data.success) {
-        setActiveCall(data.call);
+      if (response.data.success) {
+        setActiveCall(response.data.call);
         setCallStatus('connected');
         
         // Emit socket event
@@ -213,15 +189,7 @@ export const VideoCallProvider = ({ children }) => {
       stopRingtone();
 
       // Update call in database
-      await fetch(
-        `${import.meta.env.VITE_API_URL}/api/calls/reject/${incomingCall.callId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
+      await api.post(`/calls/reject/${incomingCall.callId}`);
 
       // Emit socket event
       socket?.emit('call:reject', {
@@ -239,15 +207,7 @@ export const VideoCallProvider = ({ children }) => {
   const cancelCall = async (callId) => {
     try {
       // Update call in database
-      await fetch(
-        `${import.meta.env.VITE_API_URL}/api/calls/cancel/${callId || activeCall?._id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
+      await api.post(`/calls/cancel/${callId || activeCall?._id}`);
 
       // Emit socket event
       socket?.emit('call:cancel', {
@@ -266,17 +226,10 @@ export const VideoCallProvider = ({ children }) => {
       if (!activeCall) return;
 
       // Update call in database
-      await fetch(
-        `${import.meta.env.VITE_API_URL}/api/calls/end/${activeCall._id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({ quality, reason: 'completed' })
-        }
-      );
+      await api.post(`/calls/end/${activeCall._id}`, {
+        quality,
+        reason: 'completed'
+      });
 
       // Emit socket event
       socket?.emit('call:end', {

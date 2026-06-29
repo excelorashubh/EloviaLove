@@ -165,6 +165,23 @@ async function startServer() {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+  // ── Request Logging Middleware ────────────────────────────────────────────────
+  app.use((req, res, next) => {
+    const start = Date.now();
+    
+    // Log request
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    
+    // Log response when finished
+    res.on('finish', () => {
+      const duration = Date.now() - start;
+      const statusColor = res.statusCode >= 500 ? '🔴' : res.statusCode >= 400 ? '🟡' : '🟢';
+      console.log(`${statusColor} ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+    });
+    
+    next();
+  });
+
   // ── STEP 3: Database Connection ───────────────────────────────────────────────
   console.log('🗄️  Connecting to MongoDB...');
   try {
@@ -221,15 +238,23 @@ async function startServer() {
   // Helper function to safely load routes
   const safeLoadRoute = (path, routePath) => {
     try {
-      app.use(routePath, require(path));
+      const route = require(path);
+      app.use(routePath, route);
       console.log(`✓ Loaded route: ${routePath}`);
       return true;
     } catch (error) {
       console.error(`❌ Failed to load route ${routePath}:`, error.message);
+      console.error('   Stack:', error.stack);
+      
+      // Create a fallback route that returns proper JSON error
       app.use(routePath, (req, res) => {
+        console.error(`[RouteError] Request to unloaded route: ${req.method} ${req.path}`);
         res.status(503).json({ 
+          success: false,
           error: 'Service temporarily unavailable',
-          route: routePath 
+          message: 'This API endpoint failed to load during server startup',
+          route: routePath,
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
       });
       return false;
