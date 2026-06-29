@@ -446,17 +446,28 @@ router.post('/missed/:callId', authenticateToken, async (req, res) => {
   try {
     const { callId } = req.params;
 
+    console.log(`[API] [Call Missed] Marking call ${callId} as missed`);
+
     const call = await Call.findById(callId);
     
     if (!call) {
-      return res.status(404).json({ error: 'Call not found' });
+      console.log(`[API] [Call Missed] Call ${callId} not found`);
+      return res.status(404).json({ 
+        success: false,
+        error: 'Call not found' 
+      });
     }
 
     // Update call
+    const previousStatus = call.status;
     call.status = 'missed';
     call.endedAt = new Date();
     call.endReason = 'missed';
     await call.save();
+
+    console.log(`[API] [Call Missed] Call ${callId} marked as missed (was ${previousStatus})`);
+    console.log(`[API] [Call Cleanup] User ${call.callerId} (caller) released from call state`);
+    console.log(`[API] [Call Cleanup] User ${call.receiverId} (receiver) released from call state`);
 
     res.json({
       success: true,
@@ -464,8 +475,11 @@ router.post('/missed/:callId', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Call missed marking error:', error);
-    res.status(500).json({ error: 'Failed to mark call as missed' });
+    console.error('[API] [Call Missed] Error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to mark call as missed' 
+    });
   }
 });
 
