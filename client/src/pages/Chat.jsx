@@ -124,6 +124,7 @@ const Chat = () => {
   const [page, setPage]             = useState(1);
   const [hasMore, setHasMore]       = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [showMenu, setShowMenu]     = useState(false); // Menu dropdown state
 
   const socketRef       = useRef(null);
   const messagesEndRef  = useRef(null);
@@ -131,6 +132,7 @@ const Chat = () => {
   const typingTimer     = useRef(null);
   const inputRef        = useRef(null);
   const fileInputRef    = useRef(null);
+  const menuRef         = useRef(null); // Ref for menu dropdown
 
   const handleEmojiClick = () => {
     setInput(prev => `${prev}😊`);
@@ -144,6 +146,56 @@ const Chat = () => {
   const handleFileChange = (e) => {
     if (e?.target) e.target.value = '';
     inputRef.current?.focus();
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMenu]);
+
+  const handleBlockUser = async () => {
+    if (!window.confirm(`Block ${otherUser?.name}? They won't be able to contact you.`)) return;
+    
+    try {
+      await api.post(`/users/block/${userId}`);
+      alert('User blocked successfully');
+      setShowMenu(false);
+      window.location.href = '/chats';
+    } catch (err) {
+      alert('Failed to block user');
+    }
+  };
+
+  const handleReportUser = () => {
+    setShowMenu(false);
+    alert('Report functionality coming soon');
+  };
+
+  const handleViewProfile = () => {
+    setShowMenu(false);
+    window.location.href = `/profile/${userId}`;
+  };
+
+  const handleClearChat = async () => {
+    if (!window.confirm('Clear all messages in this chat? This cannot be undone.')) return;
+    
+    try {
+      await api.delete(`/messages/${userId}`);
+      setMessages([]);
+      setShowMenu(false);
+      alert('Chat cleared successfully');
+    } catch (err) {
+      alert('Failed to clear chat');
+    }
   };
   
   // prevent adding duplicate messages from socket echo
@@ -477,9 +529,82 @@ const Chat = () => {
                     variant="icon"
                   />
                 </div>
-                <button type="button" className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" aria-label="More options">
-                  <MoreVertical size={18} />
-                </button>
+                {/* More Options Menu */}
+                <div className="relative" ref={menuRef}>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowMenu(!showMenu)}
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" 
+                    aria-label="More options"
+                    aria-expanded={showMenu}
+                    aria-haspopup="true"
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+                  
+                  {/* Dropdown Menu */}
+                  {showMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50"
+                    >
+                      <button
+                        onClick={handleViewProfile}
+                        className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-3"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        View Profile
+                      </button>
+
+                      {/* Mobile-only: Show video call in menu */}
+                      <div className="sm:hidden">
+                        <CallButton 
+                          userId={userId}
+                          userInfo={otherUser}
+                          variant="secondary"
+                          label="Video Call"
+                        />
+                      </div>
+
+                      <button
+                        onClick={handleClearChat}
+                        className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-3"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Clear Chat
+                      </button>
+
+                      <div className="border-t border-slate-100 my-2" />
+
+                      <button
+                        onClick={handleReportUser}
+                        className="w-full text-left px-4 py-2.5 text-sm text-amber-600 hover:bg-amber-50 transition-colors flex items-center gap-3"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Report User
+                      </button>
+
+                      <button
+                        onClick={handleBlockUser}
+                        className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                        Block User
+                      </button>
+                    </motion.div>
+                  )}
+                </div>
               </div>
             </header>
 
