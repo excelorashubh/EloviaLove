@@ -1,60 +1,98 @@
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
-import { SITE_URL } from '../data/seoContent';
+import CountryPageSEO from '../components/country/CountryPageSEO';
+import CountryHero from '../components/country/CountryHero';
+import CountryIntro from '../components/country/CountryIntro';
+import WhyChooseSection from '../components/country/WhyChooseSection';
+import RegionsSection from '../components/country/RegionsSection';
+import StatesGrid from '../components/country/StatesGrid';
+import CitiesGrid from '../components/country/CitiesGrid';
+import SafetySection from '../components/country/SafetySection';
+import TipsSection from '../components/country/TipsSection';
+import TestimonialsSection from '../components/country/TestimonialsSection';
+import CountryFAQ from '../components/country/CountryFAQ';
+import FutureExpansion from '../components/country/FutureExpansion';
+import FinalCTA from '../components/country/FinalCTA';
+import { indiaData } from '../data/countries/india';
 
 const DatingInIndiaPage = () => {
   return (
-    <div className="max-w-6xl mx-auto py-20 px-6">
-      <Helmet>
-        <title>Dating in India | Find Verified Singles Across India | Elovia Love</title>
-        <meta name="description" content="Connect with verified singles across India on Elovia Love. Discover meaningful relationships, local meetups, and safety-first dating resources." />
-        <link rel="canonical" href={`${SITE_URL}/dating-in-india`} />
-        <meta property="og:title" content="Dating in India | Elovia Love" />
-        <meta property="og:description" content="Connect with verified singles across India on Elovia Love." />
-        <meta property="og:url" content={`${SITE_URL}/dating-in-india`} />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+    <>
+      {/* SEO Meta Tags & Schemas */}
+      <CountryPageSEO 
+        country={indiaData.country}
+        metaTitle={indiaData.metaTitle}
+        metaDescription={indiaData.metaDescription}
+        canonicalUrl="/dating-in-india"
+        faqs={indiaData.faqs}
+      />
 
-      <h1 className="text-3xl font-bold mb-4">Dating in India</h1>
-      <p className="text-slate-700 mb-6">Explore local communities, safety tips, and events across India's major cities.</p>
+      {/* Page Content */}
+      <div className="min-h-screen bg-white">
+        {/* Hero Section */}
+        <CountryHero 
+          country={indiaData.country}
+          stats={indiaData.heroStats}
+        />
 
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-3">Popular Cities</h2>
-        <ul className="list-disc pl-6 text-slate-700">
-          <li><Link to="/dating-in-delhi" className="text-primary-600">Delhi</Link></li>
-          <li><Link to="/dating-in-mumbai" className="text-primary-600">Mumbai</Link></li>
-          <li><Link to="/dating-in-bangalore" className="text-primary-600">Bangalore</Link></li>
-          <li><Link to="/dating-in-kolkata" className="text-primary-600">Kolkata</Link></li>
-          <li><Link to="/dating-in-ranchi" className="text-primary-600">Ranchi</Link></li>
-        </ul>
-      </section>
+        {/* Introduction */}
+        <CountryIntro data={indiaData.introduction} />
 
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-3">How We Keep You Safe</h2>
-        <p className="text-slate-700">Elovia Love uses identity verification, in-app reporting, and moderation to ensure meaningful, secure connections.</p>
-      </section>
+        {/* Why Choose Elovia Love */}
+        <WhyChooseSection 
+          features={indiaData.whyChooseUs}
+          country={indiaData.country}
+        />
 
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-3">FAQ</h2>
-        <div className="space-y-4 text-slate-700">
-          <div>
-            <strong>How do I meet people in my city?</strong>
-            <p>Set your location, browse local profiles, and use our messaging tools to start conversations.</p>
-          </div>
-          <div>
-            <strong>Are profiles verified?</strong>
-            <p>Yes — look for the verified badge on profiles that completed the verification process.</p>
-          </div>
-        </div>
-      </section>
+        {/* Regional Dating Cultures */}
+        <RegionsSection 
+          regions={indiaData.regions}
+          country={indiaData.country}
+        />
 
-      <section className="bg-slate-50 p-6 rounded-lg">
-        <h3 className="text-xl font-semibold mb-2">Ready to get started?</h3>
-        <p className="text-slate-700 mb-4">Create a profile, verify your identity, and meet people near you.</p>
-        <Link to="/signup" className="inline-block bg-primary-600 text-white px-5 py-2 rounded-md">Sign Up</Link>
-      </section>
-    </div>
+        {/* Explore States */}
+        <StatesGrid 
+          states={indiaData.states}
+          country={indiaData.country}
+        />
+
+        {/* Popular Cities */}
+        <CitiesGrid 
+          cities={indiaData.popularCities}
+          country={indiaData.country}
+        />
+
+        {/* Dating Safety */}
+        <SafetySection 
+          safetyData={indiaData.safetyGuide}
+          country={indiaData.country}
+        />
+
+        {/* Dating Tips */}
+        <TipsSection 
+          tips={indiaData.datingTips}
+          country={indiaData.country}
+        />
+
+        {/* Success Stories */}
+        <TestimonialsSection 
+          testimonials={indiaData.testimonials}
+          country={indiaData.country}
+        />
+
+        {/* FAQ */}
+        <CountryFAQ 
+          faqs={indiaData.faqs}
+          country={indiaData.country}
+        />
+
+        {/* Future Expansion */}
+        <FutureExpansion 
+          countries={indiaData.futureCountries}
+        />
+
+        {/* Final CTA */}
+        <FinalCTA country={indiaData.country} />
+      </div>
+    </>
   );
 };
 
