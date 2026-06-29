@@ -32,13 +32,14 @@ function setupCallSignaling(io) {
           return;
         }
 
-        // Store call info
+        // Store call info with timestamp
         activeCalls.set(callId, {
           caller: socket.id,
           receiver: receiverSocketId,
           status: 'ringing',
           callerId: socket.userId,
-          receiverId: receiverId
+          receiverId: receiverId,
+          timestamp: Date.now()
         });
 
         // Update call status in DB
@@ -279,18 +280,24 @@ function setupCallSignaling(io) {
     });
 
     // ── Disconnect ──────────────────────────────────────────────────────────────
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
       try {
         console.log(`[Video Call] User disconnected: ${socket.id}`);
 
+        const disconnectedUserId = socket.userId;
+
         // Remove from active users
-        if (socket.userId) {
-          activeUsers.delete(socket.userId);
+        if (disconnectedUserId) {
+          activeUsers.delete(disconnectedUserId);
+          console.log(`[Video Call] User ${disconnectedUserId} marked offline`);
         }
 
-        // Handle ongoing calls
+        // Handle ongoing calls - both in-memory and database
+        const callsToCleanup = [];
         activeCalls.forEach((callInfo, callId) => {
           if (callInfo.caller === socket.id || callInfo.receiver === socket.id) {
+            callsToCleanup.push({ callId, callInfo });
+            
             // Notify the other party
             const target = socket.id === callInfo.caller 
               ? callInfo.receiver 
@@ -298,10 +305,80 @@ function setupCallSignaling(io) {
             
             io.to(target).emit('call:peer-disconnected', { callId });
             
-            // Clean up
+            // Clean up in-memory
             activeCalls.delete(callId);
           }
         });
+
+        // Update database for all affected calls
+        if (callsToCleanup.length > 0) {
+          console.log(`[Video Call] Cleaning up ${callsToCleanup.length} calls for disconnected user`);
+          
+          for (const { callId, callInfo } of callsToCleanup) {
+            try {
+              const call = await Call.findById(callId);
+              if (call && ['initiated', 'ringing', 'accepted'].includes(call.status)) {
+                // If call was accepted (in progress), mark as completed
+                // Otherwise mark as cancelled/missed
+                if (call.status === 'accepted') {
+                  call.status = 'completed';
+                  call.endReason = 'network_error';
+                  call.endedAt = new Date();
+                  call.calculateDuration();
+                } else if (call.status === 'ringing') {
+                  call.status = 'missed';
+                  call.endReason = 'missed';
+                  call.endedAt = new Date();
+                } else {
+                  call.status = 'cancelled';
+                  call.endReason = 'network_error';
+                  call.endedAt = new Date();
+                }
+                await call.save();
+                console.log(`[Video Call] Call ${callId} cleaned up on disconnect (status: ${call.status})`);
+              }
+            } catch (dbError) {
+              console.error(`[Video Call] Failed to cleanup call ${callId} in DB:`, dbError);
+            }
+          }
+        }
+
+        // Also cleanup any orphaned calls in DB for this user
+        if (disconnectedUserId) {
+          try {
+            const orphanedCalls = await Call.find({
+              $or: [
+                { callerId: disconnectedUserId, status: { $in: ['initiated', 'ringing', 'accepted'] } },
+                { receiverId: disconnectedUserId, status: { $in: ['initiated', 'ringing', 'accepted'] } }
+              ]
+            });
+
+            if (orphanedCalls.length > 0) {
+              console.log(`[Video Call] Found ${orphanedCalls.length} orphaned calls for user ${disconnectedUserId}`);
+              
+              for (const call of orphanedCalls) {
+                if (call.status === 'accepted') {
+                  call.status = 'completed';
+                  call.endReason = 'network_error';
+                } else if (call.status === 'ringing' && call.receiverId.toString() === disconnectedUserId) {
+                  call.status = 'missed';
+                  call.endReason = 'missed';
+                } else {
+                  call.status = 'cancelled';
+                  call.endReason = 'network_error';
+                }
+                call.endedAt = new Date();
+                if (call.status === 'completed') {
+                  call.calculateDuration();
+                }
+                await call.save();
+                console.log(`[Video Call] Orphaned call ${call._id} cleaned up (status: ${call.status})`);
+              }
+            }
+          } catch (dbError) {
+            console.error(`[Video Call] Failed to cleanup orphaned calls:`, dbError);
+          }
+        }
 
       } catch (error) {
         console.error('[Video Call] Disconnect error:', error);
@@ -310,17 +387,80 @@ function setupCallSignaling(io) {
 
   });
 
-  // Cleanup inactive calls every 5 minutes
+  // Cleanup stale calls in database every 2 minutes
+  setInterval(async () => {
+    try {
+      const now = new Date();
+      const staleThreshold = new Date(now.getTime() - 2 * 60 * 1000); // 2 minutes ago
+      
+      // Find calls that are stuck in active states
+      const staleCalls = await Call.find({
+        status: { $in: ['initiated', 'ringing'] },
+        createdAt: { $lt: staleThreshold }
+      });
+
+      if (staleCalls.length > 0) {
+        console.log(`[Video Call] Found ${staleCalls.length} stale calls to cleanup`);
+        
+        for (const call of staleCalls) {
+          // Timeout: initiated/ringing calls older than 2 minutes
+          if (call.status === 'ringing') {
+            call.status = 'missed';
+            call.endReason = 'timeout';
+          } else {
+            call.status = 'cancelled';
+            call.endReason = 'timeout';
+          }
+          call.endedAt = now;
+          await call.save();
+          
+          console.log(`[Video Call] Stale call ${call._id} cleaned up (was ${call.status}, marked as timeout)`);
+          
+          // Remove from in-memory if exists
+          activeCalls.delete(call._id.toString());
+        }
+      }
+
+      // Also cleanup accepted calls that are older than 2 hours (likely abandoned)
+      const abandonedThreshold = new Date(now.getTime() - 2 * 60 * 60 * 1000); // 2 hours ago
+      const abandonedCalls = await Call.find({
+        status: 'accepted',
+        startedAt: { $lt: abandonedThreshold }
+      });
+
+      if (abandonedCalls.length > 0) {
+        console.log(`[Video Call] Found ${abandonedCalls.length} abandoned accepted calls to cleanup`);
+        
+        for (const call of abandonedCalls) {
+          call.status = 'completed';
+          call.endReason = 'timeout';
+          call.endedAt = now;
+          call.calculateDuration();
+          await call.save();
+          
+          console.log(`[Video Call] Abandoned call ${call._id} cleaned up (duration: ${call.duration}s)`);
+          
+          // Remove from in-memory if exists
+          activeCalls.delete(call._id.toString());
+        }
+      }
+
+    } catch (error) {
+      console.error('[Video Call] Stale call cleanup error:', error);
+    }
+  }, 2 * 60 * 1000); // Run every 2 minutes
+
+  // Cleanup in-memory activeCalls map every 5 minutes
   setInterval(() => {
     const now = Date.now();
     activeCalls.forEach((callInfo, callId) => {
-      // Remove calls older than 10 minutes
+      // Remove calls older than 10 minutes from memory
       if (!callInfo.timestamp || now - callInfo.timestamp > 10 * 60 * 1000) {
         activeCalls.delete(callId);
-        console.log(`[Video Call] Cleaned up stale call ${callId}`);
+        console.log(`[Video Call] Cleaned up stale in-memory call ${callId}`);
       }
     });
-  }, 5 * 60 * 1000);
+  }, 5 * 60 * 1000); // Run every 5 minutes
 
 }
 

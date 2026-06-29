@@ -151,6 +151,56 @@ callSchema.statics.checkSpamLimit = async function(callerId) {
   return { allowed: true };
 };
 
+// Static method to check for active calls (with stale call prevention)
+callSchema.statics.hasActiveCall = async function(userId) {
+  const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+  
+  // Find any active call for this user created within last 2 minutes
+  const activeCall = await this.findOne({
+    $or: [
+      { callerId: userId, status: { $in: ['initiated', 'ringing', 'accepted'] } },
+      { receiverId: userId, status: { $in: ['initiated', 'ringing', 'accepted'] } }
+    ],
+    createdAt: { $gte: twoMinutesAgo } // Only consider recent calls
+  });
+
+  return activeCall;
+};
+
+// Static method to cleanup stale calls for a specific user
+callSchema.statics.cleanupStaleCallsForUser = async function(userId) {
+  const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+  
+  // Find stale calls (older than 2 minutes and still in active state)
+  const staleCalls = await this.find({
+    $or: [
+      { callerId: userId, status: { $in: ['initiated', 'ringing'] } },
+      { receiverId: userId, status: { $in: ['initiated', 'ringing'] } }
+    ],
+    createdAt: { $lt: twoMinutesAgo }
+  });
+
+  let cleanedCount = 0;
+  for (const call of staleCalls) {
+    if (call.status === 'ringing') {
+      call.status = 'missed';
+      call.endReason = 'timeout';
+    } else {
+      call.status = 'cancelled';
+      call.endReason = 'timeout';
+    }
+    call.endedAt = new Date();
+    await call.save();
+    cleanedCount++;
+  }
+
+  if (cleanedCount > 0) {
+    console.log(`[Call Model] Cleaned up ${cleanedCount} stale calls for user ${userId}`);
+  }
+
+  return cleanedCount;
+};
+
 // Static method to check cooldown (prevent spam calling same person)
 callSchema.statics.checkCooldown = async function(callerId, receiverId) {
   const lastCall = await this.findOne({

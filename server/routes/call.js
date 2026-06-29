@@ -102,17 +102,24 @@ router.post('/initiate', authenticateToken, async (req, res) => {
       });
     }
 
-    // 9. Check for active calls
-    const activeCall = await Call.findOne({
-      $or: [
-        { callerId, status: { $in: ['initiated', 'ringing', 'accepted'] } },
-        { receiverId: callerId, status: { $in: ['initiated', 'ringing', 'accepted'] } },
-        { callerId: receiverId, status: { $in: ['initiated', 'ringing', 'accepted'] } },
-        { receiverId, status: { $in: ['initiated', 'ringing', 'accepted'] } }
-      ]
-    });
+    // 9. Check for active calls (with stale call cleanup)
+    await Call.cleanupStaleCallsForUser(callerId);
+    await Call.cleanupStaleCallsForUser(receiverId);
+    
+    const [callerActiveCall, receiverActiveCall] = await Promise.all([
+      Call.hasActiveCall(callerId),
+      Call.hasActiveCall(receiverId)
+    ]);
 
-    if (activeCall) {
+    if (callerActiveCall) {
+      return res.status(409).json({ 
+        error: 'You are already in a call', 
+        status: 'busy',
+        code: 'BUSY'
+      });
+    }
+
+    if (receiverActiveCall) {
       return res.status(409).json({ 
         error: 'User is already in a call', 
         status: 'busy',
@@ -159,23 +166,39 @@ router.post('/accept/:callId', authenticateToken, async (req, res) => {
     const { callId } = req.params;
     const userId = req.user._id;
 
+    console.log(`[API] [Call Accept] User ${userId} attempting to accept call ${callId}`);
+
     const call = await Call.findById(callId);
     
     if (!call) {
-      return res.status(404).json({ error: 'Call not found' });
+      console.log(`[API] [Call Accept] Call ${callId} not found`);
+      return res.status(404).json({ 
+        success: false,
+        error: 'Call not found' 
+      });
     }
 
     // Verify user is the receiver
-    if (call.receiverId.toString() !== userId) {
-      return res.status(403).json({ error: 'Unauthorized to accept this call' });
+    if (call.receiverId.toString() !== userId.toString()) {
+      console.log(`[API] [Call Accept] User ${userId} unauthorized to accept call ${callId} (receiver: ${call.receiverId})`);
+      return res.status(403).json({ 
+        success: false,
+        error: 'Unauthorized to accept this call' 
+      });
     }
 
     // Check call status
     if (call.status !== 'initiated' && call.status !== 'ringing') {
-      return res.status(400).json({ error: 'Call cannot be accepted', status: call.status });
+      console.log(`[API] [Call Accept] Call ${callId} cannot be accepted (status: ${call.status})`);
+      return res.status(400).json({ 
+        success: false,
+        error: 'Call cannot be accepted', 
+        status: call.status 
+      });
     }
 
     // Update call
+    const previousStatus = call.status;
     call.status = 'accepted';
     call.startedAt = new Date();
     await call.save();
@@ -185,14 +208,19 @@ router.post('/accept/:callId', authenticateToken, async (req, res) => {
       { path: 'receiverId', select: 'name profilePhoto isVerified' }
     ]);
 
+    console.log(`[API] [Call Accept] Call ${callId} accepted successfully (was ${previousStatus})`);
+
     res.json({
       success: true,
       call
     });
 
   } catch (error) {
-    console.error('Call acceptance error:', error);
-    res.status(500).json({ error: 'Failed to accept call' });
+    console.error('[API] [Call Accept] Error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to accept call' 
+    });
   }
 });
 
@@ -202,22 +230,37 @@ router.post('/reject/:callId', authenticateToken, async (req, res) => {
     const { callId } = req.params;
     const userId = req.user._id;
 
+    console.log(`[API] [Call Reject] User ${userId} attempting to reject call ${callId}`);
+
     const call = await Call.findById(callId);
     
     if (!call) {
-      return res.status(404).json({ error: 'Call not found' });
+      console.log(`[API] [Call Reject] Call ${callId} not found`);
+      return res.status(404).json({ 
+        success: false,
+        error: 'Call not found' 
+      });
     }
 
     // Verify user is the receiver
-    if (call.receiverId.toString() !== userId) {
-      return res.status(403).json({ error: 'Unauthorized to reject this call' });
+    if (call.receiverId.toString() !== userId.toString()) {
+      console.log(`[API] [Call Reject] User ${userId} unauthorized to reject call ${callId} (receiver: ${call.receiverId})`);
+      return res.status(403).json({ 
+        success: false,
+        error: 'Unauthorized to reject this call' 
+      });
     }
 
     // Update call
+    const previousStatus = call.status;
     call.status = 'rejected';
     call.endedAt = new Date();
     call.endReason = 'declined';
     await call.save();
+
+    console.log(`[API] [Call Reject] Call ${callId} rejected successfully (was ${previousStatus})`);
+    console.log(`[API] [Call Cleanup] User ${call.callerId} (caller) released from call state`);
+    console.log(`[API] [Call Cleanup] User ${userId} (receiver) released from call state`);
 
     res.json({
       success: true,
@@ -225,8 +268,11 @@ router.post('/reject/:callId', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Call rejection error:', error);
-    res.status(500).json({ error: 'Failed to reject call' });
+    console.error('[API] [Call Reject] Error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to reject call' 
+    });
   }
 });
 
@@ -237,21 +283,32 @@ router.post('/end/:callId', authenticateToken, async (req, res) => {
     const userId = req.user._id;
     const { reason = 'completed', quality } = req.body;
 
+    console.log(`[API] [Call End] User ${userId} attempting to end call ${callId} (reason: ${reason})`);
+
     const call = await Call.findById(callId);
     
     if (!call) {
-      return res.status(404).json({ error: 'Call not found' });
+      console.log(`[API] [Call End] Call ${callId} not found`);
+      return res.status(404).json({ 
+        success: false,
+        error: 'Call not found' 
+      });
     }
 
     // Verify user is part of the call
-    const isParticipant = call.callerId.toString() === userId || 
-                          call.receiverId.toString() === userId;
+    const isParticipant = call.callerId.toString() === userId.toString() || 
+                          call.receiverId.toString() === userId.toString();
     
     if (!isParticipant) {
-      return res.status(403).json({ error: 'Unauthorized to end this call' });
+      console.log(`[API] [Call End] User ${userId} unauthorized to end call ${callId}`);
+      return res.status(403).json({ 
+        success: false,
+        error: 'Unauthorized to end this call' 
+      });
     }
 
     // Update call
+    const previousStatus = call.status;
     call.endedAt = new Date();
     call.status = 'completed';
     call.endReason = reason;
@@ -263,6 +320,10 @@ router.post('/end/:callId', authenticateToken, async (req, res) => {
     call.calculateDuration();
     await call.save();
 
+    console.log(`[API] [Call End] Call ${callId} ended successfully (was ${previousStatus}, duration: ${call.duration}s)`);
+    console.log(`[API] [Call Cleanup] User ${call.callerId} (caller) released from call state`);
+    console.log(`[API] [Call Cleanup] User ${call.receiverId} (receiver) released from call state`);
+
     res.json({
       success: true,
       message: 'Call ended',
@@ -270,8 +331,11 @@ router.post('/end/:callId', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Call end error:', error);
-    res.status(500).json({ error: 'Failed to end call' });
+    console.error('[API] [Call End] Error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to end call' 
+    });
   }
 });
 
@@ -281,27 +345,46 @@ router.post('/cancel/:callId', authenticateToken, async (req, res) => {
     const { callId } = req.params;
     const userId = req.user._id;
 
+    console.log(`[API] [Call Cancel] User ${userId} attempting to cancel call ${callId}`);
+
     const call = await Call.findById(callId);
     
     if (!call) {
-      return res.status(404).json({ error: 'Call not found' });
+      console.log(`[API] [Call Cancel] Call ${callId} not found`);
+      return res.status(404).json({ 
+        success: false,
+        error: 'Call not found' 
+      });
     }
 
     // Verify user is the caller
-    if (call.callerId.toString() !== userId) {
-      return res.status(403).json({ error: 'Unauthorized to cancel this call' });
+    if (call.callerId.toString() !== userId.toString()) {
+      console.log(`[API] [Call Cancel] User ${userId} unauthorized to cancel call ${callId} (caller: ${call.callerId})`);
+      return res.status(403).json({ 
+        success: false,
+        error: 'Unauthorized to cancel this call' 
+      });
     }
 
     // Can only cancel if not answered
     if (call.status === 'accepted') {
-      return res.status(400).json({ error: 'Cannot cancel an active call. Use end call instead.' });
+      console.log(`[API] [Call Cancel] Cannot cancel accepted call ${callId}`);
+      return res.status(400).json({ 
+        success: false,
+        error: 'Cannot cancel an active call. Use end call instead.' 
+      });
     }
 
     // Update call
+    const previousStatus = call.status;
     call.status = 'cancelled';
     call.endedAt = new Date();
     call.endReason = 'cancelled';
     await call.save();
+
+    console.log(`[API] [Call Cancel] Call ${callId} cancelled successfully (was ${previousStatus})`);
+    console.log(`[API] [Call Cleanup] User ${userId} (caller) released from call state`);
+    console.log(`[API] [Call Cleanup] User ${call.receiverId} (receiver) released from call state`);
 
     res.json({
       success: true,
@@ -309,8 +392,11 @@ router.post('/cancel/:callId', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Call cancellation error:', error);
-    res.status(500).json({ error: 'Failed to cancel call' });
+    console.error('[API] [Call Cancel] Error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to cancel call' 
+    });
   }
 });
 
@@ -579,15 +665,11 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
       });
     }
 
-    // 11. Check if receiver is already in another call
-    const activeCall = await Call.findOne({
-      $or: [
-        { callerId: receiverId, status: { $in: ['initiated', 'ringing', 'accepted'] } },
-        { receiverId, status: { $in: ['initiated', 'ringing', 'accepted'] } }
-      ]
-    });
+    // 11. Check if receiver is already in another call (with stale call cleanup)
+    await Call.cleanupStaleCallsForUser(receiverId);
+    const receiverActiveCall = await Call.hasActiveCall(receiverId);
 
-    if (activeCall) {
+    if (receiverActiveCall) {
       return sendResponse(200, { 
         success: true,
         canCall: false, 
@@ -597,13 +679,9 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
       });
     }
 
-    // 12. Check if caller is already in another call
-    const callerActiveCall = await Call.findOne({
-      $or: [
-        { callerId, status: { $in: ['initiated', 'ringing', 'accepted'] } },
-        { receiverId: callerId, status: { $in: ['initiated', 'ringing', 'accepted'] } }
-      ]
-    });
+    // 12. Check if caller is already in another call (with stale call cleanup)
+    await Call.cleanupStaleCallsForUser(callerId);
+    const callerActiveCall = await Call.hasActiveCall(callerId);
 
     if (callerActiveCall) {
       return sendResponse(200, {
