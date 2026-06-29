@@ -57,7 +57,7 @@ Economic considerations are practical but not superficial. Kolkata has a lower c
     {
       name: 'Park Street',
       area: 'Central Kolkata',
-      description: 'The heart of Kolkata's dining and entertainment scene with iconic restaurants, cafes, pubs, and cultural venues. Perfect for dinner dates, live music, or exploring the city's cosmopolitan side together.',
+      description: 'The heart of Kolkata\'s dining and entertainment scene with iconic restaurants, cafes, pubs, and cultural venues. Perfect for dinner dates, live music, or exploring the city\'s cosmopolitan side together.',
       atmosphere: 'Vibrant, cosmopolitan, lively',
       idealFor: 'Dinner dates, foodies, nightlife lovers',
       safety: 'Very safe, heavily policed, well-lit',

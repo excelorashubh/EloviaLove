@@ -44,7 +44,7 @@ Despite the hustle, Bangalore maintains a surprisingly relaxed vibe. There's les
     {
       name: 'Koramangala Social',
       area: 'Koramangala',
-      description: 'An iconic café-bar-workspace hybrid that defines Bangalore's startup culture. The quirky décor, diverse crowd, and relaxed atmosphere make it ideal for casual first dates or catching up with matches over coffee or cocktails.',
+      description: 'An iconic café-bar-workspace hybrid that defines Bangalore\'s startup culture. The quirky décor, diverse crowd, and relaxed atmosphere make it ideal for casual first dates or catching up with matches over coffee or cocktails.',
       atmosphere: 'Hip, casual, startup vibes',
       idealFor: 'Millennials, startup professionals, informal meetups',
       safety: 'Very safe, busy throughout the day',
@@ -55,7 +55,7 @@ Despite the hustle, Bangalore maintains a surprisingly relaxed vibe. There's les
     {
       name: 'Lumbini Gardens',
       area: 'Nagawara',
-      description: 'A beautiful lakefront park offering boat rides, scenic walking paths, and peaceful evening ambiance. Perfect for couples seeking a calm, nature-centric date away from the city's tech buzz.',
+      description: 'A beautiful lakefront park offering boat rides, scenic walking paths, and peaceful evening ambiance. Perfect for couples seeking a calm, nature-centric date away from the city\'s tech buzz.',
       atmosphere: 'Serene, lakeside, romantic',
       idealFor: 'Second or third dates, boat ride enthusiasts, sunset watchers',
       safety: 'Safe during park hours (9 AM - 7 PM)',
@@ -66,7 +66,7 @@ Despite the hustle, Bangalore maintains a surprisingly relaxed vibe. There's les
     {
       name: 'UB City Mall',
       area: 'Vittal Mallya Road',
-      description: 'Bangalore's most upscale shopping and dining destination featuring luxury brands, fine-dining restaurants, and sophisticated ambiance. Ideal for impressive dinner dates or classy evening outings.',
+      description: 'Bangalore\'s most upscale shopping and dining destination featuring luxury brands, fine-dining restaurants, and sophisticated ambiance. Ideal for impressive dinner dates or classy evening outings.',
       atmosphere: 'Luxurious, upscale, sophisticated',
       idealFor: 'Special occasions, dinner dates, wine enthusiasts',
       safety: 'Very safe, high security',
@@ -77,7 +77,7 @@ Despite the hustle, Bangalore maintains a surprisingly relaxed vibe. There's les
     {
       name: 'Ulsoor Lake',
       area: 'MG Road Area',
-      description: 'One of Bangalore's oldest lakes offering boating, lakeside walking paths, and peaceful evening views. The surrounding area has numerous cafes perfect for pre or post-walk coffee dates.',
+      description: 'One of Bangalore\'s oldest lakes offering boating, lakeside walking paths, and peaceful evening views. The surrounding area has numerous cafes perfect for pre or post-walk coffee dates.',
       atmosphere: 'Peaceful, scenic, local favorite',
       idealFor: 'Evening walks, boat rides, budget-friendly dates',
       safety: 'Safe during daylight and early evening',
@@ -145,7 +145,7 @@ Despite the hustle, Bangalore maintains a surprisingly relaxed vibe. There's les
   datingTips: [
     {
       title: 'Embrace Café Culture',
-      content: 'Bangalore's café scene is perfect for dates. Start with a coffee meeting at Third Wave, Blue Tokai, or any Koramangala café before committing to dinner plans.'
+      content: 'Bangalore\'s café scene is perfect for dates. Start with a coffee meeting at Third Wave, Blue Tokai, or any Koramangala café before committing to dinner plans.'
     },
     {
       title: 'Plan Around Traffic',
@@ -153,7 +153,7 @@ Despite the hustle, Bangalore maintains a surprisingly relaxed vibe. There's les
     },
     {
       title: 'Leverage Tech Meetups',
-      content: 'Attend tech conferences, startup events, or hobby meetups. Bangalore's vibrant event scene offers natural opportunities to meet like-minded singles.'
+      content: 'Attend tech conferences, startup events, or hobby meetups. Bangalore\'s vibrant event scene offers natural opportunities to meet like-minded singles.'
     },
     {
       title: 'Respect Professional Commitments',
