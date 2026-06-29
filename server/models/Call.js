@@ -100,8 +100,8 @@ callSchema.statics.getCallHistory = async function(userId, limit = 50) {
       { receiverId: userId }
     ]
   })
-  .populate('callerId', 'name profilePicture isVerified')
-  .populate('receiverId', 'name profilePicture isVerified')
+  .populate('callerId', 'name profilePhoto isVerified')
+  .populate('receiverId', 'name profilePhoto isVerified')
   .sort({ createdAt: -1 })
   .limit(limit)
   .lean();

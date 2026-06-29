@@ -13,14 +13,14 @@ const { authenticateToken } = require('../middleware/auth');
 router.post('/initiate', authenticateToken, async (req, res) => {
   try {
     const { receiverId, callType = 'video' } = req.body;
-    const callerId = req.user.userId;
+    const callerId = req.user._id;
 
     // Validation
     if (!receiverId) {
       return res.status(400).json({ error: 'Receiver ID is required' });
     }
 
-    if (callerId === receiverId) {
+    if (callerId.toString() === receiverId) {
       return res.status(400).json({ error: 'Cannot call yourself' });
     }
 
@@ -53,10 +53,7 @@ router.post('/initiate', authenticateToken, async (req, res) => {
 
     // 3. Check if users are matched
     const match = await Match.findOne({
-      $or: [
-        { user1: callerId, user2: receiverId, status: 'accepted' },
-        { user1: receiverId, user2: callerId, status: 'accepted' }
-      ]
+      users: { $all: [callerId, receiverId] }
     });
 
     if (!match) {
@@ -160,7 +157,7 @@ router.post('/initiate', authenticateToken, async (req, res) => {
 router.post('/accept/:callId', authenticateToken, async (req, res) => {
   try {
     const { callId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user._id;
 
     const call = await Call.findById(callId);
     
@@ -184,8 +181,8 @@ router.post('/accept/:callId', authenticateToken, async (req, res) => {
     await call.save();
 
     await call.populate([
-      { path: 'callerId', select: 'name profilePicture isVerified' },
-      { path: 'receiverId', select: 'name profilePicture isVerified' }
+      { path: 'callerId', select: 'name profilePhoto isVerified' },
+      { path: 'receiverId', select: 'name profilePhoto isVerified' }
     ]);
 
     res.json({
@@ -203,7 +200,7 @@ router.post('/accept/:callId', authenticateToken, async (req, res) => {
 router.post('/reject/:callId', authenticateToken, async (req, res) => {
   try {
     const { callId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user._id;
 
     const call = await Call.findById(callId);
     
@@ -237,7 +234,7 @@ router.post('/reject/:callId', authenticateToken, async (req, res) => {
 router.post('/end/:callId', authenticateToken, async (req, res) => {
   try {
     const { callId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user._id;
     const { reason = 'completed', quality } = req.body;
 
     const call = await Call.findById(callId);
@@ -282,7 +279,7 @@ router.post('/end/:callId', authenticateToken, async (req, res) => {
 router.post('/cancel/:callId', authenticateToken, async (req, res) => {
   try {
     const { callId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user._id;
 
     const call = await Call.findById(callId);
     
@@ -348,7 +345,7 @@ router.post('/missed/:callId', authenticateToken, async (req, res) => {
 // ── Get Call History ──────────────────────────────────────────────────────────
 router.get('/history', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
     const { limit = 50, offset = 0, type = 'all' } = req.query;
 
     const query = {
@@ -369,8 +366,8 @@ router.get('/history', authenticateToken, async (req, res) => {
     }
 
     const calls = await Call.find(query)
-      .populate('callerId', 'name profilePicture isVerified')
-      .populate('receiverId', 'name profilePicture isVerified')
+      .populate('callerId', 'name profilePhoto isVerified')
+      .populate('receiverId', 'name profilePhoto isVerified')
       .sort({ createdAt: -1 })
       .skip(parseInt(offset))
       .limit(parseInt(limit))
@@ -394,7 +391,7 @@ router.get('/history', authenticateToken, async (req, res) => {
 // ── Get Missed Calls Count ────────────────────────────────────────────────────
 router.get('/missed-count', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
 
     const count = await Call.getMissedCallsCount(userId);
 
@@ -415,13 +412,40 @@ router.get('/missed-count', authenticateToken, async (req, res) => {
 
 // ── Check Call Permission (COMPREHENSIVE) ─────────────────────────────────────
 router.get('/can-call/:userId', authenticateToken, async (req, res) => {
-  try {
-    const callerId = req.user.userId;
-    const { userId: receiverId } = req.params;
+  const startTime = Date.now();
+  const callerId = req.user._id;
+  const { userId: receiverId } = req.params;
 
+  let caller = null;
+  let receiver = null;
+  let match = null;
+  let finalDecision = { canCall: false, reason: 'Pending verification' };
+
+  const sendResponse = (statusCode, responseData) => {
+    const duration = Date.now() - startTime;
+    finalDecision = {
+      canCall: responseData.canCall,
+      reason: responseData.reason || responseData.error || null
+    };
+
+    console.log(`[API] [Call Permission Check]
+  - Authenticated User (Caller): ${callerId} (Verified: ${caller?.isVerified ?? 'N/A'})
+  - Target User (Receiver): ${receiverId} (Verified: ${receiver?.isVerified ?? 'N/A'})
+  - Match Status: ${match ? 'Matched' : 'Not Matched'}
+  - Block Status: Caller Blocked Receiver: ${caller?.blockedUsers?.includes(receiverId) ?? 'N/A'}, Receiver Blocked Caller: ${receiver?.blockedUsers?.includes(callerId) ?? 'N/A'}
+  - Privacy Settings: Video Calls Enabled: ${receiver?.privacy?.videoCalls?.enabled ?? 'N/A'}, Verified Only: ${receiver?.privacy?.videoCalls?.verifiedOnly ?? 'N/A'}
+  - Verification Status: Caller: ${caller?.isVerified ?? 'N/A'}, Receiver: ${receiver?.isVerified ?? 'N/A'}
+  - Database Result: Caller Found: ${!!caller}, Receiver Found: ${!!receiver}, Match Found: ${!!match}
+  - Final Permission Decision: Can Call = ${finalDecision.canCall}, Reason = "${finalDecision.reason}"
+  - Response Time: ${duration}ms`);
+
+    return res.status(statusCode).json(responseData);
+  };
+
+  try {
     // Validate receiverId
     if (!receiverId) {
-      return res.status(400).json({
+      return sendResponse(400, {
         success: false,
         canCall: false,
         reason: 'Invalid user ID',
@@ -431,14 +455,14 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     }
 
     // Get both users
-    const [caller, receiver] = await Promise.all([
+    [caller, receiver] = await Promise.all([
       User.findById(callerId),
       User.findById(receiverId)
     ]);
 
     // 1. Check if caller exists
     if (!caller) {
-      return res.status(404).json({
+      return sendResponse(404, {
         success: false,
         canCall: false,
         reason: 'Your account was not found',
@@ -449,7 +473,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
 
     // 2. Check if receiver exists
     if (!receiver) {
-      return res.json({ 
+      return sendResponse(200, { 
         success: true,
         canCall: false, 
         reason: 'User not found',
@@ -462,7 +486,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     if (caller.callStats?.isBannedFromCalling) {
       const banExpiry = caller.callStats.callBanExpiry;
       if (banExpiry && banExpiry > new Date()) {
-        return res.json({
+        return sendResponse(200, {
           success: true,
           canCall: false,
           reason: 'You are temporarily banned from making calls due to spam reports',
@@ -474,7 +498,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
 
     // 4. Check if receiver is suspended
     if (!receiver.isActive) {
-      return res.json({
+      return sendResponse(200, {
         success: true,
         canCall: false,
         reason: 'This user account is currently suspended',
@@ -484,18 +508,15 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     }
 
     // 5. Check if users are matched (CRITICAL REQUIREMENT)
-    const match = await Match.findOne({
-      $or: [
-        { user1: callerId, user2: receiverId, status: 'accepted' },
-        { user1: receiverId, user2: callerId, status: 'accepted' }
-      ]
+    match = await Match.findOne({
+      users: { $all: [callerId, receiverId] }
     });
 
     if (!match) {
-      return res.json({ 
+      return sendResponse(200, { 
         success: true,
         canCall: false, 
-        reason: 'Video calls are available after you both match',
+        reason: 'Users must be matched before starting a video call.',
         shortReason: 'Not Matched',
         icon: 'lock'
       });
@@ -503,7 +524,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
 
     // 6. Check if either user has blocked the other
     if (caller.blockedUsers?.includes(receiverId) || receiver.blockedUsers?.includes(callerId)) {
-      return res.json({
+      return sendResponse(200, {
         success: true,
         canCall: false,
         reason: 'Cannot call blocked users',
@@ -514,7 +535,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
 
     // 7. Check receiver's privacy settings - video calls enabled
     if (receiver.privacy?.videoCalls?.enabled === false) {
-      return res.json({ 
+      return sendResponse(200, { 
         success: true,
         canCall: false, 
         reason: 'This member has disabled incoming video calls',
@@ -525,7 +546,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
 
     // 8. Check if receiver requires verified callers only
     if (receiver.privacy?.videoCalls?.verifiedOnly && !caller.isVerified) {
-      return res.json({
+      return sendResponse(200, {
         success: true,
         canCall: false,
         reason: 'This user only accepts calls from verified members. Complete verification to call.',
@@ -537,7 +558,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     // 9. Check spam limits
     const spamCheck = await Call.checkSpamLimit(callerId);
     if (!spamCheck.allowed) {
-      return res.json({
+      return sendResponse(200, {
         success: true,
         canCall: false,
         reason: spamCheck.reason,
@@ -549,7 +570,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     // 10. Check cooldown period (prevent repeated calling same person)
     const cooldownCheck = await Call.checkCooldown(callerId, receiverId);
     if (!cooldownCheck.allowed) {
-      return res.json({
+      return sendResponse(200, {
         success: true,
         canCall: false,
         reason: cooldownCheck.reason,
@@ -567,7 +588,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     });
 
     if (activeCall) {
-      return res.json({ 
+      return sendResponse(200, { 
         success: true,
         canCall: false, 
         reason: 'The user is currently in another call',
@@ -585,7 +606,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     });
 
     if (callerActiveCall) {
-      return res.json({
+      return sendResponse(200, {
         success: true,
         canCall: false,
         reason: 'You are already in another call',
@@ -595,9 +616,10 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     }
 
     // ALL CHECKS PASSED ✓
-    res.json({ 
+    return sendResponse(200, { 
       success: true,
       canCall: true,
+      reason: null,
       receiverInfo: {
         name: receiver.name,
         profilePicture: receiver.profilePhoto,
@@ -606,12 +628,12 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('[API] Call permission check error:', error);
-    res.status(500).json({ 
+    console.error('[API] Call permission check error details:', error.stack);
+    return sendResponse(500, { 
       success: false,
       canCall: false,
       error: 'Failed to check call permission',
-      reason: 'Unable to verify permissions. Please try again.',
+      reason: 'We couldn\'t verify calling permissions right now. Please try again in a moment.',
       shortReason: 'Error',
       icon: 'error',
       message: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -623,7 +645,7 @@ router.get('/can-call/:userId', authenticateToken, async (req, res) => {
 router.post('/report/:callId', authenticateToken, async (req, res) => {
   try {
     const { callId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user._id;
     const { reason } = req.body;
 
     const call = await Call.findById(callId);
@@ -682,7 +704,7 @@ router.post('/report/:callId', authenticateToken, async (req, res) => {
 // ── Update Privacy Settings ───────────────────────────────────────────────────
 router.put('/settings', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
     const { videoCalls, voiceCalls, cameraDefaultOn, microphoneDefaultOn, muteIncomingCalls } = req.body;
 
     const updateData = {};
@@ -719,7 +741,7 @@ router.put('/settings', authenticateToken, async (req, res) => {
 // ── Get Privacy Settings ──────────────────────────────────────────────────────
 router.get('/settings', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
     const user = await User.findById(userId).select('privacy');
 
     res.json({
@@ -740,3 +762,4 @@ router.get('/settings', authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+

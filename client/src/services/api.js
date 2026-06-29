@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const base = import.meta.env.VITE_API_URL || '';
+const API_BASE_URL = base
+  ? (base.endsWith('/api') ? base : `${base}/api`)
+  : '/api';
 const isBrowser = typeof window !== 'undefined';
 
 const getToken = () => {

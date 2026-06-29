@@ -100,6 +100,7 @@ module.exports = {
   protect,
   authorize,
   optionalAuth,
+  authenticateToken: protect, // Alias for protect - used by call routes
   isAdmin: (req, res, next) => {
     if (req.user?.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'Admin access required' });
