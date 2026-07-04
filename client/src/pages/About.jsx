@@ -184,7 +184,7 @@ const About = () => {
       {/* Ad — between team and CTA */}
       <div className="py-4 bg-slate-50 flex justify-center">
         <AdWrapper showUpgradeNudge>
-          <BannerAd slot="2345678901" />
+          <BannerAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || ''} />
         </AdWrapper>
       </div>
 

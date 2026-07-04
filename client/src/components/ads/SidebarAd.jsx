@@ -5,7 +5,7 @@ import AdUnit from './AdUnit';
  * Visible on desktop/tablet only
  */
 const SidebarAd = ({ slot, className = '' }) => {
-  const adSlot = slot || import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_SIDEBAR || '0987654321';
+  const adSlot = slot || import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_SIDEBAR || '';
 
   return (
     <div className={`sidebar-ad hidden lg:block overflow-hidden ${className}`}>

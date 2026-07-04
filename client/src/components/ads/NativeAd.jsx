@@ -5,7 +5,7 @@ import AdUnit from './AdUnit';
  * Blends seamlessly with content
  */
 const NativeAd = ({ slot, className = '', placement = 'native' }) => {
-  const adSlot = slot || import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || '1122334455';
+  const adSlot = slot || import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || '';
 
   return (
     <div className={`native-ad w-full overflow-hidden rounded-2xl ${className}`}>

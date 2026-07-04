@@ -23,10 +23,9 @@ const AdBanner = ({ slot, className = '', placement = 'banner' }) => {
   // Get slot ID based on device size
   const getSlot = () => {
     if (slot) return slot;
-    
-    // Use environment variables with fallback
+
     if (adSize === 'mobile') {
-      return import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_MOBILE || '0987654321';
+      return import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_MOBILE || '';
     }
     return import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || '';
   };

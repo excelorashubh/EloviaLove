@@ -558,7 +558,7 @@ const Pricing = () => {
         {/* Ad — above feature comparison */}
         <div className="py-4 flex justify-center">
           <AdWrapper showUpgradeNudge>
-            <BannerAd slot="3456789012" />
+            <BannerAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || ''} />
           </AdWrapper>
         </div>
 

@@ -328,7 +328,7 @@ const Home = () => {
       <div className="py-4 bg-white flex justify-center">
         <React.Suspense fallback={<div className="h-24 w-full max-w-3xl bg-slate-100 animate-pulse rounded-lg" />}>
           <AdWrapper showUpgradeNudge>
-            <BannerAd slot="1234567890" />
+            <BannerAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || ''} />
           </AdWrapper>
         </React.Suspense>
       </div>
@@ -514,7 +514,7 @@ const Home = () => {
       <div className="py-4 bg-white flex justify-center">
         <React.Suspense fallback={<div className="h-24 w-full max-w-3xl bg-slate-100 animate-pulse rounded-lg" />}>
           <AdWrapper showUpgradeNudge>
-            <BannerAd slot="1234567891" />
+            <BannerAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || ''} />
           </AdWrapper>
         </React.Suspense>
       </div>

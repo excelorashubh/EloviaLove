@@ -767,7 +767,7 @@ const Discover = () => {
                   {/* InFeed Ad every 5 profiles */}
                   {idx > 0 && idx % 5 === 0 && (
                     <AdWrapper>
-                      <InFeedAd slot="4567890123" className="rounded-2xl" />
+                      <InFeedAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || ''} className="rounded-2xl" />
                     </AdWrapper>
                   )}
                   <GridProfileCard

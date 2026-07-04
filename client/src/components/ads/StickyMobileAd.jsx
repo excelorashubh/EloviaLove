@@ -9,7 +9,7 @@ import { X } from 'lucide-react';
 const StickyMobileAd = ({ slot, className = '' }) => {
   const [visible, setVisible] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const adSlot = slot || import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_MOBILE || '2233445566';
+  const adSlot = slot || import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_MOBILE || '';
 
   // Check if mobile
   useEffect(() => {

@@ -393,7 +393,7 @@ const Dashboard = () => {
 
             {/* Ad — between quick actions and chats (free users only) */}
             <AdWrapper showUpgradeNudge>
-              <BannerAd slot="5678901234" />
+              <BannerAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || ''} />
             </AdWrapper>
 
             {/* Recent Conversations */}
