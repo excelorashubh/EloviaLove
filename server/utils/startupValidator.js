@@ -4,6 +4,7 @@
  */
 
 const chalk = require('chalk') || { red: (s) => s, yellow: (s) => s, green: (s) => s };
+const { isRazorpayConfigured } = require('./razorpayConfig');
 
 class StartupValidator {
   constructor() {
@@ -172,6 +173,22 @@ class StartupValidator {
   }
 
   /**
+   * Validate Razorpay configuration
+   */
+  validateRazorpayConfig() {
+    console.log('\n🔍 Validating Razorpay Configuration...');
+
+    if (!isRazorpayConfigured()) {
+      this.errors.push('Razorpay credentials are incomplete. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.');
+      console.log('   ❌ Razorpay credentials missing or incomplete');
+      return;
+    }
+
+    const config = require('./razorpayConfig').getRazorpayConfig();
+    console.log(`   ✓ Razorpay configured for key: ${config.key_id}`);
+  }
+
+  /**
    * Validate JWT secret strength
    */
   validateJwtSecret() {
@@ -204,6 +221,7 @@ class StartupValidator {
     this.validateNodeVersion();
     this.validateEnvVars();
     this.validateMongoUri();
+    this.validateRazorpayConfig();
     this.validateJwtSecret();
     this.validateDependencies();
     this.validateFileStructure();

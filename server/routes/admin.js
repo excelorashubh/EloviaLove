@@ -6,6 +6,7 @@ const Message = require('../models/Message');
 const Payment = require('../models/Payment');
 const Subscription = require('../models/Subscription');
 const { protect, authorize } = require('../middleware/auth');
+const { getRazorpayConfig } = require('../utils/razorpayConfig');
 
 const router = express.Router();
 
@@ -716,7 +717,8 @@ router.post('/plans/:planId/resync-razorpay', async (req, res) => {
     // Best-effort: attempt to call Razorpay API to mark plan as archived (if supported)
     try {
       const Razorpay = require('razorpay');
-      const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_T9J7MIgjWdCA2L', key_secret: process.env.RAZORPAY_KEY_SECRET || 'LJzBX3PN8ehf4r3UgNh3NvbE' });
+      const config = getRazorpayConfig();
+      const razorpay = new Razorpay({ key_id: config.key_id, key_secret: config.key_secret });
       if (oldPlanId) {
         try {
           // Try to fetch the plan to confirm existence

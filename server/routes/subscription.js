@@ -5,16 +5,9 @@ const Subscription = require('../models/Subscription');
 const Payment      = require('../models/Payment');
 const PlanConfig   = require('../models/PlanConfig');
 const { protect }  = require('../middleware/auth');
+const { getRazorpayConfig } = require('../utils/razorpayConfig');
 
 const router = express.Router();
-
-const DEFAULT_RAZORPAY_KEY_ID = 'rzp_test_T9J7MIgjWdCA2L';
-const DEFAULT_RAZORPAY_KEY_SECRET = 'LJzBX3PN8ehf4r3UgNh3NvbE';
-
-const getRazorpayConfig = () => ({
-  key_id: process.env.RAZORPAY_KEY_ID || DEFAULT_RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET || DEFAULT_RAZORPAY_KEY_SECRET,
-});
 
 const getRazorpayKeyId = () => getRazorpayConfig().key_id;
 const getRazorpayKeySecret = () => getRazorpayConfig().key_secret;
