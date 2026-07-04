@@ -141,6 +141,7 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
     } catch (e) {
       const msg = e.response?.data?.message
         || e.response?.data?.error?.description
+        || e.response?.data?.error
         || e.message
         || 'Could not initiate payment.';
       setErrorMsg(msg);

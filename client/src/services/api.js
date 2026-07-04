@@ -37,12 +37,20 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      if (isBrowser) {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      }
+    const status = error.response?.status;
+    const message = error.response?.data?.message || '';
+    const requestUrl = error.config?.url || '';
+    const isAuthProblem = status === 401 && (
+      requestUrl.includes('/auth/') ||
+      /not authorized|invalid token|jwt|token|no user found|account has been deactivated/i.test(message)
+    );
+
+    if (isAuthProblem && isBrowser) {
+      localStorage.removeItem('token');
+      delete api.defaults.headers.common['Authorization'];
+      window.location.assign('/login');
     }
+
     return Promise.reject(error);
   }
 );

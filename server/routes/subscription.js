@@ -29,18 +29,37 @@ const getRazorpay = () => {
 };
 
 function buildRazorpayErrorPayload(err) {
-  const description = err?.error?.description || err?.message || 'Razorpay request failed';
-  const isAuthFailure = /authentication|unauthorized|bad_request_error/i.test(description);
+  const description = err?.error?.description || err?.description || err?.message || 'Razorpay request failed';
+  const isAuthFailure = /authentication|unauthorized|bad_request_error|invalid api key/i.test(description);
+  const isTimeout = /timeout|timed out|ETIMEDOUT|ECONNRESET|socket hang up|network/i.test(description);
   const status = isAuthFailure ? 502 : (err?.statusCode >= 400 ? err.statusCode : 502);
+
+  let message = description;
+  if (isAuthFailure) {
+    message = 'Authentication with Razorpay failed. Please verify the Razorpay key ID and secret in the server environment.';
+  } else if (isTimeout) {
+    message = 'Payment request timed out. Please try again in a moment.';
+  } else if (/not found/i.test(description)) {
+    message = 'Unable to create payment order. The requested payment resource was not found.';
+  }
 
   return {
     success: false,
-    message: isAuthFailure
-      ? 'Razorpay authentication failed. Please verify the Razorpay key ID and secret in the server environment.'
-      : description,
+    message,
     errorCode: err?.error?.code || 'RAZORPAY_ERROR',
     status,
   };
+}
+
+function logRazorpayError(context, err) {
+  console.error(`[${context}] Razorpay error`, {
+    message: err?.message,
+    statusCode: err?.statusCode,
+    error: err?.error,
+    description: err?.error?.description || err?.description || err?.message,
+    response: err?.response,
+    stack: err?.stack,
+  });
 }
 
 // Helper — fetch a single active paid plan from DB
@@ -239,7 +258,7 @@ router.post('/create-subscription', protect, async (req, res) => {
     });
   } catch (err) {
     const razorpayError = buildRazorpayErrorPayload(err);
-    console.error('Create subscription error:', razorpayError);
+    logRazorpayError('create-subscription', err);
     res.status(razorpayError.status).json({
       success: false,
       message: razorpayError.message,
@@ -306,8 +325,8 @@ router.post('/verify-subscription', protect, async (req, res) => {
 
     res.json({ success: true, message: 'Subscription activated', plan, endDate });
   } catch (err) {
-    console.error('Verify subscription error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    logRazorpayError('verify-subscription', err);
+    res.status(500).json({ success: false, message: 'Payment verification failed. Please try again.' });
   }
 });
 
@@ -331,7 +350,7 @@ router.post('/cancel', protect, async (req, res) => {
     res.json({ success: true, message: 'Subscription cancelled. Access continues until period end.' });
   } catch (err) {
     const razorpayError = buildRazorpayErrorPayload(err);
-    console.error('Cancel error:', razorpayError);
+    logRazorpayError('cancel-subscription', err);
     res.status(razorpayError.status).json({
       success: false,
       message: razorpayError.message,
@@ -365,7 +384,8 @@ router.post('/addon-order', protect, async (req, res) => {
       addonName: ADD_ONS[addon].name,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    logRazorpayError('addon-order', err);
+    res.status(502).json({ success: false, message: 'Unable to create payment order. Please try again.' });
   }
 });
 

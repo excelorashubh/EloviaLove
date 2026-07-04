@@ -59,14 +59,20 @@ export const AuthProvider = ({ children }) => {
   const loadUser = async () => {
     try {
       const response = await api.get('/auth/me');
-      // Debug logs for verification troubleshooting
-      console.log('Loaded profile:', response.data.user);
-      console.log('Loaded profile.isVerified:', response.data.user?.isVerified);
       setUser(response.data.user);
     } catch (error) {
+      const status = error?.response?.status;
+      const message = error?.response?.data?.message || '';
+      const isAuthProblem = status === 401 && /not authorized|invalid token|jwt|token|no user found|account has been deactivated/i.test(message);
+
+      if (isAuthProblem) {
+        localStorage.removeItem('token');
+        delete api.defaults.headers.common['Authorization'];
+        setToken(null);
+        setUser(null);
+      }
+
       console.error('Failed to load user:', error);
-      localStorage.removeItem('token');
-      setToken(null);
     } finally {
       setLoading(false);
     }
