@@ -2,7 +2,7 @@
 
 // 1. Google Analytics 4 Setup
 export const GA4_CONFIG = {
-  measurementId: process.env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX',
+  measurementId: import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX',
 
   // Enhanced E-commerce tracking for dating platform
   ecommerce: {

@@ -66,7 +66,7 @@ const PieTooltip = ({ active, payload }) => {
 const AdminAds = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const clientId = import.meta.env.VITE_ADSENSE_CLIENT_ID || 'Not configured';
+  const clientId = import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID || import.meta.env.VITE_ADSENSE_CLIENT_ID || 'Not configured';
   const gaId     = import.meta.env.VITE_GA_MEASUREMENT_ID  || 'Not configured';
 
   const load = async () => {
@@ -232,7 +232,7 @@ const AdminAds = () => {
               </div>
               <p className="text-xs text-slate-400 flex items-start gap-1.5">
                 <Info size={11} className="shrink-0 mt-0.5" />
-                Set <code className="bg-slate-100 px-1 rounded">VITE_ADSENSE_CLIENT_ID</code> in <code className="bg-slate-100 px-1 rounded">client/.env</code>
+                Set <code className="bg-slate-100 px-1 rounded">VITE_GOOGLE_ADSENSE_CLIENT_ID</code> in <code className="bg-slate-100 px-1 rounded">client/.env</code>
               </p>
               <a
                 href="https://adsense.google.com"
@@ -349,7 +349,7 @@ const AdminAds = () => {
           <h2 className="font-semibold text-slate-800 mb-4">AdSense Setup Checklist</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              { done: clientId !== 'Not configured', label: 'Set VITE_ADSENSE_CLIENT_ID in client/.env' },
+              { done: clientId !== 'Not configured', label: 'Set VITE_GOOGLE_ADSENSE_CLIENT_ID in client/.env' },
               { done: gaId !== 'Not configured',     label: 'Set VITE_GA_MEASUREMENT_ID in client/.env' },
               { done: true,                          label: 'AdSense script added to index.html (production only)' },
               { done: true,                          label: 'AdWrapper component gates ads by user plan' },
