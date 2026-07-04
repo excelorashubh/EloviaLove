@@ -190,7 +190,7 @@ router.post('/create-subscription', protect, async (req, res) => {
     const order = await createRazorpayOrder({
       amount,
       currency: planDoc.currency || 'INR',
-      receipt: `plan_${req.user._id}_${Date.now()}`,
+      receipt: `p_${req.user._id.toString().slice(-8)}_${Date.now().toString().slice(-6)}`,
       notes: { plan, userId: req.user._id.toString(), type: 'subscription' },
     });
 
@@ -327,7 +327,7 @@ router.post('/addon-order', protect, async (req, res) => {
     const order = await createRazorpayOrder({
       amount: ADD_ONS[addon].price,
       currency: 'INR',
-      receipt: `rcpt_${Date.now()}`,
+      receipt: `a_${Date.now().toString().slice(-8)}`,
       notes: { addon, userId: req.user._id.toString(), type: 'addon' },
     });
 
