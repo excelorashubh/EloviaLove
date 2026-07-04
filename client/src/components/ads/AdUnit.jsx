@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { loadAdSense, initializeAd, trackAdImpression } from '../../utils/ads';
 
 const isProduction = typeof window !== 'undefined' &&
-  window.location.hostname !== 'localhost' &&
-  window.location.hostname !== '127.0.0.1';
+  import.meta.env.PROD &&
+  !['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(window.location.hostname);
 
 /**
  * Base ad unit with enhanced features
@@ -86,7 +86,7 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '', placement =
     return (
       <div
         className={`flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-400 dark:text-slate-500 text-xs font-mono select-none ${className}`}
-        style={{ minHeight: style.minHeight || style.height || 90, ...style }}
+        style={{ display: 'block', minHeight: style.minHeight || style.height || 90, ...style }}
       >
         <div className="text-2xl mb-2">📢</div>
         <div className="text-center">
@@ -107,7 +107,7 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '', placement =
     return (
       <div
         className={`flex items-center justify-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg ${className}`}
-        style={{ minHeight: style.minHeight || style.height || 90, ...style }}
+        style={{ display: 'block', minHeight: style.minHeight || style.height || 90, ...style }}
       >
         <p className="text-xs text-slate-400">Advertisement</p>
       </div>
@@ -138,7 +138,7 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '', placement =
       {visible && (
         <ins
           className="adsbygoogle"
-          style={{ display: 'block', ...style }}
+          style={{ display: 'block', ...style, minHeight: style.minHeight || style.height || 90 }}
           data-ad-client={clientId}
           data-ad-slot={slot}
           data-ad-format={format}

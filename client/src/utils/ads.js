@@ -7,6 +7,7 @@
 let adsenseLoaded = false;
 let adsenseLoading = false;
 const loadCallbacks = [];
+const initializedElements = new WeakSet();
 
 /**
  * Load Google AdSense script globally (once)
@@ -80,16 +81,30 @@ export const loadAdSense = () => {
  * @param {HTMLElement} element - Ad container element
  */
 export const initializeAd = (element) => {
-  if (!element) return;
+  if (!element || initializedElements.has(element)) return;
 
-  // Development mode - skip
-  if (import.meta.env.DEV) {
+  const isProductionHost = typeof window !== 'undefined' && import.meta.env.PROD && !['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(window.location.hostname);
+
+  if (!isProductionHost) {
     return;
   }
 
+  initializedElements.add(element);
+
   try {
-    if (window.adsbygoogle && Array.isArray(window.adsbygoogle)) {
-      window.adsbygoogle.push({});
+    const pushAd = () => {
+      if (typeof window === 'undefined') return;
+
+      window.adsbygoogle = window.adsbygoogle || [];
+      if (Array.isArray(window.adsbygoogle)) {
+        window.adsbygoogle.push({});
+      }
+    };
+
+    if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+      window.requestAnimationFrame(pushAd);
+    } else {
+      pushAd();
     }
   } catch (error) {
     console.error('[AdSense] Failed to initialize ad:', error);

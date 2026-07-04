@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { loadAdSense, shouldShowAds } from '../../utils/ads';
 
@@ -9,18 +9,20 @@ import { loadAdSense, shouldShowAds } from '../../utils/ads';
  */
 const AdInitializer = () => {
   const { user } = useAuth();
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    // Only load if user should see ads
-    if (shouldShowAds(user)) {
-      loadAdSense().then((success) => {
-        if (success) {
-          console.log('[AdSense] Initialization complete');
-        } else {
-          console.warn('[AdSense] Initialization failed or skipped');
-        }
-      });
-    }
+    if (!shouldShowAds(user) || initializedRef.current) return;
+
+    initializedRef.current = true;
+
+    loadAdSense().then((success) => {
+      if (success) {
+        console.log('[AdSense] Initialization complete');
+      } else {
+        console.warn('[AdSense] Initialization failed or skipped');
+      }
+    });
   }, [user]);
 
   // This component doesn't render anything
