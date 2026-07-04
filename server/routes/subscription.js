@@ -8,6 +8,17 @@ const { protect }  = require('../middleware/auth');
 
 const router = express.Router();
 
+const DEFAULT_RAZORPAY_KEY_ID = 'rzp_test_T9HOl1VrXZDIi1';
+const DEFAULT_RAZORPAY_KEY_SECRET = 'gVJiyQO0nSL18silZJ6B1MXC';
+
+const getRazorpayConfig = () => ({
+  key_id: process.env.RAZORPAY_KEY_ID || DEFAULT_RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET || DEFAULT_RAZORPAY_KEY_SECRET,
+});
+
+const getRazorpayKeyId = () => getRazorpayConfig().key_id;
+const getRazorpayKeySecret = () => getRazorpayConfig().key_secret;
+
 // ── Add-ons (still static — admin can extend later) ──────────────────────────
 const ADD_ONS = {
   boost:     { name: 'Profile Boost', price: 99  },
@@ -17,11 +28,27 @@ const ADD_ONS = {
 
 const getRazorpay = () => {
   const Razorpay = require('razorpay');
+  const config = getRazorpayConfig();
   return new Razorpay({
-    key_id:     process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
+    key_id: config.key_id,
+    key_secret: config.key_secret,
   });
 };
+
+function buildRazorpayErrorPayload(err) {
+  const description = err?.error?.description || err?.message || 'Razorpay request failed';
+  const isAuthFailure = /authentication|unauthorized|bad_request_error/i.test(description);
+  const status = isAuthFailure ? 502 : (err?.statusCode >= 400 ? err.statusCode : 502);
+
+  return {
+    success: false,
+    message: isAuthFailure
+      ? 'Razorpay authentication failed. Please verify the Razorpay key ID and secret in the server environment.'
+      : description,
+    errorCode: err?.error?.code || 'RAZORPAY_ERROR',
+    status,
+  };
+}
 
 // Helper — fetch a single active paid plan from DB
 async function getPlan(key) {
@@ -211,16 +238,20 @@ router.post('/create-subscription', protect, async (req, res) => {
     res.json({
       success:        true,
       subscriptionId: subscription.id,
-      keyId:          process.env.RAZORPAY_KEY_ID,
+      keyId:          getRazorpayKeyId(),
       plan,
       planName:       planDoc.name,
       amount:         getEffectivePrice(planDoc) * 100,
       currency:       planDoc.currency || 'INR',
     });
   } catch (err) {
-    console.error('Create subscription error:', err?.error || err?.message || err);
-    const msg = err?.error?.description || err?.message || 'Failed to create subscription';
-    res.status(500).json({ success: false, message: msg });
+    const razorpayError = buildRazorpayErrorPayload(err);
+    console.error('Create subscription error:', razorpayError);
+    res.status(razorpayError.status).json({
+      success: false,
+      message: razorpayError.message,
+      errorCode: razorpayError.errorCode,
+    });
   }
 });
 
@@ -233,7 +264,7 @@ router.post('/verify-subscription', protect, async (req, res) => {
     // Verify signature
     const body        = razorpay_payment_id + '|' + razorpay_subscription_id;
     const expectedSig = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .createHmac('sha256', getRazorpayKeySecret())
       .update(body)
       .digest('hex');
 
@@ -306,9 +337,13 @@ router.post('/cancel', protect, async (req, res) => {
 
     res.json({ success: true, message: 'Subscription cancelled. Access continues until period end.' });
   } catch (err) {
-    console.error('Cancel error:', err?.error || err?.message || err);
-    const msg = err?.error?.description || err?.message || 'Cancellation failed';
-    res.status(500).json({ success: false, message: msg });
+    const razorpayError = buildRazorpayErrorPayload(err);
+    console.error('Cancel error:', razorpayError);
+    res.status(razorpayError.status).json({
+      success: false,
+      message: razorpayError.message,
+      errorCode: razorpayError.errorCode,
+    });
   }
 });
 
@@ -332,7 +367,7 @@ router.post('/addon-order', protect, async (req, res) => {
       orderId:   order.id,
       amount:    order.amount,
       currency:  order.currency,
-      keyId:     process.env.RAZORPAY_KEY_ID,
+      keyId:     getRazorpayKeyId(),
       addon,
       addonName: ADD_ONS[addon].name,
     });
@@ -345,7 +380,7 @@ router.post('/addon-order', protect, async (req, res) => {
 // Razorpay sends events here — MUST use raw body (registered in server.js)
 router.post('/webhook', async (req, res) => {
   try {
-    const secret    = process.env.RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_KEY_SECRET;
+    const secret    = process.env.RAZORPAY_WEBHOOK_SECRET || getRazorpayKeySecret();
     const signature = req.headers['x-razorpay-signature'];
     const body      = req.rawBody; // set by express.raw() in server.js
 
