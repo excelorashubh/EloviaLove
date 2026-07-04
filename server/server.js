@@ -4,7 +4,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
-const path = require('path');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
@@ -219,6 +218,16 @@ async function startServer() {
   // API ROUTES (WITH ERROR HANDLING)
   // ══════════════════════════════════════════════════════════════════════════════
 
+  // Root endpoint for API-only service
+  app.get('/', (req, res) => {
+    res.json({
+      success: true,
+      name: 'Elovia Love API',
+      status: 'Running',
+      version: '1.0.0'
+    });
+  });
+
   // Health check endpoint (for Render monitoring)
   app.get('/health', (req, res) => {
     const healthStatus = {
@@ -318,27 +327,6 @@ async function startServer() {
   setupCallSignaling(io);
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // STATIC FILE SERVING (React Build + Static Sitemap)
-  // ══════════════════════════════════════════════════════════════════════════════
-
-  app.use(express.static(path.join(__dirname, '../client/dist'), {
-    maxAge: '1y',
-    immutable: true,
-    etag: true,
-    lastModified: true,
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.html')) {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      }
-    }
-  }));
-
-  app.use(express.static(path.join(__dirname, '../client/public'), {
-    maxAge: '1d',
-    index: false
-  }));
-
-  // ══════════════════════════════════════════════════════════════════════════════
   // ERROR HANDLING MIDDLEWARE
   // ══════════════════════════════════════════════════════════════════════════════
 
@@ -353,19 +341,6 @@ async function startServer() {
     };
     
     res.status(err.status || 500).json(errorResponse);
-  });
-
-  // ══════════════════════════════════════════════════════════════════════════════
-  // REACT SPA FALLBACK (MUST BE LAST)
-  // ══════════════════════════════════════════════════════════════════════════════
-
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'), (err) => {
-      if (err) {
-        console.error('Error serving index.html:', err);
-        res.status(500).send('Error loading application');
-      }
-    });
   });
 
   // ══════════════════════════════════════════════════════════════════════════════

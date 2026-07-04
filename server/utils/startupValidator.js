@@ -127,8 +127,7 @@ class StartupValidator {
       '../models/Call.js',
       '../routes/auth.js',
       '../routes/call.js',
-      '../utils/callSignaling.js',
-      '../../client/dist/index.html'
+      '../utils/callSignaling.js'
     ];
 
     requiredFiles.forEach(file => {
