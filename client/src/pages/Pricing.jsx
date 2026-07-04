@@ -93,16 +93,31 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
         const { data } = await api.post('/subscription/addon-order', { addon: item.key });
 
         const options = {
-          key:         data.keyId,
-          amount:      data.amount,
-          currency:    data.currency,
-          name:        'EloviaClasses',
+          key: data.keyId,
+          amount: data.amount,
+          currency: data.currency,
+          name: 'EloviaLove',
           description: data.addonName,
-          order_id:    data.orderId,
-          prefill:     { name: user?.name || '', email: user?.email || '' },
-          theme:       { color: '#c026d3' },
-          modal:       { ondismiss: () => setStep('confirm') },
-          handler:     () => { setStep('success'); setTimeout(() => onSuccess(item.key, true), 1800); },
+          order_id: data.orderId,
+          prefill: { name: user?.name || '', email: user?.email || '' },
+          theme: { color: '#c026d3' },
+          modal: { ondismiss: () => setStep('confirm') },
+          handler: async (response) => {
+            setStep('processing');
+            try {
+              await api.post('/subscription/verify-subscription', {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                plan: item.key,
+              });
+              setStep('success');
+              setTimeout(() => onSuccess(item.key, true), 1800);
+            } catch (e) {
+              setErrorMsg(e.response?.data?.message || 'Payment verification failed. Please try again.');
+              setStep('error');
+            }
+          },
         };
         new window.Razorpay(options).open();
 
@@ -111,26 +126,28 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
         const { data } = await api.post('/subscription/create-subscription', { plan: item.key });
 
         const options = {
-          key:             data.keyId,
-          subscription_id: data.subscriptionId,
-          name:            'EloviaClasses',
-          description:     `${data.planName} Plan — Auto-renews monthly`,
-          prefill:         { name: user?.name || '', email: user?.email || '' },
-          theme:           { color: '#c026d3' },
-          modal:           { ondismiss: () => setStep('confirm') },
+          key: data.keyId,
+          amount: data.amount,
+          currency: data.currency,
+          order_id: data.orderId,
+          name: 'EloviaLove',
+          description: `${data.planName} Plan`,
+          prefill: { name: user?.name || '', email: user?.email || '' },
+          theme: { color: '#c026d3' },
+          modal: { ondismiss: () => setStep('confirm') },
           handler: async (response) => {
             setStep('processing');
             try {
               await api.post('/subscription/verify-subscription', {
-                razorpay_payment_id:      response.razorpay_payment_id,
-                razorpay_subscription_id: response.razorpay_subscription_id,
-                razorpay_signature:       response.razorpay_signature,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
                 plan: item.key,
               });
               setStep('success');
               setTimeout(() => onSuccess(item.key, false), 1800);
             } catch (e) {
-              setErrorMsg(e.response?.data?.message || 'Payment verification failed. Contact support.');
+              setErrorMsg(e.response?.data?.message || 'Payment verification failed. Please try again.');
               setStep('error');
             }
           },

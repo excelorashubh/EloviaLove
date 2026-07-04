@@ -105,55 +105,14 @@ function getRazorpayPlanInterval(durationDays) {
   return Math.max(1, Math.round(durationDays / 30));
 }
 
-async function createRazorpayPlan(planDoc, amount, currency) {
+async function createRazorpayOrder({ amount, currency, receipt, notes }) {
   const razorpay = getRazorpay();
-  const normalizedCurrency = (currency || 'INR').toUpperCase();
-  const interval = getRazorpayPlanInterval(planDoc.durationDays);
-
-  const payload = {
-    period: 'monthly',
-    interval,
-    item: {
-      name:     `EloviaLove ${planDoc.name}`,
-      amount:   Math.round(amount * 100),
-      currency: normalizedCurrency,
-    },
-    notes: {
-      plan:   planDoc.key,
-      planId: planDoc._id.toString(),
-    },
-  };
-
-  const plan = await razorpay.plans.create(payload);
-  return plan;
-}
-
-async function getOrCreateRazorpayPlan(planKey) {
-  const planDoc    = await getPlan(planKey);
-  const effectivePrice = getEffectivePrice(planDoc);
-  const currency   = planDoc.currency || 'INR';
-
-  const cached = razorpayPlanCache[planKey];
-  if (cached && cached.amount === effectivePrice && cached.currency === currency) {
-    return cached.id;
-  }
-
-  if (planDoc.razorpayPlanId && planDoc.razorpayPlanAmount === effectivePrice && planDoc.currency === currency) {
-    razorpayPlanCache[planKey] = { id: planDoc.razorpayPlanId, amount: effectivePrice, currency };
-    return planDoc.razorpayPlanId;
-  }
-
-  const razorpayPlan = await createRazorpayPlan(planDoc, effectivePrice, currency);
-
-  await PlanConfig.findByIdAndUpdate(planDoc._id, {
-    razorpayPlanId:     razorpayPlan.id,
-    razorpayPlanAmount: effectivePrice,
-    currency:           currency,
-  }, { runValidators: true });
-
-  razorpayPlanCache[planKey] = { id: razorpayPlan.id, amount: effectivePrice, currency };
-  console.log(`Created Razorpay plan for ${planKey}: ${razorpayPlan.id}`);
-  return razorpayPlan.id;
+  return razorpay.orders.create({
+    amount: Math.round(amount * 100),
+    currency: (currency || 'INR').toUpperCase(),
+    receipt,
+    notes,
+  });
 }
 
 // Expose a helper to clear in-memory Razorpay plan cache (used by admin resync)
@@ -227,34 +186,33 @@ router.post('/create-subscription', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid plan' });
     }
 
-    const razorpay = getRazorpay();
-    const planId   = await getOrCreateRazorpayPlan(plan);
-
-    const subscription = await razorpay.subscriptions.create({
-      plan_id:         planId,
-      customer_notify: 1,
-      total_count:     12,
-      quantity:        1,
-      notes: { plan, userId: req.user._id.toString() },
+    const amount = getEffectivePrice(planDoc);
+    const order = await createRazorpayOrder({
+      amount,
+      currency: planDoc.currency || 'INR',
+      receipt: `plan_${req.user._id}_${Date.now()}`,
+      notes: { plan, userId: req.user._id.toString(), type: 'subscription' },
     });
 
     await Subscription.create({
-      userId:         req.user._id,
+      userId: req.user._id,
       plan,
-      status:         'pending',
-      razorpaySubId:  subscription.id,
-      razorpayPlanId: planId,
-      totalCount:     12,
+      status: 'pending',
+      razorpaySubId: order.id,
+      razorpayPlanId: planDoc.razorpayPlanId || null,
+      totalCount: 1,
+      paidCount: 0,
     });
 
     res.json({
-      success:        true,
-      subscriptionId: subscription.id,
-      keyId:          getRazorpayKeyId(),
+      success: true,
+      orderId: order.id,
+      keyId: getRazorpayKeyId(),
       plan,
-      planName:       planDoc.name,
-      amount:         getEffectivePrice(planDoc) * 100,
-      currency:       planDoc.currency || 'INR',
+      planName: planDoc.name,
+      amount: order.amount,
+      currency: order.currency,
+      receipt: order.receipt,
     });
   } catch (err) {
     const razorpayError = buildRazorpayErrorPayload(err);
@@ -268,59 +226,59 @@ router.post('/create-subscription', protect, async (req, res) => {
 });
 
 // ── POST /api/subscription/verify-subscription ───────────────────────────────
-// Called after first payment in Razorpay checkout completes
 router.post('/verify-subscription', protect, async (req, res) => {
   try {
-    const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature, plan } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan } = req.body;
 
-    // Verify signature
-    const body        = razorpay_payment_id + '|' + razorpay_subscription_id;
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !plan) {
+      return res.status(400).json({ success: false, message: 'Missing payment verification data.' });
+    }
+
+    const body = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSig = crypto
       .createHmac('sha256', getRazorpayKeySecret())
       .update(body)
       .digest('hex');
 
     if (expectedSig !== razorpay_signature) {
-      return res.status(400).json({ success: false, message: 'Payment verification failed' });
+      return res.status(400).json({ success: false, message: 'Invalid payment signature.' });
     }
 
     const startDate = new Date();
-    const endDate   = new Date();
+    const endDate = new Date();
     endDate.setDate(endDate.getDate() + 30);
 
-    // Update subscription record
-    await Subscription.findOneAndUpdate(
-      { razorpaySubId: razorpay_subscription_id },
+    const subscriptionDoc = await Subscription.findOneAndUpdate(
+      { razorpaySubId: razorpay_order_id },
       {
-        status:    'active',
+        status: 'active',
         startDate,
         endDate,
         paymentId: razorpay_payment_id,
         paidCount: 1,
         nextBillingDate: endDate,
-      }
+      },
+      { new: true }
     );
 
-    // Activate user plan
     const planDoc = await PlanConfig.findOne({ key: plan.toLowerCase() });
     await User.findByIdAndUpdate(req.user._id, {
       plan,
-      subscriptionId:     razorpay_subscription_id,
+      subscriptionId: subscriptionDoc?.razorpaySubId || razorpay_order_id,
       subscriptionStatus: 'active',
-      subscriptionStart:  startDate,
-      subscriptionEnd:    endDate,
-      nextBillingDate:    endDate,
-      razorpayPlanId:     planDoc?.razorpayPlanId || razorpayPlanCache[plan]?.id || null,
+      subscriptionStart: startDate,
+      subscriptionEnd: endDate,
+      nextBillingDate: endDate,
+      razorpayPlanId: planDoc?.razorpayPlanId || null,
     });
 
-    // Log payment
     await Payment.create({
-      userId:    req.user._id,
+      userId: req.user._id,
       plan,
-      amount:    getEffectivePrice(await PlanConfig.findOne({ key: plan })) || 0,
-      orderId:   razorpay_subscription_id,
+      amount: getEffectivePrice(planDoc) || 0,
+      orderId: razorpay_order_id,
       paymentId: razorpay_payment_id,
-      status:    'paid',
+      status: 'paid',
     });
 
     res.json({ success: true, message: 'Subscription activated', plan, endDate });
@@ -366,12 +324,11 @@ router.post('/addon-order', protect, async (req, res) => {
     const { addon } = req.body;
     if (!ADD_ONS[addon]) return res.status(400).json({ success: false, message: 'Invalid add-on' });
 
-    const razorpay = getRazorpay();
-    const order    = await razorpay.orders.create({
-      amount:   ADD_ONS[addon].price * 100,
+    const order = await createRazorpayOrder({
+      amount: ADD_ONS[addon].price,
       currency: 'INR',
-      receipt:  `rcpt_${Date.now()}`,
-      notes:    { addon, userId: req.user._id.toString() },
+      receipt: `rcpt_${Date.now()}`,
+      notes: { addon, userId: req.user._id.toString(), type: 'addon' },
     });
 
     res.json({
