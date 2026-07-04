@@ -28,7 +28,7 @@ const AdBanner = ({ slot, className = '', placement = 'banner' }) => {
     if (adSize === 'mobile') {
       return import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_MOBILE || '0987654321';
     }
-    return import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || '9858095130';
+    return import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || '';
   };
 
   return (
