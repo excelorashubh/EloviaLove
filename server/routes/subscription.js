@@ -8,8 +8,8 @@ const { protect }  = require('../middleware/auth');
 
 const router = express.Router();
 
-const DEFAULT_RAZORPAY_KEY_ID = 'rzp_test_T9HOl1VrXZDIi1';
-const DEFAULT_RAZORPAY_KEY_SECRET = 'gVJiyQO0nSL18silZJ6B1MXC';
+const DEFAULT_RAZORPAY_KEY_ID = 'rzp_test_T9J7MIgjWdCA2L';
+const DEFAULT_RAZORPAY_KEY_SECRET = 'LJzBX3PN8ehf4r3UgNh3NvbE';
 
 const getRazorpayConfig = () => ({
   key_id: process.env.RAZORPAY_KEY_ID || DEFAULT_RAZORPAY_KEY_ID,
