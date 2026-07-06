@@ -74,6 +74,12 @@ router.post('/register', [
     const trialEnd = new Date();
     trialEnd.setDate(trialEnd.getDate() + 10);
     user.plan = 'premium';
+    user.isPremium = true;
+    user.premiumPlan = 'Welcome Trial';
+    user.premiumStartedAt = new Date();
+    user.premiumExpiresAt = trialEnd;
+    user.premiumSource = 'Welcome Bonus';
+    user.welcomePopupShown = false;
     user.isTrialUsed = true;
     user.trialStartDate = new Date();
     user.trialEndDate = trialEnd;
@@ -94,6 +100,12 @@ router.post('/register', [
         profilePhoto: user.profilePhoto,
         profileCompleted: user.profileCompleted,
         plan: user.plan,
+        isPremium: user.isPremium,
+        premiumPlan: user.premiumPlan,
+        premiumStartedAt: user.premiumStartedAt,
+        premiumExpiresAt: user.premiumExpiresAt,
+        premiumSource: user.premiumSource,
+        welcomePopupShown: user.welcomePopupShown,
         isTrialUsed: user.isTrialUsed,
         trialEndDate: user.trialEndDate,
       }
@@ -159,12 +171,14 @@ router.post('/login', [
     if (user.plan === 'premium' && user.isTrialUsed && !user.subscriptionId) {
       if (user.trialEndDate && new Date() > user.trialEndDate) {
         user.plan = 'free';
+        user.isPremium = false;
         await user.save({ validateBeforeSave: false });
       }
     }
     // ── Check paid subscription expiry ──
     if (user.subscriptionEnd && new Date() > user.subscriptionEnd && user.subscriptionId) {
       user.plan = 'free';
+      user.isPremium = false;
       user.subscriptionId = null;
       await user.save({ validateBeforeSave: false });
     }
@@ -184,6 +198,12 @@ router.post('/login', [
         profilePhoto: user.profilePhoto,
         profileCompleted: user.profileCompleted,
         plan: user.plan,
+        isPremium: user.isPremium,
+        premiumPlan: user.premiumPlan,
+        premiumStartedAt: user.premiumStartedAt,
+        premiumExpiresAt: user.premiumExpiresAt,
+        premiumSource: user.premiumSource,
+        welcomePopupShown: user.welcomePopupShown,
         isTrialUsed: user.isTrialUsed,
         trialEndDate: user.trialEndDate,
         subscriptionEnd: user.subscriptionEnd,
@@ -225,6 +245,12 @@ router.get('/me', protect, async (req, res) => {
         lastActive: user.lastActive,
         age: user.age,
         plan: user.plan,
+        isPremium: user.isPremium,
+        premiumPlan: user.premiumPlan,
+        premiumStartedAt: user.premiumStartedAt,
+        premiumExpiresAt: user.premiumExpiresAt,
+        premiumSource: user.premiumSource,
+        welcomePopupShown: user.welcomePopupShown,
         isTrialUsed: user.isTrialUsed,
         trialEndDate: user.trialEndDate,
         subscriptionEnd: user.subscriptionEnd,
@@ -240,6 +266,26 @@ router.get('/me', protect, async (req, res) => {
       success: false,
       message: 'Server error'
     });
+  }
+});
+
+// @route   POST /api/auth/welcome-popup/shown
+// @desc    Mark the welcome trial popup as shown for this user
+// @access  Private
+router.post('/welcome-popup/shown', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    if (!user.welcomePopupShown) {
+      user.welcomePopupShown = true;
+      await user.save({ validateBeforeSave: false });
+    }
+    res.json({ success: true, message: 'Welcome popup acknowledged' });
+  } catch (error) {
+    console.error('Welcome popup acknowledgment error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

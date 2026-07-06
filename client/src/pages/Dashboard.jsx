@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Heart, Settings, Sparkles, MessageCircle, Check, Crown, Zap, Star, Clock } from 'lucide-react';
@@ -180,9 +180,12 @@ const Dashboard = () => {
   const [subStatus, setSubStatus] = useState(null);
   const [planMap, setPlanMap] = useState({});
   const [showTrialModal, setShowTrialModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
   const socketRef = useRef(null);
 
   useEffect(() => {
+    let modalTimer;
     const load = async () => {
       try {
         const [convRes, notifRes, subRes, plansRes] = await Promise.all([
@@ -203,11 +206,14 @@ const Dashboard = () => {
         const shouldShowModal = typeof window !== 'undefined'
           && window.localStorage.getItem(WELCOME_MODAL_KEY) === 'true'
           && subRes.data?.isTrial
-          && subRes.data?.plan === 'premium';
+          && subRes.data?.plan === 'premium'
+          && user?.welcomePopupShown !== true;
 
         if (shouldShowModal) {
-          setShowTrialModal(true);
-          window.localStorage.removeItem(WELCOME_MODAL_KEY);
+          modalTimer = window.setTimeout(() => {
+            setShowTrialModal(true);
+            window.localStorage.removeItem(WELCOME_MODAL_KEY);
+          }, 500);
         }
       } catch (e) {
         console.error(e);
@@ -216,7 +222,13 @@ const Dashboard = () => {
       }
     };
     load();
-  }, []);
+
+    return () => {
+      if (modalTimer) {
+        window.clearTimeout(modalTimer);
+      }
+    };
+  }, [user]);
 
   // Refresh lists on profile updates
   useEffect(() => {
@@ -254,6 +266,31 @@ const Dashboard = () => {
     });
     return () => socketRef.current?.disconnect();
   }, [user?._id]);
+
+  const handleTrialAcknowledged = async () => {
+    setShowTrialModal(false);
+    setToastMessage('🎉 Your 10-Day Premium Trial has been activated! Enjoy all Premium features.');
+    setShowToast(true);
+
+    try {
+      await api.post('/auth/welcome-popup/shown');
+    } catch (err) {
+      console.error('Failed to mark welcome popup shown:', err);
+    }
+
+    window.setTimeout(() => {
+      setShowToast(false);
+    }, 4200);
+  };
+
+  const handleTrialClose = async () => {
+    setShowTrialModal(false);
+    try {
+      await api.post('/auth/welcome-popup/shown');
+    } catch (err) {
+      console.error('Failed to mark welcome popup shown:', err);
+    }
+  };
 
   // Profile completion checks
   const checks = [
@@ -601,10 +638,24 @@ const Dashboard = () => {
       </div>
       <PremiumTrialModal
         open={showTrialModal}
-        onClose={() => setShowTrialModal(false)}
+        onClose={handleTrialClose}
+        onContinue={handleTrialAcknowledged}
         trialEndDate={subStatus?.trialEndDate}
         userName={user?.name}
       />
+
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-3xl border border-pink-100 bg-white/95 px-6 py-4 text-center shadow-[0_20px_70px_rgba(255,79,139,0.18)]"
+          >
+            <p className="text-sm font-semibold text-[#4B1D31]">{toastMessage}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

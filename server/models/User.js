@@ -105,6 +105,12 @@ const userSchema = new mongoose.Schema({
     enum: ['free', 'basic', 'premium', 'pro'],
     default: 'free'
   },
+  isPremium: { type: Boolean, default: false },
+  premiumPlan: { type: String, default: '' },
+  premiumStartedAt: { type: Date },
+  premiumExpiresAt: { type: Date },
+  premiumSource: { type: String, default: '' },
+  welcomePopupShown: { type: Boolean, default: false },
   // Trial
   isTrialUsed: { type: Boolean, default: false },
   trialStartDate: { type: Date },
