@@ -30,8 +30,8 @@ const GlobalCitiesGrid = ({ cities = globalCities }) => {
             city?.hasPage ? (
               <Link
                 key={city?.slug || index}
-                to={`/dating-in-${city?.slug || ''}`}
-                className="group bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-primary-300"
+                to={city?.pageUrl || `/dating-in-${city?.slug || ''}`}
+                className="group bg-linear-to-br from-gray-50 to-white rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-primary-300"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -58,7 +58,7 @@ const GlobalCitiesGrid = ({ cities = globalCities }) => {
             ) : (
               <div
                 key={city?.slug || index}
-                className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 border border-gray-200"
+                className="bg-linear-to-br from-gray-50 to-white rounded-2xl p-8 border border-gray-200"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -88,7 +88,7 @@ const GlobalCitiesGrid = ({ cities = globalCities }) => {
         <div className="text-center mt-12">
           <button 
             onClick={() => window.location.href = '/discover'}
-            className="bg-gradient-to-r from-primary-500 to-pink-500 text-white px-8 py-4 rounded-full font-semibold hover:shadow-xl transform hover:-translate-y-1 transition-all"
+            className="bg-linear-to-r from-primary-500 to-pink-500 text-white px-8 py-4 rounded-full font-semibold hover:shadow-xl transform hover:-translate-y-1 transition-all"
           >
             View All 500+ Cities
           </button>

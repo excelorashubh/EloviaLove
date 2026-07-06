@@ -125,20 +125,20 @@ export const featuredCountries = [
 
 export const globalCities = [
   // India (largest market)
-  { name: 'Mumbai', country: 'India', slug: 'mumbai', population: '25M', hasPage: true },
-  { name: 'Delhi', country: 'India', slug: 'delhi', population: '32M', hasPage: true },
-  { name: 'Bangalore', country: 'India', slug: 'bangalore', population: '14M', hasPage: true },
-  { name: 'Hyderabad', country: 'India', slug: 'hyderabad', population: '11M', hasPage: false },
-  { name: 'Chennai', country: 'India', slug: 'chennai', population: '11M', hasPage: false },
-  { name: 'Kolkata', country: 'India', slug: 'kolkata', population: '15M', hasPage: true },
+  { name: 'Mumbai', country: 'India', slug: 'mumbai', population: '25M', hasPage: true, pageUrl: '/dating-in-mumbai' },
+  { name: 'Delhi', country: 'India', slug: 'delhi', population: '32M', hasPage: true, pageUrl: '/dating-in-delhi' },
+  { name: 'Bangalore', country: 'India', slug: 'bangalore', population: '14M', hasPage: true, pageUrl: '/dating-in-bangalore' },
+  { name: 'Hyderabad', country: 'India', slug: 'hyderabad', population: '11M', hasPage: true, pageUrl: '/dating/hyderabad' },
+  { name: 'Chennai', country: 'India', slug: 'chennai', population: '11M', hasPage: true, pageUrl: '/dating/chennai' },
+  { name: 'Kolkata', country: 'India', slug: 'kolkata', population: '15M', hasPage: true, pageUrl: '/dating-in-kolkata' },
   
   // International
-  { name: 'London', country: 'United Kingdom', slug: 'london', population: '9M', hasPage: false },
-  { name: 'New York', country: 'United States', slug: 'new-york', population: '8M', hasPage: false },
-  { name: 'Toronto', country: 'Canada', slug: 'toronto', population: '3M', hasPage: false },
-  { name: 'Sydney', country: 'Australia', slug: 'sydney', population: '5M', hasPage: false },
-  { name: 'Dubai', country: 'UAE', slug: 'dubai', population: '3M', hasPage: false },
-  { name: 'Singapore', country: 'Singapore', slug: 'singapore', population: '6M', hasPage: false }
+  { name: 'London', country: 'United Kingdom', slug: 'london', population: '9M', hasPage: true, pageUrl: '/dating/london' },
+  { name: 'New York', country: 'United States', slug: 'new-york', population: '8M', hasPage: true, pageUrl: '/dating/new-york' },
+  { name: 'Toronto', country: 'Canada', slug: 'toronto', population: '3M', hasPage: true, pageUrl: '/dating/toronto' },
+  { name: 'Sydney', country: 'Australia', slug: 'sydney', population: '5M', hasPage: true, pageUrl: '/dating/sydney' },
+  { name: 'Dubai', country: 'UAE', slug: 'dubai', population: '3M', hasPage: true, pageUrl: '/dating/dubai' },
+  { name: 'Singapore', country: 'Singapore', slug: 'singapore', population: '6M', hasPage: true, pageUrl: '/dating/singapore' }
 ];
 
 export const globalTestimonials = [
