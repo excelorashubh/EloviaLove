@@ -11,7 +11,7 @@ const iconMap = {
   'eye-off': EyeOff
 };
 
-const WhyChooseSection = ({ features, country }) => {
+const WhyChooseSection = ({ features, country, subtitle }) => {
   return (
     <section className="bg-gradient-to-br from-gray-50 to-white py-20">
       <div className="max-w-7xl mx-auto px-6">
@@ -20,7 +20,7 @@ const WhyChooseSection = ({ features, country }) => {
             Why Choose Elovia Love for Dating in {country}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            India's most comprehensive dating platform built specifically for serious relationships, safety, and genuine connections
+            {subtitle || `Elovia Love is built for verified, relationship-focused dating in ${country}. Enjoy thoughtful matches, secure messaging, and real people.`}
           </p>
         </div>
 

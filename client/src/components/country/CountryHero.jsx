@@ -7,7 +7,7 @@ const iconMap = {
   'message-circle': MessageCircle
 };
 
-const CountryHero = ({ country, stats }) => {
+const CountryHero = ({ country, stats, subtitle }) => {
   const scrollToContent = () => {
     const element = document.getElementById('main-content');
     if (element) {
@@ -30,7 +30,7 @@ const CountryHero = ({ country, stats }) => {
             Dating in <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">{country}</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
-            India's most trusted dating platform connecting verified singles across 500+ cities for meaningful, lasting relationships
+            {subtitle || `Elovia Love connects verified singles across ${country} with safety, compatibility, and relationship-focused features.`}
           </p>
           
           {/* CTA Buttons */}

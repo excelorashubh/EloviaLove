@@ -14,112 +14,128 @@ export const featuredCountries = [
     flag: '🇮🇳', 
     cities: 500,
     featured: true,
-    description: 'Largest community with verified singles across 25 states'
+    description: 'Largest community with verified singles across 25 states',
+    pageUrl: '/dating/india'
   },
   { 
     name: 'United States', 
     slug: 'united-states', 
     flag: '🇺🇸', 
     cities: 50,
-    description: 'Connect with singles in major US cities'
+    description: 'Connect with singles in major US cities',
+    pageUrl: '/dating/united-states'
   },
   { 
     name: 'Canada', 
     slug: 'canada', 
     flag: '🇨🇦', 
     cities: 20,
-    description: 'Find genuine connections across Canadian provinces'
+    description: 'Find genuine connections across Canadian provinces',
+    pageUrl: '/dating/canada'
   },
   { 
     name: 'United Kingdom', 
     slug: 'united-kingdom', 
     flag: '🇬🇧', 
     cities: 30,
-    description: 'Meet verified singles throughout the UK'
+    description: 'Meet verified singles throughout the UK',
+    pageUrl: '/dating/united-kingdom'
   },
   { 
     name: 'Australia', 
     slug: 'australia', 
     flag: '🇦🇺', 
     cities: 15,
-    description: 'Discover meaningful relationships down under'
+    description: 'Discover meaningful relationships down under',
+    pageUrl: '/dating/australia'
   },
   { 
     name: 'United Arab Emirates', 
     slug: 'uae', 
     flag: '🇦🇪', 
     cities: 5,
-    description: 'Connect with international singles in the UAE'
+    description: 'Connect with international singles in the UAE',
+    pageUrl: '/dating/united-arab-emirates'
   },
   { 
     name: 'Singapore', 
     slug: 'singapore', 
     flag: '🇸🇬', 
     cities: 1,
-    description: 'Find your match in the Lion City'
+    description: 'Find your match in the Lion City',
+    pageUrl: '/dating/singapore'
   },
   { 
     name: 'Germany', 
     slug: 'germany', 
     flag: '🇩🇪', 
     cities: 25,
-    description: 'Serious relationships across German cities'
+    description: 'Serious relationships across German cities',
+    pageUrl: '/dating/germany'
   },
   { 
     name: 'France', 
     slug: 'france', 
     flag: '🇫🇷', 
     cities: 20,
-    description: 'Discover romance in France'
+    description: 'Discover romance in France',
+    pageUrl: '/dating/france'
   },
   { 
     name: 'Japan', 
     slug: 'japan', 
     flag: '🇯🇵', 
     cities: 15,
-    description: 'Connect with singles in Japan'
+    description: 'Connect with singles in Japan',
+    pageUrl: '/dating/japan'
   },
   { 
     name: 'Brazil', 
     slug: 'brazil', 
     flag: '🇧🇷', 
     cities: 30,
-    description: 'Find love in Brazilian cities'
+    description: 'Find love in Brazilian cities',
+    pageUrl: '/dating/brazil'
   },
   { 
     name: 'Mexico', 
     slug: 'mexico', 
     flag: '🇲🇽', 
     cities: 20,
-    description: 'Meet genuine singles in Mexico'
+    description: 'Meet genuine singles in Mexico',
+    pageUrl: '/dating/mexico'
   },
   { 
     name: 'Nepal', 
     slug: 'nepal', 
     flag: '🇳🇵', 
     cities: 5,
-    description: 'Connect with Nepali singles worldwide'
+    description: 'Connect with Nepali singles worldwide',
+    pageUrl: '/dating/nepal'
   },
   { 
     name: 'Bangladesh', 
     slug: 'bangladesh', 
     flag: '🇧🇩', 
     cities: 10,
-    description: 'Find meaningful connections'
+    description: 'Find meaningful connections',
+    pageUrl: '/dating/bangladesh'
   },
   { 
     name: 'Malaysia', 
     slug: 'malaysia', 
     flag: '🇲🇾', 
     cities: 10,
-    description: 'Discover relationships in Malaysia'
+    description: 'Discover relationships in Malaysia',
+    pageUrl: '/dating/malaysia'
   },
   { 
     name: 'South Africa', 
     slug: 'south-africa', 
     flag: '🇿🇦', 
     cities: 15,
-    description: 'Connect with South African singles'
+    description: 'Connect with South African singles',
+    pageUrl: '/dating/south-africa'
   }
 ];
 

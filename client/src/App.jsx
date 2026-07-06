@@ -22,6 +22,21 @@ import Toronto from './pages/cities/Toronto';
 import Sydney from './pages/cities/Sydney';
 import Dubai from './pages/cities/Dubai';
 import Singapore from './pages/cities/Singapore';
+import UnitedStates from './pages/countries/UnitedStates';
+import Canada from './pages/countries/Canada';
+import UnitedKingdom from './pages/countries/UnitedKingdom';
+import Australia from './pages/countries/Australia';
+import UnitedArabEmirates from './pages/countries/UnitedArabEmirates';
+import SingaporeCountry from './pages/countries/Singapore';
+import Germany from './pages/countries/Germany';
+import France from './pages/countries/France';
+import Japan from './pages/countries/Japan';
+import Brazil from './pages/countries/Brazil';
+import Mexico from './pages/countries/Mexico';
+import Nepal from './pages/countries/Nepal';
+import Bangladesh from './pages/countries/Bangladesh';
+import Malaysia from './pages/countries/Malaysia';
+import SouthAfrica from './pages/countries/SouthAfrica';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
@@ -197,6 +212,21 @@ function AppContent() {
           <Route path="/dating/sydney" element={<Sydney />} />
           <Route path="/dating/dubai" element={<Dubai />} />
           <Route path="/dating/singapore" element={<Singapore />} />
+          <Route path="/dating/united-states" element={<UnitedStates />} />
+          <Route path="/dating/canada" element={<Canada />} />
+          <Route path="/dating/united-kingdom" element={<UnitedKingdom />} />
+          <Route path="/dating/australia" element={<Australia />} />
+          <Route path="/dating/united-arab-emirates" element={<UnitedArabEmirates />} />
+          <Route path="/dating/singapore" element={<SingaporeCountry />} />
+          <Route path="/dating/germany" element={<Germany />} />
+          <Route path="/dating/france" element={<France />} />
+          <Route path="/dating/japan" element={<Japan />} />
+          <Route path="/dating/brazil" element={<Brazil />} />
+          <Route path="/dating/mexico" element={<Mexico />} />
+          <Route path="/dating/nepal" element={<Nepal />} />
+          <Route path="/dating/bangladesh" element={<Bangladesh />} />
+          <Route path="/dating/malaysia" element={<Malaysia />} />
+          <Route path="/dating/south-africa" element={<SouthAfrica />} />
           <Route path="/dating-in-:city" element={<CityPage />} />
           
           <Route path="/login" element={<Login />} />

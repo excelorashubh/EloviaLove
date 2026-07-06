@@ -1,6 +1,6 @@
 import { Heart, Shield, Sparkles } from 'lucide-react';
 
-const FinalCTA = ({ country }) => {
+const FinalCTA = ({ country, subtitle, buttonText }) => {
   return (
     <section className="py-20 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 relative overflow-hidden">
       {/* Background Pattern */}
@@ -16,7 +16,7 @@ const FinalCTA = ({ country }) => {
             Ready to Find Love in {country}?
           </h2>
           <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto">
-            Join 50,000+ verified singles across 500+ Indian cities seeking genuine, meaningful relationships
+            {subtitle || `Join 50,000+ verified singles across ${country} seeking genuine, meaningful relationships.`}
           </p>
 
           {/* Feature Highlights */}
@@ -49,7 +49,7 @@ const FinalCTA = ({ country }) => {
             onClick={() => window.location.href = '/signup'}
             className="bg-white text-purple-600 px-12 py-5 rounded-full font-bold text-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 inline-block"
           >
-            Create Your Free Profile →
+            {buttonText || 'Create Your Free Profile →'}
           </button>
 
           {/* Trust Indicators */}

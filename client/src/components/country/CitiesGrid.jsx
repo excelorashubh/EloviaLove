@@ -1,7 +1,7 @@
 import { MapPin, Users, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const CitiesGrid = ({ cities, country }) => {
+const CitiesGrid = ({ cities, country, subtitle }) => {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-6">
@@ -10,7 +10,7 @@ const CitiesGrid = ({ cities, country }) => {
             Popular Cities for Dating in {country}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Discover active dating scenes, verified singles, and local date spot recommendations in major Indian cities
+            {subtitle || `Discover active dating scenes, verified singles, and local date spot recommendations in major ${country} cities.`}
           </p>
         </div>
 
@@ -18,7 +18,7 @@ const CitiesGrid = ({ cities, country }) => {
           {cities.map((city, index) => (
             <Link
               key={index}
-              to={`/dating-in-${city.slug}`}
+              to={city.pageUrl || `/dating-in-${city.slug}`}
               className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 hover:shadow-2xl transition-all duration-300 border border-gray-200 group"
             >
               {/* Header */}

@@ -1,4 +1,5 @@
 import { ArrowRight, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { featuredCountries } from '../../data/homeData';
 
 const CountriesGrid = ({ countries = featuredCountries }) => {
@@ -26,14 +27,10 @@ const CountriesGrid = ({ countries = featuredCountries }) => {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {safeCountries.map((country, index) => (
-            <div
+            <Link
               key={country?.slug || index}
-              onClick={() => {
-                if (country?.slug === 'india') {
-                  window.location.href = '/dating-in-india';
-                }
-              }}
-              className={`bg-white rounded-2xl p-6 border-2 transition-all duration-300 cursor-pointer ${
+              to={country?.pageUrl || '/'}
+              className={`bg-white rounded-2xl p-6 border-2 transition-all duration-300 group ${
                 country?.featured 
                   ? 'border-primary-500 hover:shadow-2xl hover:scale-105' 
                   : 'border-gray-200 hover:border-primary-300 hover:shadow-lg'
@@ -63,7 +60,7 @@ const CountriesGrid = ({ countries = featuredCountries }) => {
               <div className="flex items-center text-primary-600 font-medium text-sm group-hover:translate-x-2 transition-transform">
                 Explore {country?.name || 'Location'} <ArrowRight className="w-4 h-4 ml-1" />
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
