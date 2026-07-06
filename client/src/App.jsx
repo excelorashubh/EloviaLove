@@ -14,6 +14,14 @@ import DatingInMumbaiPage from './pages/DatingInMumbaiPage';
 import DatingInBangalorePage from './pages/DatingInBangalorePage';
 import DatingInKolkataPage from './pages/DatingInKolkataPage';
 import DatingInRanchiPage from './pages/DatingInRanchiPage';
+import Hyderabad from './pages/cities/Hyderabad';
+import Chennai from './pages/cities/Chennai';
+import London from './pages/cities/London';
+import NewYork from './pages/cities/NewYork';
+import Toronto from './pages/cities/Toronto';
+import Sydney from './pages/cities/Sydney';
+import Dubai from './pages/cities/Dubai';
+import Singapore from './pages/cities/Singapore';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
@@ -181,6 +189,14 @@ function AppContent() {
           <Route path="/dating-in-bangalore" element={<DatingInBangalorePage />} />
           <Route path="/dating-in-kolkata" element={<DatingInKolkataPage />} />
           <Route path="/dating-in-ranchi" element={<DatingInRanchiPage />} />
+          <Route path="/dating/hyderabad" element={<Hyderabad />} />
+          <Route path="/dating/chennai" element={<Chennai />} />
+          <Route path="/dating/london" element={<London />} />
+          <Route path="/dating/new-york" element={<NewYork />} />
+          <Route path="/dating/toronto" element={<Toronto />} />
+          <Route path="/dating/sydney" element={<Sydney />} />
+          <Route path="/dating/dubai" element={<Dubai />} />
+          <Route path="/dating/singapore" element={<Singapore />} />
           <Route path="/dating-in-:city" element={<CityPage />} />
           
           <Route path="/login" element={<Login />} />
