@@ -6,6 +6,8 @@ import { Mail, Lock, Heart, User, Calendar, Eye, EyeOff, CheckCircle2 } from 'lu
 import { SITE_URL } from '../data/seoContent';
 import { useAuth } from '../context/AuthContext';
 
+const TRIAL_WELCOME_KEY = 'elovia_premium_trial_welcome';
+
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -58,6 +60,9 @@ const Signup = () => {
       });
 
       if (result.success) {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(TRIAL_WELCOME_KEY, 'true');
+        }
         navigate('/dashboard');
       } else {
         setError(result.message);

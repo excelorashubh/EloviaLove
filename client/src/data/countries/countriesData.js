@@ -1536,7 +1536,7 @@ This is dating in Japan with care, verification, and thoughtful support. We help
     },
     {
       title: 'Premium Discoverability',
-      description: 'Boost your profile to connect with verified singles who share your priorities.'
+      description: 'Boost your profile to connect with verified singles who share your priorities.',
       icon: 'filter'
     }
   ],
@@ -2517,7 +2517,7 @@ This is dating in South Africa with trust, safety, and a focus on creating real 
   whyChooseUs: [
     {
       title: 'Verified South African Profiles',
-      description: 'We confirm every member’s identity to help you meet authentic singles.'
+      description: 'We confirm every member’s identity to help you meet authentic singles.',
       icon: 'shield-check'
     },
     {
@@ -2527,27 +2527,27 @@ This is dating in South Africa with trust, safety, and a focus on creating real 
     },
     {
       title: 'Privacy and Security',
-      description: 'Keep your personal details private while exploring verified matches.'
+      description: 'Keep your personal details private while exploring verified matches.',
       icon: 'lock'
     },
     {
       title: 'Secure Messaging',
-      description: 'Chat safely in the app and exchange contact details when you feel ready.'
+      description: 'Chat safely in the app and exchange contact details when you feel ready.',
       icon: 'message-circle'
     },
     {
       title: 'Video Calling',
-      description: 'Use video calls to build trust before planning an in-person meeting.'
+      description: 'Use video calls to build trust before planning an in-person meeting.',
       icon: 'video'
     },
     {
       title: 'Community Protection',
-      description: 'Report and block anyone who behaves inappropriately. We review reports quickly.'
+      description: 'Report and block anyone who behaves inappropriately. We review reports quickly.',
       icon: 'shield'
     },
     {
       title: 'Long-Term Relationships',
-      description: 'Elovia Love supports singles who are looking for serious, meaningful connections.'
+      description: 'Elovia Love supports singles who are looking for serious, meaningful connections.',
       icon: 'heart'
     },
     {

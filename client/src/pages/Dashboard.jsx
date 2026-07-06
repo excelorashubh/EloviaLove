@@ -11,6 +11,9 @@ import VerifiedBadge from '../components/ui/VerifiedBadge';
 import SubscriptionBanner from '../components/SubscriptionBanner';
 import BannerAd from '../components/ads/BannerAd';
 import AdWrapper from '../components/ads/AdWrapper';
+import PremiumTrialModal from '../components/ui/PremiumTrialModal';
+
+const WELCOME_MODAL_KEY = 'elovia_premium_trial_welcome';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
@@ -176,6 +179,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [subStatus, setSubStatus] = useState(null);
   const [planMap, setPlanMap] = useState({});
+  const [showTrialModal, setShowTrialModal] = useState(false);
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -194,6 +198,16 @@ const Dashboard = () => {
         setSubStatus(subRes.data);
         if (plansRes.data.success || plansRes.data.plans) {
           setPlanMap(Object.fromEntries((plansRes.data.plans || []).map(p => [p.key, p])));
+        }
+
+        const shouldShowModal = typeof window !== 'undefined'
+          && window.localStorage.getItem(WELCOME_MODAL_KEY) === 'true'
+          && subRes.data?.isTrial
+          && subRes.data?.plan === 'premium';
+
+        if (shouldShowModal) {
+          setShowTrialModal(true);
+          window.localStorage.removeItem(WELCOME_MODAL_KEY);
         }
       } catch (e) {
         console.error(e);
@@ -585,6 +599,12 @@ const Dashboard = () => {
         </div>
       </div>
       </div>
+      <PremiumTrialModal
+        open={showTrialModal}
+        onClose={() => setShowTrialModal(false)}
+        trialEndDate={subStatus?.trialEndDate}
+        userName={user?.name}
+      />
     </>
   );
 };
