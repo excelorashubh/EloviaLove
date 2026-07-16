@@ -102,8 +102,9 @@ export const AuthProvider = ({ children }) => {
       const { token: newToken, user: newUser } = response.data;
 
       localStorage.setItem('token', newToken);
+      localStorage.setItem('elovia_random_match_gift_pending', 'true');
       setToken(newToken);
-      setUser(newUser);
+      setUser({ ...newUser, giftClaimed: false, randomMatchCards: 20 });
 
       return { success: true };
     } catch (error) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, Heart, MessageSquare, Flag, UserCheck, TrendingUp, DollarSign, Eye, Globe } from 'lucide-react';
+import { Users, Heart, MessageSquare, Flag, UserCheck, TrendingUp, DollarSign, Eye, Globe, Video } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../services/api';
 
@@ -22,20 +22,23 @@ const AdminDashboard = () => {
   const [recentUsers, setRecentUsers] = useState([]);
   const [revenue, setRevenue] = useState(null);
   const [visitors, setVisitors] = useState(null);
+  const [randomMatchStats, setRandomMatchStats] = useState(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [statsRes, usersRes, revRes, visRes] = await Promise.all([
+        const [statsRes, usersRes, revRes, visRes, randomMatchRes] = await Promise.all([
           api.get('/admin/stats'),
           api.get('/admin/users?page=1'),
           api.get('/admin/analytics/overview?period=month'),
           api.get('/analytics/overview?period=today'),
+          api.get('/random-match/admin/analytics'),
         ]);
         setStats(statsRes.data.stats);
         setRecentUsers(usersRes.data.users.slice(0, 5));
         setRevenue(revRes.data);
         setVisitors(visRes.data);
+        setRandomMatchStats(randomMatchRes.data.analytics);
       } catch (e) {
         console.error(e);
       } finally {
@@ -63,6 +66,7 @@ const AdminDashboard = () => {
     { icon: Flag,         label: 'Pending Reports',    value: stats?.pendingReports,color: 'bg-red-500',     sub: 'Needs review' },
     { icon: Eye,          label: "Today's Visitors",   value: visitors?.today ?? '—', color: 'bg-primary-500', sub: `${visitors?.unique ?? 0} unique this period`, raw: true },
     { icon: Globe,        label: 'Total Page Views',   value: visitors?.total ?? '—', color: 'bg-blue-500',    sub: 'All time', raw: true },
+    { icon: Video,        label: 'Random Match Calls', value: randomMatchStats?.totalRandomCalls ?? '—', color: 'bg-fuchsia-500', sub: `${randomMatchStats?.activeCalls ?? 0} active now`, raw: true },
   ];
 
   return (

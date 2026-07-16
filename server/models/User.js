@@ -144,6 +144,21 @@ const userSchema = new mongoose.Schema({
     muteIncomingCalls: { type: Boolean, default: false },
   },
 
+  // ── Random Match Feature ─────────────────────────────────────────────────
+  randomMatchCards: { type: Number, default: 20 },
+  giftClaimed: { type: Boolean, default: false },
+  coins: { type: Number, default: 0 },
+  totalRandomCalls: { type: Number, default: 0 },
+  totalMinutesUsed: { type: Number, default: 0 },
+  totalCoinsSpent: { type: Number, default: 0 },
+  lastRandomMatch: { type: Date },
+  randomMatchHistory: [{
+    type: { type: String },
+    usedAt: { type: Date, default: Date.now },
+    durationMinutes: { type: Number, default: 0 }
+  }],
+  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+
   // ── Call Statistics (for spam detection) ──────────────────────────────────
   callStats: {
     lastCallAt: { type: Date },

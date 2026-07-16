@@ -108,6 +108,9 @@ router.post('/register', [
         welcomePopupShown: user.welcomePopupShown,
         isTrialUsed: user.isTrialUsed,
         trialEndDate: user.trialEndDate,
+        randomMatchCards: user.randomMatchCards,
+        giftClaimed: user.giftClaimed,
+        coins: user.coins,
       }
     });
   } catch (error) {
@@ -207,6 +210,9 @@ router.post('/login', [
         isTrialUsed: user.isTrialUsed,
         trialEndDate: user.trialEndDate,
         subscriptionEnd: user.subscriptionEnd,
+        randomMatchCards: user.randomMatchCards,
+        giftClaimed: user.giftClaimed,
+        coins: user.coins,
       }
     });
   } catch (error) {
@@ -254,6 +260,9 @@ router.get('/me', protect, async (req, res) => {
         isTrialUsed: user.isTrialUsed,
         trialEndDate: user.trialEndDate,
         subscriptionEnd: user.subscriptionEnd,
+        randomMatchCards: user.randomMatchCards,
+        giftClaimed: user.giftClaimed,
+        coins: user.coins,
         phoneVerified:  user.phoneVerified,
         emailVerified:  user.emailVerified,
         blueTickStatus: user.blueTickStatus,

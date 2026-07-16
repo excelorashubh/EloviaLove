@@ -12,6 +12,7 @@ import SubscriptionBanner from '../components/SubscriptionBanner';
 import BannerAd from '../components/ads/BannerAd';
 import AdWrapper from '../components/ads/AdWrapper';
 import PremiumTrialModal from '../components/ui/PremiumTrialModal';
+import RandomVideoMatchPanel from '../components/randommatch/RandomVideoMatchPanel';
 
 const WELCOME_MODAL_KEY = 'elovia_premium_trial_welcome';
 
@@ -390,6 +391,10 @@ const Dashboard = () => {
                   View Profile
                 </Link>
               </div>
+            </motion.div>
+
+            <motion.div initial="hidden" animate="visible" variants={fadeIn}>
+              <RandomVideoMatchPanel />
             </motion.div>
 
             {/* Quick Actions */}

@@ -286,6 +286,7 @@ async function startServer() {
   safeLoadRoute('./routes/contact', '/api/contact');
   safeLoadRoute('./routes/ads', '/api/ads');
   safeLoadRoute('./routes/call', '/api/calls');
+  safeLoadRoute('./routes/randomMatch', '/api/random-match');
   console.log('✓ All routes loaded\n');
 
   // ══════════════════════════════════════════════════════════════════════════════
