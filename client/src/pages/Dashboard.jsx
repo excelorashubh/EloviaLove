@@ -39,10 +39,10 @@ const stagger = {
 };
 
 const PLAN_CONFIG = {
-  free:    { label: 'Free',    icon: Star,     gradient: 'from-slate-400 to-slate-500',   bg: 'bg-slate-50',   border: 'border-slate-200', perks: ['10 likes/day', 'Basic matching', 'Chat after match'] },
-  basic:   { label: 'Basic',   icon: Zap,      gradient: 'from-blue-500 to-cyan-500',     bg: 'bg-blue-50',    border: 'border-blue-200',  perks: ['Unlimited likes', 'No ads', 'Basic filters'] },
-  premium: { label: 'Premium', icon: Sparkles, gradient: 'from-primary-600 to-pink-500',  bg: 'bg-primary-50', border: 'border-primary-200', perks: ['See who liked you ❤️', 'Advanced filters', 'Read receipts'] },
-  pro:     { label: 'Pro',     icon: Crown,    gradient: 'from-amber-500 to-orange-500',  bg: 'bg-amber-50',   border: 'border-amber-200', perks: ['Profile Boost 🚀', 'VIP Badge', 'Top visibility'] },
+  free: { label: 'Free', icon: Star, gradient: 'from-slate-400 to-slate-500', bg: 'bg-slate-50', border: 'border-slate-200', perks: ['10 likes/day', 'Basic matching', 'Chat after match'] },
+  basic: { label: 'Basic', icon: Zap, gradient: 'from-blue-500 to-cyan-500', bg: 'bg-blue-50', border: 'border-blue-200', perks: ['Unlimited likes', 'No ads', 'Basic filters'] },
+  premium: { label: 'Premium', icon: Sparkles, gradient: 'from-primary-600 to-pink-500', bg: 'bg-primary-50', border: 'border-primary-200', perks: ['See who liked you ❤️', 'Advanced filters', 'Read receipts'] },
+  pro: { label: 'Pro', icon: Crown, gradient: 'from-amber-500 to-orange-500', bg: 'bg-amber-50', border: 'border-amber-200', perks: ['Profile Boost 🚀', 'VIP Badge', 'Top visibility'] },
 };
 
 const ICON_MAP = {
@@ -60,13 +60,13 @@ const SubscriptionCard = ({ subStatus, loading, planMap }) => {
   const planData = planMap?.[planKey];
   const cfg = planData
     ? {
-        label: planData.name,
-        icon: ICON_MAP[planKey] || Star,
-        gradient: planData.color || 'from-primary-600 to-pink-500',
-        bg: planData.color ? 'bg-white' : 'bg-primary-50',
-        border: planData.color ? 'border-slate-200' : 'border-primary-200',
-        perks: planData.features?.map(f => typeof f.value === 'boolean' ? f.label : `${f.label}: ${f.value}`) || [],
-      }
+      label: planData.name,
+      icon: ICON_MAP[planKey] || Star,
+      gradient: planData.color || 'from-primary-600 to-pink-500',
+      bg: planData.color ? 'bg-white' : 'bg-primary-50',
+      border: planData.color ? 'border-slate-200' : 'border-primary-200',
+      perks: planData.features?.map(f => typeof f.value === 'boolean' ? f.label : `${f.label}: ${f.value}`) || [],
+    }
     : PLAN_CONFIG[planKey] || PLAN_CONFIG.free;
   const Icon = cfg.icon;
 
@@ -112,9 +112,8 @@ const SubscriptionCard = ({ subStatus, loading, planMap }) => {
 
       {/* Trial / expiry countdown */}
       {(isTrial || (planKey !== 'free' && daysLeft !== null)) && (
-        <div className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-4 ${
-          daysLeft <= 2 ? 'bg-red-50 border border-red-200' : 'bg-white/70 border border-slate-200'
-        }`}>
+        <div className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-4 ${daysLeft <= 2 ? 'bg-red-50 border border-red-200' : 'bg-white/70 border border-slate-200'
+          }`}>
           <Clock size={13} className={daysLeft <= 2 ? 'text-red-500' : 'text-slate-400'} />
           <p className={`text-xs font-semibold ${daysLeft <= 2 ? 'text-red-600' : 'text-slate-600'}`}>
             {isTrial
@@ -319,327 +318,327 @@ const Dashboard = () => {
         <link rel="canonical" href={`${SITE_URL}/dashboard`} />
       </Helmet>
       <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* Main */}
-          <div className="lg:col-span-2 space-y-6">
+            {/* Main */}
+            <div className="lg:col-span-2 space-y-6">
 
-            {/* Trial / subscription banner */}
-            <SubscriptionBanner />
+              {/* Trial / subscription banner */}
+              <SubscriptionBanner />
 
-            {/* Welcome */}
-            <motion.div initial="hidden" animate="visible" variants={fadeIn}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
-            >
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                <div className="flex items-center gap-4">
-                  <img src={avatarSrc} alt="Profile" className="w-16 h-16 rounded-2xl object-cover shadow-sm" />
-                  <div>
-                    <div className="text-sm text-slate-500 mb-2">Welcome back,</div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="text-3xl font-bold text-slate-900">
-                        {user?.name}
-                      </h1>
-                      {user?.isVerified && <VerifiedBadge size={22} />}
-                    </div>
-                    <div className="text-sm text-slate-500">{usernameHandle}</div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${user?.isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
-                    {user?.isVerified ? 'Verified Member' : 'Verification Available'}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 bg-slate-100 text-slate-700 text-sm font-medium">
-                    {PLAN_CONFIG[user?.plan || 'free']?.label || 'Free'} Plan
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500 mb-2">Profile strength</p>
-                  <p className="text-3xl font-bold text-slate-900">{completionPct}%</p>
-                  <div className="h-2 mt-3 rounded-full bg-slate-200 overflow-hidden">
-                    <div className="h-full bg-linear-to-r from-primary-600 to-pink-500 transition-all duration-700" style={{ width: `${completionPct}%` }} />
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500 mb-2">Matches ready</p>
-                  <p className="text-3xl font-bold text-slate-900">{conversations.length}</p>
-                  <p className="text-sm text-slate-500 mt-2">Active chats and match requests in your dashboard.</p>
-                </div>
-              </div>
-
-              <p className="text-slate-500 text-sm mt-5">
-                {user?.profileCompleted
-                  ? 'Your profile is complete and ready to attract quality matches.'
-                  : 'Complete the missing details below to improve visibility and matching results.'}
-              </p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {!user?.profileCompleted && (
-                  <Link to="/profile/edit"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors text-sm font-medium"
-                  >
-                    <Settings size={14} /> Complete Profile
-                  </Link>
-                )}
-                <Link to="/profile"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors text-sm font-medium"
-                >
-                  View Profile
-                </Link>
-              </div>
-            </motion.div>
-
-            <motion.div initial="hidden" animate="visible" variants={fadeIn}>
-              <RandomVideoMatchPanel />
-            </motion.div>
-
-            {/* Quick Actions */}
-            <motion.div initial="hidden" animate="visible" variants={fadeIn}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
-            >
-              <h2 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h2>
-              <div
-                className="grid grid-cols-2 gap-4"
+              {/* Welcome */}
+              <motion.div initial="hidden" animate="visible" variants={fadeIn}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
               >
-                <Link to="/discover"
-                  className="bg-linear-to-r from-primary-600 to-pink-500 text-white p-5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 group"
-                >
-                  <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                  <div className="flex items-center gap-4">
+                    <img src={avatarSrc} alt="Profile" className="w-16 h-16 rounded-2xl object-cover shadow-sm" />
                     <div>
-                      <h3 className="text-lg font-bold mb-1">Discover</h3>
-                      <p className="text-primary-100 text-sm">Find your match</p>
-                    </div>
-                    <Sparkles className="w-7 h-7 text-white/70 group-hover:scale-110 transition-transform" />
-                  </div>
-                </Link>
-                <Link to="/matches"
-                  className="bg-white text-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold mb-1">Matches</h3>
-                      <p className="text-slate-500 text-sm">
-                        {conversations.length > 0 ? `${conversations.length} conversation${conversations.length > 1 ? 's' : ''}` : 'Chat with matches'}
-                      </p>
-                    </div>
-                    <Heart className="w-7 h-7 text-pink-500 group-hover:scale-110 transition-transform" />
-                  </div>
-                </Link>
-                <Link to="/chats"
-                  className="col-span-2 bg-white text-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold mb-1">Chats</h3>
-                      <p className="text-slate-500 text-sm">
-                        {conversations.filter(c => c.lastMessage).length > 0
-                          ? `${conversations.filter(c => c.lastMessage).length} active conversation${conversations.filter(c => c.lastMessage).length > 1 ? 's' : ''}`
-                          : 'All your conversations'}
-                      </p>
-                    </div>
-                    <MessageCircle className="w-7 h-7 text-primary-500 group-hover:scale-110 transition-transform" />
-                  </div>
-                </Link>
-              </div>
-            </motion.div>
-
-            {/* Ad — between quick actions and chats (free users only) */}
-            <AdWrapper showUpgradeNudge>
-              <BannerAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || ''} />
-            </AdWrapper>
-
-            {/* Recent Conversations */}
-            <motion.div initial="hidden" animate="visible" variants={fadeIn}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
-            >
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-bold text-slate-900">Recent Chats</h2>
-                <Link to="/chats" className="text-primary-600 hover:text-primary-700 text-sm font-medium">View all</Link>
-              </div>
-
-              {loading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="flex items-center gap-3 animate-pulse">
-                      <div className="w-11 h-11 rounded-full bg-slate-200 shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-3 bg-slate-200 rounded w-1/3" />
-                        <div className="h-3 bg-slate-200 rounded w-2/3" />
+                      <div className="text-sm text-slate-500 mb-2">Welcome back,</div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h1 className="text-3xl font-bold text-slate-900">
+                          {user?.name}
+                        </h1>
+                        {user?.isVerified && <VerifiedBadge size={22} />}
                       </div>
+                      <div className="text-sm text-slate-500">{usernameHandle}</div>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${user?.isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
+                      {user?.isVerified ? 'Verified Member' : 'Verification Available'}
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 bg-slate-100 text-slate-700 text-sm font-medium">
+                      {PLAN_CONFIG[user?.plan || 'free']?.label || 'Free'} Plan
+                    </span>
+                  </div>
                 </div>
-              ) : conversations.length > 0 ? (
-                <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-1 -mx-2">
-                  {conversations.map(conv => (
-                    <motion.div key={conv.matchId} variants={fadeIn}>
-                      <Link
-                        to={`/chat/${conv.otherUser.id}`}
-                        className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-slate-50 transition-colors"
-                      >
-                        <img
-                          src={conv.otherUser.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(conv.otherUser.name)}&background=e879a0&color=fff`}
-                          alt={conv.otherUser.name}
-                          className="w-11 h-11 rounded-full object-cover shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-slate-900 text-sm flex items-center gap-1">
-                              {conv.otherUser.name}
-                              {conv.otherUser.isVerified && <VerifiedBadge size={14} />}
-                            </span>
-                            <span className="text-xs text-slate-400">{formatTime(conv.lastMessage?.createdAt)}</span>
-                          </div>
-                          <p className={`text-sm truncate mt-0.5 ${conv.unreadCount > 0 ? 'text-slate-900 font-medium' : 'text-slate-500'}`}>
-                            {conv.lastMessage
-                              ? (conv.lastMessage.sender._id !== conv.otherUser.id ? 'You: ' : '') + conv.lastMessage.content
-                              : 'Say hello!'}
-                          </p>
-                        </div>
-                        {conv.unreadCount > 0 && (
-                          <span className="shrink-0 w-5 h-5 bg-primary-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                            {conv.unreadCount}
-                          </span>
-                        )}
-                      </Link>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              ) : (
-                <div className="text-center py-10">
-                  <Heart className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-                  <p className="text-slate-500 text-sm mb-4">No matches yet. Start discovering!</p>
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500 mb-2">Profile strength</p>
+                    <p className="text-3xl font-bold text-slate-900">{completionPct}%</p>
+                    <div className="h-2 mt-3 rounded-full bg-slate-200 overflow-hidden">
+                      <div className="h-full bg-linear-to-r from-primary-600 to-pink-500 transition-all duration-700" style={{ width: `${completionPct}%` }} />
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500 mb-2">Matches ready</p>
+                    <p className="text-3xl font-bold text-slate-900">{conversations.length}</p>
+                    <p className="text-sm text-slate-500 mt-2">Active chats and match requests in your dashboard.</p>
+                  </div>
+                </div>
+
+                <p className="text-slate-500 text-sm mt-5">
+                  {user?.profileCompleted
+                    ? 'Your profile is complete and ready to attract quality matches.'
+                    : 'Complete the missing details below to improve visibility and matching results.'}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {!user?.profileCompleted && (
+                    <Link to="/profile/edit"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors text-sm font-medium"
+                    >
+                      <Settings size={14} /> Complete Profile
+                    </Link>
+                  )}
+                  <Link to="/profile"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors text-sm font-medium"
+                  >
+                    View Profile
+                  </Link>
+                </div>
+              </motion.div>
+
+              <motion.div initial="hidden" animate="visible" variants={fadeIn}>
+                <RandomVideoMatchPanel />
+              </motion.div>
+
+              {/* Quick Actions */}
+              <motion.div initial="hidden" animate="visible" variants={fadeIn}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
+              >
+                <h2 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h2>
+                <div
+                  className="grid grid-cols-2 gap-4"
+                >
                   <Link to="/discover"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors text-sm font-medium"
+                    className="bg-linear-to-r from-primary-600 to-pink-500 text-white p-5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 group"
                   >
-                    <MessageCircle size={14} /> Find Matches
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-bold mb-1">Discover</h3>
+                        <p className="text-primary-100 text-sm">Find your match</p>
+                      </div>
+                      <Sparkles className="w-7 h-7 text-white/70 group-hover:scale-110 transition-transform" />
+                    </div>
+                  </Link>
+                  <Link to="/matches"
+                    className="bg-white text-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-bold mb-1">Matches</h3>
+                        <p className="text-slate-500 text-sm">
+                          {conversations.length > 0 ? `${conversations.length} conversation${conversations.length > 1 ? 's' : ''}` : 'Chat with matches'}
+                        </p>
+                      </div>
+                      <Heart className="w-7 h-7 text-pink-500 group-hover:scale-110 transition-transform" />
+                    </div>
+                  </Link>
+                  <Link to="/chats"
+                    className="col-span-2 bg-white text-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-bold mb-1">Chats</h3>
+                        <p className="text-slate-500 text-sm">
+                          {conversations.filter(c => c.lastMessage).length > 0
+                            ? `${conversations.filter(c => c.lastMessage).length} active conversation${conversations.filter(c => c.lastMessage).length > 1 ? 's' : ''}`
+                            : 'All your conversations'}
+                        </p>
+                      </div>
+                      <MessageCircle className="w-7 h-7 text-primary-500 group-hover:scale-110 transition-transform" />
+                    </div>
                   </Link>
                 </div>
-              )}
-            </motion.div>
-          </div>
+              </motion.div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+              {/* Ad — between quick actions and chats (free users only) */}
+              <AdWrapper showUpgradeNudge>
+                <BannerAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || ''} />
+              </AdWrapper>
 
-            {/* Profile summary card */}
-            <motion.div initial="hidden" animate="visible" variants={fadeIn}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
-            >
-              <div className="flex items-center gap-4">
-                <img src={avatarSrc} alt="Profile" className="w-16 h-16 rounded-2xl object-cover" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center flex-wrap gap-2">
-                    <h3 className="text-xl font-bold text-slate-900 truncate">{user?.name || 'Your profile'}</h3>
-                    {user?.isVerified && <VerifiedBadge size={18} />}
-                  </div>
-                  <p className="text-sm text-slate-500">{usernameHandle}</p>
-                </div>
-              </div>
-              <div className="mt-5 space-y-3 text-sm text-slate-600">
-                <div className="flex items-center justify-between gap-3">
-                  <span>Membership</span>
-                  <span className="font-semibold text-slate-900">{planMap[user?.plan]?.name || PLAN_CONFIG[user?.plan || 'free']?.label || 'Free'}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span>Status</span>
-                  <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${user?.isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
-                    {user?.isVerified ? 'Verified' : 'Unverified'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span>Profile score</span>
-                  <span className="font-semibold text-slate-900">{completionPct}%</span>
-                </div>
-              </div>
-              <Link to="/profile"
-                className="mt-5 inline-flex items-center justify-center w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+              {/* Recent Conversations */}
+              <motion.div initial="hidden" animate="visible" variants={fadeIn}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
               >
-                View Profile Details
-              </Link>
-            </motion.div>
-
-            {/* Profile Completion */}
-            <motion.div initial="hidden" animate="visible" variants={fadeIn}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
-            >
-              <h3 className="text-base font-bold text-slate-900 mb-4">Profile Completion</h3>
-
-              {/* Progress bar */}
-              <div className="mb-4">
-                <div className="flex justify-between text-xs text-slate-500 mb-1.5">
-                  <span>Progress</span>
-                  <span className="font-semibold text-primary-600">{completionPct}%</span>
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-lg font-bold text-slate-900">Recent Chats</h2>
+                  <Link to="/chats" className="text-primary-600 hover:text-primary-700 text-sm font-medium">View all</Link>
                 </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-linear-to-r from-primary-500 to-pink-500 rounded-full transition-all duration-700"
-                    style={{ width: `${completionPct}%` }}
-                  />
-                </div>
-              </div>
 
-              <div className="space-y-2.5">
-                {checks.map(({ label, done }) => (
-                  <div key={label} className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">{label}</span>
-                    {done
-                      ? <Check size={15} className="text-green-500" />
-                      : <span className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 inline-block" />
-                    }
-                  </div>
-                ))}
-              </div>
-
-              <Link to="/profile/edit"
-                className="inline-flex items-center gap-2 mt-5 w-full justify-center px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors text-sm font-medium"
-              >
-                <Settings size={14} /> Edit Profile
-              </Link>
-            </motion.div>
-
-            {/* Subscription Plan Card */}
-            <motion.div initial="hidden" animate="visible" variants={fadeIn}>
-              <SubscriptionCard subStatus={subStatus} loading={loading} planMap={planMap} />
-            </motion.div>
-
-            {/* Notifications */}
-            <motion.div initial="hidden" animate="visible" variants={fadeIn}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-bold text-slate-900">Notifications</h3>
-                <Link to="/notifications" className="text-primary-600 hover:text-primary-700 text-sm font-medium">View all</Link>
-              </div>
-
-              {loading ? (
-                <div className="space-y-3 animate-pulse">
-                  {[1, 2].map(i => <div key={i} className="h-4 bg-slate-200 rounded w-full" />)}
-                </div>
-              ) : notifications.length > 0 ? (
-                <div className="space-y-3">
-                  {notifications.map(n => (
-                    <div key={n._id} className="flex items-start gap-2.5">
-                      <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${n.isRead ? 'bg-slate-300' : 'bg-primary-500'}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-700 font-medium leading-snug">{n.title}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{formatTime(n.createdAt)}</p>
+                {loading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="flex items-center gap-3 animate-pulse">
+                        <div className="w-11 h-11 rounded-full bg-slate-200 shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3 bg-slate-200 rounded w-1/3" />
+                          <div className="h-3 bg-slate-200 rounded w-2/3" />
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                ) : conversations.length > 0 ? (
+                  <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-1 -mx-2">
+                    {conversations.map(conv => (
+                      <motion.div key={conv.matchId} variants={fadeIn}>
+                        <Link
+                          to={`/chat/${conv.otherUser.id}`}
+                          className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-slate-50 transition-colors"
+                        >
+                          <img
+                            src={conv.otherUser.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(conv.otherUser.name)}&background=e879a0&color=fff`}
+                            alt={conv.otherUser.name}
+                            className="w-11 h-11 rounded-full object-cover shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-slate-900 text-sm flex items-center gap-1">
+                                {conv.otherUser.name}
+                                {conv.otherUser.isVerified && <VerifiedBadge size={14} />}
+                              </span>
+                              <span className="text-xs text-slate-400">{formatTime(conv.lastMessage?.createdAt)}</span>
+                            </div>
+                            <p className={`text-sm truncate mt-0.5 ${conv.unreadCount > 0 ? 'text-slate-900 font-medium' : 'text-slate-500'}`}>
+                              {conv.lastMessage
+                                ? (conv.lastMessage.sender._id !== conv.otherUser.id ? 'You: ' : '') + conv.lastMessage.content
+                                : 'Say hello!'}
+                            </p>
+                          </div>
+                          {conv.unreadCount > 0 && (
+                            <span className="shrink-0 w-5 h-5 bg-primary-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                              {conv.unreadCount}
+                            </span>
+                          )}
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <div className="text-center py-10">
+                    <Heart className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+                    <p className="text-slate-500 text-sm mb-4">No matches yet. Start discovering!</p>
+                    <Link to="/discover"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors text-sm font-medium"
+                    >
+                      <MessageCircle size={14} /> Find Matches
+                    </Link>
+                  </div>
+                )}
+              </motion.div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+
+              {/* Profile summary card */}
+              <motion.div initial="hidden" animate="visible" variants={fadeIn}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
+              >
+                <div className="flex items-center gap-4">
+                  <img src={avatarSrc} alt="Profile" className="w-16 h-16 rounded-2xl object-cover" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center flex-wrap gap-2">
+                      <h3 className="text-xl font-bold text-slate-900 truncate">{user?.name || 'Your profile'}</h3>
+                      {user?.isVerified && <VerifiedBadge size={18} />}
+                    </div>
+                    <p className="text-sm text-slate-500">{usernameHandle}</p>
+                  </div>
+                </div>
+                <div className="mt-5 space-y-3 text-sm text-slate-600">
+                  <div className="flex items-center justify-between gap-3">
+                    <span>Membership</span>
+                    <span className="font-semibold text-slate-900">{planMap[user?.plan]?.name || PLAN_CONFIG[user?.plan || 'free']?.label || 'Free'}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span>Status</span>
+                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${user?.isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
+                      {user?.isVerified ? 'Verified' : 'Unverified'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span>Profile score</span>
+                    <span className="font-semibold text-slate-900">{completionPct}%</span>
+                  </div>
+                </div>
+                <Link to="/profile"
+                  className="mt-5 inline-flex items-center justify-center w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  View Profile Details
+                </Link>
+              </motion.div>
+
+              {/* Profile Completion */}
+              <motion.div initial="hidden" animate="visible" variants={fadeIn}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
+              >
+                <h3 className="text-base font-bold text-slate-900 mb-4">Profile Completion</h3>
+
+                {/* Progress bar */}
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs text-slate-500 mb-1.5">
+                    <span>Progress</span>
+                    <span className="font-semibold text-primary-600">{completionPct}%</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-linear-to-r from-primary-500 to-pink-500 rounded-full transition-all duration-700"
+                      style={{ width: `${completionPct}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  {checks.map(({ label, done }) => (
+                    <div key={label} className="flex items-center justify-between">
+                      <span className="text-sm text-slate-600">{label}</span>
+                      {done
+                        ? <Check size={15} className="text-green-500" />
+                        : <span className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 inline-block" />
+                      }
                     </div>
                   ))}
                 </div>
-              ) : (
-                <p className="text-sm text-slate-400">No new notifications</p>
-              )}
-            </motion.div>
 
+                <Link to="/profile/edit"
+                  className="inline-flex items-center gap-2 mt-5 w-full justify-center px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors text-sm font-medium"
+                >
+                  <Settings size={14} /> Edit Profile
+                </Link>
+              </motion.div>
+
+              {/* Subscription Plan Card */}
+              <motion.div initial="hidden" animate="visible" variants={fadeIn}>
+                <SubscriptionCard subStatus={subStatus} loading={loading} planMap={planMap} />
+              </motion.div>
+
+              {/* Notifications */}
+              <motion.div initial="hidden" animate="visible" variants={fadeIn}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-bold text-slate-900">Notifications</h3>
+                  <Link to="/notifications" className="text-primary-600 hover:text-primary-700 text-sm font-medium">View all</Link>
+                </div>
+
+                {loading ? (
+                  <div className="space-y-3 animate-pulse">
+                    {[1, 2].map(i => <div key={i} className="h-4 bg-slate-200 rounded w-full" />)}
+                  </div>
+                ) : notifications.length > 0 ? (
+                  <div className="space-y-3">
+                    {notifications.map(n => (
+                      <div key={n._id} className="flex items-start gap-2.5">
+                        <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${n.isRead ? 'bg-slate-300' : 'bg-primary-500'}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-slate-700 font-medium leading-snug">{n.title}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">{formatTime(n.createdAt)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-400">No new notifications</p>
+                )}
+              </motion.div>
+
+            </div>
           </div>
         </div>
-      </div>
       </div>
       <PremiumTrialModal
         open={showTrialModal}
