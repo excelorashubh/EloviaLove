@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
-  Heart, X, MapPin, SlidersHorizontal, Zap, RotateCcw,
-  Lock, Crown, Sparkles, CheckCircle2, ChevronDown, Plus, Minus,
+  Heart, X, MapPin, SlidersHorizontal, Zap, Sparkles,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SITE_URL } from '../data/seoContent';
@@ -14,40 +13,20 @@ import api from '../services/api';
 import BackButton from '../components/BackButton';
 import InFeedAd from '../components/ads/InFeedAd';
 import AdWrapper from '../components/ads/AdWrapper';
-
-const INTERESTS_OPTIONS = [
-  'Travel', 'Coffee', 'Dogs', 'Photography', 'Hiking', 'Music',
-  'Cooking', 'Reading', 'Gaming', 'Fitness', 'Art', 'Movies',
-  'Dancing', 'Yoga', 'Sports', 'Nature', 'Fashion', 'Tech',
-];
-
-const EDUCATION_OPTIONS = ["High School", "Bachelor's", "Master's", "PhD", "Diploma", "Other"];
-const PROFESSION_OPTIONS = ['Engineer', 'Doctor', 'Teacher', 'Designer', 'Lawyer', 'Artist', 'Entrepreneur', 'Student', 'Other'];
-const GOAL_OPTIONS = ['Casual Dating', 'Serious Relationship', 'Marriage', 'Friendship'];
-const INCOME_OPTIONS = ['< 3 LPA', '3–5 LPA', '5–10 LPA', '10–20 LPA', '20+ LPA'];
-const RELIGION_OPTIONS = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhist', 'Jain', 'Other'];
-
-const PLAN_RANK = { free: 0, basic: 1, premium: 2, pro: 3 };
-const planHas = (userPlan, required) => PLAN_RANK[userPlan] >= PLAN_RANK[required];
-
-const PLAN_META = {
-  basic: { label: 'Basic', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', icon: Sparkles },
-  premium: { label: 'Premium', color: 'text-pink-600', bg: 'bg-pink-50', border: 'border-pink-200', icon: Sparkles },
-  pro: { label: 'Pro', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', icon: Crown },
-};
+import DiscoverFilters from '../components/discover/DiscoverFilters';
 
 // ── Match Popup ──────────────────────────────────────────────────────────────
 const MatchPopup = React.memo(({ matchedUser, onClose }) => {
   const navigate = useNavigate();
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={onClose}
     >
-      <motion.div
+      <Motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.5, opacity: 0 }}
@@ -79,350 +58,8 @@ const MatchPopup = React.memo(({ matchedUser, onClose }) => {
             Keep Swiping
           </button>
         </div>
-      </motion.div>
-    </motion.div>
-  );
-});
-
-// ── Filter Toolbar ──────────────────────────────────────────────────────────────
-const FilterToolbar = React.memo(({ filters, onChange, onApply, onReset, userPlan, showMobileFilters, onToggleMobileFilters }) => {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
-  const activeCount = [
-    filters.gender, filters.ageMin, filters.ageMax, filters.location,
-    filters.onlineOnly, filters.interests?.length, filters.education,
-    filters.profession, filters.relationshipGoals, filters.lifestyle?.smoking,
-    filters.lifestyle?.drinking, filters.heightMin, filters.heightMax,
-    filters.income, filters.religion, filters.isVerified, filters.recentlyActive,
-  ].filter(Boolean).length;
-
-  return (
-    <>
-      {/* Desktop Toolbar */}
-      <div className="hidden lg:block sticky top-16 z-40 bg-white border-b border-slate-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-3 flex-wrap">
-            {/* Location */}
-            <div className="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2">
-              <MapPin size={14} className="text-slate-500" />
-              <input
-                type="text"
-                placeholder="Location"
-                value={filters.location || ''}
-                onChange={(e) => onChange('location', e.target.value)}
-                className="bg-transparent text-xs focus:outline-none"
-              />
-            </div>
-
-            {/* Age Range */}
-            <div className="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2">
-              <span className="text-xs text-slate-600">Age:</span>
-              <input
-                type="number"
-                placeholder="Min"
-                value={filters.ageMin || ''}
-                onChange={(e) => onChange('ageMin', e.target.value)}
-                className="bg-transparent text-xs w-12 focus:outline-none"
-              />
-              <span className="text-xs text-slate-400">–</span>
-              <input
-                type="number"
-                placeholder="Max"
-                value={filters.ageMax || ''}
-                onChange={(e) => onChange('ageMax', e.target.value)}
-                className="bg-transparent text-xs w-12 focus:outline-none"
-              />
-            </div>
-
-            {/* Gender */}
-            <select
-              value={filters.gender || ''}
-              onChange={(e) => onChange('gender', e.target.value)}
-              className="bg-slate-50 rounded-xl px-3 py-2 text-xs focus:outline-none border-0"
-            >
-              <option value="">Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Non-binary">Non-binary</option>
-            </select>
-
-            {/* Sort */}
-            <select
-              value={filters.sortBy || 'recommended'}
-              onChange={(e) => onChange('sortBy', e.target.value)}
-              className="bg-slate-50 rounded-xl px-3 py-2 text-xs focus:outline-none border-0"
-            >
-              <option value="recommended">Recommended</option>
-              <option value="recent">Recently Active</option>
-              <option value="compatibility">Best Match</option>
-              <option value="age">Age</option>
-            </select>
-
-            {/* Verified Filter */}
-            {planHas(userPlan, 'pro') && (
-              <label className="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={filters.isVerified || false}
-                  onChange={(e) => onChange('isVerified', e.target.checked)}
-                  className="w-3 h-3"
-                />
-                <CheckCircle2 size={14} className="text-blue-500" />
-                <span className="text-xs text-slate-600">Verified</span>
-              </label>
-            )}
-
-            {/* Advanced Toggle */}
-            <button
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="ml-auto flex items-center gap-1 px-3 py-2 bg-slate-50 rounded-xl text-xs hover:bg-slate-100"
-            >
-              <SlidersHorizontal size={14} />
-              {showAdvanced ? <Minus size={12} /> : <Plus size={12} />}
-            </button>
-
-            {/* Reset */}
-            {activeCount > 0 && (
-              <button
-                onClick={onReset}
-                className="flex items-center gap-1 px-3 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs hover:bg-slate-200"
-              >
-                <RotateCcw size={12} />
-                Reset
-              </button>
-            )}
-
-            {/* Apply */}
-            <button
-              onClick={onApply}
-              className="px-4 py-2 bg-linear-to-r from-pink-600 to-pink-500 text-white rounded-xl text-xs font-semibold hover:shadow-md transition-all"
-            >
-              Apply {activeCount > 0 && `(${activeCount})`}
-            </button>
-          </div>
-
-          {/* Advanced Filters Row */}
-          {showAdvanced && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-3 pt-3 border-t border-slate-100 grid gap-3 grid-cols-4"
-            >
-              {planHas(userPlan, 'premium') && (
-                <>
-                  {/* Interests */}
-                  <div>
-                    <label className="text-xs text-slate-600 block mb-1">Interests</label>
-                    <div className="flex flex-wrap gap-1">
-                      {INTERESTS_OPTIONS.slice(0, 4).map(opt => (
-                        <button
-                          key={opt}
-                          onClick={() => {
-                            const cur = filters.interests || [];
-                            const updated = cur.includes(opt) ? cur.filter(x => x !== opt) : [...cur, opt];
-                            onChange('interests', updated);
-                          }}
-                          className={`px-2 py-1 rounded-full text-[10px] transition ${
-                            (filters.interests || []).includes(opt)
-                              ? 'bg-pink-600 text-white'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
-                        >
-                          {opt}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Education */}
-                  <select
-                    value={filters.education || ''}
-                    onChange={(e) => onChange('education', e.target.value)}
-                    className="bg-slate-50 rounded-xl px-2 py-1 text-xs focus:outline-none border-0"
-                  >
-                    <option value="">Education</option>
-                    {EDUCATION_OPTIONS.map(opt => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-
-                  {/* Profession */}
-                  <select
-                    value={filters.profession || ''}
-                    onChange={(e) => onChange('profession', e.target.value)}
-                    className="bg-slate-50 rounded-xl px-2 py-1 text-xs focus:outline-none border-0"
-                  >
-                    <option value="">Profession</option>
-                    {PROFESSION_OPTIONS.map(opt => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-
-                  {/* Relationship Goal */}
-                  <select
-                    value={filters.relationshipGoals || ''}
-                    onChange={(e) => onChange('relationshipGoals', e.target.value)}
-                    className="bg-slate-50 rounded-xl px-2 py-1 text-xs focus:outline-none border-0"
-                  >
-                    <option value="">Relationship Goal</option>
-                    {GOAL_OPTIONS.map(opt => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                </>
-              )}
-
-              {planHas(userPlan, 'pro') && (
-                <>
-                  {/* Income */}
-                  <select
-                    value={filters.income || ''}
-                    onChange={(e) => onChange('income', e.target.value)}
-                    className="bg-slate-50 rounded-xl px-2 py-1 text-xs focus:outline-none border-0"
-                  >
-                    <option value="">Income</option>
-                    {INCOME_OPTIONS.map(opt => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-
-                  {/* Religion */}
-                  <select
-                    value={filters.religion || ''}
-                    onChange={(e) => onChange('religion', e.target.value)}
-                    className="bg-slate-50 rounded-xl px-2 py-1 text-xs focus:outline-none border-0"
-                  >
-                    <option value="">Religion</option>
-                    {RELIGION_OPTIONS.map(opt => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-
-                  {/* Height Range */}
-                  <div className="flex items-center gap-1">
-                    <label className="text-xs text-slate-600">Height (cm):</label>
-                    <input
-                      type="number"
-                      placeholder="Min"
-                      value={filters.heightMin || ''}
-                      onChange={(e) => onChange('heightMin', e.target.value)}
-                      className="bg-slate-50 rounded-xl px-2 py-1 text-xs w-16 focus:outline-none border-0"
-                    />
-                    <span className="text-xs text-slate-400">–</span>
-                    <input
-                      type="number"
-                      placeholder="Max"
-                      value={filters.heightMax || ''}
-                      onChange={(e) => onChange('heightMax', e.target.value)}
-                      className="bg-slate-50 rounded-xl px-2 py-1 text-xs w-16 focus:outline-none border-0"
-                    />
-                  </div>
-
-                  {/* Recently Active */}
-                  <label className="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={filters.recentlyActive || false}
-                      onChange={(e) => onChange('recentlyActive', e.target.checked)}
-                      className="w-3 h-3"
-                    />
-                    <span className="text-xs text-slate-600">Active 24h</span>
-                  </label>
-
-                  {/* Online Only */}
-                  {planHas(userPlan, 'basic') && (
-                    <label className="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={filters.onlineOnly || false}
-                        onChange={(e) => onChange('onlineOnly', e.target.checked)}
-                        className="w-3 h-3"
-                      />
-                      <span className="text-xs text-slate-600">Online</span>
-                    </label>
-                  )}
-                </>
-              )}
-            </motion.div>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile Filter Button */}
-      <div className="lg:hidden sticky top-16 z-40 bg-white border-b border-slate-100 px-4 py-3">
-        <button
-          onClick={onToggleMobileFilters}
-          className="w-full flex items-center justify-between px-4 py-2 bg-slate-50 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition"
-        >
-          <SlidersHorizontal size={16} />
-          Filters {activeCount > 0 && `(${activeCount})`}
-          <ChevronDown size={16} className={showMobileFilters ? 'rotate-180' : ''} />
-        </button>
-      </div>
-
-      {/* Mobile Filters Drawer */}
-      <AnimatePresence>
-        {showMobileFilters && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-white border-b border-slate-100 px-4 py-3 space-y-3"
-          >
-            {/* Basic Filters */}
-            <input
-              type="text"
-              placeholder="Location"
-              value={filters.location || ''}
-              onChange={(e) => onChange('location', e.target.value)}
-              className="w-full bg-slate-50 rounded-xl px-3 py-2 text-sm focus:outline-none border-0"
-            />
-            <div className="flex gap-2">
-              <input
-                type="number"
-                placeholder="Min Age"
-                value={filters.ageMin || ''}
-                onChange={(e) => onChange('ageMin', e.target.value)}
-                className="flex-1 bg-slate-50 rounded-xl px-3 py-2 text-sm focus:outline-none border-0"
-              />
-              <input
-                type="number"
-                placeholder="Max Age"
-                value={filters.ageMax || ''}
-                onChange={(e) => onChange('ageMax', e.target.value)}
-                className="flex-1 bg-slate-50 rounded-xl px-3 py-2 text-sm focus:outline-none border-0"
-              />
-            </div>
-            <select
-              value={filters.gender || ''}
-              onChange={(e) => onChange('gender', e.target.value)}
-              className="w-full bg-slate-50 rounded-xl px-3 py-2 text-sm focus:outline-none border-0"
-            >
-              <option value="">Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Non-binary">Non-binary</option>
-            </select>
-
-            <div className="flex gap-2 pt-3">
-              <button
-                onClick={onReset}
-                className="flex-1 py-2 bg-slate-100 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-200"
-              >
-                Reset
-              </button>
-              <button
-                onClick={onApply}
-                className="flex-1 py-2 bg-linear-to-r from-pink-600 to-pink-500 text-white rounded-xl text-sm font-semibold hover:shadow-md transition-all"
-              >
-                Apply
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+      </Motion.div>
+    </Motion.div>
   );
 });
 
@@ -432,7 +69,7 @@ const GridProfileCard = React.memo(({ user, onLike, onPass, onSuperLike }) => {
     `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=e879a0&color=fff&size=800`;
 
   return (
-    <motion.div
+    <Motion.div
       whileHover={{ y: -6 }}
       transition={{ duration: 0.25 }}
       className="group flex flex-col rounded-[24px] overflow-hidden bg-white shadow-md hover:shadow-xl transition-transform duration-250 min-h-[470px] lg:min-h-[500px]"
@@ -514,7 +151,7 @@ const GridProfileCard = React.memo(({ user, onLike, onPass, onSuperLike }) => {
           </button>
         </div>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 });
 
@@ -708,6 +345,14 @@ const Discover = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
+              onClick={() => setShowMobileFilters(true)}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-pink-200 bg-pink-50 px-3 text-sm font-semibold text-pink-700 transition hover:bg-pink-100 dark:border-pink-400/40 dark:bg-pink-500/10 dark:text-pink-300 dark:hover:bg-pink-500/20 lg:hidden"
+            >
+              <SlidersHorizontal size={17} />
+              Filters
+            </button>
+            <button
               onClick={() => loadRandom(1)}
               className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-linear-to-r from-pink-600 to-pink-500 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all"
             >
@@ -718,29 +363,30 @@ const Discover = () => {
         </div>
       </div>
 
-      {/* Filter Toolbar */}
-      <FilterToolbar
-        filters={filters}
-        onChange={handleFilterChange}
-        onApply={loadFiltered}
-        onReset={() => handleFilterChange('reset')}
-        userPlan={userPlan}
-        showMobileFilters={showMobileFilters}
-        onToggleMobileFilters={() => setShowMobileFilters(!showMobileFilters)}
-      />
+      <div className="mx-auto max-w-7xl px-4 lg:flex lg:items-start lg:gap-6">
+        <aside className="hidden lg:block lg:w-64 lg:shrink-0 lg:py-8 xl:w-72">
+          <DiscoverFilters
+            filters={filters}
+            onChange={handleFilterChange}
+            onApply={loadFiltered}
+            onReset={() => handleFilterChange('reset')}
+            userPlan={userPlan}
+          />
+        </aside>
 
-      {/* Hero Section */}
-      <section className="bg-linear-to-r from-violet-700 via-fuchsia-600 to-pink-500 text-white px-4 py-10 sm:py-12">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold mb-2">Find Amazing People</h2>
-          <p className="text-base sm:text-lg text-white/90 max-w-2xl mx-auto">
-            Discover meaningful connections with people who share your interests and values.
-          </p>
-        </div>
-      </section>
+        <div className="min-w-0 flex-1">
+          {/* Hero Section */}
+          <section className="mt-6 rounded-2xl bg-linear-to-r from-violet-700 via-fuchsia-600 to-pink-500 px-4 py-10 text-white sm:py-12 lg:mt-8">
+            <div className="mx-auto max-w-7xl text-center">
+              <h2 className="mb-2 text-3xl font-extrabold sm:text-4xl">Find Amazing People</h2>
+              <p className="mx-auto max-w-2xl text-base text-white/90 sm:text-lg">
+                Discover meaningful connections with people who share your interests and values.
+              </p>
+            </div>
+          </section>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+          {/* Main Content */}
+          <main className="py-8">
         {loading && users.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mb-4" />
@@ -760,8 +406,8 @@ const Discover = () => {
           </div>
         ) : (
           <>
-            {/* Responsive Grid: 4 cols (desktop) → 3 (laptop) → 2 (tablet) → 1 (mobile) */}
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {/* Responsive grid adjusts to the width remaining beside the desktop filters. */}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {users.map((user, idx) => (
                 <React.Fragment key={user._id}>
                   {/* InFeed Ad every 5 profiles */}
@@ -791,7 +437,41 @@ const Discover = () => {
             )}
           </>
         )}
-      </main>
+          </main>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {showMobileFilters && (
+          <>
+            <Motion.button
+              type="button"
+              aria-label="Close filters"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileFilters(false)}
+              className="fixed inset-0 z-[60] cursor-default bg-black/50 backdrop-blur-sm lg:hidden"
+            />
+            <Motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="fixed left-0 top-0 z-[70] h-full w-[85vw] max-w-[320px] p-3 lg:hidden"
+            >
+              <DiscoverFilters
+                filters={filters}
+                onChange={handleFilterChange}
+                onApply={loadFiltered}
+                onReset={() => handleFilterChange('reset')}
+                userPlan={userPlan}
+                onClose={() => setShowMobileFilters(false)}
+              />
+            </Motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Premium Banner */}
       <section className="bg-linear-to-r from-pink-600 to-rose-500 text-white px-4 py-8 sm:py-10 mt-12">
