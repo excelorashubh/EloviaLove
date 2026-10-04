@@ -85,7 +85,7 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 overflow-visible transition-all duration-300 ${
         isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'
       }`}
     >
@@ -119,7 +119,7 @@ const Navbar = () => {
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-4 relative">
             {isAuthenticated ? (
-              <div className="relative" ref={profileMenuContainerRef}>
+              <div className="relative z-[60]" ref={profileMenuContainerRef}>
                 <button
                   ref={profileToggleButtonRef}
                   type="button"
@@ -145,7 +145,7 @@ const Navbar = () => {
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: -8 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
-                      className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-100"
+                      className="absolute right-0 top-full z-[70] mt-2 w-48 max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl border border-slate-100 bg-white py-2 shadow-lg"
                       role="menu"
                       aria-label="Profile menu"
                     >

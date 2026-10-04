@@ -342,7 +342,7 @@ const Discover = () => {
       </Helmet>
 
       {/* Header */}
-      <div className="sticky top-0 z-50 shrink-0 bg-white border-b border-slate-100 shadow-sm dark:border-white/20 dark:bg-black">
+      <div className="sticky top-0 z-10 shrink-0 bg-white border-b border-slate-100 shadow-sm dark:border-white/20 dark:bg-black">
         <div className="max-w-9xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BackButton to="/dashboard" />
@@ -478,14 +478,14 @@ const Discover = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMobileFilters(false)}
-              className="fixed inset-0 z-[60] cursor-default bg-black/50 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 cursor-default bg-black/50 backdrop-blur-sm lg:hidden"
             />
             <Motion.aside
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ duration: 0.25, ease: 'easeInOut' }}
-              className="fixed left-0 top-0 z-[70] h-full w-[85vw] max-w-[320px] p-3 lg:hidden"
+              className="fixed left-0 top-0 z-40 h-full w-[85vw] max-w-[320px] p-3 lg:hidden"
             >
               <DiscoverFilters
                 filters={filters}
