@@ -46,6 +46,12 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.85;
+  cursor: pointer;
+}
+
 /* Custom scrollbar for auth pages */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;

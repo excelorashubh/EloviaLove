@@ -160,13 +160,13 @@ const Signup = () => {
       </Helmet>
 
       <div className="min-h-screen bg-[#050505] text-white lg:h-screen lg:overflow-hidden"
-        style={{
-          backgroundImage:
-            `url(${signup})`,
-        }}
+      // style={{
+      //   backgroundImage:
+      //     `url(${signup})`,
+      // }}
       >
         <div className="mx-auto flex min-h-screen max-w-[1700px] flex-col lg:h-screen lg:flex-row lg:items-stretch">
-          <div className="relative overflow-hidden border-b border-white/10 bg-[#090b10] lg:sticky lg:top-0 lg:h-screen lg:w-[52%] lg:shrink-0 lg:border-b-0 lg:border-r">
+          <div className="hidden relative overflow-hidden border-b border-white/10 bg-[#090b10] lg:sticky lg:top-0 lg:block lg:h-screen lg:w-[52%] lg:shrink-0 lg:border-b-0 lg:border-r">
             {/* Romantic background image + dark gradient overlay */}
             <div
               className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -331,7 +331,7 @@ const Signup = () => {
                       Date of Birth
                     </label>
                     <div className="relative">
-                      <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
+                      <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/80" />
                       <input
                         type="date"
                         name="dateOfBirth"
