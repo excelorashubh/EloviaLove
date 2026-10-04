@@ -1,117 +1,66 @@
-import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  LayoutDashboard, Users, Flag, BarChart2, DollarSign,
-  LogOut, Menu, Heart, ChevronRight, Eye, Megaphone, CreditCard, BookOpen, MessageSquare
-} from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { Menu } from 'lucide-react';
+import Sidebar from './Sidebar';
 
-const navItems = [
-  { label: 'Dashboard', path: '/admin',           icon: LayoutDashboard },
-  { label: 'Messages',  path: '/admin/messages',  icon: MessageSquare },
-  { label: 'Users',     path: '/admin/users',     icon: Users },
-  { label: 'Reports',   path: '/admin/reports',   icon: Flag },
-  { label: 'Revenue',   path: '/admin/revenue',   icon: DollarSign },
-  { label: 'Analytics', path: '/admin/analytics', icon: BarChart2 },
-  { label: 'Visitors',  path: '/admin/visitors',  icon: Eye },
-  { label: 'Plans',     path: '/admin/plans',     icon: CreditCard },
-  { label: 'Blog',      path: '/admin/blog',      icon: BookOpen },
-  { label: 'Ads',       path: '/admin/ads',       icon: Megaphone },
-];
+const SIDEBAR_COLLAPSED_KEY = 'elovia_admin_sidebar_collapsed';
+const ADMIN_THEME_KEY = 'elovia_admin_theme';
 
 const AdminLayout = ({ children }) => {
-  const { logout, user } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const handleLogout = () => { logout(); navigate('/login'); };
-
-  const Sidebar = () => (
-    <aside className="flex flex-col h-full bg-slate-900 text-white w-64">
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-700">
-        <div className="bg-linear-to-tr from-primary-600 to-pink-500 p-2 rounded-xl">
-          <Heart size={20} fill="currentColor" />
-        </div>
-        <div>
-          <p className="font-bold text-sm leading-tight">Elovia Love</p>
-          <p className="text-xs text-slate-400">Admin Panel</p>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {navItems.map(({ label, path, icon: Icon }) => {
-          const active = location.pathname === path;
-          return (
-            <Link
-              key={path}
-              to={path}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                active
-                  ? 'bg-primary-600 text-white'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <Icon size={18} />
-              {label}
-              {active && <ChevronRight size={14} className="ml-auto" />}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* User + Logout */}
-      <div className="px-4 py-4 border-t border-slate-700">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-xs font-bold">
-            {user?.name?.[0]?.toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.name}</p>
-            <p className="text-xs text-slate-400">Administrator</p>
-          </div>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
-        >
-          <LogOut size={16} /> Log out
-        </button>
-      </div>
-    </aside>
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true'
+  );
+  const [theme, setTheme] = useState(
+    () => window.localStorage.getItem(ADMIN_THEME_KEY) || 'dark'
   );
 
+  useLayoutEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    window.localStorage.setItem(ADMIN_THEME_KEY, theme);
+  }, [theme]);
+
+  useEffect(() => {
+    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
   return (
-    <div className="flex h-screen bg-slate-100 overflow-hidden">
+    <div className="admin-theme flex h-screen overflow-hidden bg-white text-slate-900 dark:bg-black dark:text-white">
       {/* Desktop sidebar */}
-      <div className="hidden md:flex shrink-0">
-        <Sidebar />
+      <div className="hidden h-full shrink-0 md:flex">
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggleCollapsed={() => setSidebarCollapsed((collapsed) => !collapsed)}
+          theme={theme}
+          onToggleTheme={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}
+        />
       </div>
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
-          <div className="absolute left-0 top-0 h-full z-50">
-            <Sidebar />
+          <div className="absolute inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
+          <div className="absolute left-0 top-0 z-50 h-full w-64">
+            <Sidebar
+              mobile
+              theme={theme}
+              onToggleTheme={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}
+              onClose={() => setSidebarOpen(false)}
+            />
           </div>
         </div>
       )}
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Top bar (mobile) */}
-        <header className="md:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-slate-200">
-          <button onClick={() => setSidebarOpen(true)} className="p-1 text-slate-600">
+        <header className="flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/30 dark:bg-black dark:text-white md:hidden">
+          <button onClick={() => setSidebarOpen(true)} className="p-1 text-slate-600 dark:text-white/60">
             <Menu size={22} />
           </button>
-          <span className="font-bold text-slate-800">Admin Panel</span>
+          <span className="font-bold">Admin Panel</span>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="min-h-0 flex-1 overflow-y-auto bg-white p-6 dark:bg-black">
           {children}
         </main>
       </div>

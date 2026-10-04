@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-primary-50: #fdf4ff;
@@ -50,6 +51,89 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
   opacity: 0.85;
   cursor: pointer;
+}
+
+/* Theme the existing admin page utilities without changing page behavior. */
+.admin-theme [class~="bg-slate-50"],
+.admin-theme [class~="bg-slate-100"],
+.admin-theme [class~="bg-slate-200"] {
+  background-color: #fff;
+}
+
+.admin-theme [class~="text-slate-900"],
+.admin-theme [class~="text-slate-800"],
+.admin-theme [class~="text-slate-700"] {
+  color: #0f172a;
+}
+
+.admin-theme [class~="border-slate-100"],
+.admin-theme [class~="border-slate-200"] {
+  border-color: #e2e8f0;
+}
+
+.dark .admin-theme [class~="bg-white"],
+.dark .admin-theme [class~="bg-slate-50"],
+.dark .admin-theme [class~="bg-slate-900"] {
+  background-color: #000;
+}
+
+.dark .admin-theme [class~="bg-white"][class~="h-4"] {
+  background-color: #fff;
+}
+
+.dark .admin-theme [class~="bg-slate-100"] {
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+.dark .admin-theme [class~="bg-slate-200"],
+.dark .admin-theme [class~="bg-slate-300"] {
+  background-color: rgb(255 255 255 / 0.16);
+}
+
+.dark .admin-theme [class~="bg-slate-700"] {
+  background-color: #000;
+}
+
+.dark .admin-theme [class~="text-slate-900"],
+.dark .admin-theme [class~="text-slate-800"],
+.dark .admin-theme [class~="text-slate-700"],
+.dark .admin-theme [class~="text-slate-600"] {
+  color: #fff;
+}
+
+.dark .admin-theme [class~="text-slate-500"],
+.dark .admin-theme [class~="text-slate-400"],
+.dark .admin-theme [class~="text-slate-300"] {
+  color: rgb(255 255 255 / 0.6);
+}
+
+.dark .admin-theme [class~="text-slate-200"] {
+  color: rgb(255 255 255 / 0.8);
+}
+
+.dark .admin-theme [class~="border-slate-100"],
+.dark .admin-theme [class~="border-slate-200"] {
+  border-color: rgb(255 255 255 / 0.2);
+}
+
+.dark .admin-theme [class~="divide-slate-100"] > :not(:last-child),
+.dark .admin-theme [class~="divide-slate-200"] > :not(:last-child) {
+  border-color: rgb(255 255 255 / 0.2);
+}
+
+.dark .admin-theme [class~="hover:bg-slate-50"]:hover,
+.dark .admin-theme [class~="hover:bg-slate-100"]:hover,
+.dark .admin-theme [class~="hover:bg-slate-200"]:hover {
+  background-color: rgb(255 255 255 / 0.1);
+}
+
+.dark .admin-theme [class~="hover:text-slate-700"]:hover,
+.dark .admin-theme [class~="hover:text-slate-900"]:hover {
+  color: #fff;
+}
+
+.dark .admin-theme [class~="placeholder:text-slate-400"]::placeholder {
+  color: rgb(255 255 255 / 0.6);
 }
 
 /* Custom scrollbar for auth pages */
