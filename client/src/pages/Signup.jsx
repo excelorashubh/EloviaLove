@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { SITE_URL } from '../data/seoContent';
 import { useAuth } from '../context/AuthContext';
-import signup from '../assets/signup.png'
+
 
 const TRIAL_WELCOME_KEY = 'elovia_premium_trial_welcome';
 
