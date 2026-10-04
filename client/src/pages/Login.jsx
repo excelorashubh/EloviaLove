@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Heart, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, Heart, Eye, EyeOff, CheckCircle2, Sparkles } from 'lucide-react';
 import { SITE_URL } from '../data/seoContent';
 import { useAuth } from '../context/AuthContext';
 
@@ -52,29 +52,26 @@ const Login = () => {
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
-      {/* Full-screen container */}
-      <div className="fixed inset-0 overflow-hidden bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50">
-        
-        {/* Floating hearts animation */}
+      <div className="min-h-screen w-full overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.8),_rgba(255,244,247,0.95)_35%,_rgba(248,234,240,0.9)_100%)]">
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-          {[...Array(8)].map((_, i) => (
+          {[...Array(10)].map((_, i) => (
             <motion.div
               key={i}
               className="absolute text-pink-400"
-              initial={{ 
-                x: Math.random() * window.innerWidth,
-                y: window.innerHeight + 100,
+              initial={{
+                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
+                y: (typeof window !== 'undefined' ? window.innerHeight : 900) + 100,
                 scale: Math.random() * 0.5 + 0.5,
-                opacity: 0.3
+                opacity: 0.35
               }}
               animate={{
-                y: -100,
-                x: Math.random() * window.innerWidth,
+                y: -120,
+                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
               }}
               transition={{
-                duration: Math.random() * 10 + 15,
+                duration: Math.random() * 12 + 16,
                 repeat: Infinity,
-                ease: "linear",
+                ease: 'linear',
                 delay: Math.random() * 5,
               }}
             >
@@ -83,82 +80,86 @@ const Login = () => {
           ))}
         </div>
 
-        <div className="h-screen w-full flex">
-          
-          {/* Left Side - Hero (55%) */}
+        <div className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col lg:flex-row lg:items-center lg:justify-center lg:px-6 xl:px-10">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="hidden lg:flex lg:w-[55%] relative bg-gradient-to-br from-pink-200 via-rose-200 to-purple-300 items-center justify-center"
-          >
-            {/* Dark overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/45 to-black/60" />
-            
-            {/* Content */}
-            <div className="relative z-10 text-center px-12 max-w-2xl">
+            className="relative hidden items-center justify-center overflow-hidden rounded-[30px] bg-cover bg-center bg-no-repeat p-8 shadow-[0_30px_80px_rgba(80,18,39,0.18)] lg:flex lg:w-[54%] lg:max-w-[760px] lg:min-h-[720px]">
+            <div
+              className="absolute inset-0 rounded-[30px]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(135deg, rgba(32, 10, 18, 0.30), rgba(58, 17, 27, 0.55), rgba(20, 8, 16, 0.72)), url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+              }}
+            />
+            <div className="absolute -left-12 top-14 h-40 w-40 rounded-full bg-pink-300/30 blur-3xl" />
+            <div className="absolute bottom-16 right-8 h-48 w-48 rounded-full bg-pink-200/20 blur-3xl" />
+            <div className="relative z-10 max-w-[540px] text-center text-white">
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.8 }}
               >
-                {/* Main Heading */}
-                <h1 className="text-6xl font-bold text-white mb-6 leading-tight tracking-tight">
+                <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-pink-100 backdrop-blur-sm">
+                  <Sparkles size={14} className="text-pink-200" />
+                  Premium matchmaking
+                </div>
+                <h1 className="mb-6 text-[clamp(2.8rem,4vw,4.5rem)] font-black leading-[1.05] tracking-[-0.04em] text-white">
                   Every Love Story<br />Begins With One Hello ❤️
                 </h1>
-                
-                {/* Subtitle */}
-                <p className="text-xl text-white/90 mb-12 font-light">
-                  Find meaningful relationships with verified singles across India
+                <p className="mx-auto mb-10 max-w-[480px] text-lg font-light text-white/90 xl:text-xl">
+                  Find meaningful relationships with verified singles across India.
                 </p>
 
-                {/* Trust Badges - Single Row */}
-                <div className="grid grid-cols-4 gap-4 text-white/90">
-                  <div className="text-center">
-                    <CheckCircle2 className="mx-auto mb-2" size={20} />
-                    <p className="text-sm font-medium">Verified<br />Profiles</p>
-                  </div>
-                  <div className="text-center">
-                    <CheckCircle2 className="mx-auto mb-2" size={20} />
-                    <p className="text-sm font-medium">AI<br />Matchmaking</p>
-                  </div>
-                  <div className="text-center">
-                    <CheckCircle2 className="mx-auto mb-2" size={20} />
-                    <p className="text-sm font-medium">Safe &<br />Secure</p>
-                  </div>
-                  <div className="text-center">
-                    <CheckCircle2 className="mx-auto mb-2" size={20} />
-                    <p className="text-sm font-medium">Serious<br />Relationship</p>
-                  </div>
+                <div className="grid grid-cols-2 gap-3 text-left text-white/90 md:grid-cols-4">
+                  {[
+                    'Verified Profiles',
+                    'AI Matchmaking',
+                    'Safe & Secure',
+                    'Serious Relationships',
+                  ].map((item) => (
+                    <div key={item} className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 backdrop-blur-sm">
+                      <CheckCircle2 className="mb-2 text-pink-200" size={18} />
+                      <p className="text-[11px] font-semibold leading-relaxed">{item}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-[11px] font-medium text-pink-50/90">
+                  <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.9)]" />
+                  Verified profiles • Secure conversations • Genuine connections
                 </div>
               </motion.div>
             </div>
           </motion.div>
 
-          {/* Right Side - Login Card (45%) */}
-          <div className="w-full lg:w-[45%] flex items-center justify-center p-8">
+          <div className="flex w-full items-center justify-center p-4 sm:p-6 lg:w-[46%] lg:max-w-[560px] lg:p-6 xl:p-8">
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="w-full max-w-[430px]"
+              className="w-full max-w-[500px]"
             >
-              {/* Glassmorphism Card */}
-              <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl shadow-pink-200/50 p-10">
+              <div className="rounded-[32px] border border-white/60 bg-white/95 p-6 shadow-[0_30px_90px_rgba(255,123,160,0.16)] backdrop-blur-xl sm:p-8 lg:p-9">
                 
-                {/* Logo */}
                 <Link
                   to="/"
-                  className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#FF4E7A] to-[#FF7AA8] rounded-2xl mb-8 shadow-lg hover:scale-105 transition-transform duration-300"
+                  className="mb-7 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF4E7A] to-[#FF7AA8] shadow-[0_18px_32px_rgba(255,94,136,0.22)] transition-transform duration-300 hover:scale-105"
                 >
-                  <Heart size={28} className="text-white" fill="currentColor" />
+                  <Heart size={24} className="text-white" fill="currentColor" />
                 </Link>
 
-                {/* Header */}
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                  ❤️ Welcome Back
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-600">Secure access</span>
+                </div>
+                <h2 className="mb-2 text-[clamp(2rem,2.7vw,2.5rem)] font-bold tracking-[-0.04em] text-gray-900">
+                  Welcome Back ❤️
                 </h2>
-                <p className="text-gray-600 mb-8">
+                <p className="mb-8 text-[15px] leading-6 text-gray-600">
                   Continue your journey to meaningful connections
                 </p>
 
@@ -189,8 +190,8 @@ const Login = () => {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all bg-white"
-                        placeholder="you@example.com"
+                        className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-2xl bg-white transition-all placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        placeholder="Enter your email address"
                       />
                     </div>
                   </div>
@@ -208,7 +209,7 @@ const Login = () => {
                         value={formData.password}
                         onChange={handleChange}
                         required
-                        className="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all bg-white"
+                        className="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-2xl bg-white transition-all placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-pink-500"
                         placeholder="Enter your password"
                       />
                       <button
@@ -233,7 +234,7 @@ const Login = () => {
                       />
                       <span className="text-gray-700 font-medium">Remember Me</span>
                     </label>
-                    <Link to="#" className="text-pink-600 hover:text-pink-700 font-semibold">
+                    <Link to="/contact" className="font-semibold text-pink-600 transition-colors hover:text-pink-700">
                       Forgot Password?
                     </Link>
                   </div>
@@ -242,17 +243,17 @@ const Login = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-[#FF4E7A] to-[#FF7AA8] text-white py-4 rounded-full font-semibold text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FD5A7A] to-[#FD2B6B] px-5 py-4 text-base font-bold text-white shadow-[0_16px_38px_rgba(253,90,122,0.35)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(253,90,122,0.42)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {loading ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                         Signing in...
                       </>
                     ) : (
                       <>
-                        <Heart size={18} fill="currentColor" />
-                        Continue Finding Love
+                        <span>Continue Finding Love</span>
+                        <span aria-hidden="true">→</span>
                       </>
                     )}
                   </button>
@@ -298,22 +299,19 @@ const Login = () => {
                 {/* Sign Up Link */}
                 <p className="mt-8 text-center text-sm text-gray-600">
                   New here?{' '}
-                  <Link to="/signup" className="text-pink-600 hover:text-pink-700 font-semibold">
-                    Create Account →
+                  <Link to="/signup" className="font-semibold text-pink-600 transition-colors hover:text-pink-700">
+                    Create your account →
                   </Link>
                 </p>
 
-                {/* Minimal Footer */}
-                <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-center gap-3 text-xs text-gray-500">
-                  <Link to="/privacy-policy" className="hover:text-pink-600">Privacy</Link>
+                <div className="mt-8 flex items-center justify-center gap-3 border-t border-gray-100 pt-6 text-xs text-gray-500">
+                  <Link to="/privacy-policy" className="transition-colors hover:text-pink-600">Privacy</Link>
                   <span>·</span>
-                  <Link to="/terms-of-service" className="hover:text-pink-600">Terms</Link>
+                  <Link to="/terms-of-service" className="transition-colors hover:text-pink-600">Terms</Link>
                   <span>·</span>
-                  <Link to="/contact" className="hover:text-pink-600">Support</Link>
+                  <Link to="/contact" className="transition-colors hover:text-pink-600">Support</Link>
                 </div>
-                <p className="text-center text-xs text-gray-400 mt-2">
-                  © 2026 Elovia Love
-                </p>
+                <p className="mt-2 text-center text-xs text-gray-400">© 2026 Elovia Love</p>
               </div>
             </motion.div>
           </div>
