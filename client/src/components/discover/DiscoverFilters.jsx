@@ -42,7 +42,7 @@ const DiscoverFilters = ({ filters, onChange, onApply, onReset, userPlan, onClos
     <Motion.section
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex max-h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-sm dark:border-white/20 dark:bg-black dark:text-white lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)]"
+      className="flex max-h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-sm dark:border-white/20 dark:bg-black dark:text-white lg:max-h-[calc(100vh-12rem)]"
     >
       <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-4 dark:border-white/20">
         <div className="flex items-center gap-2">

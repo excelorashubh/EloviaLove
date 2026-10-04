@@ -169,6 +169,7 @@ const Discover = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [mode, setMode] = useState('random');
   const observerTarget = useRef(null);
+  const usersScrollRef = useRef(null);
   const DISCOVER_PAGE_SIZE = 20;
 
   const [filters, setFilters] = useState({
@@ -281,7 +282,11 @@ const Discover = () => {
           }
         }
       });
-    }, { threshold: 0.1, rootMargin: '200px' });
+    }, {
+      threshold: 0.1,
+      rootMargin: '200px',
+      root: window.matchMedia('(min-width: 1024px)').matches ? usersScrollRef.current : null,
+    });
 
     if (observerTarget.current) observer.observe(observerTarget.current);
     return () => observer.disconnect();
@@ -329,7 +334,7 @@ const Discover = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-black lg:h-[calc(100vh-5rem)] lg:min-h-0 lg:overflow-hidden">
       <Helmet>
         <title>Discover — Elovia Love — Find Meaningful Connections</title>
         <meta name="description" content="Discover meaningful connections on Elovia Love. Explore verified singles, advanced filters and premium matches." />
@@ -337,7 +342,7 @@ const Discover = () => {
       </Helmet>
 
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
+      <div className="sticky top-0 z-50 shrink-0 bg-white border-b border-slate-100 shadow-sm dark:border-white/20 dark:bg-black">
         <div className="max-w-9xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BackButton to="/dashboard" />
@@ -363,30 +368,35 @@ const Discover = () => {
         </div>
       </div>
 
-      <div className="mx-auto max-w-9xl px-4 lg:flex lg:items-start lg:gap-6">
-        <aside className="hidden lg:block lg:w-64 lg:shrink-0 lg:py-8 xl:w-72">
-          <DiscoverFilters
-            filters={filters}
-            onChange={handleFilterChange}
-            onApply={loadFiltered}
-            onReset={() => handleFilterChange('reset')}
-            userPlan={userPlan}
-          />
+      <div className="mx-auto flex w-full max-w-9xl flex-1 flex-col px-4 lg:min-h-0 lg:flex-row lg:items-stretch lg:gap-6">
+        <aside className="hidden lg:flex lg:w-64 lg:shrink-0 lg:py-6 xl:w-72">
+          <div className="sticky top-6 w-full self-start">
+            <DiscoverFilters
+              filters={filters}
+              onChange={handleFilterChange}
+              onApply={loadFiltered}
+              onReset={() => handleFilterChange('reset')}
+              userPlan={userPlan}
+            />
+          </div>
         </aside>
 
-        <div className="min-w-0 flex-1">
+        <section
+          ref={usersScrollRef}
+          className="min-w-0 flex-1 lg:min-h-0 lg:overflow-y-auto lg:py-6 discover-users-scroll"
+        >
           {/* Hero Section */}
-          <section className="mt-6 rounded-2xl bg-linear-to-r from-violet-700 via-fuchsia-600 to-pink-500 px-4 py-10 text-white sm:py-12 lg:mt-8">
+          <div className="mt-6 rounded-2xl bg-linear-to-r from-violet-700 via-fuchsia-600 to-pink-500 px-4 py-10 text-white sm:py-12 lg:mt-0">
             <div className="mx-auto max-w-9xl text-center">
               <h2 className="mb-2 text-3xl font-extrabold sm:text-4xl">Find Amazing People</h2>
               <p className="mx-auto max-w-2xl text-base text-white/90 sm:text-lg">
                 Discover meaningful connections with people who share your interests and values.
               </p>
             </div>
-          </section>
+          </div>
 
           {/* Main Content */}
-          <main className="py-8">
+          <div className="py-8">
             {loading && users.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mb-4" />
@@ -437,8 +447,25 @@ const Discover = () => {
                 )}
               </>
             )}
-          </main>
-        </div>
+          </div>
+
+          {/* Premium Banner */}
+          <section className="bg-linear-to-r from-pink-600 to-rose-500 text-white px-4 py-8 sm:py-10 mb-8 rounded-2xl">
+            <div className="max-w-sm sm:max-w-md mx-auto text-center">
+              <div className="mb-4 text-3xl">⭐</div>
+              <h3 className="text-2xl font-extrabold mb-2">Upgrade to Premium</h3>
+              <p className="text-white/90 mb-6">
+                Get unlimited likes, advanced filters, priority visibility, and see who liked you.
+              </p>
+              <button
+                onClick={() => navigate('/pricing')}
+                className="px-6 py-3 bg-white text-pink-600 font-bold rounded-2xl hover:shadow-lg transition-all"
+              >
+                View Plans
+              </button>
+            </div>
+          </section>
+        </section>
       </div>
 
       <AnimatePresence>
@@ -472,23 +499,6 @@ const Discover = () => {
           </>
         )}
       </AnimatePresence>
-
-      {/* Premium Banner */}
-      <section className="bg-linear-to-r from-pink-600 to-rose-500 text-white px-4 py-8 sm:py-10 mt-12">
-        <div className="max-w-sm sm:max-w-md mx-auto text-center">
-          <div className="mb-4 text-3xl">⭐</div>
-          <h3 className="text-2xl font-extrabold mb-2">Upgrade to Premium</h3>
-          <p className="text-white/90 mb-6">
-            Get unlimited likes, advanced filters, priority visibility, and see who liked you.
-          </p>
-          <button
-            onClick={() => navigate('/pricing')}
-            className="px-6 py-3 bg-white text-pink-600 font-bold rounded-2xl hover:shadow-lg transition-all"
-          >
-            View Plans
-          </button>
-        </div>
-      </section>
 
       {/* Match Popup */}
       <AnimatePresence>
