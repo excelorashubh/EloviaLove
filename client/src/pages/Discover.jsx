@@ -338,7 +338,7 @@ const Discover = () => {
 
       {/* Header */}
       <div className="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-8xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BackButton to="/dashboard" />
             <h1 className="text-2xl font-extrabold text-slate-900">Discover</h1>
@@ -363,7 +363,7 @@ const Discover = () => {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 lg:flex lg:items-start lg:gap-6">
+      <div className="mx-auto max-w-8xl px-4 lg:flex lg:items-start lg:gap-6">
         <aside className="hidden lg:block lg:w-64 lg:shrink-0 lg:py-8 xl:w-72">
           <DiscoverFilters
             filters={filters}
@@ -377,7 +377,7 @@ const Discover = () => {
         <div className="min-w-0 flex-1">
           {/* Hero Section */}
           <section className="mt-6 rounded-2xl bg-linear-to-r from-violet-700 via-fuchsia-600 to-pink-500 px-4 py-10 text-white sm:py-12 lg:mt-8">
-            <div className="mx-auto max-w-7xl text-center">
+            <div className="mx-auto max-w-8xl text-center">
               <h2 className="mb-2 text-3xl font-extrabold sm:text-4xl">Find Amazing People</h2>
               <p className="mx-auto max-w-2xl text-base text-white/90 sm:text-lg">
                 Discover meaningful connections with people who share your interests and values.
@@ -387,56 +387,56 @@ const Discover = () => {
 
           {/* Main Content */}
           <main className="py-8">
-        {loading && users.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mb-4" />
-            <p className="text-slate-600">Finding matches...</p>
-          </div>
-        ) : users.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Heart className="w-16 h-16 text-slate-200 mb-4" />
-            <h3 className="text-xl font-bold text-slate-700 mb-2">No more profiles</h3>
-            <p className="text-slate-500 mb-6">You've seen everyone! Check back later.</p>
-            <button
-              onClick={() => loadRandom(1)}
-              className="px-6 py-3 bg-pink-600 text-white rounded-2xl font-semibold hover:bg-pink-700 transition-colors"
-            >
-              Refresh
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Responsive grid adjusts to the width remaining beside the desktop filters. */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {users.map((user, idx) => (
-                <React.Fragment key={user._id}>
-                  {/* InFeed Ad every 5 profiles */}
-                  {idx > 0 && idx % 5 === 0 && (
-                    <AdWrapper>
-                      <InFeedAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || ''} className="rounded-2xl" />
-                    </AdWrapper>
-                  )}
-                  <GridProfileCard
-                    user={user}
-                    onLike={() => swipe('like', user._id)}
-                    onPass={() => swipe('pass', user._id)}
-                    onSuperLike={() => swipe('super', user._id)}
-                  />
-                </React.Fragment>
-              ))}
-            </div>
-
-            {/* Infinite Scroll Sentinel */}
-            {hasMore && <div ref={observerTarget} className="h-10" />}
-
-            {/* Loading indicator at bottom */}
-            {loading && users.length > 0 && (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600" />
+            {loading && users.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mb-4" />
+                <p className="text-slate-600">Finding matches...</p>
               </div>
+            ) : users.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <Heart className="w-16 h-16 text-slate-200 mb-4" />
+                <h3 className="text-xl font-bold text-slate-700 mb-2">No more profiles</h3>
+                <p className="text-slate-500 mb-6">You've seen everyone! Check back later.</p>
+                <button
+                  onClick={() => loadRandom(1)}
+                  className="px-6 py-3 bg-pink-600 text-white rounded-2xl font-semibold hover:bg-pink-700 transition-colors"
+                >
+                  Refresh
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Responsive grid adjusts to the width remaining beside the desktop filters. */}
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  {users.map((user, idx) => (
+                    <React.Fragment key={user._id}>
+                      {/* InFeed Ad every 5 profiles */}
+                      {idx > 0 && idx % 5 === 0 && (
+                        <AdWrapper>
+                          <InFeedAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || ''} className="rounded-2xl" />
+                        </AdWrapper>
+                      )}
+                      <GridProfileCard
+                        user={user}
+                        onLike={() => swipe('like', user._id)}
+                        onPass={() => swipe('pass', user._id)}
+                        onSuperLike={() => swipe('super', user._id)}
+                      />
+                    </React.Fragment>
+                  ))}
+                </div>
+
+                {/* Infinite Scroll Sentinel */}
+                {hasMore && <div ref={observerTarget} className="h-10" />}
+
+                {/* Loading indicator at bottom */}
+                {loading && users.length > 0 && (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600" />
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
           </main>
         </div>
       </div>
