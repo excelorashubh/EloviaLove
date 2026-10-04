@@ -52,11 +52,60 @@ router.get('/', async (req, res) => {
   }
 });
 
+// ── PUBLIC: GET /api/blogs/sitemap.xml — published database posts ───────────
+router.get('/sitemap.xml', async (req, res) => {
+  try {
+    const posts = await Blog.find({ isPublished: true })
+      .select('slug updatedAt')
+      .sort({ updatedAt: -1 });
+    const baseUrl = (process.env.CLIENT_URL || process.env.VITE_SITE_URL || 'https://elovialove.com')
+      .replace(/\/+$/, '');
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/blog</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>`;
+
+    posts.forEach((post) => {
+      const slug = toSlug(post.slug);
+      if (!slug) return;
+      const lastmod = post.updatedAt instanceof Date
+        ? post.updatedAt.toISOString().split('T')[0]
+        : '';
+
+      xml += `
+  <url>
+    <loc>${baseUrl}/blog/${encodeURIComponent(slug)}</loc>
+    ${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+    });
+
+    xml += `
+</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (err) {
+    res.status(500).send('Error generating sitemap');
+  }
+});
+
 // ── PUBLIC: GET /api/blog/:slug — single post + increment views ───────────────
 router.get('/:slug', async (req, res) => {
   try {
+    const slug = toSlug(req.params.slug);
     const post = await Blog.findOneAndUpdate(
-      { slug: req.params.slug, isPublished: true },
+      { slug, isPublished: true },
       { $inc: { views: 1 } },
       { new: true }
     );
@@ -150,76 +199,6 @@ router.delete('/:id', protect, isAdmin, async (req, res) => {
     res.json({ success: true, message: 'Post deleted' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-// ── PUBLIC: GET /api/blog/sitemap.xml — dynamic sitemap ──────────────────────
-router.get('/sitemap.xml', async (req, res) => {
-  try {
-    const posts = await Blog.find({ isPublished: true }).select('slug updatedAt').sort({ updatedAt: -1 });
-    const baseUrl = process.env.CLIENT_URL || process.env.VITE_SITE_URL || 'https://elovialove.com';
-
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/blog</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/blog/dating-tips</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-
-    const blogSlugs = [
-      'dating-profile-tips',
-      'online-dating-safety',
-      'first-message-examples',
-      'how-to-find-real-love',
-      'red-flags-in-online-dating',
-      'long-distance-relationship-advice',
-      'how-to-avoid-fake-profiles',
-      'best-dating-app-tips',
-      'how-to-start-a-conversation'
-    ];
-
-    const existingUrls = new Set([`${baseUrl}/`, `${baseUrl}/blog`, `${baseUrl}/blog/dating-tips`]);
-    blogSlugs.forEach((slug) => {
-      const url = `${baseUrl}/blog/${slug}`;
-      existingUrls.add(url);
-      xml += `
-  <url>
-    <loc>${url}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
-  </url>`;
-    });
-
-    posts.forEach(post => {
-      const url = `${baseUrl}/blog/${post.slug}`;
-      if (existingUrls.has(url)) return;
-      xml += `
-  <url>
-    <loc>${url}</loc>
-    <lastmod>${post.updatedAt.toISOString().split('T')[0]}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
-    });
-
-    xml += `
-</urlset>`;
-
-    res.header('Content-Type', 'application/xml');
-    res.send(xml);
-  } catch (err) {
-    res.status(500).send('Error generating sitemap');
   }
 });
 
