@@ -338,7 +338,7 @@ const Discover = () => {
 
       {/* Header */}
       <div className="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
-        <div className="max-w-8xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-9xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BackButton to="/dashboard" />
             <h1 className="text-2xl font-extrabold text-slate-900">Discover</h1>
@@ -363,7 +363,7 @@ const Discover = () => {
         </div>
       </div>
 
-      <div className="mx-auto max-w-8xl px-4 lg:flex lg:items-start lg:gap-6">
+      <div className="mx-auto max-w-9xl px-4 lg:flex lg:items-start lg:gap-6">
         <aside className="hidden lg:block lg:w-64 lg:shrink-0 lg:py-8 xl:w-72">
           <DiscoverFilters
             filters={filters}
@@ -377,7 +377,7 @@ const Discover = () => {
         <div className="min-w-0 flex-1">
           {/* Hero Section */}
           <section className="mt-6 rounded-2xl bg-linear-to-r from-violet-700 via-fuchsia-600 to-pink-500 px-4 py-10 text-white sm:py-12 lg:mt-8">
-            <div className="mx-auto max-w-8xl text-center">
+            <div className="mx-auto max-w-9xl text-center">
               <h2 className="mb-2 text-3xl font-extrabold sm:text-4xl">Find Amazing People</h2>
               <p className="mx-auto max-w-2xl text-base text-white/90 sm:text-lg">
                 Discover meaningful connections with people who share your interests and values.
