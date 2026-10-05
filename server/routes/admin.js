@@ -7,6 +7,7 @@ const Payment = require('../models/Payment');
 const Subscription = require('../models/Subscription');
 const { protect, authorize } = require('../middleware/auth');
 const { getRazorpayConfig } = require('../utils/razorpayConfig');
+const adminController = require('../controllers/adminController');
 
 const router = express.Router();
 
@@ -305,44 +306,17 @@ router.put('/users/:userId/verify', async (req, res) => {
 // @route   GET /api/admin/stats
 // @desc    Get platform statistics
 // @access  Private/Admin
-router.get('/stats', async (req, res) => {
-  try {
-    const [
-      totalUsers,
-      activeUsers,
-      totalMatches,
-      totalMessages,
-      pendingReports,
-      recentUsers
-    ] = await Promise.all([
-      User.countDocuments(),
-      User.countDocuments({ isActive: true }),
-      Match.countDocuments(),
-      Message.countDocuments(),
-      Report.countDocuments({ status: 'pending' }),
-      User.countDocuments({
-        createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
-      })
-    ]);
+router.get('/stats', adminController.getPlatformStats);
 
-    res.json({
-      success: true,
-      stats: {
-        totalUsers,
-        activeUsers,
-        totalMatches,
-        totalMessages,
-        pendingReports,
-        recentUsers,
-        userActivity: activeUsers / totalUsers * 100
-      }
-    });
+router.get('/monitoring/random-video', adminController.getRandomVideoMonitoring);
+router.get('/random-video/monitoring', adminController.getRandomVideoMonitoring);
+router.get('/random-video/analytics', async (req, res) => {
+  try {
+    const result = await require('../utils/randomMatchManager').getAnalytics();
+    res.json(result);
   } catch (error) {
-    console.error('Get stats error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    console.error('Random video admin analytics error:', error);
+    res.status(500).json({ success: false, message: 'Unable to load analytics' });
   }
 });
 

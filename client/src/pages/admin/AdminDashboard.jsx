@@ -23,22 +23,25 @@ const AdminDashboard = () => {
   const [revenue, setRevenue] = useState(null);
   const [visitors, setVisitors] = useState(null);
   const [randomMatchStats, setRandomMatchStats] = useState(null);
+  const [randomVideoMonitoring, setRandomVideoMonitoring] = useState(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [statsRes, usersRes, revRes, visRes, randomMatchRes] = await Promise.all([
+        const [statsRes, usersRes, revRes, visRes, randomMatchRes, monitorRes] = await Promise.all([
           api.get('/admin/stats'),
           api.get('/admin/users?page=1'),
           api.get('/admin/analytics/overview?period=month'),
           api.get('/analytics/overview?period=today'),
           api.get('/random-match/admin/analytics'),
+          api.get('/admin/monitoring/random-video'),
         ]);
         setStats(statsRes.data.stats);
         setRecentUsers(usersRes.data.users.slice(0, 5));
         setRevenue(revRes.data);
         setVisitors(visRes.data);
         setRandomMatchStats(randomMatchRes.data.analytics);
+        setRandomVideoMonitoring(monitorRes.data.monitoring);
       } catch (e) {
         console.error(e);
       } finally {
@@ -67,6 +70,8 @@ const AdminDashboard = () => {
     { icon: Eye,          label: "Today's Visitors",   value: visitors?.today ?? '—', color: 'bg-primary-500', sub: `${visitors?.unique ?? 0} unique this period`, raw: true },
     { icon: Globe,        label: 'Total Page Views',   value: visitors?.total ?? '—', color: 'bg-blue-500',    sub: 'All time', raw: true },
     { icon: Video,        label: 'Random Match Calls', value: randomMatchStats?.totalRandomCalls ?? '—', color: 'bg-fuchsia-500', sub: `${randomMatchStats?.activeCalls ?? 0} active now`, raw: true },
+    { icon: TrendingUp,   label: 'Random Queue',       value: randomVideoMonitoring?.queueSize ?? '—', color: 'bg-violet-500', sub: randomVideoMonitoring?.status ? `${randomVideoMonitoring.status} status` : 'Monitoring', raw: true },
+    { icon: Flag,         label: 'Monitoring Alerts',  value: randomVideoMonitoring?.alerts?.length ?? 0, color: 'bg-amber-500', sub: randomVideoMonitoring?.alerts?.[0] || 'All clear', raw: true },
   ];
 
   return (

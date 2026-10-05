@@ -55,6 +55,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Pricing from './pages/Pricing';
 import SubscriptionSuccess from './pages/SubscriptionSuccess';
+import RandomVideoPage from './pages/RandomVideo';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
@@ -303,6 +304,14 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Chat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/random-video"
+            element={
+              <ProtectedRoute>
+                <RandomVideoPage />
               </ProtectedRoute>
             }
           />

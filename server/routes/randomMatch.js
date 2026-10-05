@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 const randomMatchManager = require('../utils/randomMatchManager');
 const User = require('../models/User');
 
@@ -102,7 +102,7 @@ router.get('/history', protect, async (req, res) => {
   }
 });
 
-router.get('/admin/analytics', protect, async (req, res) => {
+router.get('/admin/analytics', protect, authorize('admin'), async (req, res) => {
   try {
     const result = await randomMatchManager.getAnalytics();
     res.json(result);

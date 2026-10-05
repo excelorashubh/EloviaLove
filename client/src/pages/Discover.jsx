@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
-  Heart, X, MapPin, SlidersHorizontal, Zap, Sparkles,
+  Heart, X, MapPin, SlidersHorizontal, Zap, Sparkles, Video,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SITE_URL } from '../data/seoContent';
@@ -14,6 +14,7 @@ import BackButton from '../components/BackButton';
 import InFeedAd from '../components/ads/InFeedAd';
 import AdWrapper from '../components/ads/AdWrapper';
 import DiscoverFilters from '../components/discover/DiscoverFilters';
+import RandomVideoLauncher from '../components/randommatch/RandomVideoLauncher';
 
 // ── Match Popup ──────────────────────────────────────────────────────────────
 const MatchPopup = React.memo(({ matchedUser, onClose }) => {
@@ -358,6 +359,14 @@ const Discover = () => {
               Filters
             </button>
             <button
+              type="button"
+              onClick={() => navigate('/random-video')}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-pink-200 bg-gradient-to-r from-[#FD5A7A] to-[#FD2B6B] px-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(253,90,122,0.2)] transition hover:-translate-y-0.5"
+            >
+              <Video size={17} />
+              Random Video
+            </button>
+            <button
               onClick={() => loadRandom(1)}
               className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-linear-to-r from-pink-600 to-pink-500 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all"
             >
@@ -393,6 +402,10 @@ const Discover = () => {
                 Discover meaningful connections with people who share your interests and values.
               </p>
             </div>
+          </div>
+
+          <div className="py-6">
+            <RandomVideoLauncher />
           </div>
 
           {/* Main Content */}

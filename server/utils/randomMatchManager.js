@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const randomVideoMonitor = require('./randomVideoMonitor');
 
 class RandomMatchManager {
   constructor() {
@@ -18,6 +19,7 @@ class RandomMatchManager {
       onlineUsers: 0,
       liveMonitoring: []
     };
+    this.monitoringWindow = [];
   }
 
   async startSearch(userDoc, io) {
@@ -53,6 +55,11 @@ class RandomMatchManager {
       this.stats.activeCalls += 1;
       this.stats.totalRandomCalls += 1;
       this.stats.queueSize = Math.max(0, this.queue.length);
+      randomVideoMonitor.addEvent('match_found', {
+        userId,
+        partnerId: candidate.userId,
+        sessionId: session.id,
+      });
       io.to(userId).emit('matchFound', { session, partner: candidate.profile });
       io.to(candidate.userId).emit('matchFound', { session, partner: this.getPublicProfile(userDoc) });
       return { success: true, status: 'matched', session, partner: candidate.profile };
@@ -67,18 +74,30 @@ class RandomMatchManager {
     };
     this.queue.push(entry);
     this.stats.queueSize = this.queue.length;
+    randomVideoMonitor.addEvent('queue_joined', {
+      userId,
+      queueSize: this.queue.length,
+    });
     return { success: true, status: 'searching', message: 'Finding your perfect match...' };
   }
 
   async skipSearch(userId, io) {
     const session = this.userSessions.get(userId);
     if (session) {
+      randomVideoMonitor.addEvent('session_skipped', {
+        userId,
+        sessionId: session.id,
+      });
       this.endSession(userId, io, 'skipped');
       return { success: true, message: 'Match skipped. Searching again...' };
     }
 
     this.queue = this.queue.filter(item => item.userId !== userId);
     this.stats.queueSize = this.queue.length;
+    randomVideoMonitor.addEvent('queue_left', {
+      userId,
+      queueSize: this.queue.length,
+    });
     return { success: true, message: 'Search canceled.' };
   }
 
@@ -111,6 +130,11 @@ class RandomMatchManager {
     const targetUser = await User.findById(targetId);
     if (!targetUser) return { success: false, message: 'User not found.' };
     this.stats.reports += 1;
+    randomVideoMonitor.addEvent('report_submitted', {
+      reporterId: userId,
+      targetId,
+      reason,
+    });
     if (io) {
       io.to(targetId).emit('randomMatchReport', { targetId, reason });
     }
@@ -127,6 +151,10 @@ class RandomMatchManager {
       await currentUser.save({ validateBeforeSave: false });
     }
     this.stats.blockedUsers += 1;
+    randomVideoMonitor.addEvent('user_blocked', {
+      userId,
+      targetId,
+    });
     if (io) {
       io.to(userId).emit('randomMatchBlocked', { targetId });
     }
@@ -263,6 +291,12 @@ class RandomMatchManager {
     };
     this.sessions.set(session.id, session);
     session.status = 'active';
+    randomVideoMonitor.addEvent('session_started', {
+      sessionId: session.id,
+      userAId: session.userAId,
+      userBId: session.userBId,
+      mode: session.mode,
+    });
     this.startTimer(session, io);
     return session;
   }
@@ -277,6 +311,13 @@ class RandomMatchManager {
     this.userSessions.delete(session.userBId);
     this.sessions.delete(session.id);
     this.stats.activeCalls = Math.max(0, this.stats.activeCalls - 1);
+    randomVideoMonitor.addEvent('session_ended', {
+      sessionId: session.id,
+      userId,
+      otherId,
+      reason,
+      durationSeconds: session.startedAt ? Math.max(1, Math.round((Date.now() - new Date(session.startedAt).getTime()) / 1000)) : 0,
+    });
     if (io) {
       io.to(userId).emit('endMatch', { reason, session });
       io.to(otherId).emit('endMatch', { reason, session });
@@ -330,6 +371,19 @@ class RandomMatchManager {
     return age;
   }
 
+  getMonitoringSnapshot() {
+    return randomVideoMonitor.buildSnapshot({
+      queueSize: this.queue.length,
+      activeCalls: this.userSessions.size,
+      totalRandomCalls: this.stats.totalRandomCalls,
+      reports: this.stats.reports,
+      blockedUsers: this.stats.blockedUsers,
+      totalMinutesUsed: this.stats.totalMinutesUsed,
+      cardsUsed: this.stats.cardsUsed,
+      coinsSpent: this.stats.coinsSpent,
+    });
+  }
+
   getAnalytics() {
     return {
       success: true,
@@ -337,7 +391,8 @@ class RandomMatchManager {
         ...this.stats,
         activeCalls: this.userSessions.size,
         queueSize: this.queue.length,
-        averageCallDuration: this.stats.totalRandomCalls > 0 ? Math.round(this.stats.totalMinutesUsed / this.stats.totalRandomCalls) : 0
+        averageCallDuration: this.stats.totalRandomCalls > 0 ? Math.round(this.stats.totalMinutesUsed / this.stats.totalRandomCalls) : 0,
+        monitoring: this.getMonitoringSnapshot(),
       }
     };
   }
