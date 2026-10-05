@@ -149,6 +149,29 @@ router.get('/admin/messages', protect, authorize('admin'), async (req, res) => {
   }
 });
 
+router.get('/admin/messages/summary', protect, authorize('admin'), async (req, res) => {
+  try {
+    const totals = await ContactMessage.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          newCount: { $sum: { $cond: [{ $eq: ['$status', 'New'] }, 1, 0] } },
+          readCount: { $sum: { $cond: [{ $eq: ['$status', 'Read'] }, 1, 0] } },
+          repliedCount: { $sum: { $cond: [{ $eq: ['$status', 'Replied'] }, 1, 0] } },
+          archivedCount: { $sum: { $cond: [{ $eq: ['$status', 'Archived'] }, 1, 0] } }
+        }
+      }
+    ]);
+
+    const stats = totals[0] || { total: 0, newCount: 0, readCount: 0, repliedCount: 0, archivedCount: 0 };
+    res.json({ success: true, stats });
+  } catch (error) {
+    console.error('Admin summary error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 router.get('/admin/messages/:id', protect, authorize('admin'), async (req, res) => {
   try {
     const contact = await ContactMessage.findById(req.params.id).populate('userId', 'name email profilePhoto isVerified');
@@ -252,29 +275,6 @@ router.delete('/admin/messages/:id', protect, authorize('admin'), async (req, re
     res.json({ success: true, message: 'Message deleted successfully' });
   } catch (error) {
     console.error('Admin delete message error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-router.get('/admin/messages/summary', protect, authorize('admin'), async (req, res) => {
-  try {
-    const totals = await ContactMessage.aggregate([
-      {
-        $group: {
-          _id: null,
-          total: { $sum: 1 },
-          newCount: { $sum: { $cond: [{ $eq: ['$status', 'New'] }, 1, 0] } },
-          readCount: { $sum: { $cond: [{ $eq: ['$status', 'Read'] }, 1, 0] } },
-          repliedCount: { $sum: { $cond: [{ $eq: ['$status', 'Replied'] }, 1, 0] } },
-          archivedCount: { $sum: { $cond: [{ $eq: ['$status', 'Archived'] }, 1, 0] } }
-        }
-      }
-    ]);
-
-    const stats = totals[0] || { total: 0, newCount: 0, readCount: 0, repliedCount: 0, archivedCount: 0 };
-    res.json({ success: true, stats });
-  } catch (error) {
-    console.error('Admin summary error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

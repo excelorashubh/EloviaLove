@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, Trash2, ArrowRight, Download } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Search, Trash2, ArrowRight, Download, AlertCircle, RefreshCw } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { fetchAdminMessages, deleteAdminMessage, fetchContactSummary } from '../../services/contact';
 
@@ -37,10 +37,11 @@ const columns = [
 const formatDate = (iso) => new Date(iso).toLocaleString('en-IN', { hour12: true });
 
 function AdminContactMessages() {
-  const [summary, setSummary] = useState({});
+  const [summary, setSummary] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [loadError, setLoadError] = useState(false);
+  const page = 1;
   const [filterStatus, setFilterStatus] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
   const [search, setSearch] = useState('');
@@ -48,8 +49,9 @@ function AdminContactMessages() {
   const [details, setDetails] = useState(null);
   const tableRef = useRef(null);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const [summaryRes, messagesRes] = await Promise.all([
         fetchContactSummary(),
@@ -59,14 +61,15 @@ function AdminContactMessages() {
       setMessages(messagesRes.data.messages);
     } catch (error) {
       console.error('Admin contact load error', error);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, filterStatus, filterPriority, search]);
 
   useEffect(() => {
     loadData();
-  }, [page, filterStatus, filterPriority, search]);
+  }, [loadData]);
 
   const handleSelectAll = (event) => {
     if (event.target.checked) {
@@ -150,7 +153,7 @@ function AdminContactMessages() {
           {STAT_CARDS.map((card) => (
             <div key={card.key} className={`rounded-3xl p-5 ${card.color}`}> 
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">{card.label}</p>
-              <p className="mt-4 text-3xl font-bold text-white">{summary?.[card.key] ?? 0}</p>
+              <p className="mt-4 text-3xl font-bold text-white">{summary?.[card.key] ?? (loadError ? '—' : 0)}</p>
             </div>
           ))}
         </div>
@@ -184,6 +187,20 @@ function AdminContactMessages() {
             </div>
           </div>
 
+          {loadError && (
+            <div role="alert" className="mb-5 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 sm:flex-row sm:items-center sm:justify-between">
+              <span className="inline-flex items-center gap-2"><AlertCircle size={17} /> Unable to load contact messages. Please try again.</span>
+              <button
+                type="button"
+                onClick={loadData}
+                disabled={loading}
+                className="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-red-600 px-3 py-2 font-semibold text-white hover:bg-red-700 disabled:opacity-60 sm:self-auto"
+              >
+                <RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Retry
+              </button>
+            </div>
+          )}
+
           <div className="overflow-x-auto">
             <table ref={tableRef} className="min-w-full divide-y divide-slate-200 text-sm">
               <thead className="bg-slate-50 text-slate-500">
@@ -202,7 +219,9 @@ function AdminContactMessages() {
                   </tr>
                 ) : messages.length === 0 ? (
                   <tr>
-                    <td colSpan={columns.length + 2} className="px-4 py-10 text-center text-slate-500">No contact messages found.</td>
+                    <td colSpan={columns.length + 2} className="px-4 py-10 text-center text-slate-500">
+                      {loadError ? 'Contact messages could not be loaded.' : 'No contact messages found.'}
+                    </td>
                   </tr>
                 ) : messages.map((message) => (
                   <tr key={message._id} className="hover:bg-slate-50 transition-colors">
