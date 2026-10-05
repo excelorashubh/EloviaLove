@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { HeartHandshake, Star, Shield, Heart, MessageCircle, Zap, MapPin, Users, Quote } from 'lucide-react';
+import { HeartHandshake, Star, Shield, Heart, MessageCircle, Zap, MapPin, Users, Quote, X, ArrowRight, Sparkles } from 'lucide-react';
 import { SITE_URL } from '../data/seoContent';
 import { WebSiteSchema, OrganizationSchema, BreadcrumbSchema } from '../components/seo/SchemaComponents';
 import { globalStats } from '../data/homeData';
+import { useAuth } from '../context/AuthContext';
 
 const FAQAccordion = React.lazy(() => import('../components/FAQAccordion'));
 const BannerAd = React.lazy(() => import('../components/ads/BannerAd'));
@@ -30,9 +31,154 @@ const staggerContainer = {
   }
 };
 
+const AUTH_POPUP_STORAGE_KEY = 'elovia_auth_popup_dismissed_at';
+const AUTH_POPUP_DELAY_MS = 7000;
+
 const Home = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
+  const [showAuthPopup, setShowAuthPopup] = useState(false);
+  const triggerTimeoutRef = useRef(null);
+  const triggeredRef = useRef(false);
+
+  const shouldShowPopup = () => {
+    if (typeof window === 'undefined') return false;
+    if (loading || isAuthenticated) return false;
+
+    const dismissedAt = Number(window.localStorage.getItem(AUTH_POPUP_STORAGE_KEY) || '0');
+    const twentyFourHoursMs = 24 * 60 * 60 * 1000;
+    return !dismissedAt || Date.now() - dismissedAt >= twentyFourHoursMs;
+  };
+
+  const dismissAuthPopup = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(AUTH_POPUP_STORAGE_KEY, String(Date.now()));
+    }
+    setShowAuthPopup(false);
+  };
+
+  const showAuthPopupIfEligible = () => {
+    if (!shouldShowPopup() || triggeredRef.current) return;
+    triggeredRef.current = true;
+    setShowAuthPopup(true);
+  };
+
+  useEffect(() => {
+    if (loading || isAuthenticated) {
+      setShowAuthPopup(false);
+      return;
+    }
+
+    if (triggerTimeoutRef.current) {
+      window.clearTimeout(triggerTimeoutRef.current);
+    }
+
+    triggerTimeoutRef.current = window.setTimeout(() => {
+      showAuthPopupIfEligible();
+    }, AUTH_POPUP_DELAY_MS);
+
+    const handleScroll = () => {
+      if (typeof window === 'undefined') return;
+      const scrollPosition = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
+      if (scrollPosition >= 0.35 && scrollPosition <= 0.4) {
+        showAuthPopupIfEligible();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (triggerTimeoutRef.current) {
+        window.clearTimeout(triggerTimeoutRef.current);
+      }
+    };
+  }, [loading, isAuthenticated]);
+
+  const handleAuthAction = (path) => {
+    dismissAuthPopup();
+    navigate(path);
+  };
+
   return (
     <>
+      {showAuthPopup && !loading && !isAuthenticated && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 backdrop-blur-sm px-4 py-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 18 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 18 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="relative w-full max-w-xl overflow-hidden rounded-[28px] border border-pink-100 bg-white/95 p-5 shadow-[0_30px_90px_rgba(15,23,42,0.22)] sm:p-8"
+          >
+            <button
+              type="button"
+              aria-label="Close auth popup"
+              onClick={dismissAuthPopup}
+              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="mb-6 flex justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FD5A7A] to-[#FD2B6B] shadow-[0_18px_38px_rgba(253,90,122,0.35)]">
+                <Heart className="h-8 w-8 text-white" fill="currentColor" />
+              </div>
+            </div>
+
+            <div className="text-center">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-pink-100 bg-pink-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-pink-600">
+                <Sparkles size={12} />
+                Join Elovia Love
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900">Find your perfect match</h2>
+              <p className="mt-3 text-base leading-7 text-slate-600">
+                Meet verified singles, chat with people who match your values, and start building a real connection.
+              </p>
+            </div>
+
+            <div className="mt-7 space-y-3">
+              <button
+                type="button"
+                onClick={() => handleAuthAction('/signup')}
+                className="flex w-full items-center justify-between rounded-2xl bg-gradient-to-r from-[#FD5A7A] to-[#FD2B6B] px-5 py-4 text-left text-white shadow-[0_20px_44px_rgba(253,90,122,0.30)] transition hover:translate-y-[-1px]"
+              >
+                <span>
+                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-pink-100">Free</span>
+                  <span className="mt-1 block text-lg font-bold">Create Free Account</span>
+                </span>
+                <ArrowRight className="h-5 w-5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleAuthAction('/login')}
+                className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 text-left text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <span>
+                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Already a member</span>
+                  <span className="mt-1 block text-lg font-bold">Log In</span>
+                </span>
+                <ArrowRight className="h-5 w-5 text-slate-400" />
+              </button>
+            </div>
+
+            <div className="mt-6 flex items-center justify-between gap-3 text-sm text-slate-500">
+              <p className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                Verified profiles only
+              </p>
+              <button
+                type="button"
+                onClick={dismissAuthPopup}
+                className="font-medium text-slate-600 transition hover:text-slate-900"
+              >
+                Maybe Later
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
       {/* ── SEO Schema Markup ── */}
       <WebSiteSchema />
       <OrganizationSchema />
