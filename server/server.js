@@ -32,13 +32,15 @@ async function startServer() {
   // ── STEP 2: Initialize Express ─────────────────────────────────────────────
   const app = express();
   const server = createServer(app);
+  const allowedOrigins = [
+    process.env.CLIENT_URL,
+    'https://elovialove.onrender.com',
+    'http://localhost:5173',
+    'http://localhost:5174',
+  ].filter(Boolean).map(origin => origin.replace(/\/+$/, ''));
   const io = new Server(server, {
     cors: {
-      origin: [
-        process.env.CLIENT_URL || "http://localhost:5173",
-        "http://localhost:5173",
-        "http://localhost:5174",
-      ],
+      origin: allowedOrigins,
       methods: ["GET", "POST"],
       credentials: true,
     }
@@ -130,7 +132,7 @@ async function startServer() {
 
   // ── CORS Configuration ────────────────────────────────────────────────────────
   app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']

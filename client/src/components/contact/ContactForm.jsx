@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { submitContactMessage } from '../../services/contact';
@@ -24,6 +24,7 @@ export default function ContactForm() {
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState({ loading: false, success: '', error: '' });
+  const submitting = useRef(false);
 
   useEffect(() => {
     if (user) {
@@ -44,9 +45,11 @@ export default function ContactForm() {
 
   const validate = () => {
     const nextErrors = {};
-    if (!form.fullName.trim()) nextErrors.fullName = 'Please enter your full name.';
+    if (form.fullName.trim().length < 3) nextErrors.fullName = 'Full name must be at least 3 characters.';
+    else if (form.fullName.trim().length > 100) nextErrors.fullName = 'Full name cannot exceed 100 characters.';
     if (!form.email.trim()) nextErrors.email = 'Please enter your email address.';
     else if (!emailRegex.test(form.email.trim())) nextErrors.email = 'Please enter a valid email address.';
+    else if (form.email.trim().length > 100) nextErrors.email = 'Email cannot exceed 100 characters.';
     if (form.phoneNumber.trim() && !phoneRegex.test(normalizePhoneForValidation(combinedPhone))) nextErrors.phoneNumber = 'Please enter a valid phone number with country code.';
     if (!form.subject.trim()) nextErrors.subject = 'Please enter a subject.';
     else if (form.subject.trim().length < 5) nextErrors.subject = 'Subject must be at least 5 characters.';
@@ -70,26 +73,28 @@ export default function ContactForm() {
   };
 
   const resetForm = () => {
-    setForm((prev) => ({
+    setForm({
       ...initialState,
       fullName: user?.name || '',
       email: user?.email || '',
       countryCode: user?.phone?.startsWith('+') ? user.phone.split(' ')[0] : '+91',
       phoneNumber: user?.phone ? user.phone.replace(/^\+\d+\s*/, '') : ''
-    }));
+    });
     setErrors({});
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (submitting.current) return;
     if (!validate()) return;
+    submitting.current = true;
     setStatus({ loading: true, success: '', error: '' });
 
     try {
       await submitContactMessage({
         fullName: form.fullName.trim(),
         email: form.email.trim(),
-        phone: combinedPhone,
+        phone: normalizePhoneForValidation(combinedPhone),
         subject: form.subject.trim(),
         message: form.message.trim(),
         honeypot: form.honeypot.trim()
@@ -98,8 +103,31 @@ export default function ContactForm() {
       resetForm();
       setTimeout(() => setStatus((prev) => ({ ...prev, success: '' })), 6000);
     } catch (error) {
-      const message = error.response?.data?.message || 'Unable to send your message. Please try again later.';
+      const statusCode = error.response?.status;
+      const serverErrors = error.response?.data?.errors || [];
+      if (statusCode === 422 && serverErrors.length) {
+        const fieldErrors = Object.fromEntries(serverErrors.map(item => [item.field || item.path, item.message]).filter(([field]) => field));
+        if (Object.keys(fieldErrors).length) {
+          setErrors(fieldErrors);
+          setStatus({ loading: false, success: '', error: '' });
+        } else {
+          setStatus({
+            loading: false,
+            success: '',
+            error: serverErrors.map(item => item.message).filter(Boolean).join(' '),
+          });
+        }
+        return;
+      }
+
+      const message = statusCode === 429
+        ? "You've sent several messages recently. Please wait a moment and try again."
+        : statusCode === 503 || !error.response
+          ? "We're unable to reach our server right now. Please try again in a moment."
+          : error.response?.data?.message || 'Unable to process your request. Please try again later.';
       setStatus({ loading: false, success: '', error: message });
+    } finally {
+      submitting.current = false;
     }
   };
 

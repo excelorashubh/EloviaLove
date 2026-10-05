@@ -8,6 +8,12 @@ const router = express.Router();
 
 const sanitizePhone = (phone) => phone ? phone.trim().replace(/\s+/g, ' ') : '';
 
+const sendNotificationEmail = (options, label) => {
+  sendEmail(options).catch(error => {
+    console.error(`Contact ${label} email notification failed:`, error);
+  });
+};
+
 const preventDuplicates = async (email, subject, message, ipAddress) => {
   const threshold = new Date(Date.now() - 1000 * 60 * 5); // 5 minutes
   const existing = await ContactMessage.findOne({
@@ -25,8 +31,8 @@ router.post(
   optionalAuth,
   [
     body('fullName').trim().notEmpty().withMessage('Full name is required').isLength({ min: 3, max: 100 }).withMessage('Full name must be between 3 and 100 characters'),
-    body('email').trim().notEmpty().withMessage('Email is required').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
-    body('phone').optional({ checkFalsy: true }).trim().isLength({ min: 7, max: 20 }).withMessage('Please provide a valid phone number'),
+    body('email').trim().notEmpty().withMessage('Email is required').isEmail().withMessage('Please provide a valid email').isLength({ max: 100 }).withMessage('Email cannot exceed 100 characters').normalizeEmail(),
+    body('phone').optional({ checkFalsy: true }).trim().matches(/^\+\d{7,20}$/).withMessage('Please provide a valid phone number with country code'),
     body('subject').trim().notEmpty().withMessage('Subject is required').isLength({ min: 5, max: 120 }).withMessage('Subject must be between 5 and 120 characters'),
     body('message').trim().notEmpty().withMessage('Message is required').isLength({ min: 15, max: 2000 }).withMessage('Message must be between 15 and 2000 characters'),
     body('honeypot').optional().custom((value) => {
@@ -37,11 +43,16 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(422).json({ success: false, errors: errors.array().map(err => ({ field: err.param, message: err.msg })) });
+      return res.status(422).json({ success: false, errors: errors.array().map(err => ({ field: err.path || err.param, message: err.msg })) });
     }
 
     try {
-      const { fullName, email, phone, subject, message } = req.body;
+      if (ContactMessage.db.readyState !== 1) {
+        return res.status(503).json({ success: false, message: 'Contact service is temporarily unavailable. Please try again later.' });
+      }
+
+      const { fullName, email, subject, message } = req.body;
+      const phone = req.body.phone || '';
       const normalizedPhone = sanitizePhone(phone);
       const ipAddress = req.ip || req.headers['x-forwarded-for'] || ''; // preserve origin
       const userAgent = req.get('User-Agent') || '';
@@ -78,26 +89,26 @@ router.post(
         ipAddress,
         userAgent
       });
-      await sendEmail({
+      sendNotificationEmail({
         to: process.env.ADMIN_NOTIFICATION_EMAIL || 'support@elovialove.com',
         ...adminMail
-      });
+      }, 'admin');
 
       const autoReply = buildAutoReplyEmail({ fullName, email, phone: normalizedPhone, subject });
-      await sendEmail({
+      sendNotificationEmail({
         to: email,
         ...autoReply
-      });
+      }, 'auto-reply');
 
       const io = req.app.get('io');
       if (io) {
         io.to('admin').emit('contact_message_created', contact);
       }
 
-      return res.json({ success: true, message: 'Message sent successfully. Our team will respond shortly.' });
+      return res.status(201).json({ success: true, message: 'Message sent successfully. Our team will respond shortly.' });
     } catch (error) {
       console.error('Contact message error:', error);
-      return res.status(500).json({ success: false, message: 'Unable to send your message at this time. Please try again later.' });
+      return res.status(500).json({ success: false, message: 'Unable to process your request. Please try again later.' });
     }
   }
 );
