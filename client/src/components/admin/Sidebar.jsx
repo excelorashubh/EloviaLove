@@ -17,6 +17,7 @@ import {
   PanelLeftOpen,
   Sun,
   Users,
+  Video,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -25,6 +26,7 @@ const navItems = [
   { label: 'Messages', path: '/admin/messages', icon: MessageSquare },
   { label: 'Users', path: '/admin/users', icon: Users },
   { label: 'Reports', path: '/admin/reports', icon: Flag },
+  { label: 'Random Video Monitor', path: '/admin/random-video/monitor', icon: Video },
   { label: 'Revenue', path: '/admin/revenue', icon: DollarSign },
   { label: 'Analytics', path: '/admin/analytics', icon: BarChart2 },
   { label: 'Visitors', path: '/admin/visitors', icon: Eye },

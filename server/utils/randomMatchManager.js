@@ -372,6 +372,23 @@ class RandomMatchManager {
   }
 
   getMonitoringSnapshot() {
+    const queueEntries = this.queue.slice(0, 100).map(entry => ({
+      userId: entry.userId,
+      name: entry.profile?.name || '',
+      joinedAt: entry.joinedAt,
+      status: 'waiting',
+    }));
+    const activeSessions = Array.from(this.sessions.values()).slice(0, 100).map(session => ({
+      sessionId: session.id,
+      userAId: session.userAId,
+      userBId: session.userBId,
+      status: session.status,
+      mode: session.mode,
+      createdAt: session.createdAt,
+      startedAt: session.startedAt,
+      timer: session.timer,
+    }));
+
     return randomVideoMonitor.buildSnapshot({
       queueSize: this.queue.length,
       activeCalls: this.userSessions.size,
@@ -381,6 +398,9 @@ class RandomMatchManager {
       totalMinutesUsed: this.stats.totalMinutesUsed,
       cardsUsed: this.stats.cardsUsed,
       coinsSpent: this.stats.coinsSpent,
+      queueEntries,
+      activeSessionCount: this.sessions.size,
+      activeSessions,
     });
   }
 

@@ -67,6 +67,7 @@ import AdminPlans from './pages/admin/AdminPlans';
 import AdminBlog from './pages/admin/AdminBlog';
 import AdminAds from './pages/admin/AdminAds';
 import AdminContactMessages from './pages/admin/AdminContactMessages';
+import RandomVideoMonitor from './pages/admin/RandomVideoMonitor';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
@@ -424,6 +425,7 @@ function AppContent() {
           <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
           <Route path="/admin/messages" element={<AdminRoute><AdminContactMessages /></AdminRoute>} />
           <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
+          <Route path="/admin/random-video/monitor" element={<AdminRoute><RandomVideoMonitor /></AdminRoute>} />
           <Route path="/admin/revenue" element={<AdminRoute><AdminRevenue /></AdminRoute>} />
           <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
           <Route path="/admin/visitors" element={<AdminRoute><AdminVisitors /></AdminRoute>} />

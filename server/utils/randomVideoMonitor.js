@@ -18,7 +18,19 @@ class RandomVideoMonitor {
     }
   }
 
-  buildSnapshot({ queueSize = 0, activeCalls = 0, totalRandomCalls = 0, reports = 0, blockedUsers = 0, totalMinutesUsed = 0, cardsUsed = 0, coinsSpent = 0 }) {
+  buildSnapshot({
+    queueSize = 0,
+    activeCalls = 0,
+    totalRandomCalls = 0,
+    reports = 0,
+    blockedUsers = 0,
+    totalMinutesUsed = 0,
+    cardsUsed = 0,
+    coinsSpent = 0,
+    queueEntries = [],
+    activeSessionCount = 0,
+    activeSessions = [],
+  }) {
     const now = Date.now();
     const lastHourEvents = this.events.filter(event => now - new Date(event.timestamp).getTime() <= 60 * 60 * 1000);
     const matchEvents = lastHourEvents.filter(event => event.type === 'match_found').length;
@@ -34,7 +46,12 @@ class RandomVideoMonitor {
     return {
       status: alerts.length ? 'warning' : 'healthy',
       queueSize,
+      queueEntries,
+      queueEntriesTruncated: queueSize > queueEntries.length,
       activeSessions: activeCalls,
+      activeSessionCount,
+      activeSessionEntries: activeSessions,
+      activeSessionEntriesTruncated: activeSessionCount > activeSessions.length,
       totalCalls: totalRandomCalls,
       reports,
       blockedUsers,
