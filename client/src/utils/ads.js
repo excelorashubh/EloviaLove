@@ -8,6 +8,8 @@ let adsenseLoaded = false;
 let adsenseLoading = false;
 const loadCallbacks = [];
 const initializedElements = new WeakSet();
+export const ADSENSE_CLIENT_ID =
+  import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID || 'ca-pub-7967762028283267';
 
 /**
  * Load Google AdSense script globally (once)
@@ -27,15 +29,6 @@ export const loadAdSense = () => {
       return;
     }
 
-    const clientId = import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID;
-    
-    // No client ID configured
-    if (!clientId) {
-      console.warn('[AdSense] Client ID not configured');
-      resolve(false);
-      return;
-    }
-
     // Development mode - skip loading
     if (import.meta.env.DEV) {
       console.log('[AdSense] Development mode - skipping script load');
@@ -46,11 +39,25 @@ export const loadAdSense = () => {
       return;
     }
 
+    const existingScript = Array.from(document.scripts).find((script) =>
+      script.src.includes('pagead2.googlesyndication.com/pagead/js/adsbygoogle.js')
+    );
+    if (existingScript) {
+      if (new URL(existingScript.src).searchParams.get('client') === ADSENSE_CLIENT_ID) {
+        adsenseLoaded = true;
+        resolve(true);
+      } else {
+        console.error('[AdSense] An AdSense script is already loaded with a different publisher ID');
+        resolve(false);
+      }
+      return;
+    }
+
     adsenseLoading = true;
 
     // Create script element
     const script = document.createElement('script');
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`;
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`;
     script.async = true;
     script.crossOrigin = 'anonymous';
 

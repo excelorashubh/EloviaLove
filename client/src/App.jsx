@@ -56,6 +56,7 @@ import TermsOfService from './pages/TermsOfService';
 import SafetyHub from './pages/SafetyHub';
 import RefundPolicy from './pages/RefundPolicy';
 import ReportAbuse from './pages/ReportAbuse';
+import VerificationGuide from './pages/VerificationGuide';
 import Pricing from './pages/Pricing';
 import SubscriptionSuccess from './pages/SubscriptionSuccess';
 import RandomVideoPage from './pages/RandomVideo';
@@ -244,6 +245,7 @@ function AppContent() {
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/safety" element={<SafetyHub />} />
           <Route path="/report-abuse" element={<ReportAbuse />} />
+          <Route path="/how-verification-works" element={<VerificationGuide />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/subscription/success" element={<SubscriptionSuccess />} />

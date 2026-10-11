@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { loadAdSense, initializeAd, trackAdImpression } from '../../utils/ads';
+import { ADSENSE_CLIENT_ID, loadAdSense, initializeAd, trackAdImpression } from '../../utils/ads';
 
 const isProduction = typeof window !== 'undefined' &&
   import.meta.env.PROD &&
@@ -19,7 +19,7 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '', placement =
   const [error, setError] = useState(false);
   const pushed = useRef(false);
   const impressionTracked = useRef(false);
-  const clientId = import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID || 'ca-pub-7967762028283267';
+  const clientId = ADSENSE_CLIENT_ID;
 
   // Lazy load when ad comes into view
   useEffect(() => {
