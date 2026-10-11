@@ -1,8 +1,9 @@
 import AdUnit from './AdUnit';
+import { ADSENSE_AD_SLOTS } from '../../utils/ads';
 
 /** Native in-feed ad — blends into content lists */
 const InFeedAd = ({ slot, className = '', placement = 'in_feed' }) => {
-  const adSlot = slot || import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || '';
+  const adSlot = slot || ADSENSE_AD_SLOTS.native;
 
   return (
     <div className={`w-full overflow-hidden rounded-2xl ${className}`} style={{ minHeight: 120 }}>

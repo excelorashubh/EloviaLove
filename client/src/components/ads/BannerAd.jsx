@@ -1,8 +1,9 @@
 import AdUnit from './AdUnit';
+import { ADSENSE_AD_SLOTS } from '../../utils/ads';
 
 /** Responsive leaderboard banner — use between page sections */
 const BannerAd = ({ slot, className = '', placement = 'banner' }) => {
-  const adSlot = slot || import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || '';
+  const adSlot = slot || ADSENSE_AD_SLOTS.banner;
 
   return (
     <div className={`w-full overflow-hidden ${className}`} style={{ minHeight: 90 }}>

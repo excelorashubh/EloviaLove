@@ -10,6 +10,12 @@ const loadCallbacks = [];
 const initializedElements = new WeakSet();
 export const ADSENSE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID || 'ca-pub-7967762028283267';
+export const ADSENSE_AD_SLOTS = {
+  banner: import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || '9858095130',
+  sidebar: import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_SIDEBAR || '2360667505',
+  native: import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || '8109863804',
+  mobile: import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_MOBILE || '1847743171',
+};
 
 /**
  * Load Google AdSense script globally (once)

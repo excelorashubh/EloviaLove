@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import AdUnit from './AdUnit';
 import { X } from 'lucide-react';
+import { ADSENSE_AD_SLOTS } from '../../utils/ads';
 
 /**
  * StickyMobileAd - Sticky bottom ad for mobile devices
@@ -9,7 +10,7 @@ import { X } from 'lucide-react';
 const StickyMobileAd = ({ slot, className = '' }) => {
   const [visible, setVisible] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const adSlot = slot || import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_MOBILE || '';
+  const adSlot = slot || ADSENSE_AD_SLOTS.mobile;
 
   // Check if mobile
   useEffect(() => {

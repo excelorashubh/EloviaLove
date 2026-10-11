@@ -1,5 +1,5 @@
 import AdUnit from './AdUnit';
-import { getResponsiveAdSize } from '../../utils/ads';
+import { ADSENSE_AD_SLOTS, getResponsiveAdSize } from '../../utils/ads';
 import { useState, useEffect } from 'react';
 
 /**
@@ -25,9 +25,9 @@ const AdBanner = ({ slot, className = '', placement = 'banner' }) => {
     if (slot) return slot;
 
     if (adSize === 'mobile') {
-      return import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_MOBILE || '';
+      return ADSENSE_AD_SLOTS.mobile;
     }
-    return import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_TOP || '';
+    return ADSENSE_AD_SLOTS.banner;
   };
 
   return (

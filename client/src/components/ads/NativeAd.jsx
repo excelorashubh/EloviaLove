@@ -1,11 +1,12 @@
 import AdUnit from './AdUnit';
+import { ADSENSE_AD_SLOTS } from '../../utils/ads';
 
 /**
  * NativeAd - Fluid in-feed native ad
  * Blends seamlessly with content
  */
 const NativeAd = ({ slot, className = '', placement = 'native' }) => {
-  const adSlot = slot || import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || '';
+  const adSlot = slot || ADSENSE_AD_SLOTS.native;
 
   return (
     <div className={`native-ad w-full overflow-hidden rounded-2xl ${className}`}>
