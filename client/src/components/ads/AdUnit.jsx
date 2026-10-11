@@ -43,7 +43,7 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '', placement =
   useEffect(() => {
     if (!isProduction || !visible || pushed.current || !clientId || !slot) return;
 
-    let timeoutId = null;
+    let statusObserver = null;
 
     const loadAndInitialize = async () => {
       try {
@@ -55,18 +55,27 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '', placement =
         }
 
         // Initialize ad
-        if (ref.current) {
-          initializeAd(ref.current);
+        const adElement = ref.current;
+        if (adElement) {
+          initializeAd(adElement);
           pushed.current = true;
           setLoaded(true);
 
-          // Track impression after 1 second
-          timeoutId = setTimeout(() => {
-            if (!impressionTracked.current) {
+          const trackFilledImpression = () => {
+            if (
+              adElement.getAttribute('data-ad-status') === 'filled' &&
+              !impressionTracked.current
+            ) {
               trackAdImpression(slot, placement);
               impressionTracked.current = true;
             }
-          }, 1000);
+          };
+          statusObserver = new MutationObserver(trackFilledImpression);
+          statusObserver.observe(adElement, {
+            attributes: true,
+            attributeFilter: ['data-ad-status'],
+          });
+          trackFilledImpression();
         }
       } catch (err) {
         console.error('[AdUnit] Failed to load ad:', err);
@@ -77,7 +86,7 @@ const AdUnit = ({ slot, format = 'auto', style = {}, className = '', placement =
     loadAndInitialize();
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      statusObserver?.disconnect();
     };
   }, [visible, clientId, slot, placement]);
 
