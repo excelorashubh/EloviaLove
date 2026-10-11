@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /* eslint-disable react-refresh/only-export-components */
 // ── Complete Analytics & SEO Monitoring Setup ───────────────────────────────
@@ -129,25 +129,25 @@ export const AHREFS_WMT_CONFIG = {
 
 // 1. GA4 Event Tracking Hook
 export const useAnalytics = () => {
-  const trackEvent = (eventName, parameters = {}) => {
+  const trackEvent = useCallback((eventName, parameters = {}) => {
     if (typeof window.gtag === 'function') {
       window.gtag('event', eventName, {
         ...parameters,
         custom_parameter_1: 'dating_platform'
       });
     }
-  };
+  }, []);
 
-  const trackPageView = (pagePath, pageTitle) => {
+  const trackPageView = useCallback((pagePath, pageTitle) => {
     if (typeof window.gtag === 'function') {
       window.gtag('config', GA4_CONFIG.measurementId, {
         page_path: pagePath,
         page_title: pageTitle
       });
     }
-  };
+  }, []);
 
-  const trackEcommerce = (event, items, value) => {
+  const trackEcommerce = useCallback((event, items, value) => {
     if (typeof window.gtag === 'function') {
       window.gtag('event', event, {
         currency: 'INR',
@@ -155,7 +155,7 @@ export const useAnalytics = () => {
         items: items
       });
     }
-  };
+  }, []);
 
   return { trackEvent, trackPageView, trackEcommerce };
 };
@@ -187,7 +187,7 @@ export const SEOMonitor = () => {
         utm_campaign: urlParams.get('utm_campaign')
       });
     }
-  }, []);
+  }, [trackEvent]);
 
   return null;
 };
@@ -217,7 +217,7 @@ export const CrawlMonitor = () => {
         page_url: window.location.pathname
       });
     }
-  }, []);
+  }, [trackEvent]);
 
   return null;
 };
@@ -226,7 +226,7 @@ export const CrawlMonitor = () => {
 export const IndexCoverageMonitor = () => {
   const { trackEvent } = useAnalytics();
 
-  const checkIndexStatus = async () => {
+  const checkIndexStatus = useCallback(async () => {
     try {
       // Check if page is indexed (simplified version)
       const response = await fetch(`/api/seo/check-index?url=${encodeURIComponent(window.location.href)}`);
@@ -241,7 +241,7 @@ export const IndexCoverageMonitor = () => {
     } catch (error) {
       console.error('Index check failed:', error);
     }
-  };
+  }, [trackEvent]);
 
   useEffect(() => {
     // Check index status periodically (every 24 hours)
@@ -249,7 +249,7 @@ export const IndexCoverageMonitor = () => {
     checkIndexStatus(); // Initial check
 
     return () => clearInterval(checkInterval);
-  }, []);
+  }, [checkIndexStatus]);
 
   return null;
 };

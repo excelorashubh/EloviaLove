@@ -287,11 +287,3 @@ const SafetyPage = () => (
 );
 */
 
-export {
-  AUTHOR_CONFIG,
-  EDITORIAL_POLICY,
-  AuthorBio,
-  TrustIndicators,
-  ContentReviewBadge,
-  ContentTimestamps
-};

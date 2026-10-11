@@ -83,10 +83,3 @@ import { NoIndexPage, AdminPageWrapper, UserProfileWrapper, ChatWrapper } from '
 } />
 */
 
-export {
-  NoIndexPage,
-  AdminPageWrapper,
-  UserProfileWrapper,
-  ChatWrapper,
-  SearchResultsWrapper
-};

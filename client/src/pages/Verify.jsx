@@ -8,16 +8,20 @@ import api from '../services/api';
 import { SITE_URL } from '../data/seoContent';
 
 // ── Step indicator ────────────────────────────────────────────────────────────
-const Step = ({ icon: Icon, label, done, active }) => (
-  <div className={`flex flex-col items-center gap-1 ${active ? 'opacity-100' : 'opacity-40'}`}>
-    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
-      done ? 'bg-green-500 border-green-500' : active ? 'border-primary-500 bg-primary-50' : 'border-slate-200 bg-white'
-    }`}>
-      {done ? <CheckCircle2 size={18} className="text-white" /> : <Icon size={18} className={active ? 'text-primary-600' : 'text-slate-400'} />}
+const Step = (props) => {
+  const { icon: Icon, label, done, active } = props;
+
+  return (
+    <div className={`flex flex-col items-center gap-1 ${active ? 'opacity-100' : 'opacity-40'}`}>
+      <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+        done ? 'bg-green-500 border-green-500' : active ? 'border-primary-500 bg-primary-50' : 'border-slate-200 bg-white'
+      }`}>
+        {done ? <CheckCircle2 size={18} className="text-white" /> : <Icon size={18} className={active ? 'text-primary-600' : 'text-slate-400'} />}
+      </div>
+      <span className={`text-[10px] font-semibold ${done ? 'text-green-600' : active ? 'text-primary-600' : 'text-slate-400'}`}>{label}</span>
     </div>
-    <span className={`text-[10px] font-semibold ${done ? 'text-green-600' : active ? 'text-primary-600' : 'text-slate-400'}`}>{label}</span>
-  </div>
-);
+  );
+};
 
 const Verify = () => {
   const { user, loadUser } = useAuth();
@@ -120,6 +124,46 @@ const Verify = () => {
   };
 
   const isPremium = ['premium', 'pro'].includes(user?.plan);
+
+  const renderBlueTickForm = () => (
+    <div className="space-y-4">
+      <p className="text-slate-600 text-sm text-center">Upload a clear selfie to verify your identity. Admin will review within 24–48 hours.</p>
+
+      <div
+        onClick={() => fileRef.current?.click()}
+        className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center cursor-pointer hover:border-primary-400 transition-colors"
+      >
+        {selfiePreview ? (
+          <img src={selfiePreview} alt="Selfie" className="w-24 h-24 rounded-full object-cover mx-auto border-4 border-primary-200" />
+        ) : (
+          <>
+            <Camera size={32} className="text-slate-300 mx-auto mb-2" />
+            <p className="text-slate-500 text-sm">Tap to upload selfie</p>
+            <p className="text-slate-400 text-xs mt-1">Clear face photo required</p>
+          </>
+        )}
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleSelfie} />
+      </div>
+
+      <button
+        onClick={submitBlueTick}
+        disabled={btLoading || !selfie}
+        className="w-full py-3 bg-gradient-to-r from-blue-500 to-primary-600 text-white font-bold rounded-2xl disabled:opacity-50 flex items-center justify-center gap-2"
+      >
+        {btLoading ? <Loader2 size={16} className="animate-spin" /> : <BadgeCheck size={16} />}
+        Submit for Verification
+      </button>
+
+      {btMsg && (
+        <div className={`flex items-center gap-2 p-3 rounded-xl text-sm font-medium ${
+          btMsg.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
+        }`}>
+          {btMsg.type === 'success' ? <CheckCircle2 size={15} /> : <AlertCircle size={15} />}
+          {btMsg.text}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -341,44 +385,7 @@ const Verify = () => {
                   </a>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <p className="text-slate-600 text-sm text-center">Upload a clear selfie to verify your identity. Admin will review within 24–48 hours.</p>
-
-                  {/* Selfie upload */}
-                  <div
-                    onClick={() => fileRef.current?.click()}
-                    className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center cursor-pointer hover:border-primary-400 transition-colors"
-                  >
-                    {selfiePreview ? (
-                      <img src={selfiePreview} alt="Selfie" className="w-24 h-24 rounded-full object-cover mx-auto border-4 border-primary-200" />
-                    ) : (
-                      <>
-                        <Camera size={32} className="text-slate-300 mx-auto mb-2" />
-                        <p className="text-slate-500 text-sm">Tap to upload selfie</p>
-                        <p className="text-slate-400 text-xs mt-1">Clear face photo required</p>
-                      </>
-                    )}
-                    <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleSelfie} />
-                  </div>
-
-                  <button
-                    onClick={submitBlueTick}
-                    disabled={btLoading || !selfie}
-                    className="w-full py-3 bg-gradient-to-r from-blue-500 to-primary-600 text-white font-bold rounded-2xl disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {btLoading ? <Loader2 size={16} className="animate-spin" /> : <BadgeCheck size={16} />}
-                    Submit for Verification
-                  </button>
-
-                  {btMsg && (
-                    <div className={`flex items-center gap-2 p-3 rounded-xl text-sm font-medium ${
-                      btMsg.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
-                    }`}>
-                      {btMsg.type === 'success' ? <CheckCircle2 size={15} /> : <AlertCircle size={15} />}
-                      {btMsg.text}
-                    </div>
-                  )}
-                </div>
+                renderBlueTickForm()
               )
             )}
 

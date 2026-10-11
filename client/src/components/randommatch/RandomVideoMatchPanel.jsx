@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { Crown, Heart, Sparkles, Video, MessageCircle, ShieldCheck, Coins, TimerReset, SkipForward, Ban, Flag, Mic, MicOff, Camera, CameraOff, RefreshCw, Sparkle, Gift, X } from 'lucide-react';
 import api from '../../services/api';
 import { io } from 'socket.io-client';
@@ -17,20 +17,15 @@ const RandomVideoMatchPanel = () => {
   const [countdown, setCountdown] = useState(3);
   const [callTimer, setCallTimer] = useState(120);
   const [toast, setToast] = useState(null);
-  const [showGiftPopup, setShowGiftPopup] = useState(false);
+  const showGiftPopup = typeof window !== 'undefined'
+    && window.localStorage.getItem('elovia_random_match_gift_pending') === 'true'
+    && !user?.giftClaimed;
   const [showCallUi, setShowCallUi] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const socketRef = useRef(null);
 
   const isFreeMode = useMemo(() => (cards.randomMatchCards > 0), [cards.randomMatchCards]);
-
-  useEffect(() => {
-    const pendingGift = window.localStorage.getItem('elovia_random_match_gift_pending');
-    if (pendingGift === 'true' && user?.giftClaimed === false) {
-      setShowGiftPopup(true);
-    }
-  }, [user?.giftClaimed]);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -115,7 +110,7 @@ const RandomVideoMatchPanel = () => {
           setToast({ type: 'info', message: '🔍 Searching nearby' });
         }
       }
-    } catch (error) {
+    } catch {
       setStatus('idle');
       setToast({ type: 'warning', message: '⚠ Unable to start matching right now' });
     }
@@ -154,7 +149,6 @@ const RandomVideoMatchPanel = () => {
       if (res.data?.success) {
         setCards(prev => ({ ...prev, randomMatchCards: res.data.randomMatchCards || 20, giftClaimed: true }));
         window.localStorage.removeItem('elovia_random_match_gift_pending');
-        setShowGiftPopup(false);
         setToast({ type: 'success', message: '🎉 Gift Claimed Successfully' });
       }
     } catch (error) {
@@ -218,7 +212,7 @@ const RandomVideoMatchPanel = () => {
               <div className="relative min-h-80 overflow-hidden rounded-2xl bg-linear-to-br from-black/20 to-fuchsia-900/30 p-5">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.15),transparent_50%)]" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.div
+                  <Motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="absolute inset-0 rounded-[22px] border border-white/10"
@@ -332,8 +326,8 @@ const RandomVideoMatchPanel = () => {
 
       <AnimatePresence>
         {showGiftPopup && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur">
-            <motion.div initial={{ y: 24, scale: 0.96, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} className="relative w-full max-w-lg overflow-hidden rounded-[30px] border border-pink-300/30 bg-linear-to-br from-[#2a0f2f] via-[#6f1458] to-[#ff5ca8] p-6 text-center text-white shadow-[0_25px_90px_rgba(0,0,0,0.35)]">
+          <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur">
+            <Motion.div initial={{ y: 24, scale: 0.96, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} className="relative w-full max-w-lg overflow-hidden rounded-[30px] border border-pink-300/30 bg-linear-to-br from-[#2a0f2f] via-[#6f1458] to-[#ff5ca8] p-6 text-center text-white shadow-[0_25px_90px_rgba(0,0,0,0.35)]">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_40%)]" />
               <div className="relative">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-3xl shadow-lg">🎉</div>
@@ -351,16 +345,16 @@ const RandomVideoMatchPanel = () => {
                   <Gift size={16} /> Claim Gift
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
+            </Motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {toast && (
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 18 }} className="absolute bottom-4 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/20 bg-slate-950/80 px-4 py-2 text-sm font-semibold text-white shadow-xl backdrop-blur">
+          <Motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 18 }} className="absolute bottom-4 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/20 bg-slate-950/80 px-4 py-2 text-sm font-semibold text-white shadow-xl backdrop-blur">
             {toast.message}
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>

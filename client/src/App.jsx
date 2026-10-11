@@ -53,6 +53,8 @@ import SalesmanSection from './pages/salesman/SalesmanSection';
 import FAQ from './pages/FAQ';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
+import SafetyHub from './pages/SafetyHub';
+import RefundPolicy from './pages/RefundPolicy';
 import Pricing from './pages/Pricing';
 import SubscriptionSuccess from './pages/SubscriptionSuccess';
 import RandomVideoPage from './pages/RandomVideo';
@@ -239,6 +241,8 @@ function AppContent() {
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/safety" element={<SafetyHub />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/subscription/success" element={<SubscriptionSuccess />} />
 

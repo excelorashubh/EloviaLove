@@ -41,10 +41,10 @@ const Footer = () => {
             <h3 className="text-white font-semibold mb-5 text-sm uppercase tracking-wider">Safety Hub</h3>
             <ul className="space-y-4">
               <li><Link to="/safety" className="text-sm hover:text-primary-400 transition-colors">Safety Overview</Link></li>
-              <li><Link to="/how-verification-works" className="text-sm hover:text-primary-400 transition-colors">How Verification Works</Link></li>
-              <li><Link to="/online-dating-safety-india" className="text-sm hover:text-primary-400 transition-colors">Dating Safety India</Link></li>
               <li><Link to="/report-abuse" className="text-sm hover:text-primary-400 transition-colors">Report Abuse</Link></li>
-              <li><Link to="/community-guidelines" className="text-sm hover:text-primary-400 transition-colors">Guidelines</Link></li>
+              <li><Link to="/faq" className="text-sm hover:text-primary-400 transition-colors">FAQ</Link></li>
+              <li><Link to="/privacy" className="text-sm hover:text-primary-400 transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="text-sm hover:text-primary-400 transition-colors">Terms of Service</Link></li>
             </ul>
           </div>
 
@@ -73,11 +73,14 @@ const Footer = () => {
           <div>
             <h3 className="text-white font-semibold mb-5 text-sm uppercase tracking-wider">Resources</h3>
             <ul className="space-y-4">
+              <li><Link to="/about" className="text-sm hover:text-primary-400 transition-colors">About Us</Link></li>
+              <li><Link to="/contact" className="text-sm hover:text-primary-400 transition-colors">Contact</Link></li>
               <li><Link to="/blog" className="text-sm hover:text-primary-400 transition-colors">Dating Blog</Link></li>
               <li><Link to="/pricing" className="text-sm hover:text-primary-400 transition-colors">Premium Plans</Link></li>
               <li><Link to="/faq" className="text-sm hover:text-primary-400 transition-colors">FAQ</Link></li>
               <li><Link to="/privacy" className="text-sm hover:text-primary-400 transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms" className="text-sm hover:text-primary-400 transition-colors">Terms of Service</Link></li>
+              <li><Link to="/refund-policy" className="text-sm hover:text-primary-400 transition-colors">Refund & Cancellation Policy</Link></li>
             </ul>
           </div>
         </div>

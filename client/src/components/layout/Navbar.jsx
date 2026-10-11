@@ -39,12 +39,6 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    if (!location.pathname) return;
-    setIsMobileMenuOpen(false);
-    setIsProfileMenuOpen(false);
-  }, [location.pathname]);
-
-  useEffect(() => {
     if (!isProfileMenuOpen) return;
 
     const handleClickOutside = (event) => {
