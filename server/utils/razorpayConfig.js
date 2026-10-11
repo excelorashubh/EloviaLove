@@ -1,6 +1,3 @@
-const DEFAULT_RAZORPAY_KEY_ID = 'rzp_test_T9J7MIgjWdCA2L';
-const DEFAULT_RAZORPAY_KEY_SECRET = 'LJzBX3PN8ehf4r3UgNh3NvbE';
-
 function getRazorpayConfig() {
   const keyId = process.env.RAZORPAY_KEY_ID?.trim();
   const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
@@ -18,6 +15,14 @@ function getRazorpayConfig() {
   };
 }
 
+function getRazorpayWebhookSecret() {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET?.trim();
+  if (!secret || /^your_|^change[_-]?me$/i.test(secret)) {
+    throw new Error('Missing Razorpay webhook secret: RAZORPAY_WEBHOOK_SECRET');
+  }
+  return secret;
+}
+
 function isRazorpayConfigured() {
   try {
     getRazorpayConfig();
@@ -28,8 +33,7 @@ function isRazorpayConfigured() {
 }
 
 module.exports = {
-  DEFAULT_RAZORPAY_KEY_ID,
-  DEFAULT_RAZORPAY_KEY_SECRET,
   getRazorpayConfig,
+  getRazorpayWebhookSecret,
   isRazorpayConfigured,
 };

@@ -1,4 +1,8 @@
-const { getRazorpayConfig, isRazorpayConfigured } = require('../utils/razorpayConfig');
+const {
+  getRazorpayConfig,
+  getRazorpayWebhookSecret,
+  isRazorpayConfigured,
+} = require('../utils/razorpayConfig');
 
 describe('Razorpay configuration', () => {
   const originalEnv = process.env;
@@ -7,6 +11,7 @@ describe('Razorpay configuration', () => {
     process.env = { ...originalEnv };
     delete process.env.RAZORPAY_KEY_ID;
     delete process.env.RAZORPAY_KEY_SECRET;
+    delete process.env.RAZORPAY_WEBHOOK_SECRET;
   });
 
   afterAll(() => {
@@ -29,5 +34,12 @@ describe('Razorpay configuration', () => {
 
     expect(() => getRazorpayConfig()).toThrow(/RAZORPAY_KEY_SECRET/);
     expect(isRazorpayConfigured()).toBe(false);
+  });
+
+  it('requires a dedicated webhook secret', () => {
+    process.env.RAZORPAY_WEBHOOK_SECRET = 'your_webhook_secret_here';
+    expect(() => getRazorpayWebhookSecret()).toThrow(/RAZORPAY_WEBHOOK_SECRET/);
+    process.env.RAZORPAY_WEBHOOK_SECRET = 'webhook_test_secret';
+    expect(getRazorpayWebhookSecret()).toBe('webhook_test_secret');
   });
 });

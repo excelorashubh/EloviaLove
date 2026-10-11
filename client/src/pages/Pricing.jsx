@@ -82,6 +82,30 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
   const price = item.price;
   const Icon = isAddon ? null : item.icon;
 
+  const openCheckout = (options, orderId) => {
+    const checkout = new window.Razorpay(options);
+    checkout.on('payment.failed', async ({ error = {} } = {}) => {
+      const metadata = error.metadata || {};
+      const failedOrderId = metadata.order_id || orderId;
+      setErrorMsg(error.description || 'Payment was not completed. Please try another available method.');
+      setStep('error');
+      try {
+        await api.post('/subscription/payment-failure', {
+          orderId: failedOrderId,
+          errorCode: error.code,
+          description: error.description,
+          method: metadata.payment_method || metadata.method,
+        });
+      } catch (diagnosticError) {
+        console.warn('Unable to submit Razorpay failure diagnostics', {
+          orderId: failedOrderId,
+          errorCode: diagnosticError.response?.data?.errorCode,
+        });
+      }
+    });
+    checkout.open();
+  };
+
   const startPayment = async () => {
     setStep('processing');
     try {
@@ -119,7 +143,7 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
             }
           },
         };
-        new window.Razorpay(options).open();
+        openCheckout(options, data.orderId);
 
       } else {
         // ── Plans: recurring subscription ────────────────────────────────────
@@ -152,7 +176,7 @@ const PaymentModal = ({ item, isAddon, onClose, onSuccess, user }) => {
             }
           },
         };
-        new window.Razorpay(options).open();
+        openCheckout(options, data.orderId);
       }
 
     } catch (e) {

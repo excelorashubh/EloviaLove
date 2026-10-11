@@ -1,11 +1,14 @@
 const express = require('express');
-const crypto  = require('crypto');
 const User         = require('../models/User');
 const Subscription = require('../models/Subscription');
 const Payment      = require('../models/Payment');
 const PlanConfig   = require('../models/PlanConfig');
 const { protect }  = require('../middleware/auth');
-const { getRazorpayConfig } = require('../utils/razorpayConfig');
+const { getRazorpayConfig, getRazorpayWebhookSecret } = require('../utils/razorpayConfig');
+const {
+  verifyPaymentSignature,
+  verifyWebhookSignature,
+} = require('../utils/razorpaySecurity');
 
 const router = express.Router();
 
@@ -30,7 +33,8 @@ const getRazorpay = () => {
 
 function buildRazorpayErrorPayload(err) {
   const description = err?.error?.description || err?.description || err?.message || 'Razorpay request failed';
-  const isAuthFailure = /authentication|unauthorized|bad_request_error|invalid api key/i.test(description);
+  const isAuthFailure = err?.statusCode === 401 || err?.statusCode === 403
+    || /authentication failure|unauthorized|invalid api key/i.test(description);
   const isTimeout = /timeout|timed out|ETIMEDOUT|ECONNRESET|socket hang up|network/i.test(description);
   const status = isAuthFailure ? 502 : (err?.statusCode >= 400 ? err.statusCode : 502);
 
@@ -51,14 +55,15 @@ function buildRazorpayErrorPayload(err) {
   };
 }
 
-function logRazorpayError(context, err) {
+function logRazorpayError(context, err, details = {}) {
   console.error(`[${context}] Razorpay error`, {
-    message: err?.message,
+    requestId: details.requestId,
+    orderId: details.orderId,
+    paymentMethod: details.paymentMethod,
     statusCode: err?.statusCode,
-    error: err?.error,
-    description: err?.error?.description || err?.description || err?.message,
-    response: err?.response,
-    stack: err?.stack,
+    errorCode: err?.error?.code || err?.code,
+    description: (err?.error?.description || err?.description || err?.message || 'Razorpay request failed')
+      .toString().replace(/[\r\n]+/g, ' ').slice(0, 500),
   });
 }
 
@@ -106,13 +111,79 @@ function getRazorpayPlanInterval(durationDays) {
 }
 
 async function createRazorpayOrder({ amount, currency, receipt, notes }) {
+  const amountPaise = Math.round(amount * 100);
+  if (!Number.isSafeInteger(amountPaise) || amountPaise <= 0) {
+    throw new Error('Invalid payment amount');
+  }
   const razorpay = getRazorpay();
   return razorpay.orders.create({
-    amount: Math.round(amount * 100),
+    amount: amountPaise,
     currency: (currency || 'INR').toUpperCase(),
     receipt,
     notes,
   });
+}
+
+async function fulfillVerifiedPayment(orderPayment, razorpayPayment) {
+  const session = await mongoose.startSession();
+  const now = new Date();
+  const endDate = new Date(now);
+  endDate.setDate(endDate.getDate() + (orderPayment.durationDays || 30));
+  let alreadyProcessed = false;
+
+  try {
+    await session.withTransaction(async () => {
+      const storedPayment = await Payment.findById(orderPayment._id).session(session);
+      if (!storedPayment) throw new Error('Payment order record not found');
+      if (storedPayment.status === 'paid') {
+        if (storedPayment.paymentId !== razorpayPayment.id) {
+          throw new Error('Order was already completed with a different payment');
+        }
+        alreadyProcessed = true;
+        return;
+      }
+      if (storedPayment.status !== 'created') throw new Error('Payment order is no longer payable');
+
+      storedPayment.status = 'paid';
+      storedPayment.paymentId = razorpayPayment.id;
+      storedPayment.paymentMethod = razorpayPayment.method;
+      await storedPayment.save({ session });
+
+      if (storedPayment.itemType === 'subscription') {
+        const subscription = await Subscription.findOneAndUpdate(
+          { razorpaySubId: storedPayment.orderId, userId: storedPayment.userId },
+          {
+            status: 'active',
+            startDate: now,
+            endDate,
+            paymentId: razorpayPayment.id,
+            paidCount: 1,
+            nextBillingDate: endDate,
+          },
+          { new: true, session }
+        );
+        if (!subscription) throw new Error('Subscription order record not found');
+
+        const userUpdate = await User.updateOne(
+          { _id: storedPayment.userId },
+          {
+            plan: storedPayment.plan,
+            subscriptionId: storedPayment.orderId,
+            subscriptionStatus: 'active',
+            subscriptionStart: now,
+            subscriptionEnd: endDate,
+            nextBillingDate: endDate,
+          },
+          { session }
+        );
+        if (userUpdate.matchedCount !== 1) throw new Error('Payment customer not found');
+      }
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  return { alreadyProcessed, endDate };
 }
 
 // Expose a helper to clear in-memory Razorpay plan cache (used by admin resync)
@@ -181,6 +252,9 @@ router.get('/status', protect, async (req, res) => {
 router.post('/create-subscription', protect, async (req, res) => {
   try {
     const { plan } = req.body;
+    if (typeof plan !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid plan' });
+    }
     const planDoc = await getPlan(plan).catch(() => null);
     if (!planDoc || planDoc.key === 'free') {
       return res.status(400).json({ success: false, message: 'Invalid plan' });
@@ -194,21 +268,39 @@ router.post('/create-subscription', protect, async (req, res) => {
       notes: { plan, userId: req.user._id.toString(), type: 'subscription' },
     });
 
-    await Subscription.create({
-      userId: req.user._id,
-      plan,
-      status: 'pending',
-      razorpaySubId: order.id,
-      razorpayPlanId: planDoc.razorpayPlanId || null,
-      totalCount: 1,
-      paidCount: 0,
-    });
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await Subscription.create([{
+          userId: req.user._id,
+          plan: planDoc.key,
+          status: 'pending',
+          razorpaySubId: order.id,
+          razorpayPlanId: planDoc.razorpayPlanId || null,
+          totalCount: 1,
+          paidCount: 0,
+        }], { session });
+        await Payment.create([{
+          userId: req.user._id,
+          plan: planDoc.key,
+          amount,
+          amountPaise: order.amount,
+          currency: order.currency,
+          itemType: 'subscription',
+          durationDays: planDoc.durationDays || 30,
+          orderId: order.id,
+          status: 'created',
+        }], { session });
+      });
+    } finally {
+      await session.endSession();
+    }
 
     res.json({
       success: true,
       orderId: order.id,
       keyId: getRazorpayKeyId(),
-      plan,
+      plan: planDoc.key,
       planName: planDoc.name,
       amount: order.amount,
       currency: order.currency,
@@ -216,7 +308,7 @@ router.post('/create-subscription', protect, async (req, res) => {
     });
   } catch (err) {
     const razorpayError = buildRazorpayErrorPayload(err);
-    logRazorpayError('create-subscription', err);
+    logRazorpayError('create-subscription', err, { requestId: req.id });
     res.status(razorpayError.status).json({
       success: false,
       message: razorpayError.message,
@@ -228,63 +320,55 @@ router.post('/create-subscription', protect, async (req, res) => {
 // ── POST /api/subscription/verify-subscription ───────────────────────────────
 router.post('/verify-subscription', protect, async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !plan) {
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({ success: false, message: 'Missing payment verification data.' });
     }
 
-    const body = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expectedSig = crypto
-      .createHmac('sha256', getRazorpayKeySecret())
-      .update(body)
-      .digest('hex');
-
-    if (expectedSig !== razorpay_signature) {
+    if (!verifyPaymentSignature(
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      getRazorpayKeySecret()
+    )) {
       return res.status(400).json({ success: false, message: 'Invalid payment signature.' });
     }
 
-    const startDate = new Date();
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 30);
-
-    const subscriptionDoc = await Subscription.findOneAndUpdate(
-      { razorpaySubId: razorpay_order_id },
-      {
-        status: 'active',
-        startDate,
-        endDate,
-        paymentId: razorpay_payment_id,
-        paidCount: 1,
-        nextBillingDate: endDate,
-      },
-      { new: true }
-    );
-
-    const planDoc = await PlanConfig.findOne({ key: plan.toLowerCase() });
-    await User.findByIdAndUpdate(req.user._id, {
-      plan,
-      subscriptionId: subscriptionDoc?.razorpaySubId || razorpay_order_id,
-      subscriptionStatus: 'active',
-      subscriptionStart: startDate,
-      subscriptionEnd: endDate,
-      nextBillingDate: endDate,
-      razorpayPlanId: planDoc?.razorpayPlanId || null,
-    });
-
-    await Payment.create({
-      userId: req.user._id,
-      plan,
-      amount: getEffectivePrice(planDoc) || 0,
+    const orderPayment = await Payment.findOne({
       orderId: razorpay_order_id,
-      paymentId: razorpay_payment_id,
-      status: 'paid',
+      userId: req.user._id,
     });
+    if (!orderPayment) {
+      return res.status(404).json({ success: false, message: 'Payment order was not found for this account.' });
+    }
 
-    res.json({ success: true, message: 'Subscription activated', plan, endDate });
+    const razorpayPayment = await getRazorpay().payments.fetch(razorpay_payment_id);
+    if (
+      razorpayPayment.order_id !== orderPayment.orderId
+      || razorpayPayment.amount !== orderPayment.amountPaise
+      || razorpayPayment.currency !== orderPayment.currency
+    ) {
+      return res.status(400).json({ success: false, message: 'Payment does not match the order.' });
+    }
+    if (razorpayPayment.status !== 'captured') {
+      return res.status(409).json({ success: false, message: 'Payment is not captured yet. Please try again shortly.' });
+    }
+
+    const result = await fulfillVerifiedPayment(orderPayment, razorpayPayment);
+    res.json({
+      success: true,
+      message: orderPayment.itemType === 'subscription' ? 'Subscription activated' : 'Add-on payment verified',
+      plan: orderPayment.itemType === 'subscription' ? orderPayment.plan : undefined,
+      endDate: orderPayment.itemType === 'subscription' ? result.endDate : undefined,
+      alreadyProcessed: result.alreadyProcessed,
+    });
   } catch (err) {
-    logRazorpayError('verify-subscription', err);
-    res.status(500).json({ success: false, message: 'Payment verification failed. Please try again.' });
+    logRazorpayError('verify-subscription', err, {
+      requestId: req.id,
+      orderId: req.body?.razorpay_order_id,
+    });
+    res.status(500).json({ success: false, message: 'Payment verification failed. Please try again.', errorCode: err?.error?.code });
   }
 });
 
@@ -296,8 +380,9 @@ router.post('/cancel', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'No active subscription' });
     }
 
-    const razorpay = getRazorpay();
-    await razorpay.subscriptions.cancel(user.subscriptionId, { cancel_at_cycle_end: 1 });
+    if (user.subscriptionEnd && user.subscriptionEnd <= new Date()) {
+      return res.status(400).json({ success: false, message: 'The paid access period has ended.' });
+    }
 
     await User.findByIdAndUpdate(req.user._id, { subscriptionStatus: 'cancelled' });
     await Subscription.findOneAndUpdate(
@@ -331,6 +416,17 @@ router.post('/addon-order', protect, async (req, res) => {
       notes: { addon, userId: req.user._id.toString(), type: 'addon' },
     });
 
+    await Payment.create({
+      userId: req.user._id,
+      plan: addon,
+      amount: ADD_ONS[addon].price,
+      amountPaise: order.amount,
+      currency: order.currency,
+      itemType: 'addon',
+      orderId: order.id,
+      status: 'created',
+    });
+
     res.json({
       success:   true,
       orderId:   order.id,
@@ -346,22 +442,43 @@ router.post('/addon-order', protect, async (req, res) => {
   }
 });
 
+router.post('/payment-failure', protect, async (req, res) => {
+  try {
+    const { orderId, errorCode, description, method } = req.body || {};
+    if (typeof orderId !== 'string' || !orderId) {
+      return res.status(400).json({ success: false, message: 'Payment order ID is required.' });
+    }
+    const order = await Payment.findOne({ orderId, userId: req.user._id }).select('_id');
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Payment order was not found for this account.' });
+    }
+
+    console.warn('[razorpay-checkout-failure]', {
+      requestId: req.id,
+      orderId,
+      paymentMethod: typeof method === 'string' ? method.slice(0, 40) : undefined,
+      errorCode: typeof errorCode === 'string' ? errorCode.slice(0, 80) : undefined,
+      description: typeof description === 'string'
+        ? description.replace(/[\r\n]+/g, ' ').slice(0, 500)
+        : undefined,
+    });
+    res.json({ success: true });
+  } catch (err) {
+    logRazorpayError('payment-failure-diagnostics', err, { requestId: req.id });
+    res.status(500).json({ success: false, message: 'Unable to record payment diagnostics.' });
+  }
+});
+
 // ── POST /api/subscription/webhook ───────────────────────────────────────────
 // Razorpay sends events here — MUST use raw body (registered in server.js)
 router.post('/webhook', async (req, res) => {
   try {
-    const secret    = process.env.RAZORPAY_WEBHOOK_SECRET || getRazorpayKeySecret();
+    const secret    = getRazorpayWebhookSecret();
     const signature = req.headers['x-razorpay-signature'];
     const body      = req.rawBody; // set by express.raw() in server.js
 
-    // Verify webhook signature
-    const expected = crypto
-      .createHmac('sha256', secret)
-      .update(body)
-      .digest('hex');
-
-    if (expected !== signature) {
-      console.warn('Webhook signature mismatch');
+    if (!verifyWebhookSignature(body, signature, secret)) {
+      console.warn('[razorpay-webhook] signature mismatch', { requestId: req.id });
       return res.status(400).json({ success: false, message: 'Invalid signature' });
     }
 
@@ -369,13 +486,47 @@ router.post('/webhook', async (req, res) => {
     const payload = event.payload?.subscription?.entity || {};
     const payment = event.payload?.payment?.entity || {};
 
-    console.log('Webhook event:', event.event, payload.id || payment.id);
+    console.log('[razorpay-webhook]', {
+      requestId: req.id,
+      event: event.event,
+      orderId: payment.order_id,
+      paymentId: payment.id,
+      paymentMethod: payment.method,
+      errorCode: payment.error_code,
+      description: payment.error_description,
+    });
 
     switch (event.event) {
+      case 'payment.captured': {
+        const orderPayment = await Payment.findOne({ orderId: payment.order_id });
+        if (orderPayment) {
+          if (
+            payment.amount !== orderPayment.amountPaise
+            || payment.currency !== orderPayment.currency
+          ) {
+            console.error('[razorpay-webhook] captured payment does not match order', {
+              requestId: req.id,
+              orderId: payment.order_id,
+              paymentId: payment.id,
+            });
+            return res.status(400).json({ success: false, message: 'Payment does not match the order.' });
+          }
+          await fulfillVerifiedPayment(orderPayment, payment);
+        }
+        break;
+      }
+
+      case 'payment.failed': {
+        await Payment.findOneAndUpdate(
+          { orderId: payment.order_id, status: 'created' },
+          { status: 'failed', paymentId: payment.id, paymentMethod: payment.method }
+        );
+        break;
+      }
 
       case 'subscription.activated': {
         const sub = await Subscription.findOneAndUpdate(
-          { razorpaySubId: payload.id },
+          { razorpaySubId: payload.id, paymentId: { $ne: payment.id } },
           { status: 'active' },
           { new: true }
         );
@@ -473,8 +624,15 @@ router.post('/webhook', async (req, res) => {
 
     res.json({ success: true });
   } catch (err) {
-    console.error('Webhook error:', err);
-    res.status(500).json({ success: false });
+    logRazorpayError('webhook', err, {
+      requestId: req.id,
+      orderId: req.body?.payload?.payment?.entity?.order_id,
+      paymentMethod: req.body?.payload?.payment?.entity?.method,
+    });
+    res.status(err.message?.includes('webhook secret') ? 503 : 500).json({
+      success: false,
+      message: 'Webhook processing failed.',
+    });
   }
 });
 

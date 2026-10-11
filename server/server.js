@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
+const crypto = require('crypto');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
@@ -52,6 +53,15 @@ async function startServer() {
 
   // ── Trust Proxy (Required for Render) ─────────────────────────────────────────
   app.set('trust proxy', 1);
+
+  app.use((req, res, next) => {
+    const suppliedId = req.get('x-request-id');
+    req.id = suppliedId && /^[A-Za-z0-9._:-]{1,128}$/.test(suppliedId)
+      ? suppliedId
+      : crypto.randomUUID();
+    res.setHeader('X-Request-ID', req.id);
+    next();
+  });
 
   // ── Compression Middleware (Performance) ──────────────────────────────────────
   app.use(compression({ 
@@ -135,7 +145,8 @@ async function startServer() {
     origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+    exposedHeaders: ['X-Request-ID']
   }));
 
   // ── Rate Limiting (DDoS Protection) ───────────────────────────────────────────

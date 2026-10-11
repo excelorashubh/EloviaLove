@@ -29,6 +29,7 @@ class StartupValidator {
     const optional = [
       'RAZORPAY_KEY_ID',
       'RAZORPAY_KEY_SECRET',
+      'RAZORPAY_WEBHOOK_SECRET',
       'CLOUDINARY_CLOUD_NAME',
       'CLOUDINARY_API_KEY',
       'CLOUDINARY_API_SECRET',
@@ -186,6 +187,13 @@ class StartupValidator {
 
     const config = require('./razorpayConfig').getRazorpayConfig();
     console.log(`   ✓ Razorpay configured for key: ${config.key_id}`);
+    try {
+      require('./razorpayConfig').getRazorpayWebhookSecret();
+      console.log('   ✓ Razorpay webhook secret configured');
+    } catch (err) {
+      this.warnings.push(err.message);
+      console.log(`   ⚠️  ${err.message}; webhook events will be rejected`);
+    }
   }
 
   /**
