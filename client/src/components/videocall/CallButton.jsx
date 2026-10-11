@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Video, Loader2, Lock, UserX, ShieldAlert, Ban, Clock } from 'lucide-react';
 import { useVideoCall } from '../../context/VideoCallContext';
 import { useAuth } from '../../context/AuthContext';
@@ -20,8 +20,7 @@ const CallButton = ({
   const [permission, setPermission] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  // Check if call is allowed
-  const checkPermission = async () => {
+  const checkPermission = useCallback(async () => {
     if (!userId || userId === user?.id || userId === user?._id) {
       setChecking(false);
       return;
@@ -43,11 +42,11 @@ const CallButton = ({
     } finally {
       setChecking(false);
     }
-  };
+  }, [user?._id, user?.id, userId]);
 
   useEffect(() => {
     checkPermission();
-  }, [userId, user]);
+  }, [checkPermission]);
 
   const handleCall = async () => {
     if (loading) return;

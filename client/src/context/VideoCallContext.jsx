@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { io } from 'socket.io-client';
 import api from '../services/api';
@@ -14,32 +15,31 @@ export const useVideoCall = () => {
 };
 
 export const VideoCallProvider = ({ children }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
   const [socket, setSocket] = useState(null);
-  
+
   // Call states
   const [incomingCall, setIncomingCall] = useState(null);
   const [activeCall, setActiveCall] = useState(null);
-  const [callStatus, setCallStatus] = useState('idle'); // idle, calling, ringing, connected, ended
-  
+  const [callStatus, setCallStatus] = useState('idle');
+
   // WebRTC refs
   const peerConnection = useRef(null);
   const localStream = useRef(null);
   const remoteStream = useRef(null);
-  
+
   // Media states
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
-  const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
-  
+  const [isSpeakerEnabled] = useState(true);
+
   // Connection states
-  const [connectionQuality, setConnectionQuality] = useState('excellent');
+  const [connectionQuality] = useState('excellent');
   const [isReconnecting, setIsReconnecting] = useState(false);
-  
+
   // Call history
   const [missedCallsCount, setMissedCallsCount] = useState(0);
 
-  // ICE servers configuration
   const iceServers = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
@@ -50,9 +50,107 @@ export const VideoCallProvider = ({ children }) => {
     ]
   };
 
-  // Initialize socket connection
+  function fetchMissedCallsCount() {
+    return (async () => {
+      try {
+        const response = await api.get('/calls/missed-count');
+        if (response.data.success) {
+          setMissedCallsCount(response.data.count);
+        }
+      } catch (error) {
+        console.error('Failed to fetch missed calls count:', error);
+      }
+    })();
+  }
+
+  function playRingtone() {
+    console.log('[VideoCall] Playing ringtone');
+  }
+
+  function stopRingtone() {
+    console.log('[VideoCall] Stopping ringtone');
+  }
+
+  function handleIncomingCall(data) {
+    console.log('[VideoCall] Incoming call:', data);
+    setIncomingCall(data);
+    setCallStatus('ringing');
+    playRingtone();
+  }
+
+  function handleCallAccepted({ callId }) {
+    console.log('[VideoCall] Call accepted');
+    setCallStatus('connected');
+    return initializeWebRTC(true);
+  }
+
+  function handleCallRejected({ callId }) {
+    console.log('[VideoCall] Call rejected');
+    cleanup();
+  }
+
+  function handleCallCancelled({ callId }) {
+    console.log('[VideoCall] Call cancelled');
+    stopRingtone();
+    setIncomingCall(null);
+    setCallStatus('idle');
+  }
+
+  function handleCallEnded({ callId }) {
+    console.log('[VideoCall] Call ended');
+    cleanup();
+  }
+
+  function handleReceiverOffline({ callId }) {
+    console.log('[VideoCall] Receiver offline');
+    cleanup();
+  }
+
+  function handlePeerDisconnected({ callId }) {
+    console.log('[VideoCall] Peer disconnected');
+    cleanup();
+  }
+
+  async function handleOffer({ callId, offer }) {
+    try {
+      if (!peerConnection.current) {
+        await initializeWebRTC(false);
+      }
+
+      await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
+
+      const answer = await peerConnection.current.createAnswer();
+      await peerConnection.current.setLocalDescription(answer);
+
+      socket?.emit('webrtc:answer', {
+        callId,
+        answer
+      });
+    } catch (error) {
+      console.error('[WebRTC] Handle offer error:', error);
+    }
+  }
+
+  async function handleAnswer({ callId, answer }) {
+    try {
+      await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
+    } catch (error) {
+      console.error('[WebRTC] Handle answer error:', error);
+    }
+  }
+
+  async function handleIceCandidate({ callId, candidate }) {
+    try {
+      if (peerConnection.current) {
+        await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+      }
+    } catch (error) {
+      console.error('[WebRTC] Handle ICE candidate error:', error);
+    }
+  }
+
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (user) {
       const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const newSocket = io(socketUrl, {
         auth: { token: localStorage.getItem('token') }
@@ -80,35 +178,13 @@ export const VideoCallProvider = ({ children }) => {
         newSocket.disconnect();
       };
     }
-  }, [isAuthenticated, user]);
+  }, [user]);
 
-  // Fetch missed calls count
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user) {
       fetchMissedCallsCount();
     }
-  }, [isAuthenticated]);
-
-  const fetchMissedCallsCount = async () => {
-    try {
-      const response = await api.get('/calls/missed-count');
-      if (response.data.success) {
-        setMissedCallsCount(response.data.count);
-      }
-    } catch (error) {
-      console.error('Failed to fetch missed calls count:', error);
-    }
-  };
-
-  // Handle incoming call
-  const handleIncomingCall = (data) => {
-    console.log('[VideoCall] Incoming call:', data);
-    setIncomingCall(data);
-    setCallStatus('ringing');
-    
-    // Play ringtone (implement audio)
-    playRingtone();
-  };
+  }, [user]);
 
   // Initialize call
   const initiateCall = async (receiverId, receiverInfo, callType = 'video') => {
@@ -320,8 +396,40 @@ export const VideoCallProvider = ({ children }) => {
     }
   };
 
-  // Handle WebRTC offer
-  const handleOffer = async ({ callId, offer }) => {
+  function handleCallAccepted({ callId }) {
+    console.log('[VideoCall] Call accepted');
+    setCallStatus('connected');
+    return initializeWebRTC(true);
+  }
+
+  function handleCallRejected({ callId }) {
+    console.log('[VideoCall] Call rejected');
+    cleanup();
+  }
+
+  function handleCallCancelled({ callId }) {
+    console.log('[VideoCall] Call cancelled');
+    stopRingtone();
+    setIncomingCall(null);
+    setCallStatus('idle');
+  }
+
+  function handleCallEnded({ callId }) {
+    console.log('[VideoCall] Call ended');
+    cleanup();
+  }
+
+  function handleReceiverOffline({ callId }) {
+    console.log('[VideoCall] Receiver offline');
+    cleanup();
+  }
+
+  function handlePeerDisconnected({ callId }) {
+    console.log('[VideoCall] Peer disconnected');
+    cleanup();
+  }
+
+  async function handleOffer({ callId, offer }) {
     try {
       if (!peerConnection.current) {
         await initializeWebRTC(false);
@@ -342,16 +450,16 @@ export const VideoCallProvider = ({ children }) => {
   };
 
   // Handle WebRTC answer
-  const handleAnswer = async ({ callId, answer }) => {
+  async function handleAnswer({ callId, answer }) {
     try {
       await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
     } catch (error) {
       console.error('[WebRTC] Handle answer error:', error);
     }
-  };
+  }
 
   // Handle ICE candidate
-  const handleIceCandidate = async ({ callId, candidate }) => {
+  async function handleIceCandidate({ callId, candidate }) {
     try {
       if (peerConnection.current) {
         await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
@@ -359,46 +467,7 @@ export const VideoCallProvider = ({ children }) => {
     } catch (error) {
       console.error('[WebRTC] Handle ICE candidate error:', error);
     }
-  };
-
-  // Handle call accepted
-  const handleCallAccepted = async ({ callId }) => {
-    console.log('[VideoCall] Call accepted');
-    setCallStatus('connected');
-    await initializeWebRTC(true);
-  };
-
-  // Handle call rejected
-  const handleCallRejected = ({ callId }) => {
-    console.log('[VideoCall] Call rejected');
-    cleanup();
-  };
-
-  // Handle call cancelled
-  const handleCallCancelled = ({ callId }) => {
-    console.log('[VideoCall] Call cancelled');
-    stopRingtone();
-    setIncomingCall(null);
-    setCallStatus('idle');
-  };
-
-  // Handle call ended
-  const handleCallEnded = ({ callId }) => {
-    console.log('[VideoCall] Call ended');
-    cleanup();
-  };
-
-  // Handle receiver offline
-  const handleReceiverOffline = ({ callId }) => {
-    console.log('[VideoCall] Receiver offline');
-    cleanup();
-  };
-
-  // Handle peer disconnected
-  const handlePeerDisconnected = ({ callId }) => {
-    console.log('[VideoCall] Peer disconnected');
-    cleanup();
-  };
+  }
 
   // Toggle video
   const toggleVideo = () => {
@@ -440,17 +509,6 @@ export const VideoCallProvider = ({ children }) => {
     setIsVideoEnabled(true);
     setIsAudioEnabled(true);
     setIsReconnecting(false);
-  };
-
-  // Ringtone helpers (to be implemented with audio)
-  const playRingtone = () => {
-    // Implement ringtone audio
-    console.log('[VideoCall] Playing ringtone');
-  };
-
-  const stopRingtone = () => {
-    // Stop ringtone audio
-    console.log('[VideoCall] Stopping ringtone');
   };
 
   const value = {

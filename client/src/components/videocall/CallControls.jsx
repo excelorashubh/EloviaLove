@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Video, VideoOff, Mic, MicOff, PhoneOff } from 'lucide-react';
 
 const CallControls = ({
@@ -12,7 +12,7 @@ const CallControls = ({
   return (
     <div className="flex items-center justify-center gap-4">
       {/* Toggle Video */}
-      <motion.button
+      <Motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={onToggleVideo}
@@ -24,10 +24,10 @@ const CallControls = ({
         title={isVideoEnabled ? 'Turn off camera' : 'Turn on camera'}
       >
         {isVideoEnabled ? <Video size={24} /> : <VideoOff size={24} />}
-      </motion.button>
+      </Motion.button>
 
       {/* Toggle Audio */}
-      <motion.button
+      <Motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={onToggleAudio}
@@ -39,10 +39,10 @@ const CallControls = ({
         title={isAudioEnabled ? 'Mute microphone' : 'Unmute microphone'}
       >
         {isAudioEnabled ? <Mic size={24} /> : <MicOff size={24} />}
-      </motion.button>
+      </Motion.button>
 
       {/* End Call */}
-      <motion.button
+      <Motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={onEndCall}
@@ -50,7 +50,7 @@ const CallControls = ({
         title="End call"
       >
         <PhoneOff size={28} strokeWidth={2.5} />
-      </motion.button>
+      </Motion.button>
     </div>
   );
 };

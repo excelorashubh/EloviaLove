@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Phone, X, CheckCircle2 } from 'lucide-react';
 import VerifiedBadge from '../ui/VerifiedBadge';
 
@@ -28,13 +28,13 @@ const IncomingCallModal = ({ caller, onAccept, onReject }) => {
 
   return (
     <AnimatePresence>
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md"
       >
-        <motion.div
+        <Motion.div
           initial={{ scale: 0.8, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.8, opacity: 0, y: 20 }}
@@ -43,7 +43,7 @@ const IncomingCallModal = ({ caller, onAccept, onReject }) => {
         >
           {/* Pulsing animation background */}
           <div className="absolute inset-0 rounded-3xl overflow-hidden">
-            <motion.div
+            <Motion.div
               animate={{
                 scale: [1, 1.2, 1],
                 opacity: [0.3, 0.1, 0.3],
@@ -60,7 +60,7 @@ const IncomingCallModal = ({ caller, onAccept, onReject }) => {
           {/* Content */}
           <div className="relative z-10 text-center">
             {/* Caller Photo */}
-            <motion.div
+            <Motion.div
               animate={{
                 scale: [1, 1.05, 1],
               }}
@@ -81,7 +81,7 @@ const IncomingCallModal = ({ caller, onAccept, onReject }) => {
                   <VerifiedBadge size={24} />
                 </div>
               )}
-            </motion.div>
+            </Motion.div>
 
             {/* Caller Name */}
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
@@ -94,7 +94,7 @@ const IncomingCallModal = ({ caller, onAccept, onReject }) => {
             {/* Action Buttons */}
             <div className="flex items-center justify-center gap-6">
               {/* Reject Button */}
-              <motion.button
+              <Motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onReject}
@@ -104,10 +104,10 @@ const IncomingCallModal = ({ caller, onAccept, onReject }) => {
                   <X size={28} className="text-white" strokeWidth={2.5} />
                 </div>
                 <span className="text-white/80 text-xs font-medium">Decline</span>
-              </motion.button>
+              </Motion.button>
 
               {/* Accept Button */}
-              <motion.button
+              <Motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onAccept}
@@ -117,11 +117,11 @@ const IncomingCallModal = ({ caller, onAccept, onReject }) => {
                   <Phone size={32} className="text-white" strokeWidth={2.5} />
                 </div>
                 <span className="text-white text-sm font-semibold">Accept</span>
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </Motion.div>
+      </Motion.div>
     </AnimatePresence>
   );
 };

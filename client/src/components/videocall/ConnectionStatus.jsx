@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Loader2, WifiOff } from 'lucide-react';
 
 const ConnectionStatus = ({ status = 'connecting' }) => {
@@ -35,14 +35,14 @@ const ConnectionStatus = ({ status = 'connecting' }) => {
   const config = getStatusConfig();
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       className="flex flex-col items-center gap-3"
     >
       <div className={config.color}>{config.icon}</div>
       <p className="text-white text-lg font-semibold">{config.text}</p>
-    </motion.div>
+    </Motion.div>
   );
 };
 

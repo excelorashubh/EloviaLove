@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Video, X } from 'lucide-react';
 import VerifiedBadge from '../ui/VerifiedBadge';
 
@@ -11,14 +11,14 @@ const CallConfirmationModal = ({ user, onConfirm, onCancel, isOpen }) => {
 
   return (
     <AnimatePresence>
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
         onClick={onCancel}
       >
-        <motion.div
+        <Motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
@@ -76,8 +76,8 @@ const CallConfirmationModal = ({ user, onConfirm, onCancel, isOpen }) => {
               Call
             </button>
           </div>
-        </motion.div>
-      </motion.div>
+        </Motion.div>
+      </Motion.div>
     </AnimatePresence>
   );
 };

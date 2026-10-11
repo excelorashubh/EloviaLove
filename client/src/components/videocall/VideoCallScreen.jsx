@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { X, Maximize2, Minimize2 } from 'lucide-react';
 import CallControls from './CallControls';
 import CallTimer from './CallTimer';
@@ -23,8 +23,6 @@ const VideoCallScreen = ({
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [pipPosition, setPipPosition] = useState({ x: 20, y: 20 });
 
   // Set up video streams
   useEffect(() => {
@@ -117,7 +115,7 @@ const VideoCallScreen = ({
         </div>
 
         {/* Local Video (PiP - Picture in Picture) */}
-        <motion.div
+        <Motion.div
           drag
           dragMomentum={false}
           dragElastic={0}
@@ -127,11 +125,8 @@ const VideoCallScreen = ({
             right: window.innerWidth - 180,
             bottom: window.innerHeight - 260,
           }}
-          onDragStart={() => setIsDragging(true)}
-          onDragEnd={(e, info) => {
-            setIsDragging(false);
-            setPipPosition({ x: info.point.x, y: info.point.y });
-          }}
+          onDragStart={() => {}}
+          onDragEnd={() => {}}
           initial={{ x: 20, y: 20 }}
           className="absolute top-20 right-6 w-40 h-52 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/30 cursor-move"
           style={{ touchAction: 'none' }}
@@ -153,7 +148,7 @@ const VideoCallScreen = ({
               </div>
             </div>
           )}
-        </motion.div>
+        </Motion.div>
 
         {/* Bottom Controls */}
         <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent">

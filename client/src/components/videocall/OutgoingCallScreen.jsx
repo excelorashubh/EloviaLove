@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import VerifiedBadge from '../ui/VerifiedBadge';
 
@@ -23,7 +23,7 @@ const OutgoingCallScreen = ({ receiver, onCancel }) => {
         {/* Pulsing rings animation */}
         <div className="relative mb-8">
           {[1, 2, 3].map((ring) => (
-            <motion.div
+            <Motion.div
               key={ring}
               className="absolute inset-0 rounded-full border-4 border-green-400/30"
               animate={{
@@ -47,7 +47,7 @@ const OutgoingCallScreen = ({ receiver, onCancel }) => {
           ))}
 
           {/* Receiver photo */}
-          <motion.div
+          <Motion.div
             animate={{
               scale: [1, 1.05, 1],
             }}
@@ -68,20 +68,20 @@ const OutgoingCallScreen = ({ receiver, onCancel }) => {
                 <VerifiedBadge size={28} />
               </div>
             )}
-          </motion.div>
+          </Motion.div>
         </div>
 
         {/* Receiver name */}
         <h2 className="text-3xl font-bold text-white mb-2">{receiver?.name}</h2>
 
         {/* Calling status */}
-        <motion.p
+        <Motion.p
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
           className="text-lg text-white/80 mb-8"
         >
           Calling{dots}
-        </motion.p>
+        </Motion.p>
 
         {/* Info text */}
         <p className="text-sm text-white/60 mb-12 text-center max-w-xs">
@@ -89,7 +89,7 @@ const OutgoingCallScreen = ({ receiver, onCancel }) => {
         </p>
 
         {/* Cancel button */}
-        <motion.button
+        <Motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onCancel}
@@ -99,7 +99,7 @@ const OutgoingCallScreen = ({ receiver, onCancel }) => {
             <X size={28} className="text-white" strokeWidth={2.5} />
           </div>
           <span className="text-white/80 text-sm font-medium">Cancel</span>
-        </motion.button>
+        </Motion.button>
       </div>
     </div>
   );

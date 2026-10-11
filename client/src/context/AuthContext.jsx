@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import { io } from 'socket.io-client';
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }) => {
         // Broadcast a window event so pages can reactively refresh or update lists
         try {
           window.dispatchEvent(new CustomEvent('profile_updated', { detail: payload }));
-        } catch (e) {
+        } catch {
           // ignore
         }
         // If the updated profile is the current user, reload user data
