@@ -3,7 +3,7 @@ title: Dating in Chennai | Elovia Love
 seo_title: Dating in Chennai | Elovia Love
 meta_description: Connect with verified singles in Chennai for meaningful relationships, marriage, friendship, and companionship through Elovia Love — a privacy-first, culturally aware dating experience.
 slug: /dating-in-chennai-india
-canonical_url: https://elovialove.com/dating-in-chennai-india
+canonical_url: https://elovialove.onrender.com/dating-in-chennai-india
 og_title: Dating in Chennai | Real Connections with Elovia Love
 og_description: Meet genuine singles in Chennai through a secure, thoughtful dating experience built around trust, family values, and long-term compatibility.
 twitter_title: Dating in Chennai with Elovia Love
@@ -178,15 +178,15 @@ Join the waitlist and begin authentic conversations.
     {
       "@type": "WebPage",
       "name": "Dating in Chennai | Elovia Love",
-      "url": "https://elovialove.com/dating-in-chennai-india",
+      "url": "https://elovialove.onrender.com/dating-in-chennai-india",
       "description": "Connect with verified singles in Chennai for meaningful relationships, marriage, friendship, and companionship through Elovia Love — a privacy-first, culturally aware dating experience."
     },
     {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.com/"},
-        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.com/cities"},
-        {"@type": "ListItem", "position": 3, "name": "Chennai", "item": "https://elovialove.com/dating-in-chennai-india"}
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.onrender.com/"},
+        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.onrender.com/cities"},
+        {"@type": "ListItem", "position": 3, "name": "Chennai", "item": "https://elovialove.onrender.com/dating-in-chennai-india"}
       ]
     },
     {
@@ -209,12 +209,12 @@ Join the waitlist and begin authentic conversations.
     {
       "@type": "Organization",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     },
     {
       "@type": "WebSite",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     }
   ]
 }

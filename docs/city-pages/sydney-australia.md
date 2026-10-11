@@ -1,9 +1,9 @@
-﻿---
+---
 title: Dating in Sydney | Elovia Love
 seo_title: Dating in Sydney | Elovia Love
 meta_description: Meet verified singles in Sydney for meaningful relationships, outdoor-friendly dating, and genuine connection with Elovia Love.
 slug: /dating-in-sydney-australia
-canonical_url: https://elovialove.com/dating-in-sydney-australia
+canonical_url: https://elovialove.onrender.com/dating-in-sydney-australia
 og_title: Dating in Sydney | Thoughtful Connections with Elovia Love
 og_description: Discover verified profiles, AI matchmaking, and safety-first features tailored to Sydney singles who value outdoor life and authentic connections.
 twitter_title: Dating in Sydney with Elovia Love
@@ -182,15 +182,15 @@ Join the waitlist and start building meaningful connections.
     {
       "@type": "WebPage",
       "name": "Dating in Sydney | Elovia Love",
-      "url": "https://elovialove.com/dating-in-sydney-australia",
+      "url": "https://elovialove.onrender.com/dating-in-sydney-australia",
       "description": "Meet verified singles in Sydney for meaningful relationships, outdoor-friendly dating, and genuine connection with Elovia Love."
     },
     {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.com/"},
-        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.com/cities"},
-        {"@type": "ListItem", "position": 3, "name": "Sydney", "item": "https://elovialove.com/dating-in-sydney-australia"}
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.onrender.com/"},
+        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.onrender.com/cities"},
+        {"@type": "ListItem", "position": 3, "name": "Sydney", "item": "https://elovialove.onrender.com/dating-in-sydney-australia"}
       ]
     },
     {
@@ -213,12 +213,12 @@ Join the waitlist and start building meaningful connections.
     {
       "@type": "Organization",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     },
     {
       "@type": "WebSite",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     }
   ]
 }

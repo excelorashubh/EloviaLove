@@ -3,7 +3,7 @@ title: Dating in London | Elovia Love
 seo_title: Dating in London | Elovia Love
 meta_description: Meet verified singles in London for meaningful, long-term relationships and secure, thoughtful dating with Elovia Love — optimized for London's busy, diverse lifestyle.
 slug: /dating-in-london-united-kingdom
-canonical_url: https://elovialove.com/dating-in-london-united-kingdom
+canonical_url: https://elovialove.onrender.com/dating-in-london-united-kingdom
 og_title: Dating in London | Thoughtful Connections with Elovia Love
 og_description: Discover verified profiles, AI-driven matchmaking, and privacy-first features tailored for London singles who want real connection.
 twitter_title: Dating in London with Elovia Love
@@ -182,15 +182,15 @@ Join the waitlist and connect with people who value intentional dating.
     {
       "@type": "WebPage",
       "name": "Dating in London | Elovia Love",
-      "url": "https://elovialove.com/dating-in-london-united-kingdom",
+      "url": "https://elovialove.onrender.com/dating-in-london-united-kingdom",
       "description": "Meet verified singles in London for meaningful, long-term relationships and secure, thoughtful dating with Elovia Love — optimized for London's busy, diverse lifestyle."
     },
     {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.com/"},
-        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.com/cities"},
-        {"@type": "ListItem", "position": 3, "name": "London", "item": "https://elovialove.com/dating-in-london-united-kingdom"}
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.onrender.com/"},
+        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.onrender.com/cities"},
+        {"@type": "ListItem", "position": 3, "name": "London", "item": "https://elovialove.onrender.com/dating-in-london-united-kingdom"}
       ]
     },
     {
@@ -213,12 +213,12 @@ Join the waitlist and connect with people who value intentional dating.
     {
       "@type": "Organization",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     },
     {
       "@type": "WebSite",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     }
   ]
 }

@@ -3,7 +3,7 @@ title: Dating in Hyderabad | Elovia Love
 seo_title: Dating in Hyderabad | Elovia Love
 meta_description: Meet verified singles in Hyderabad seeking meaningful relationships, marriage, friendship, and companionship on Elovia Love — a safer, privacy-first dating experience tailored to Hyderabad's modern lifestyle.
 slug: /dating-in-hyderabad-india
-canonical_url: https://elovialove.com/dating-in-hyderabad-india
+canonical_url: https://elovialove.onrender.com/dating-in-hyderabad-india
 og_title: Dating in Hyderabad | Meaningful Connections with Elovia Love
 og_description: Discover verified profiles, AI matchmaking, and secure conversations crafted for Hyderabad singles who value trust, family, and long-term potential.
 twitter_title: Dating in Hyderabad with Elovia Love
@@ -180,15 +180,15 @@ Join the waitlist and start building connections that matter.
 		{
 			"@type": "WebPage",
 			"name": "Dating in Hyderabad | Elovia Love",
-			"url": "https://elovialove.com/dating-in-hyderabad-india",
+			"url": "https://elovialove.onrender.com/dating-in-hyderabad-india",
 			"description": "Meet verified singles in Hyderabad seeking meaningful relationships, marriage, friendship, and companionship on Elovia Love — a safer, privacy-first dating experience tailored to Hyderabad's modern lifestyle."
 		},
 		{
 			"@type": "BreadcrumbList",
 			"itemListElement": [
-				{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.com/"},
-				{"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.com/cities"},
-				{"@type": "ListItem", "position": 3, "name": "Hyderabad", "item": "https://elovialove.com/dating-in-hyderabad-india"}
+				{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.onrender.com/"},
+				{"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.onrender.com/cities"},
+				{"@type": "ListItem", "position": 3, "name": "Hyderabad", "item": "https://elovialove.onrender.com/dating-in-hyderabad-india"}
 			]
 		},
 		{
@@ -211,12 +211,12 @@ Join the waitlist and start building connections that matter.
 		{
 			"@type": "Organization",
 			"name": "Elovia Love",
-			"url": "https://elovialove.com"
+			"url": "https://elovialove.onrender.com"
 		},
 		{
 			"@type": "WebSite",
 			"name": "Elovia Love",
-			"url": "https://elovialove.com"
+			"url": "https://elovialove.onrender.com"
 		}
 	]
 }

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../services/api';
+import { SITE_URL } from '../../data/seoContent';
 
 // ── Slug generator ────────────────────────────────────────────────────────────
 const toSlug = (t) => t.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
@@ -303,7 +304,7 @@ const BlogModal = ({ post, onClose, onSave }) => {
                 <p className="text-blue-700 text-base font-medium leading-tight truncate">
                   {form.metaTitle || form.title || 'Your Post Title'}
                 </p>
-                <p className="text-green-700 text-xs mt-0.5">elovialove.com/blog/{form.slug || 'your-post-slug'}</p>
+                <p className="text-green-700 text-xs mt-0.5">{SITE_URL}/blog/{form.slug || 'your-post-slug'}</p>
                 <p className="text-slate-600 text-sm mt-1 line-clamp-2">
                   {form.metaDescription || form.excerpt || 'Your meta description will appear here...'}
                 </p>

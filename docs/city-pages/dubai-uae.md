@@ -4,7 +4,7 @@
 - SEO Title: Dating in Dubai | Elovia Love
 - Meta Description: Meet verified singles in Dubai for meaningful relationships, sophisticated dating, and genuine connection with Elovia Love.
 - Slug: /dating-in-dubai-uae
-- Canonical URL: https://elovialove.com/dating-in-dubai-uae
+- Canonical URL: https://elovialove.onrender.com/dating-in-dubai-uae
 - Open Graph Title: Dating in Dubai | Thoughtful Connections with Elovia Love
 - Open Graph Description: Discover a more intentional and secure way to meet genuine singles in Dubai through verified profiles and AI matchmaking.
 - Twitter Title: Dating in Dubai with Elovia Love
@@ -17,7 +17,7 @@ title: Dating in Dubai | Elovia Love
 seo_title: Dating in Dubai | Elovia Love
 meta_description: Meet verified singles in Dubai for meaningful relationships and discreet, culturally aware matchmaking — a privacy-first experience tailored for Dubai's diverse community.
 slug: /dating-in-dubai-uae
-canonical_url: https://elovialove.com/dating-in-dubai-uae
+canonical_url: https://elovialove.onrender.com/dating-in-dubai-uae
 og_title: Dating in Dubai | Thoughtful Connections with Elovia Love
 og_description: Discover verified profiles, privacy-first tools, and AI matchmaking designed for Dubai singles who value discretion and cultural sensitivity.
 twitter_title: Dating in Dubai with Elovia Love
@@ -185,15 +185,15 @@ Join the waitlist and start making respectful, private connections.
     {
       "@type": "WebPage",
       "name": "Dating in Dubai | Elovia Love",
-      "url": "https://elovialove.com/dating-in-dubai-uae",
+      "url": "https://elovialove.onrender.com/dating-in-dubai-uae",
       "description": "Meet verified singles in Dubai for meaningful relationships and discreet, culturally aware matchmaking — a privacy-first experience tailored for Dubai's diverse community."
     },
     {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.com/"},
-        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.com/cities"},
-        {"@type": "ListItem", "position": 3, "name": "Dubai", "item": "https://elovialove.com/dating-in-dubai-uae"}
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.onrender.com/"},
+        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.onrender.com/cities"},
+        {"@type": "ListItem", "position": 3, "name": "Dubai", "item": "https://elovialove.onrender.com/dating-in-dubai-uae"}
       ]
     },
     {
@@ -216,12 +216,12 @@ Join the waitlist and start making respectful, private connections.
     {
       "@type": "Organization",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     },
     {
       "@type": "WebSite",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     }
   ]
 }

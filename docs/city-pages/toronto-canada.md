@@ -4,7 +4,7 @@
 - SEO Title: Dating in Toronto | Elovia Love
 - Meta Description: Meet verified singles in Toronto for meaningful relationships, serious dating, and genuine connection with Elovia Love.
 - Slug: /dating-in-toronto-canada
-- Canonical URL: https://elovialove.com/dating-in-toronto-canada
+- Canonical URL: https://elovialove.onrender.com/dating-in-toronto-canada
 - Open Graph Title: Dating in Toronto | Thoughtful Connections with Elovia Love
 - Open Graph Description: Discover a more intentional way to meet genuine singles in Toronto through verified profiles and AI matchmaking.
 - Twitter Title: Dating in Toronto with Elovia Love
@@ -88,7 +88,7 @@ title: Dating in Toronto | Elovia Love
 seo_title: Dating in Toronto | Elovia Love
 meta_description: Meet verified singles in Toronto for meaningful relationships, companionship, and marriage-minded dating — a privacy-first platform tailored to Toronto’s multicultural communities.
 slug: /dating-in-toronto-canada
-canonical_url: https://elovialove.com/dating-in-toronto-canada
+canonical_url: https://elovialove.onrender.com/dating-in-toronto-canada
 og_title: Dating in Toronto | Thoughtful Connections with Elovia Love
 og_description: Discover verified profiles, AI matchmaking, and safety-first features designed for Toronto singles seeking authentic connections.
 twitter_title: Dating in Toronto with Elovia Love
@@ -257,15 +257,15 @@ Join the waitlist and start meeting people who value authentic connection.
     {
       "@type": "WebPage",
       "name": "Dating in Toronto | Elovia Love",
-      "url": "https://elovialove.com/dating-in-toronto-canada",
+      "url": "https://elovialove.onrender.com/dating-in-toronto-canada",
       "description": "Meet verified singles in Toronto for meaningful relationships, companionship, and marriage-minded dating — a privacy-first platform tailored to Toronto’s multicultural communities."
     },
     {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.com/"},
-        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.com/cities"},
-        {"@type": "ListItem", "position": 3, "name": "Toronto", "item": "https://elovialove.com/dating-in-toronto-canada"}
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.onrender.com/"},
+        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.onrender.com/cities"},
+        {"@type": "ListItem", "position": 3, "name": "Toronto", "item": "https://elovialove.onrender.com/dating-in-toronto-canada"}
       ]
     },
     {
@@ -288,12 +288,12 @@ Join the waitlist and start meeting people who value authentic connection.
     {
       "@type": "Organization",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     },
     {
       "@type": "WebSite",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     }
   ]
 }

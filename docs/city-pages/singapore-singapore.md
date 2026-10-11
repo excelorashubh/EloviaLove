@@ -4,7 +4,7 @@
 - SEO Title: Dating in Singapore | Elovia Love
 - Meta Description: Meet verified singles in Singapore for meaningful relationships, serious dating, and genuine connection with Elovia Love.
 - Slug: /dating-in-singapore
-- Canonical URL: https://elovialove.com/dating-in-singapore
+- Canonical URL: https://elovialove.onrender.com/dating-in-singapore
 - Open Graph Title: Dating in Singapore | Thoughtful Connections with Elovia Love
 - Open Graph Description: Discover a more intentional way to meet genuine singles in Singapore through verified profiles and AI matchmaking.
 - Twitter Title: Dating in Singapore with Elovia Love
@@ -128,7 +128,7 @@ title: Dating in Singapore | Elovia Love
 seo_title: Dating in Singapore | Elovia Love
 meta_description: Meet verified singles in Singapore for meaningful relationships and culturally aware matchmaking — a privacy-first experience built for Singapore’s diverse, fast-paced lifestyle.
 slug: /dating-in-singapore-singapore
-canonical_url: https://elovialove.com/dating-in-singapore-singapore
+canonical_url: https://elovialove.onrender.com/dating-in-singapore-singapore
 og_title: Dating in Singapore | Thoughtful Connections with Elovia Love
 og_description: Discover verified profiles, AI matchmaking, and safety-first features tailored to Singapore singles who value discretion and genuine connection.
 twitter_title: Dating in Singapore with Elovia Love
@@ -295,15 +295,15 @@ Join the waitlist and start meeting people who value discretion and meaningful c
     {
       "@type": "WebPage",
       "name": "Dating in Singapore | Elovia Love",
-      "url": "https://elovialove.com/dating-in-singapore-singapore",
+      "url": "https://elovialove.onrender.com/dating-in-singapore-singapore",
       "description": "Meet verified singles in Singapore for meaningful relationships and culturally aware matchmaking — a privacy-first experience built for Singapore’s diverse, fast-paced lifestyle."
     },
     {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.com/"},
-        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.com/cities"},
-        {"@type": "ListItem", "position": 3, "name": "Singapore", "item": "https://elovialove.com/dating-in-singapore-singapore"}
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.onrender.com/"},
+        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.onrender.com/cities"},
+        {"@type": "ListItem", "position": 3, "name": "Singapore", "item": "https://elovialove.onrender.com/dating-in-singapore-singapore"}
       ]
     },
     {
@@ -326,12 +326,12 @@ Join the waitlist and start meeting people who value discretion and meaningful c
     {
       "@type": "Organization",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     },
     {
       "@type": "WebSite",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     }
   ]
 }

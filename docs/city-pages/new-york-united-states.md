@@ -3,7 +3,7 @@ title: Dating in New York | Elovia Love
 seo_title: Dating in New York | Elovia Love
 meta_description: Meet verified singles in New York for meaningful relationships, companionship, and marriage-minded dating — a privacy-first, verification-led experience tailored to NYC life.
 slug: /dating-in-new-york-united-states
-canonical_url: https://elovialove.com/dating-in-new-york-united-states
+canonical_url: https://elovialove.onrender.com/dating-in-new-york-united-states
 og_title: Dating in New York | Thoughtful Connections with Elovia Love
 og_description: Discover verified profiles, AI matchmaking, and secure conversations designed for New Yorkers who want intentional, lasting connections.
 twitter_title: Dating in New York with Elovia Love
@@ -178,15 +178,15 @@ Join the waitlist and begin authentic conversations.
     {
       "@type": "WebPage",
       "name": "Dating in New York | Elovia Love",
-      "url": "https://elovialove.com/dating-in-new-york-united-states",
+      "url": "https://elovialove.onrender.com/dating-in-new-york-united-states",
       "description": "Meet verified singles in New York for meaningful relationships, companionship, and marriage-minded dating — a privacy-first, verification-led experience tailored to NYC life."
     },
     {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.com/"},
-        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.com/cities"},
-        {"@type": "ListItem", "position": 3, "name": "New York", "item": "https://elovialove.com/dating-in-new-york-united-states"}
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://elovialove.onrender.com/"},
+        {"@type": "ListItem", "position": 2, "name": "Cities", "item": "https://elovialove.onrender.com/cities"},
+        {"@type": "ListItem", "position": 3, "name": "New York", "item": "https://elovialove.onrender.com/dating-in-new-york-united-states"}
       ]
     },
     {
@@ -209,12 +209,12 @@ Join the waitlist and begin authentic conversations.
     {
       "@type": "Organization",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     },
     {
       "@type": "WebSite",
       "name": "Elovia Love",
-      "url": "https://elovialove.com"
+      "url": "https://elovialove.onrender.com"
     }
   ]
 }
