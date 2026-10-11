@@ -1,6 +1,6 @@
 # ❤️ Elovia Love - Premium Dating Platform
 
-[![Production Status](https://img.shields.io/badge/Production-Live-success)](https://elovialove.com)
+[![Production Status](https://img.shields.io/badge/Production-Live-success)](https://elovialove.onrender.com)
 [![License](https://img.shields.io/badge/License-ISC-blue)](LICENSE)
 
 Elovia Love is a modern, high-performance dating platform built with the MERN stack (MongoDB, Express, React, Node.js). It features real-time matching, instant messaging, and a robust SEO-driven architecture.

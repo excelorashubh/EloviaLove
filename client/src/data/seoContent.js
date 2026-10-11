@@ -1,7 +1,7 @@
 const resolveSiteUrl = () => {
   if (import.meta.env.VITE_SITE_URL) return import.meta.env.VITE_SITE_URL;
   if (typeof window !== 'undefined' && window.location?.origin) return window.location.origin;
-  return 'https://elovialove.com';
+  return 'https://elovialove.onrender.com';
 };
 
 export const SITE_URL = resolveSiteUrl();
