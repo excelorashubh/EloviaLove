@@ -19,7 +19,7 @@ const AdWrapper = ({ children, showUpgradeNudge = false, className = '' }) => {
   }
 
   return (
-    <div className={`ad-wrapper ${className}`}>
+    <div className={`ad-wrapper w-full ${className}`}>
       {children}
       {showUpgradeNudge && (
         <p className="text-center text-xs text-slate-400 mt-2">
