@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 const FAQAccordion = ({ faqs }) => {
   const [open, setOpen] = useState(null);
@@ -33,7 +33,7 @@ const FAQAccordion = ({ faqs }) => {
             </button>
             <AnimatePresence initial={false}>
               {open === i && (
-                <motion.div
+                <Motion.div
                   key="answer"
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
@@ -44,7 +44,7 @@ const FAQAccordion = ({ faqs }) => {
                   <div className="px-5 pb-5 pt-1 text-sm text-slate-600 leading-relaxed border-t border-slate-100">
                     {faq.answer}
                   </div>
-                </motion.div>
+                </Motion.div>
               )}
             </AnimatePresence>
           </div>

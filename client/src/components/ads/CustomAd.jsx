@@ -4,13 +4,12 @@ import adService from '../../services/adService';
 /**
  * CustomAd - Displays custom banner ads from database
  * Falls back to AdSense if no custom ad available
- * 
+ *
  * @param {string} placement - Ad placement identifier
- * @param {string} fallbackSlot - AdSense slot ID for fallback
  * @param {string} className - Additional CSS classes
  * @param {object} style - Additional inline styles
  */
-const CustomAd = ({ placement, fallbackSlot, className = '', style = {} }) => {
+const CustomAd = ({ placement, className = '', style = {}, onAdLoad }) => {
   const [ad, setAd] = useState(null);
   const [loading, setLoading] = useState(true);
   const [impressionRecorded, setImpressionRecorded] = useState(false);
@@ -23,10 +22,13 @@ const CustomAd = ({ placement, fallbackSlot, className = '', style = {} }) => {
       const fetchedAd = await adService.getAdForPlacement(placement);
       setAd(fetchedAd);
       setLoading(false);
+      if (onAdLoad) {
+        onAdLoad(Boolean(fetchedAd));
+      }
     };
 
     fetchAd();
-  }, [placement]);
+  }, [onAdLoad, placement]);
 
   // Record impression when ad becomes visible
   useEffect(() => {

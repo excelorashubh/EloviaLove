@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Phone, Mail, ShieldCheck, CheckCircle2, ArrowLeft, Loader2, BadgeCheck, AlertCircle, Camera } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

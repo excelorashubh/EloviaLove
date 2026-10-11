@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react';
+
+/* eslint-disable react-refresh/only-export-components */
 // ── Complete Analytics & SEO Monitoring Setup ───────────────────────────────
 
 // 1. Google Analytics 4 Setup
@@ -395,15 +398,3 @@ function App() {
 // GET /api/seo/check-index?url=...
 */
 
-export {
-  GA4_CONFIG,
-  GSC_CONFIG,
-  BING_WMT_CONFIG,
-  CLARITY_CONFIG,
-  AHREFS_WMT_CONFIG,
-  useAnalytics,
-  SEOMonitor,
-  CrawlMonitor,
-  IndexCoverageMonitor,
-  SEOMetricsDashboard
-};

@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle2, Lock, MapPin, Sparkles, Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 const PLAN_RANK = { free: 0, basic: 1, premium: 2, pro: 3 };
 const planHas = (userPlan, requiredPlan) => PLAN_RANK[userPlan] >= PLAN_RANK[requiredPlan];
@@ -34,14 +34,9 @@ const PillGroup = ({ options, value, onChange, multi = false, disabled = false }
 );
 
 export default function FilterSidebar({ filters, onChange, onApply, onReset, userPlan, activeCount, onUpgradeClick, className = '' }) {
-  const field = (key) => ({
-    value: filters[key],
-    onChange: (value) => onChange(key, value),
-  });
-
   return (
     <aside className={`hidden xl:block w-[360px] ${className}`}>
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
@@ -279,7 +274,7 @@ export default function FilterSidebar({ filters, onChange, onApply, onReset, use
             View Plans
           </button>
         </div>
-      </motion.div>
+      </Motion.div>
     </aside>
   );
 }

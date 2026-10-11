@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import { SITE_URL } from '../../data/seoContent';
 
 const CitySEO = ({ city, metaTitle, metaDescription, canonicalUrl, faqs = [] }) => {
-  const faqSchema = faqs.map((faq, index) => ({
+  const faqSchema = faqs.map((faq) => ({
     "@type": "Question",
     "name": faq.question,
     "acceptedAnswer": {

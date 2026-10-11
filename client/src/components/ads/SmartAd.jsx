@@ -33,9 +33,9 @@ const SmartAd = ({ placement, slot, format = 'auto', style = {}, className = '' 
       {!showAdSense && placement && (
         <CustomAd
           placement={placement}
-          fallbackSlot={slot}
           className={className}
           style={style}
+          onAdLoad={(loaded) => setCustomAdLoaded(loaded)}
         />
       )}
 

@@ -1,7 +1,7 @@
 import { Shield, AlertTriangle, CheckCircle2, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const SafetyGuide = ({ data, city }) => {
+const SafetyGuide = ({ data }) => {
   const safetyTips = [
     { icon: CheckCircle2, text: 'Always meet in public places' },
     { icon: CheckCircle2, text: 'Video call before meeting' },

@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 const COUNTRY_OPTIONS = [
   { label: 'India', value: '+91', emoji: '🇮🇳' },
   { label: 'United States', value: '+1', emoji: '🇺🇸' },
@@ -12,26 +10,16 @@ const COUNTRY_OPTIONS = [
 const formatLabel = ({ emoji, label, value }) => `${emoji} ${label} (${value})`;
 
 export default function PhoneInput({ countryCode, phoneNumber, onChange, error }) {
-  const [selectedCountry, setSelectedCountry] = useState(countryCode || '+91');
-  const [localNumber, setLocalNumber] = useState(phoneNumber || '');
-
-  useEffect(() => {
-    if (countryCode) setSelectedCountry(countryCode);
-  }, [countryCode]);
-
-  useEffect(() => {
-    if (phoneNumber) setLocalNumber(phoneNumber);
-  }, [phoneNumber]);
+  const selectedCountry = countryCode || '+91';
+  const localNumber = phoneNumber || '';
 
   const handleCountryChange = (event) => {
     const nextCode = event.target.value;
-    setSelectedCountry(nextCode);
     onChange({ countryCode: nextCode, phoneNumber: localNumber });
   };
 
   const handleNumberChange = (event) => {
     const cleaned = event.target.value.replace(/[^0-9 ]/g, '');
-    setLocalNumber(cleaned);
     onChange({ countryCode: selectedCountry, phoneNumber: cleaned });
   };
 

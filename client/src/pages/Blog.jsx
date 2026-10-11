@@ -49,7 +49,7 @@ const BlogImage = ({ post, className = '' }) => {
 
   if (!imageUrl || failed) {
     return (
-      <div className={`flex items-center justify-center bg-gradient-to-br from-rose-100 via-pink-50 to-slate-100 ${className}`}>
+      <div className={`flex items-center justify-center bg-linear-to-br from-rose-100 via-pink-50 to-slate-100 ${className}`}>
         <Heart className="h-10 w-10 text-rose-300" />
       </div>
     );

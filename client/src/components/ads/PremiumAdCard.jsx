@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Crown, Check, Sparkles, Shield, Zap, Heart } from 'lucide-react';
 
@@ -16,7 +16,7 @@ const PremiumAdCard = ({ className = '', variant = 'default' }) => {
 
   if (variant === 'compact') {
     return (
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -42,12 +42,12 @@ const PremiumAdCard = ({ className = '', variant = 'default' }) => {
             </Link>
           </div>
         </div>
-      </motion.div>
+      </Motion.div>
     );
   }
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
@@ -78,7 +78,7 @@ const PremiumAdCard = ({ className = '', variant = 'default' }) => {
         {/* Benefits */}
         <div className="space-y-3 mb-6">
           {benefits.map((benefit, index) => (
-            <motion.div
+            <Motion.div
               key={index}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -89,7 +89,7 @@ const PremiumAdCard = ({ className = '', variant = 'default' }) => {
                 <benefit.icon size={16} />
               </div>
               <span className="text-sm font-medium">{benefit.text}</span>
-            </motion.div>
+            </Motion.div>
           ))}
         </div>
 
@@ -107,7 +107,7 @@ const PremiumAdCard = ({ className = '', variant = 'default' }) => {
           ✨ Join 10,000+ premium members
         </p>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 };
 

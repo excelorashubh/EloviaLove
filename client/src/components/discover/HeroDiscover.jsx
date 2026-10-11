@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 export default function HeroDiscover({ onUpgradeClick }) {
   return (
@@ -12,23 +12,23 @@ export default function HeroDiscover({ onUpgradeClick }) {
 
       <div className="relative grid gap-8 lg:grid-cols-[1.4fr_1fr] items-center">
         <div className="space-y-6 text-white">
-          <motion.h1
+          <Motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="text-4xl sm:text-5xl font-extrabold leading-tight tracking-tight"
           >
             Discover Amazing People <span aria-hidden>❤️</span>
-          </motion.h1>
-          <motion.p
+          </Motion.h1>
+          <Motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="max-w-2xl text-base sm:text-lg text-white/90"
           >
             Find meaningful connections with people who share your interests and values.
-          </motion.p>
-          <motion.div
+          </Motion.p>
+          <Motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -46,10 +46,10 @@ export default function HeroDiscover({ onUpgradeClick }) {
             >
               Browse Matches
             </a>
-          </motion.div>
+          </Motion.div>
         </div>
 
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.15 }}
@@ -88,7 +88,7 @@ export default function HeroDiscover({ onUpgradeClick }) {
               Upgrade Now
             </button>
           </div>
-        </motion.div>
+        </Motion.div>
       </div>
     </section>
   );

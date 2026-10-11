@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { X, Crown, Clock } from 'lucide-react';
 import api from '../services/api';
@@ -30,7 +30,7 @@ const SubscriptionBanner = () => {
 
   return (
     <AnimatePresence>
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -12 }}
@@ -83,7 +83,7 @@ const SubscriptionBanner = () => {
             <X size={14} />
           </button>
         </div>
-      </motion.div>
+      </Motion.div>
     </AnimatePresence>
   );
 };

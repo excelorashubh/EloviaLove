@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Heart, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import EloviaLoveWB from "../../assets/EloviaLoveWB_small.png"
@@ -39,6 +39,7 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
+    if (!location.pathname) return;
     setIsMobileMenuOpen(false);
     setIsProfileMenuOpen(false);
   }, [location.pathname]);
@@ -140,7 +141,7 @@ const Navbar = () => {
                 </button>
                 <AnimatePresence>
                   {isProfileMenuOpen && (
-                    <motion.div
+                    <Motion.div
                       initial={{ opacity: 0, scale: 0.95, y: -8 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: -8 }}
@@ -156,7 +157,7 @@ const Navbar = () => {
                       <Link to="/chats" onClick={() => setIsProfileMenuOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" role="menuitem">Chats</Link>
                       <Link to="/settings" onClick={() => setIsProfileMenuOpen(false)} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" role="menuitem">Settings</Link>
                       <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-50" role="menuitem">Logout</button>
-                    </motion.div>
+                    </Motion.div>
                   )}
                 </AnimatePresence>
               </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Heart, Star, X as XIcon, MoreHorizontal, CheckCircle2, MapPin } from 'lucide-react';
 
 export default function ProfileCard({ user = {}, onLike, onPass, onSuperLike, onBookmark, onReport, bookmarked }) {
@@ -19,7 +19,7 @@ export default function ProfileCard({ user = {}, onLike, onPass, onSuperLike, on
   const avatar = profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=7e5bef&color=fff&size=512`;
 
   return (
-    <motion.article whileHover={{ y: -8 }} transition={{ duration: 0.25 }} className="group relative overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-2xl">
+    <Motion.article whileHover={{ y: -8 }} transition={{ duration: 0.25 }} className="group relative overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-2xl">
       <div className="relative overflow-hidden rounded-[32px] bg-slate-100">
         <img
           src={avatar}
@@ -132,6 +132,6 @@ export default function ProfileCard({ user = {}, onLike, onPass, onSuperLike, on
           </button>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
