@@ -109,9 +109,10 @@ export const initializeAd = (element) => {
       if (typeof window === 'undefined') return;
 
       window.adsbygoogle = window.adsbygoogle || [];
-      if (Array.isArray(window.adsbygoogle)) {
-        window.adsbygoogle.push({});
+      if (typeof window.adsbygoogle.push !== 'function') {
+        throw new Error('AdSense ad queue is unavailable');
       }
+      window.adsbygoogle.push({});
     };
 
     if (typeof window !== 'undefined' && window.requestAnimationFrame) {
