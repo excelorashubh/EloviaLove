@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 // ── E-A-T Optimization Strategy for Dating Platform ──────────────────────────
 
 // 1. Author Bios and Expertise Signals
@@ -75,7 +77,7 @@ export const EDITORIAL_POLICY = {
 };
 
 // 3. Content Review System Component
-export const ContentReviewBadge = ({ content, reviewDate, reviewer }) => (
+export const ContentReviewBadge = ({ reviewDate, reviewer }) => (
   <div className="content-review-badge bg-green-50 border border-green-200 rounded-lg p-4 my-6">
     <div className="flex items-center space-x-2 mb-2">
       <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -164,7 +166,7 @@ export const AuthorBio = ({ authorSlug, showCredentials = true }) => {
 };
 
 // 5. Trust Indicators Component
-export const TrustIndicators = ({ contentType = 'article' }) => (
+export const TrustIndicators = () => (
   <div className="trust-indicators bg-blue-50 border border-blue-200 rounded-lg p-4 my-6">
     <h4 className="text-sm font-semibold text-blue-800 mb-3">Why Trust This Content:</h4>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-blue-700">

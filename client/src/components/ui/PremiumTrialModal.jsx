@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import {
@@ -66,19 +66,14 @@ const petals = [
 ];
 
 const PremiumTrialModal = ({ open, onClose, onContinue, trialEndDate, userName }) => {
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const daysLeft = trialEndDate
-    ? Math.max(0, Math.ceil((new Date(trialEndDate) - new Date()) / 86400000))
-    : 10;
+  const [showConfetti, setShowConfetti] = useState(Boolean(open));
+  const viewport = typeof window !== 'undefined'
+    ? { width: window.innerWidth, height: window.innerHeight }
+    : { width: 0, height: 0 };
 
   useEffect(() => {
     if (!open) return;
-    setDimensions({
-      width: typeof window !== 'undefined' ? window.innerWidth : 0,
-      height: typeof window !== 'undefined' ? window.innerHeight : 0,
-    });
-    setShowConfetti(true);
+
     const timer = window.setTimeout(() => setShowConfetti(false), 5600);
     return () => window.clearTimeout(timer);
   }, [open]);
@@ -87,13 +82,13 @@ const PremiumTrialModal = ({ open, onClose, onContinue, trialEndDate, userName }
 
   return (
     <AnimatePresence>
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex min-h-screen items-center justify-center px-3 py-4 sm:px-6 sm:py-5"
       >
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -101,10 +96,10 @@ const PremiumTrialModal = ({ open, onClose, onContinue, trialEndDate, userName }
           onClick={onClose}
         />
 
-        {showConfetti && dimensions.width > 0 && (
+        {showConfetti && viewport.width > 0 && (
           <Confetti
-            width={dimensions.width}
-            height={dimensions.height}
+            width={viewport.width}
+            height={viewport.height}
             numberOfPieces={140}
             recycle={false}
             gravity={0.25}
@@ -121,7 +116,7 @@ const PremiumTrialModal = ({ open, onClose, onContinue, trialEndDate, userName }
           <div className="pointer-events-none absolute left-1/2 top-8 h-40 w-40 -translate-x-1/2 rounded-full bg-[#fff0f6]/70 blur-2xl" />
 
           {floatingParticles.map((particle, index) => (
-            <motion.span
+            <Motion.span
               key={index}
               className="absolute rounded-full"
               style={{
@@ -137,7 +132,7 @@ const PremiumTrialModal = ({ open, onClose, onContinue, trialEndDate, userName }
           ))}
 
           {petals.map((petal, index) => (
-            <motion.span
+            <Motion.span
               key={index}
               className="absolute rounded-full bg-pink-100/90 shadow-[0_0_20px_rgba(255,111,168,0.18)]"
               style={{ width: 12, height: 12, top: '-8%', left: petal.left }}
@@ -147,7 +142,7 @@ const PremiumTrialModal = ({ open, onClose, onContinue, trialEndDate, userName }
           ))}
         </div>
 
-        <motion.div
+        <Motion.div
           initial={{ scale: 0.84, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
@@ -197,7 +192,7 @@ const PremiumTrialModal = ({ open, onClose, onContinue, trialEndDate, userName }
                 {features.map((feature, index) => {
                   const Icon = feature.icon;
                   return (
-                    <motion.div
+                    <Motion.div
                       key={feature.label}
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -209,12 +204,12 @@ const PremiumTrialModal = ({ open, onClose, onContinue, trialEndDate, userName }
                         <Icon size={18} />
                       </div>
                       <p className="mt-3 text-sm font-semibold text-[#4B1D31]">{feature.label}</p>
-                    </motion.div>
+                    </Motion.div>
                   );
                 })}
               </div>
 
-              <motion.div
+              <Motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, delay: 0.25 }}
@@ -239,7 +234,7 @@ const PremiumTrialModal = ({ open, onClose, onContinue, trialEndDate, userName }
                     <p className="mt-1 text-lg font-bold text-[#7B5B69]">Worth ₹999</p>
                   </div>
                 </div>
-              </motion.div>
+              </Motion.div>
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -263,8 +258,8 @@ const PremiumTrialModal = ({ open, onClose, onContinue, trialEndDate, userName }
               Enjoy your premium experience and start making meaningful connections today.
             </p>
           </div>
-        </motion.div>
-      </motion.div>
+        </Motion.div>
+      </Motion.div>
     </AnimatePresence>
   );
 };
