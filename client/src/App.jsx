@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import api from './services/api';
 import Home from './pages/Home';
@@ -178,16 +178,54 @@ function VideoCallHandler() {
 
 function AppContent() {
   const location = useLocation();
+  const isChatPage = location.pathname.startsWith('/chat/');
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/register';
   const isDiscoverPage = location.pathname === '/discover' || location.pathname.startsWith('/discover/');
   const isDashboardPage = location.pathname === '/dashboard' || location.pathname.startsWith('/dashboard/');
   const hideGlobalNavbar = location.pathname.startsWith('/admin') || isAuthPage;
   const hideFooter = location.pathname.startsWith('/admin') || isAuthPage || isDiscoverPage || isDashboardPage;
   const hideChatInterface = location.pathname === '/chat' || location.pathname.startsWith('/chat/');
+  const [chatNavbarHeight, setChatNavbarHeight] = useState(80);
+  const [chatViewportHeight, setChatViewportHeight] = useState(() => (
+    typeof window === 'undefined' ? 0 : window.visualViewport?.height || window.innerHeight
+  ));
 
   useEffect(() => {
     trackPageVisit(location.pathname);
   }, [location.pathname]);
+
+  useLayoutEffect(() => {
+    if (!isChatPage) return undefined;
+
+    const navbar = document.querySelector('[data-site-navbar]');
+    const visualViewport = window.visualViewport;
+    const updateViewport = () => {
+      setChatViewportHeight(visualViewport?.height || window.innerHeight);
+    };
+    const updateNavbarHeight = () => {
+      if (navbar) setChatNavbarHeight(navbar.getBoundingClientRect().bottom);
+    };
+    const resizeObserver = navbar ? new ResizeObserver(updateNavbarHeight) : null;
+    const handleNavbarTransitionEnd = (event) => {
+      if (event.target === navbar) updateNavbarHeight();
+    };
+
+    updateViewport();
+    updateNavbarHeight();
+    if (navbar) {
+      resizeObserver.observe(navbar, { box: 'border-box' });
+      navbar.addEventListener('transitionend', handleNavbarTransitionEnd);
+    }
+    window.addEventListener('resize', updateViewport);
+    visualViewport?.addEventListener('resize', updateViewport);
+
+    return () => {
+      resizeObserver?.disconnect();
+      navbar?.removeEventListener('transitionend', handleNavbarTransitionEnd);
+      window.removeEventListener('resize', updateViewport);
+      visualViewport?.removeEventListener('resize', updateViewport);
+    };
+  }, [isChatPage]);
 
   return (
     <>
@@ -197,7 +235,15 @@ function AppContent() {
       {/* Global Video Call Handler */}
       <VideoCallHandler />
 
-      <main className={`min-h-screen ${!hideGlobalNavbar ? 'pt-20' : ''}`}>
+      <main
+        className={isChatPage
+          ? 'box-border min-h-0 overflow-hidden'
+          : `min-h-screen ${!hideGlobalNavbar ? 'pt-20' : ''}`}
+        style={isChatPage ? {
+          height: `${chatViewportHeight}px`,
+          paddingTop: `${chatNavbarHeight}px`,
+        } : undefined}
+      >
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />

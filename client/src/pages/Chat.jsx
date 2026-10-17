@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { SITE_URL } from '../data/seoContent';
 import { Send, ArrowLeft, Check, CheckCheck, Phone, MoreVertical, Smile, Paperclip, Image, Gift, Search } from 'lucide-react';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
@@ -55,7 +55,7 @@ const groupByDate = (messages, myId) => {
 
 const MessageBubble = React.memo(({ item, isMe, isGrouped, otherAvatar, otherUser, retryFailed }) => {
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, y: 10, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.18, ease: 'easeOut' }}
@@ -102,7 +102,7 @@ const MessageBubble = React.memo(({ item, isMe, isGrouped, otherAvatar, otherUse
           )}
         </div>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 });
 
@@ -127,12 +127,14 @@ const Chat = () => {
   const [showMenu, setShowMenu]     = useState(false); // Menu dropdown state
 
   const socketRef       = useRef(null);
-  const messagesEndRef  = useRef(null);
+  const messagesContainerRef = useRef(null);
   const unreadRef       = useRef(null);
   const typingTimer     = useRef(null);
   const inputRef        = useRef(null);
   const fileInputRef    = useRef(null);
   const menuRef         = useRef(null); // Ref for menu dropdown
+  const isNearBottomRef = useRef(true);
+  const hasPositionedMessagesRef = useRef(false);
 
   const handleEmojiClick = () => {
     setInput(prev => `${prev}😊`);
@@ -309,13 +311,26 @@ const Chat = () => {
   }, [userId]);
 
   // ── Auto-scroll ──────────────────────────────────────────────────────────────
-  const hasScrolledToUnread = useRef(false);
   useEffect(() => {
-    if (!loading && !hasScrolledToUnread.current && unreadRef.current) {
-      unreadRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      hasScrolledToUnread.current = true;
-    } else {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (loading) return;
+
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    if (!hasPositionedMessagesRef.current) {
+      const unreadMessage = unreadRef.current;
+      if (unreadMessage) {
+        const unreadTop = unreadMessage.getBoundingClientRect().top
+          - container.getBoundingClientRect().top
+          + container.scrollTop;
+        container.scrollTop = Math.max(0, unreadTop - container.clientHeight / 2);
+      } else {
+        container.scrollTop = container.scrollHeight;
+      }
+      hasPositionedMessagesRef.current = true;
+      isNearBottomRef.current = true;
+    } else if (isNearBottomRef.current) {
+      container.scrollTop = container.scrollHeight;
     }
   }, [messages, isTyping, loading]);
 
@@ -356,6 +371,7 @@ const Chat = () => {
 
     setSending(true);
     setInput('');
+    isNearBottomRef.current = true;
     socketRef.current?.emit('stop_typing', { to: userId, from: myId });
 
     // Optimistic bubble
@@ -419,7 +435,7 @@ const Chat = () => {
   const otherAvatar = avatarUrl(otherUser);
 
   if (loading) return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+    <div className="flex h-full min-h-0 items-center justify-center bg-slate-50">
       <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600" />
     </div>
   );
@@ -431,11 +447,11 @@ const Chat = () => {
         <meta name="description" content="Real-time messaging with your matches on Elovia Love." />
         <link rel="canonical" href={`${SITE_URL}/chat/${userId}`} />
       </Helmet>
-      <div className="h-screen overflow-hidden bg-slate-50">
-        <div className="flex h-full">
+      <div className="h-full min-h-0 overflow-hidden bg-slate-50">
+        <div className="flex h-full min-h-0 min-w-0">
 
           {/* Sidebar */}
-          <aside className="hidden xl:flex flex-col w-96 border-r border-slate-200 bg-white overflow-hidden">
+          <aside className="hidden min-h-0 w-96 shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white xl:flex">
             <div className="border-b border-slate-200 px-5 py-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -456,7 +472,7 @@ const Chat = () => {
                 />
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="min-h-0 flex-1 overflow-y-auto">
               {filteredConversations.length === 0 ? (
                 <div className="p-6 text-sm text-slate-500">No conversations found.</div>
               ) : (
@@ -496,7 +512,7 @@ const Chat = () => {
             </div>
           </aside>
 
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             <header className="flex items-center justify-between gap-2 sm:gap-4 shrink-0 border-b border-slate-200 bg-white px-3 py-3 sm:px-6 z-20">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <Link to="/chats" className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors xl:hidden shrink-0">
@@ -553,7 +569,7 @@ const Chat = () => {
                   
                   {/* Dropdown Menu */}
                   {showMenu && (
-                    <motion.div
+                    <Motion.div
                       initial={{ opacity: 0, scale: 0.95, y: -10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -601,14 +617,21 @@ const Chat = () => {
                         </svg>
                         Block User
                       </button>
-                    </motion.div>
+                    </Motion.div>
                   )}
                 </div>
               </div>
             </header>
 
-            <div className="flex-1 overflow-hidden bg-slate-50">
-              <div className="h-full overflow-y-auto px-4 py-4 sm:px-6">
+            <div className="min-h-0 flex-1 overflow-hidden bg-slate-50">
+              <div
+                ref={messagesContainerRef}
+                onScroll={(event) => {
+                  const container = event.currentTarget;
+                  isNearBottomRef.current = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+                }}
+                className="h-full min-h-0 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6"
+              >
                 {hasMore && (
                   <div className="flex justify-center py-3">
                     <button
@@ -661,7 +684,7 @@ const Chat = () => {
 
                 <AnimatePresence>
                   {isTyping && (
-                    <motion.div
+                    <Motion.div
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 8 }}
@@ -677,16 +700,15 @@ const Chat = () => {
                           />
                         ))}
                       </div>
-                    </motion.div>
+                    </Motion.div>
                   )}
                 </AnimatePresence>
 
-                <div ref={messagesEndRef} />
               </div>
             </div>
 
-            <div className="bg-white border-t border-slate-200 shrink-0">
-              <div className="max-w-5xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+            <div className="shrink-0 border-t border-slate-200 bg-white">
+              <div className="mx-auto max-w-5xl px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-4">
                 <form onSubmit={handleSend} className="flex items-end gap-1.5 sm:gap-2">
                   <button type="button" onClick={handleEmojiClick} className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors shrink-0 hidden xs:flex items-center justify-center" aria-label="Add emoji">
                     <Smile size={16} className="sm:hidden" />
