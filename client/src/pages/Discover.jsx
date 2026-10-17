@@ -346,7 +346,7 @@ const Discover = () => {
       <div className="sticky top-0 z-10 shrink-0 bg-white border-b border-slate-100 shadow-sm dark:border-white/20 dark:bg-black">
         <div className="max-w-9xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <BackButton to="/dashboard" />
+            <BackButton to="/dashboard" labelClassName="hidden lg:inline" />
             <h1 className="text-2xl font-extrabold text-slate-900">Discover</h1>
           </div>
           <div className="flex items-center gap-2">
