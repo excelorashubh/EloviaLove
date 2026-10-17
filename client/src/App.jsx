@@ -184,7 +184,7 @@ function AppContent() {
   const isDashboardPage = location.pathname === '/dashboard' || location.pathname.startsWith('/dashboard/');
   const hideGlobalNavbar = location.pathname.startsWith('/admin') || isAuthPage;
   const hideFooter = location.pathname.startsWith('/admin') || isAuthPage || isDiscoverPage || isDashboardPage;
-  const hideChatInterface = location.pathname === '/chat' || location.pathname.startsWith('/chat/');
+  const hideChatInterface = location.pathname === '/chats' || location.pathname.startsWith('/chat/');
   const [chatNavbarHeight, setChatNavbarHeight] = useState(80);
   const [chatViewportHeight, setChatViewportHeight] = useState(() => (
     typeof window === 'undefined' ? 0 : window.visualViewport?.height || window.innerHeight
