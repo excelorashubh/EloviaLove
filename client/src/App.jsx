@@ -179,8 +179,10 @@ function VideoCallHandler() {
 function AppContent() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/register';
+  const isDiscoverPage = location.pathname === '/discover' || location.pathname.startsWith('/discover/');
+  const isDashboardPage = location.pathname === '/dashboard' || location.pathname.startsWith('/dashboard/');
   const hideGlobalNavbar = location.pathname.startsWith('/admin') || isAuthPage;
-  const hideFooter = location.pathname.startsWith('/admin') || isAuthPage;
+  const hideFooter = location.pathname.startsWith('/admin') || isAuthPage || isDiscoverPage || isDashboardPage;
   const hideChatInterface = location.pathname === '/chat' || location.pathname.startsWith('/chat/');
 
   useEffect(() => {
