@@ -190,7 +190,7 @@ const Navbar = () => {
       {/* Mobile Navigation */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -214,6 +214,7 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={`block px-3 py-3 rounded-lg text-base font-medium ${
                     location.pathname === link.path
                       ? 'bg-primary-50 text-primary-700'
@@ -226,7 +227,10 @@ const Navbar = () => {
               <div className="mt-6 flex flex-col gap-3 px-3">
                 {isAuthenticated ? (
                   <button
-                    onClick={logout}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      logout();
+                    }}
                     className="w-full text-center py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors"
                   >
                     Log out
@@ -235,12 +239,14 @@ const Navbar = () => {
                   <>
                     <Link
                       to="/login"
+                      onClick={() => setIsMobileMenuOpen(false)}
                       className="w-full text-center py-3 text-slate-700 font-medium border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
                     >
                       Log in
                     </Link>
                     <Link
                       to="/signup"
+                      onClick={() => setIsMobileMenuOpen(false)}
                       className="w-full text-center py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors"
                     >
                       Sign up
@@ -249,7 +255,7 @@ const Navbar = () => {
                 )}
               </div>
             </div>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </header>
