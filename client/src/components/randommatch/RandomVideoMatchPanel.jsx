@@ -2,13 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { Crown, Heart, Sparkles, Video, MessageCircle, ShieldCheck, Coins, TimerReset, SkipForward, Ban, Flag, Mic, MicOff, Camera, CameraOff, RefreshCw, Sparkle, Gift, X } from 'lucide-react';
 import api from '../../services/api';
-import { io } from 'socket.io-client';
 import { useAuth } from '../../context/AuthContext';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-
 const RandomVideoMatchPanel = () => {
-  const { user, token } = useAuth();
+  const { user, socket } = useAuth();
   const [status, setStatus] = useState('idle');
   const [cards, setCards] = useState({ randomMatchCards: 20, giftClaimed: false, coins: 0 });
   const [partner, setPartner] = useState(null);
@@ -28,16 +25,11 @@ const RandomVideoMatchPanel = () => {
   const isFreeMode = useMemo(() => (cards.randomMatchCards > 0), [cards.randomMatchCards]);
 
   useEffect(() => {
-    if (!user?._id) return;
-
-    const socket = io(SOCKET_URL, {
-      auth: { token },
-      transports: ['websocket', 'polling'],
-    });
+    if (!socket || !user?._id) return undefined;
     socketRef.current = socket;
 
-    socket.on('connect', () => socket.emit('join', user._id));
-    socket.on('matchFound', ({ session: matchSession, partner: matchPartner }) => {
+    const handleConnect = () => socket.emit('join', user._id);
+    const handleMatchFound = ({ session: matchSession, partner: matchPartner }) => {
       setPartner(matchPartner);
       setSession(matchSession);
       setStatus('matched');
@@ -45,20 +37,36 @@ const RandomVideoMatchPanel = () => {
       setCountdown(3);
       setLoadingMessage('Connecting...');
       setToast({ type: 'success', message: '❤️ Match Found' });
-    });
-    socket.on('timerUpdate', ({ timer }) => setCallTimer(timer));
-    socket.on('endMatch', () => {
+    };
+    const handleTimerUpdate = ({ timer }) => setCallTimer(timer);
+    const handleEndMatch = () => {
       setStatus('idle');
       setPartner(null);
       setSession(null);
       setShowCallUi(false);
       setCallTimer(120);
-    });
-    socket.on('toast', ({ message }) => setToast({ type: 'info', message }));
-    socket.on('partnerDisconnected', () => setToast({ type: 'warning', message: '⚠ Partner Disconnected' }));
+    };
+    const handleToast = ({ message }) => setToast({ type: 'info', message });
+    const handlePartnerDisconnected = () => setToast({ type: 'warning', message: '⚠ Partner Disconnected' });
 
-    return () => socket.disconnect();
-  }, [token, user?._id]);
+    socket.on('connect', handleConnect);
+    socket.on('matchFound', handleMatchFound);
+    socket.on('timerUpdate', handleTimerUpdate);
+    socket.on('endMatch', handleEndMatch);
+    socket.on('toast', handleToast);
+    socket.on('partnerDisconnected', handlePartnerDisconnected);
+    if (socket.connected) handleConnect();
+
+    return () => {
+      socket.off('connect', handleConnect);
+      socket.off('matchFound', handleMatchFound);
+      socket.off('timerUpdate', handleTimerUpdate);
+      socket.off('endMatch', handleEndMatch);
+      socket.off('toast', handleToast);
+      socket.off('partnerDisconnected', handlePartnerDisconnected);
+      if (socketRef.current === socket) socketRef.current = null;
+    };
+  }, [socket, user?._id]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {

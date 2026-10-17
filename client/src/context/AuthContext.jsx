@@ -63,27 +63,62 @@ export const AuthProvider = ({ children }) => {
 
   // Shared authenticated socket for global events and page-level subscriptions.
   useEffect(() => {
-    const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    const SOCKET_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || 'http://localhost:5000';
     if (!token || !user?._id) {
       return undefined;
     }
 
     const currentSocket = io(SOCKET_URL, {
       auth: { token },
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
+      tryAllTransports: true,
+      autoConnect: false,
     });
-    setSocket(currentSocket);
 
-    const handleConnect = () => currentSocket.emit('join', user._id);
+    const handleConnect = () => {
+      if (import.meta.env.DEV) {
+        console.info('[socket] connected', {
+          socketId: currentSocket.id,
+          userId: user._id,
+          transport: currentSocket.io.engine?.transport?.name,
+        });
+      }
+      currentSocket.emit('join', user._id, (result) => {
+        if (import.meta.env.DEV) {
+          console.info('[socket] personal room confirmed', result);
+        }
+      });
+    };
+    const handleConnectError = (error) => {
+      console.error('[socket] connection failed', {
+        message: error.message,
+        userId: user._id,
+      });
+    };
+    const handleDisconnect = (reason) => {
+      if (import.meta.env.DEV) {
+        console.warn('[socket] disconnected', {
+          socketId: currentSocket.id,
+          userId: user._id,
+          reason,
+        });
+      }
+    };
     const handleProfileUpdate = (payload) => {
       window.dispatchEvent(new CustomEvent('profile_updated', { detail: payload }));
       if (payload?.userId === user._id) loadUser();
     };
     currentSocket.on('connect', handleConnect);
+    currentSocket.on('connect_error', handleConnectError);
+    currentSocket.on('disconnect', handleDisconnect);
     currentSocket.on('profile_updated', handleProfileUpdate);
+    setSocket(currentSocket);
+    currentSocket.connect();
 
     return () => {
       currentSocket.off('connect', handleConnect);
+      currentSocket.off('connect_error', handleConnectError);
+      currentSocket.off('disconnect', handleDisconnect);
       currentSocket.off('profile_updated', handleProfileUpdate);
       currentSocket.disconnect();
       setSocket((activeSocket) => activeSocket === currentSocket ? null : activeSocket);

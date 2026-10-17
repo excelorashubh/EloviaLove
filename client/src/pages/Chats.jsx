@@ -40,19 +40,44 @@ const Chats = () => {
   const conversationsRef = useRef(conversations);
   conversationsRef.current = conversations;
 
+  const updateConversations = useCallback((update) => {
+    const next = typeof update === 'function' ? update(conversationsRef.current) : update;
+    conversationsRef.current = next;
+    setConversations(next);
+  }, []);
+
   const loadConversations = useCallback(async () => {
     const currentRequest = ++requestId.current;
     try {
       const res = await api.get('/messages');
       if (currentRequest === requestId.current && res.data.success) {
-        setConversations((res.data.conversations || []).filter(c => c.lastMessage));
+        const fetched = (res.data.conversations || []).filter(c => c.lastMessage);
+        updateConversations((current) => {
+          const currentByUser = new Map(current.map((conv) => [
+            String(conv.otherUser.id || conv.otherUser._id),
+            conv,
+          ]));
+          const merged = fetched.map((conv) => {
+            const userId = String(conv.otherUser.id || conv.otherUser._id);
+            const live = currentByUser.get(userId);
+            const fetchedAt = new Date(conv.lastMessage?.createdAt || 0).getTime();
+            const liveAt = new Date(live?.lastMessage?.createdAt || 0).getTime();
+            return live && liveAt > fetchedAt ? live : conv;
+          });
+          const fetchedUsers = new Set(merged.map((conv) => String(conv.otherUser.id || conv.otherUser._id)));
+          const pendingConversations = current.filter((conv) =>
+            conv.matchId?.toString().startsWith('temp-')
+            && !fetchedUsers.has(String(conv.otherUser.id || conv.otherUser._id))
+          );
+          return [...pendingConversations, ...merged];
+        });
       }
     } catch (e) {
       console.error('Chats fetch error:', e.response?.data || e.message);
     } finally {
       if (currentRequest === requestId.current) setLoading(false);
     }
-  }, []);
+  }, [updateConversations]);
 
   useEffect(() => {
     loadConversations();
@@ -63,18 +88,50 @@ const Chats = () => {
     const myId = String(user.id || user._id);
     const handlePrivateMessage = ({ message, from, to }) => {
       const messageId = String(message?._id || message?.id || '');
-      if (!messageId || seenMessageIds.current.has(messageId)) return;
-      seenMessageIds.current.add(messageId);
+      if (!messageId) {
+        if (import.meta.env.DEV) console.warn('[chats] received message event without an ID');
+        loadConversations();
+        return;
+      }
+      if (seenMessageIds.current.has(messageId)) return;
 
       const senderId = String(message.sender?._id || message.sender?.id || message.sender || from || '');
       const receiverId = String(message.receiver?._id || message.receiver?.id || message.receiver || to || '');
       const sentByMe = senderId === myId;
       const otherUserId = sentByMe ? receiverId : senderId;
+      if (import.meta.env.DEV) {
+        console.info('[chats] received private_message', {
+          messageId,
+          senderId,
+          receiverId,
+          currentUserId: myId,
+        });
+      }
       if (!otherUserId) {
         loadConversations();
         return;
       }
 
+      const currentConversation = conversationsRef.current.find(
+        c => String(c.otherUser.id || c.otherUser._id) === otherUserId
+      );
+      const currentLastMessageId = String(
+        currentConversation?.lastMessage?.id
+        || currentConversation?.lastMessage?._id
+        || ''
+      );
+      const messageAt = new Date(message.createdAt || 0).getTime();
+      const currentMessageAt = new Date(currentConversation?.lastMessage?.createdAt || 0).getTime();
+      if (
+        currentLastMessageId === messageId
+        || (currentLastMessageId && currentMessageAt > messageAt)
+      ) {
+        seenMessageIds.current.add(messageId);
+        return;
+      }
+
+      seenMessageIds.current.add(messageId);
+      requestId.current += 1;
       const updatedMsg = {
         id: messageId,
         _id: messageId,
@@ -102,7 +159,7 @@ const Chats = () => {
           lastMessage: updatedMsg,
           unreadCount: sentByMe ? 0 : 1,
         };
-        setConversations(prev => [newConversation, ...prev]);
+        updateConversations(prev => [newConversation, ...prev]);
         if (!sentByMe) {
           setNewlyReceived(prev => new Set(prev).add(newConversation.matchId));
         }
@@ -110,7 +167,7 @@ const Chats = () => {
         return;
       }
 
-      setConversations(prev => {
+      updateConversations(prev => {
         const idx = prev.findIndex(
           c => String(c.otherUser.id || c.otherUser._id) === otherUserId
         );
@@ -142,13 +199,19 @@ const Chats = () => {
       }, 2500));
     };
 
-    const handleMessagesRead = ({ by }) => {
-      setConversations(prev => prev.map(conv => (
-        String(conv.otherUser.id || conv.otherUser._id) === String(by)
-          && String(conv.lastMessage?.sender?._id || conv.lastMessage?.sender?.id || conv.lastMessage?.sender) === myId
-          ? { ...conv, lastMessage: { ...conv.lastMessage, isRead: true } }
-          : conv
-      )));
+    const handleMessagesRead = ({ by, from, to }) => {
+      requestId.current += 1;
+      const otherUserId = String(from === myId ? to : from || by || '');
+      updateConversations(prev => prev.map(conv => {
+        if (String(conv.otherUser.id || conv.otherUser._id) !== otherUserId) return conv;
+        if (String(by) === myId) return { ...conv, unreadCount: 0 };
+        if (
+          String(conv.lastMessage?.sender?._id || conv.lastMessage?.sender?.id || conv.lastMessage?.sender) === myId
+        ) {
+          return { ...conv, lastMessage: { ...conv.lastMessage, isRead: true } };
+        }
+        return conv;
+      }));
     };
 
     socket.on('private_message', handlePrivateMessage);
@@ -169,7 +232,7 @@ const Chats = () => {
       timersToClear.forEach(window.clearTimeout);
       timersToClear.clear();
     };
-  }, [loadConversations, socket, user?._id, user?.id]);
+  }, [loadConversations, socket, updateConversations, user?._id, user?.id]);
 
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 

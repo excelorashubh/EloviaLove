@@ -55,7 +55,20 @@ router.get('/:userId', protect, async (req, res) => {
     // Notify the sender their messages were read
     if (updateResult.modifiedCount > 0) {
       const io = req.app.get('io');
-      if (io) io.to(userId.toString()).emit('messages_read', { by: req.user._id });
+      if (io) {
+        const event = {
+          by: req.user._id.toString(),
+          from: userId.toString(),
+          to: req.user._id.toString(),
+        };
+        io.to(userId.toString()).emit('messages_read', event);
+        io.to(req.user._id.toString()).emit('messages_read', event);
+        console.info('[messages] read receipt emitted', {
+          from: event.from,
+          to: event.to,
+          messageCount: updateResult.modifiedCount,
+        });
+      }
     }
 
     res.json({
@@ -118,16 +131,7 @@ router.post('/:userId', protect, [
     await message.populate('sender', 'name profilePhoto');
     await message.populate('receiver', 'name profilePhoto');
 
-    // Create notification for receiver
-    await Notification.create({
-      user: userId,
-      type: 'message',
-      title: 'New Message',
-      message: `${req.user.name} sent you a message`,
-      relatedUser: req.user._id
-    });
-
-    // Emit the new message to the receiver via socket in real-time
+    // Emit after the message is persisted, independently of notification storage.
     const io = req.app.get('io');
     if (io) {
       const event = {
@@ -144,6 +148,31 @@ router.post('/:userId', protect, [
       };
       io.to(userId.toString()).emit('private_message', event);
       io.to(req.user._id.toString()).emit('private_message', event);
+      console.info('[messages] private_message emitted', {
+        messageId: message._id.toString(),
+        from: event.from,
+        to: event.to,
+      });
+    } else {
+      console.error('[messages] Socket.IO unavailable after message persistence', {
+        messageId: message._id.toString(),
+      });
+    }
+
+    try {
+      await Notification.create({
+        user: userId,
+        type: 'message',
+        title: 'New Message',
+        message: `${req.user.name} sent you a message`,
+        relatedUser: req.user._id
+      });
+    } catch (notificationError) {
+      console.error('[messages] notification creation failed after message persistence', {
+        messageId: message._id.toString(),
+        receiverId: userId.toString(),
+        error: notificationError.message,
+      });
     }
 
     res.status(201).json({

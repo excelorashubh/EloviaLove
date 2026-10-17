@@ -58,7 +58,11 @@ async function startServer() {
       if (!user?.isActive) throw new Error('Authentication required');
       socket.data.userId = user._id.toString();
       next();
-    } catch {
+    } catch (error) {
+      console.warn('[socket] authentication rejected', {
+        socketId: socket.id,
+        reason: error.message,
+      });
       next(new Error('Socket authentication failed'));
     }
   });
@@ -323,13 +327,24 @@ async function startServer() {
   // ══════════════════════════════════════════════════════════════════════════════
 
   io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
-    socket.join(socket.data.userId);
+    const userId = socket.data.userId;
+    socket.join(userId);
+    console.info('[socket] authenticated connection', {
+      socketId: socket.id,
+      userId,
+      transport: socket.conn.transport.name,
+      room: userId,
+    });
 
-    socket.on('join', (userId) => {
-      const roomId = userId?.toString();
-      if (roomId === socket.data.userId) {
+    socket.on('join', (requestedUserId, acknowledge) => {
+      const roomId = requestedUserId?.toString();
+      if (roomId === userId) {
         socket.join(roomId);
+        if (typeof acknowledge === 'function') {
+          acknowledge({ ok: true, userId, room: roomId });
+        }
+      } else if (typeof acknowledge === 'function') {
+        acknowledge({ ok: false });
       }
     });
 
@@ -356,7 +371,7 @@ async function startServer() {
     });
 
     socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.id);
+      console.info('[socket] disconnected', { socketId: socket.id, userId });
     });
   });
 

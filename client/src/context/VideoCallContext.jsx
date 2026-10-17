@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
-import { io } from 'socket.io-client';
 import api from '../services/api';
 
 const VideoCallContext = createContext();
@@ -15,8 +14,7 @@ export const useVideoCall = () => {
 };
 
 export const VideoCallProvider = ({ children }) => {
-  const { user } = useAuth();
-  const [socket, setSocket] = useState(null);
+  const { user, socket } = useAuth();
 
   // Call states
   const [incomingCall, setIncomingCall] = useState(null);
@@ -150,35 +148,39 @@ export const VideoCallProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if (user) {
-      const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const newSocket = io(socketUrl, {
-        auth: { token: localStorage.getItem('token') }
-      });
+    if (!socket || !user?._id) return undefined;
 
-      newSocket.on('connect', () => {
-        console.log('[VideoCall] Socket connected');
-        newSocket.emit('user:online', user._id);
-      });
+    const handleConnect = () => {
+      socket.emit('user:online', user._id);
+    };
 
-      newSocket.on('call:incoming', handleIncomingCall);
-      newSocket.on('call:accepted', handleCallAccepted);
-      newSocket.on('call:rejected', handleCallRejected);
-      newSocket.on('call:cancelled', handleCallCancelled);
-      newSocket.on('call:ended', handleCallEnded);
-      newSocket.on('call:receiver-offline', handleReceiverOffline);
-      newSocket.on('webrtc:offer', handleOffer);
-      newSocket.on('webrtc:answer', handleAnswer);
-      newSocket.on('webrtc:ice-candidate', handleIceCandidate);
-      newSocket.on('call:peer-disconnected', handlePeerDisconnected);
+    socket.on('connect', handleConnect);
+    socket.on('call:incoming', handleIncomingCall);
+    socket.on('call:accepted', handleCallAccepted);
+    socket.on('call:rejected', handleCallRejected);
+    socket.on('call:cancelled', handleCallCancelled);
+    socket.on('call:ended', handleCallEnded);
+    socket.on('call:receiver-offline', handleReceiverOffline);
+    socket.on('webrtc:offer', handleOffer);
+    socket.on('webrtc:answer', handleAnswer);
+    socket.on('webrtc:ice-candidate', handleIceCandidate);
+    socket.on('call:peer-disconnected', handlePeerDisconnected);
+    if (socket.connected) handleConnect();
 
-      setSocket(newSocket);
-
-      return () => {
-        newSocket.disconnect();
-      };
-    }
-  }, [user]);
+    return () => {
+      socket.off('connect', handleConnect);
+      socket.off('call:incoming', handleIncomingCall);
+      socket.off('call:accepted', handleCallAccepted);
+      socket.off('call:rejected', handleCallRejected);
+      socket.off('call:cancelled', handleCallCancelled);
+      socket.off('call:ended', handleCallEnded);
+      socket.off('call:receiver-offline', handleReceiverOffline);
+      socket.off('webrtc:offer', handleOffer);
+      socket.off('webrtc:answer', handleAnswer);
+      socket.off('webrtc:ice-candidate', handleIceCandidate);
+      socket.off('call:peer-disconnected', handlePeerDisconnected);
+    };
+  }, [socket, user?._id]);
 
   useEffect(() => {
     if (user) {
