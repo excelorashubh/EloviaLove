@@ -10,13 +10,15 @@ import { Link } from 'react-router-dom';
  *  - user.plan === 'free'   → show ads + optional upgrade nudge
  *  - basic / premium / pro / gold / vip / lifetime  → render nothing (ad-free experience)
  */
-const AdWrapper = ({ children, showUpgradeNudge = false, className = '' }) => {
+const AdWrapper = ({ children, showUpgradeNudge = false, className = '', asChild = false }) => {
   const { user } = useAuth();
 
   // Check if user should see ads using utility function
   if (!shouldShowAds(user)) {
     return null;
   }
+
+  if (asChild) return children;
 
   return (
     <div className={`ad-wrapper w-full ${className}`}>

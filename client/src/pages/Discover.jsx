@@ -454,14 +454,15 @@ const Discover = () => {
               </div>
             ) : (
               <>
-                {/* Responsive grid adjusts to the width remaining beside the desktop filters. */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {users.map((user, idx) => (
                     <React.Fragment key={user._id}>
-                    {/* Keep in-feed ads on their own row, not in a profile-card grid cell. */}
-                      {idx > 0 && idx % 5 === 0 && (
-                      <AdWrapper className="col-span-full">
-                          <InFeedAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || ''} className="rounded-2xl" />
+                      {idx > 0 && idx % 6 === 0 && (
+                        <AdWrapper asChild>
+                          <InFeedAd
+                            slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || ''}
+                            className="col-span-full rounded-2xl"
+                          />
                         </AdWrapper>
                       )}
                       <GridProfileCard
