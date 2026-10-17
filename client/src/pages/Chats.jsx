@@ -27,6 +27,11 @@ const avatarUrl = (u) =>
   u?.profilePhoto ||
   `https://ui-avatars.com/api/?name=${encodeURIComponent(u?.name || 'U')}&background=e879a0&color=fff`;
 
+const getId = (value) => {
+  const id = value?._id || value?.id || value;
+  return id == null ? '' : String(id);
+};
+
 const isMessageNewer = (candidate, current) => {
   if (!current) return true;
   const candidateTime = new Date(candidate?.createdAt || 0).getTime();
@@ -104,7 +109,7 @@ const Chats = () => {
       syncTimer.current = window.setTimeout(loadConversations, 150);
     };
     const handlePrivateMessage = ({ message, from, to }) => {
-      const messageId = String(message?._id || message?.id || '');
+      const messageId = getId(message?._id || message?.id);
       if (!messageId) {
         if (import.meta.env.DEV) console.warn('[chats] received message event without an ID');
         loadConversations();
@@ -112,8 +117,18 @@ const Chats = () => {
       }
       if (seenMessageIds.current.has(messageId)) return;
 
-      const senderId = String(message.sender?._id || message.sender?.id || message.sender || from || '');
-      const receiverId = String(message.receiver?._id || message.receiver?.id || message.receiver || to || '');
+      const senderId = getId(message.sender) || getId(from);
+      const receiverId = getId(message.receiver) || getId(to);
+      if (senderId !== myId && receiverId !== myId) {
+        if (import.meta.env.DEV) {
+          console.warn('[chats] ignored private_message not addressed to the authenticated user', {
+            messageId,
+            currentUserId: myId,
+          });
+        }
+        return;
+      }
+
       const sentByMe = senderId === myId;
       const otherUserId = sentByMe ? receiverId : senderId;
       if (import.meta.env.DEV) {
@@ -142,16 +157,22 @@ const Chats = () => {
         || (currentConversation?.lastMessage && !isMessageNewer(message, currentConversation.lastMessage))
       ) {
         seenMessageIds.current.add(messageId);
+        if (currentLastMessageId !== messageId) scheduleConversationSync();
         return;
       }
 
       seenMessageIds.current.add(messageId);
+      if (seenMessageIds.current.size > 500) {
+        const oldestMessageId = seenMessageIds.current.values().next().value;
+        seenMessageIds.current.delete(oldestMessageId);
+      }
       requestId.current += 1;
       const updatedMsg = {
         id: messageId,
         _id: messageId,
         content: message.content,
         sender: message.sender,
+        receiver: message.receiver,
         createdAt: message.createdAt,
         isRead: Boolean(message.isRead),
       };

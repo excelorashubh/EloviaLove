@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { MessageCircle, Heart, Search } from 'lucide-react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { SITE_URL } from '../data/seoContent';
 
@@ -18,6 +19,7 @@ const formatTime = (ts) => {
 };
 
 const Matches = () => {
+  const { socket, user } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -35,6 +37,28 @@ const Matches = () => {
     };
     load();
   }, []);
+
+  useEffect(() => {
+    if (!socket || !(user?.id || user?._id)) return undefined;
+    const refresh = async () => {
+      try {
+        const response = await api.get('/messages');
+        if (response.data.success) setConversations(response.data.conversations);
+      } catch (error) {
+        console.error('Failed to refresh matches after chat update:', error);
+      }
+    };
+    socket.on('private_message', refresh);
+    socket.on('messages_read', refresh);
+    socket.on('messages_deleted', refresh);
+    socket.on('connect', refresh);
+    return () => {
+      socket.off('private_message', refresh);
+      socket.off('messages_read', refresh);
+      socket.off('messages_deleted', refresh);
+      socket.off('connect', refresh);
+    };
+  }, [socket, user?._id, user?.id]);
 
   // Refresh matches when a profile update occurs
   useEffect(() => {

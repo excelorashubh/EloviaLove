@@ -26,6 +26,19 @@ const formatDate = (ts) => {
   return d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
 };
 
+const getMessageId = (message) => String(message?._id || message?.id || '');
+
+const mergeMessages = (current, incoming) => {
+  const byId = new Map();
+  [...current, ...incoming].forEach((message) => {
+    const id = getMessageId(message);
+    if (id) byId.set(id, { ...byId.get(id), ...message });
+  });
+  return [...byId.values()].sort((a, b) =>
+    new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
+  );
+};
+
 const groupByDate = (messages, myId) => {
   const groups = [];
   let currentDate = null;
@@ -133,6 +146,7 @@ const Chat = () => {
   const isNearBottomRef = useRef(true);
   const hasPositionedMessagesRef = useRef(false);
   const hasConnectedOnceRef = useRef(false);
+  const historyRequestRef = useRef(0);
 
   const handleEmojiClick = () => {
     setInput(prev => `${prev}😊`);
@@ -222,7 +236,7 @@ const Chat = () => {
           api.get('/messages'),
         ]).then(([messageResponse, conversationResponse]) => {
           if (messageResponse.data.success) {
-            setMessages(messageResponse.data.messages);
+            setMessages(prev => mergeMessages(prev, messageResponse.data.messages));
             setHasMore(messageResponse.data.pagination.hasMore);
           }
           if (conversationResponse.data.success) {
@@ -234,42 +248,63 @@ const Chat = () => {
     };
     const handleDisconnect = () => setConnected(false);
 
-    const handlePrivateMessage = ({ message, from }) => {
-      // Only accept messages from the person we're chatting with
-      if (String(from) !== String(userId)) return;
+    const handlePrivateMessage = ({ message, from, to }) => {
+      const senderId = String(message?.sender?._id || message?.sender?.id || message?.sender || from || '');
+      const receiverId = String(message?.receiver?._id || message?.receiver?.id || message?.receiver || to || '');
+      if (senderId !== String(userId) && receiverId !== String(userId)) return;
 
-      // Deduplicate — ignore if we already have this message (optimistic)
-      if (sentIds.current.has(message._id?.toString())) return;
+      const receivedId = getMessageId(message);
+      if (!receivedId) {
+        console.error('[chat] Received private_message without a persisted ID', { userId });
+        return;
+      }
 
       setMessages(prev => {
-        if (prev.some(m => m._id?.toString() === message._id?.toString())) return prev;
-        return [...prev, message];
+        if (senderId === myId) {
+          const optimistic = prev.find(candidate =>
+            candidate.pending && candidate.content === message.content
+          );
+          if (optimistic) {
+            return mergeMessages(
+              prev.filter(candidate => candidate !== optimistic),
+              [message]
+            );
+          }
+        }
+        return mergeMessages(prev, [message]);
       });
 
       setConversations(prev => {
         const updatedMsg = {
-          id: message._id,
+          id: receivedId,
+          _id: receivedId,
           content: message.content,
           sender: message.sender,
+          receiver: message.receiver,
           createdAt: message.createdAt,
-          isRead: false,
+          isRead: Boolean(message.isRead),
         };
-        const idx = prev.findIndex(c => (c.otherUser.id || c.otherUser._id)?.toString() === from?.toString());
+        const idx = prev.findIndex(c => String(c.otherUser.id || c.otherUser._id) === String(userId));
         if (idx !== -1) {
           const updated = [...prev];
           const conv = { ...updated[idx] };
           conv.lastMessage = updatedMsg;
-          conv.unreadCount = 0;
+          conv.unreadCount = senderId === myId ? conv.unreadCount : 0;
           updated.splice(idx, 1);
           return [conv, ...updated];
         }
         return prev;
       });
 
-      // Mark as read since chat is open
-      api.get(`/messages/${userId}`).catch((error) => {
-        console.error('Failed to mark incoming chat messages read:', error);
-      });
+      if (senderId !== myId) {
+        api.get(`/messages/${userId}`).then((response) => {
+          if (response.data.success) {
+            setMessages(prev => mergeMessages(prev, response.data.messages));
+          }
+        }).catch((error) => {
+          console.error('Failed to mark incoming chat messages read:', error);
+        });
+      }
     };
 
     const handleTyping = ({ from }) => {
@@ -329,6 +364,14 @@ const Chat = () => {
 
   // ── Load history + other user ────────────────────────────────────────────────
   useEffect(() => {
+    const requestId = ++historyRequestRef.current;
+    setMessages([]);
+    setOtherUser(null);
+    setLoading(true);
+    setPage(1);
+    hasPositionedMessagesRef.current = false;
+    hasConnectedOnceRef.current = false;
+
     const load = async () => {
       try {
         const [msgRes, userRes, convRes] = await Promise.all([
@@ -336,8 +379,9 @@ const Chat = () => {
           api.get(`/users/${userId}`),
           api.get('/messages'),
         ]);
+        if (requestId !== historyRequestRef.current) return;
         if (msgRes.data.success) {
-          setMessages(msgRes.data.messages);
+          setMessages(prev => mergeMessages(prev, msgRes.data.messages));
           setHasMore(msgRes.data.pagination.hasMore);
         }
         if (userRes.data.success) setOtherUser(userRes.data.user);
@@ -345,12 +389,17 @@ const Chat = () => {
           setConversations((convRes.data.conversations || []).filter(c => c.lastMessage));
         }
       } catch (e) {
-        console.error(e);
+        if (requestId === historyRequestRef.current) {
+          console.error('Failed to load conversation:', e);
+        }
       } finally {
-        setLoading(false);
+        if (requestId === historyRequestRef.current) setLoading(false);
       }
     };
     load();
+    return () => {
+      historyRequestRef.current += 1;
+    };
   }, [userId]);
 
   // ── Auto-scroll ──────────────────────────────────────────────────────────────
@@ -385,7 +434,7 @@ const Chat = () => {
     try {
       const res = await api.get(`/messages/${userId}?page=${nextPage}`);
       if (res.data.success) {
-        setMessages(prev => [...res.data.messages, ...prev]);
+        setMessages(prev => mergeMessages(prev, res.data.messages));
         setHasMore(res.data.pagination.hasMore);
         setPage(nextPage);
       }

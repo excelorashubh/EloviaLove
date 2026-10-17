@@ -243,10 +243,19 @@ const Dashboard = () => {
 
   // Real-time notifications via socket
   useEffect(() => {
-    if (!socket || !user?._id) return undefined;
+    if (!socket || !(user?.id || user?._id)) return undefined;
+    const refreshConversations = async () => {
+      try {
+        const response = await api.get('/messages');
+        if (response.data.success) setConversations(response.data.conversations.slice(0, 5));
+      } catch (error) {
+        console.error('Failed to refresh dashboard conversations:', error);
+      }
+    };
     const handleNotification = (notif) => {
       setNotifications(prev => [notif, ...prev].slice(0, 3));
     };
+    const handleMessageUpdate = () => refreshConversations();
     const handlePlansUpdated = async () => {
       try {
         const plansRes = await api.get('/subscription/plans');
@@ -256,12 +265,18 @@ const Dashboard = () => {
       }
     };
     socket.on('notification', handleNotification);
+    socket.on('private_message', handleMessageUpdate);
+    socket.on('messages_read', handleMessageUpdate);
+    socket.on('messages_deleted', handleMessageUpdate);
     socket.on('plans_updated', handlePlansUpdated);
     return () => {
       socket.off('notification', handleNotification);
+      socket.off('private_message', handleMessageUpdate);
+      socket.off('messages_read', handleMessageUpdate);
+      socket.off('messages_deleted', handleMessageUpdate);
       socket.off('plans_updated', handlePlansUpdated);
     };
-  }, [socket, user?._id]);
+  }, [socket, user?._id, user?.id]);
 
   const handleTrialAcknowledged = async () => {
     setShowTrialModal(false);
