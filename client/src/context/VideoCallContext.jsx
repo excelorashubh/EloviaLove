@@ -148,10 +148,11 @@ export const VideoCallProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if (!socket || !user?._id) return undefined;
+    const currentUserId = user?.id || user?._id;
+    if (!socket || !currentUserId) return undefined;
 
     const handleConnect = () => {
-      socket.emit('user:online', user._id);
+      socket.emit('user:online', currentUserId);
     };
 
     socket.on('connect', handleConnect);
@@ -180,7 +181,7 @@ export const VideoCallProvider = ({ children }) => {
       socket.off('webrtc:ice-candidate', handleIceCandidate);
       socket.off('call:peer-disconnected', handlePeerDisconnected);
     };
-  }, [socket, user?._id]);
+  }, [socket, user?._id, user?.id]);
 
   useEffect(() => {
     if (user) {

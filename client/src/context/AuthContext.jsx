@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(() => (isBrowser ? localStorage.getItem('token') : null));
   const [socket, setSocket] = useState(null);
+  const authenticatedUserId = user?.id || user?._id;
 
   const clearSession = useCallback(() => {
     if (isBrowser) localStorage.removeItem('token');
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }) => {
   // Shared authenticated socket for global events and page-level subscriptions.
   useEffect(() => {
     const SOCKET_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || 'http://localhost:5000';
-    if (!token || !user?._id) {
+    if (!token || !authenticatedUserId) {
       return undefined;
     }
 
@@ -79,11 +80,11 @@ export const AuthProvider = ({ children }) => {
       if (import.meta.env.DEV) {
         console.info('[socket] connected', {
           socketId: currentSocket.id,
-          userId: user._id,
+          userId: authenticatedUserId,
           transport: currentSocket.io.engine?.transport?.name,
         });
       }
-      currentSocket.emit('join', user._id, (result) => {
+      currentSocket.emit('join', authenticatedUserId, (result) => {
         if (import.meta.env.DEV) {
           console.info('[socket] personal room confirmed', result);
         }
@@ -92,21 +93,21 @@ export const AuthProvider = ({ children }) => {
     const handleConnectError = (error) => {
       console.error('[socket] connection failed', {
         message: error.message,
-        userId: user._id,
+        userId: authenticatedUserId,
       });
     };
     const handleDisconnect = (reason) => {
       if (import.meta.env.DEV) {
         console.warn('[socket] disconnected', {
           socketId: currentSocket.id,
-          userId: user._id,
+          userId: authenticatedUserId,
           reason,
         });
       }
     };
     const handleProfileUpdate = (payload) => {
       window.dispatchEvent(new CustomEvent('profile_updated', { detail: payload }));
-      if (payload?.userId === user._id) loadUser();
+      if (String(payload?.userId) === String(authenticatedUserId)) loadUser();
     };
     currentSocket.on('connect', handleConnect);
     currentSocket.on('connect_error', handleConnectError);
@@ -123,7 +124,7 @@ export const AuthProvider = ({ children }) => {
       currentSocket.disconnect();
       setSocket((activeSocket) => activeSocket === currentSocket ? null : activeSocket);
     };
-  }, [loadUser, token, user?._id]);
+  }, [authenticatedUserId, loadUser, token]);
 
   const login = async (email, password) => {
     try {

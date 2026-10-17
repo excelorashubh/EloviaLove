@@ -27,6 +27,17 @@ const avatarUrl = (u) =>
   u?.profilePhoto ||
   `https://ui-avatars.com/api/?name=${encodeURIComponent(u?.name || 'U')}&background=e879a0&color=fff`;
 
+const isMessageNewer = (candidate, current) => {
+  if (!current) return true;
+  const candidateTime = new Date(candidate?.createdAt || 0).getTime();
+  const currentTime = new Date(current?.createdAt || 0).getTime();
+  if (candidateTime !== currentTime) return candidateTime > currentTime;
+
+  const candidateId = String(candidate?.id || candidate?._id || '');
+  const currentId = String(current?.id || current?._id || '');
+  return candidateId > currentId;
+};
+
 const Chats = () => {
   const { user, socket } = useAuth();
   const [conversations, setConversations] = useState([]);
@@ -36,6 +47,7 @@ const Chats = () => {
   const [newlyReceived, setNewlyReceived] = useState(new Set());
   const seenMessageIds = useRef(new Set());
   const flashTimers = useRef(new Map());
+  const syncTimer = useRef(null);
   const requestId = useRef(0);
   const conversationsRef = useRef(conversations);
   conversationsRef.current = conversations;
@@ -60,9 +72,9 @@ const Chats = () => {
           const merged = fetched.map((conv) => {
             const userId = String(conv.otherUser.id || conv.otherUser._id);
             const live = currentByUser.get(userId);
-            const fetchedAt = new Date(conv.lastMessage?.createdAt || 0).getTime();
-            const liveAt = new Date(live?.lastMessage?.createdAt || 0).getTime();
-            return live && liveAt > fetchedAt ? live : conv;
+            return live && isMessageNewer(live.lastMessage, conv.lastMessage)
+              ? { ...live, unreadCount: conv.unreadCount }
+              : conv;
           });
           const fetchedUsers = new Set(merged.map((conv) => String(conv.otherUser.id || conv.otherUser._id)));
           const pendingConversations = current.filter((conv) =>
@@ -84,8 +96,13 @@ const Chats = () => {
   }, [loadConversations]);
 
   useEffect(() => {
-    if (!socket || !user?._id) return undefined;
-    const myId = String(user.id || user._id);
+    const currentUserId = user?.id || user?._id;
+    if (!socket || !currentUserId) return undefined;
+    const myId = String(currentUserId);
+    const scheduleConversationSync = () => {
+      window.clearTimeout(syncTimer.current);
+      syncTimer.current = window.setTimeout(loadConversations, 150);
+    };
     const handlePrivateMessage = ({ message, from, to }) => {
       const messageId = String(message?._id || message?.id || '');
       if (!messageId) {
@@ -120,11 +137,9 @@ const Chats = () => {
         || currentConversation?.lastMessage?._id
         || ''
       );
-      const messageAt = new Date(message.createdAt || 0).getTime();
-      const currentMessageAt = new Date(currentConversation?.lastMessage?.createdAt || 0).getTime();
       if (
         currentLastMessageId === messageId
-        || (currentLastMessageId && currentMessageAt > messageAt)
+        || (currentConversation?.lastMessage && !isMessageNewer(message, currentConversation.lastMessage))
       ) {
         seenMessageIds.current.add(messageId);
         return;
@@ -163,7 +178,7 @@ const Chats = () => {
         if (!sentByMe) {
           setNewlyReceived(prev => new Set(prev).add(newConversation.matchId));
         }
-        loadConversations();
+        scheduleConversationSync();
         return;
       }
 
@@ -197,6 +212,7 @@ const Chats = () => {
         });
         flashTimers.current.delete(flashId);
       }, 2500));
+      scheduleConversationSync();
     };
 
     const handleMessagesRead = ({ by, from, to }) => {
@@ -231,6 +247,7 @@ const Chats = () => {
       window.removeEventListener('profile_updated', handleProfileUpdate);
       timersToClear.forEach(window.clearTimeout);
       timersToClear.clear();
+      window.clearTimeout(syncTimer.current);
     };
   }, [loadConversations, socket, updateConversations, user?._id, user?.id]);
 

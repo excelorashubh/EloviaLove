@@ -25,10 +25,11 @@ const RandomVideoMatchPanel = () => {
   const isFreeMode = useMemo(() => (cards.randomMatchCards > 0), [cards.randomMatchCards]);
 
   useEffect(() => {
-    if (!socket || !user?._id) return undefined;
+    const currentUserId = user?.id || user?._id;
+    if (!socket || !currentUserId) return undefined;
     socketRef.current = socket;
 
-    const handleConnect = () => socket.emit('join', user._id);
+    const handleConnect = () => socket.emit('join', currentUserId);
     const handleMatchFound = ({ session: matchSession, partner: matchPartner }) => {
       setPartner(matchPartner);
       setSession(matchSession);
@@ -66,7 +67,7 @@ const RandomVideoMatchPanel = () => {
       socket.off('partnerDisconnected', handlePartnerDisconnected);
       if (socketRef.current === socket) socketRef.current = null;
     };
-  }, [socket, user?._id]);
+  }, [socket, user?._id, user?.id]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
