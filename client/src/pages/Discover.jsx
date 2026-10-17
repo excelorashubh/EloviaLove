@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
@@ -193,10 +193,32 @@ const Discover = () => {
   const [page, setPage] = useState(1);
   const [matchPopup, setMatchPopup] = useState(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [mobileFiltersTop, setMobileFiltersTop] = useState(0);
   const [mode, setMode] = useState('random');
   const observerTarget = useRef(null);
   const usersScrollRef = useRef(null);
   const DISCOVER_PAGE_SIZE = 20;
+
+  useLayoutEffect(() => {
+    if (!showMobileFilters) return undefined;
+
+    const navbar = document.querySelector('[data-site-navbar]');
+    if (!navbar) return undefined;
+
+    const updateNavbarOffset = () => {
+      setMobileFiltersTop(navbar.getBoundingClientRect().bottom);
+    };
+    const resizeObserver = new ResizeObserver(updateNavbarOffset);
+
+    updateNavbarOffset();
+    resizeObserver.observe(navbar);
+    window.addEventListener('resize', updateNavbarOffset);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateNavbarOffset);
+    };
+  }, [showMobileFilters]);
 
   const [filters, setFilters] = useState({
     gender: '',
@@ -377,11 +399,12 @@ const Discover = () => {
           <div className="flex items-center gap-2">
             <button
               type="button"
+              aria-label="Open filters"
               onClick={() => setShowMobileFilters(true)}
               className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-pink-200 bg-pink-50 px-3 text-sm font-semibold text-pink-700 transition hover:bg-pink-100 dark:border-pink-400/40 dark:bg-pink-500/10 dark:text-pink-300 dark:hover:bg-pink-500/20 lg:hidden"
             >
               <SlidersHorizontal size={17} />
-              Filters
+              <p className="hidden md:inline">Filters</p>
             </button>
             <button
               type="button"
@@ -389,7 +412,7 @@ const Discover = () => {
               className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-pink-200 bg-gradient-to-r from-[#FD5A7A] to-[#FD2B6B] px-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(253,90,122,0.2)] transition hover:-translate-y-0.5"
             >
               <Video size={17} />
-              Random Video
+              <p className="hidden md:inline">Random Video</p>
             </button>
             <button
               onClick={() => loadRandom(1)}
@@ -517,14 +540,16 @@ const Discover = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMobileFilters(false)}
-              className="fixed inset-0 z-40 cursor-default bg-black/50 backdrop-blur-sm lg:hidden"
+              className="fixed inset-x-0 bottom-0 z-40 cursor-default bg-black/50 backdrop-blur-sm lg:hidden"
+              style={{ top: mobileFiltersTop }}
             />
             <Motion.aside
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ duration: 0.25, ease: 'easeInOut' }}
-              className="fixed left-0 top-0 z-40 h-full w-[85vw] max-w-[320px] p-3 lg:hidden"
+              className="fixed bottom-0 left-0 z-40 flex w-[85vw] max-w-[320px] flex-col overflow-hidden p-3 lg:hidden"
+              style={{ top: mobileFiltersTop }}
             >
               <DiscoverFilters
                 filters={filters}
@@ -533,6 +558,7 @@ const Discover = () => {
                 onReset={() => handleFilterChange('reset')}
                 userPlan={userPlan}
                 onClose={() => setShowMobileFilters(false)}
+                className="h-full"
               />
             </Motion.aside>
           </>

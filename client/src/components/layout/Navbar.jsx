@@ -100,6 +100,7 @@ const Navbar = () => {
 
   return (
     <header
+      data-site-navbar
       className={`fixed top-0 left-0 right-0 z-50 overflow-visible transition-all duration-300 ${
         isScrolled ? 'bg-white/90 dark:bg-black/90 backdrop-blur-md shadow-sm dark:shadow-black/40 py-3' : 'bg-transparent py-5'
       }`}
