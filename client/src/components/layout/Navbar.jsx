@@ -8,10 +8,11 @@ import VerifiedBadge from '../ui/VerifiedBadge';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileMenuPath, setMobileMenuPath] = useState(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const location = useLocation();
+  const isMobileMenuOpen = mobileMenuPath === location.pathname;
   const { isAuthenticated, logout, user } = useAuth();
   const profileMenuContainerRef = useRef(null);
   const profileToggleButtonRef = useRef(null);
@@ -29,11 +30,12 @@ const Navbar = () => {
 
   const toggleProfileMenu = () => {
     setIsProfileMenuOpen((prev) => !prev);
-    setIsMobileMenuOpen(false);
+    setMobileMenuPath(null);
   };
 
   const handleLogout = () => {
     setIsProfileMenuOpen(false);
+    setMobileMenuPath(null);
     logout();
   };
 
@@ -77,7 +79,7 @@ const Navbar = () => {
     if (!isMobileMenuOpen) return;
 
     const handleEscape = (event) => {
-      if (event.key === 'Escape') setIsMobileMenuOpen(false);
+      if (event.key === 'Escape') setMobileMenuPath(null);
     };
 
     document.addEventListener('keydown', handleEscape);
@@ -105,9 +107,9 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="flex shrink-0 items-center gap-1 md:gap-2 group">
+          <Link to="/" className="flex shrink-0 items-center gap-0 md:gap-2 group">
             <div className="text-white p-1 md:p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300">
-              <img src={EloviaLoveWB} alt="Elovia Love logo" className="w-8 md:w-10" />
+              <img src={EloviaLoveWB} alt="Elovia Love logo" className="w-7 md:w-10" />
             </div>
             <span className="whitespace-nowrap text-lg md:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-primary-600 to-pink-600">
               Elovia Love
@@ -130,7 +132,7 @@ const Navbar = () => {
           </nav>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-1 md:gap-4 relative">
+          <div className="ml-auto md:ml-0 flex shrink-0 items-center gap-1 md:gap-4 relative">
             {isAuthenticated ? (
               <div className="relative z-[60]" ref={profileMenuContainerRef}>
                 <button
@@ -190,9 +192,10 @@ const Navbar = () => {
                 <Link
                   to="/login"
                   aria-label="Log in"
-                  className="flex md:hidden h-10 w-10 items-center justify-center rounded-lg text-slate-600 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                  className="flex md:hidden h-10 items-center justify-center gap-1.5 rounded-lg border border-pink-200 dark:border-pink-900 px-2 text-sm font-medium whitespace-nowrap text-slate-700 dark:text-slate-200 transition-colors hover:bg-pink-50 dark:hover:bg-slate-900 hover:text-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                 >
                   <LogIn size={20} aria-hidden="true" />
+                  <span>Login</span>
                 </Link>
                 <Link
                   to="/signup"
@@ -202,16 +205,13 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-          </div>
-
-          <div className="md:hidden flex shrink-0 items-center">
             <button
               type="button"
               aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Toggle navigation menu'}
               aria-expanded={isMobileMenuOpen}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+              className="md:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-600 dark:text-slate-200 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
               onClick={() => {
-                setIsMobileMenuOpen((prev) => !prev);
+                setMobileMenuPath((prev) => (prev === location.pathname ? null : location.pathname));
                 setIsProfileMenuOpen(false);
               }}
             >
@@ -254,7 +254,7 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={() => setMobileMenuPath(null)}
                   className={`block px-3 py-3 rounded-lg text-base font-medium ${
                     location.pathname === link.path
                       ? 'bg-primary-50 dark:bg-primary-950 text-primary-700 dark:text-primary-200'
@@ -265,14 +265,40 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="mt-6 flex flex-col gap-3 px-3">
-                {!isAuthenticated && (
-                  <Link
-                    to="/signup"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-full text-center py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
-                  >
-                    Create Account
-                  </Link>
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      to="/profile"
+                      onClick={() => setMobileMenuPath(null)}
+                      className="w-full text-center py-3 text-slate-700 dark:text-slate-200 font-medium border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                    >
+                      My Profile
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="w-full text-center py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                    >
+                      Log out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuPath(null)}
+                      className="w-full text-center py-3 text-slate-700 dark:text-slate-200 font-medium border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                    >
+                      Log in
+                    </Link>
+                    <Link
+                      to="/signup"
+                      onClick={() => setMobileMenuPath(null)}
+                      className="w-full text-center py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                    >
+                      Create Account
+                    </Link>
+                  </>
                 )}
               </div>
             </div>

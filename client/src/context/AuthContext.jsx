@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import api from '../services/api';
 import { io } from 'socket.io-client';
 
@@ -19,14 +19,46 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(() => (isBrowser ? localStorage.getItem('token') : null));
 
+  const clearSession = useCallback(() => {
+    if (isBrowser) localStorage.removeItem('token');
+    delete api.defaults.headers.common['Authorization'];
+    setToken(null);
+    setUser(null);
+  }, [isBrowser]);
+
+  const loadUser = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const response = await api.get('/auth/me');
+      if (isBrowser && localStorage.getItem('token') !== token) return;
+      if (!response.data?.user) {
+        throw new Error('Authentication response did not include a user');
+      }
+      setUser(response.data.user);
+    } catch (error) {
+      if (isBrowser && localStorage.getItem('token') !== token) return;
+      const status = error?.response?.status;
+      const isInvalidSession =
+        status === 401 || error?.message === 'Authentication response did not include a user';
+      if (isInvalidSession) clearSession();
+      console.error('Failed to load user:', error);
+    } finally {
+      if (!isBrowser || localStorage.getItem('token') === token) {
+        setLoading(false);
+      }
+    }
+  }, [clearSession, isBrowser, token]);
+
   useEffect(() => {
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       loadUser();
     } else {
+      setUser(null);
       setLoading(false);
     }
-  }, [token, isBrowser]);
+  }, [token, isBrowser, loadUser]);
 
   // Socket for global realtime events (profile updates)
   const socketRef = useRef(null);
@@ -55,29 +87,7 @@ export const AuthProvider = ({ children }) => {
       socketRef.current?.disconnect();
       socketRef.current = null;
     };
-  }, [token, user?._id]);
-
-  const loadUser = async () => {
-    try {
-      const response = await api.get('/auth/me');
-      setUser(response.data.user);
-    } catch (error) {
-      const status = error?.response?.status;
-      const message = error?.response?.data?.message || '';
-      const isAuthProblem = status === 401 && /not authorized|invalid token|jwt|token|no user found|account has been deactivated/i.test(message);
-
-      if (isAuthProblem) {
-        localStorage.removeItem('token');
-        delete api.defaults.headers.common['Authorization'];
-        setToken(null);
-        setUser(null);
-      }
-
-      console.error('Failed to load user:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [loadUser, token, user?._id]);
 
   const login = async (email, password) => {
     try {
@@ -117,10 +127,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
-    delete api.defaults.headers.common['Authorization'];
+    clearSession();
   };
 
   const updateProfile = async (profileData) => {
@@ -147,7 +154,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     loadUser,
-    isAuthenticated: !!user
+    isAuthenticated: !loading && Boolean(user)
   };
 
   return (
