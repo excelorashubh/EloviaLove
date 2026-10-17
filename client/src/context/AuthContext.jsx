@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import { io } from 'socket.io-client';
 
@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(() => (isBrowser ? localStorage.getItem('token') : null));
+  const [socket, setSocket] = useState(null);
 
   const clearSession = useCallback(() => {
     if (isBrowser) localStorage.removeItem('token');
@@ -60,32 +61,32 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token, isBrowser, loadUser]);
 
-  // Socket for global realtime events (profile updates)
-  const socketRef = useRef(null);
+  // Shared authenticated socket for global events and page-level subscriptions.
   useEffect(() => {
     const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-    if (!socketRef.current && token) {
-      socketRef.current = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
-      socketRef.current.on('connect', () => {
-        // join personal room when authenticated
-        if (user?._id) socketRef.current.emit('join', user._id);
-      });
-      socketRef.current.on('profile_updated', (payload) => {
-        // Broadcast a window event so pages can reactively refresh or update lists
-        try {
-          window.dispatchEvent(new CustomEvent('profile_updated', { detail: payload }));
-        } catch {
-          // ignore
-        }
-        // If the updated profile is the current user, reload user data
-        if (user?._id && payload?.userId === user._id) {
-          loadUser();
-        }
-      });
+    if (!token || !user?._id) {
+      return undefined;
     }
+
+    const currentSocket = io(SOCKET_URL, {
+      auth: { token },
+      transports: ['websocket', 'polling'],
+    });
+    setSocket(currentSocket);
+
+    const handleConnect = () => currentSocket.emit('join', user._id);
+    const handleProfileUpdate = (payload) => {
+      window.dispatchEvent(new CustomEvent('profile_updated', { detail: payload }));
+      if (payload?.userId === user._id) loadUser();
+    };
+    currentSocket.on('connect', handleConnect);
+    currentSocket.on('profile_updated', handleProfileUpdate);
+
     return () => {
-      socketRef.current?.disconnect();
-      socketRef.current = null;
+      currentSocket.off('connect', handleConnect);
+      currentSocket.off('profile_updated', handleProfileUpdate);
+      currentSocket.disconnect();
+      setSocket((activeSocket) => activeSocket === currentSocket ? null : activeSocket);
     };
   }, [loadUser, token, user?._id]);
 
@@ -154,6 +155,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     loadUser,
+    socket,
     isAuthenticated: !loading && Boolean(user)
   };
 

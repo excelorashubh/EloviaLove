@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Heart, Settings, Sparkles, MessageCircle, Check, Crown, Zap, Star, Clock } from 'lucide-react';
 import { SITE_URL } from '../data/seoContent';
-import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
@@ -15,8 +14,6 @@ import PremiumTrialModal from '../components/ui/PremiumTrialModal';
 import RandomVideoLauncher from '../components/randommatch/RandomVideoLauncher';
 
 const WELCOME_MODAL_KEY = 'elovia_premium_trial_welcome';
-
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 const formatTime = (ts) => {
   if (!ts) return '';
@@ -173,7 +170,7 @@ const SubscriptionCard = ({ subStatus, loading, planMap }) => {
 };
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, socket } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -182,8 +179,6 @@ const Dashboard = () => {
   const [showTrialModal, setShowTrialModal] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
-  const socketRef = useRef(null);
-
   useEffect(() => {
     let modalTimer;
     const load = async () => {
@@ -248,24 +243,25 @@ const Dashboard = () => {
 
   // Real-time notifications via socket
   useEffect(() => {
-    if (!user?._id) return;
-    socketRef.current = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
-    socketRef.current.on('connect', () => {
-      socketRef.current.emit('join', user._id);
-    });
-    socketRef.current.on('notification', (notif) => {
+    if (!socket || !user?._id) return undefined;
+    const handleNotification = (notif) => {
       setNotifications(prev => [notif, ...prev].slice(0, 3));
-    });
-    socketRef.current.on('plans_updated', async () => {
+    };
+    const handlePlansUpdated = async () => {
       try {
         const plansRes = await api.get('/subscription/plans');
         setPlanMap(Object.fromEntries((plansRes.data.plans || []).map(p => [p.key, p])));
       } catch (error) {
         console.error('Failed to refresh plans after update:', error);
       }
-    });
-    return () => socketRef.current?.disconnect();
-  }, [user?._id]);
+    };
+    socket.on('notification', handleNotification);
+    socket.on('plans_updated', handlePlansUpdated);
+    return () => {
+      socket.off('notification', handleNotification);
+      socket.off('plans_updated', handlePlansUpdated);
+    };
+  }, [socket, user?._id]);
 
   const handleTrialAcknowledged = async () => {
     setShowTrialModal(false);

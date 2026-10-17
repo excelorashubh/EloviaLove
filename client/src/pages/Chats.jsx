@@ -1,16 +1,13 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Search, MessageCircle, Check, CheckCheck, Sparkles, X } from 'lucide-react';
-import { io } from 'socket.io-client';
 import { SITE_URL } from '../data/seoContent';
 import { useAuth } from '../context/AuthContext';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
 import api from '../services/api';
 import BackButton from '../components/BackButton';
-
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 const formatTime = (ts) => {
   if (!ts) return '';
@@ -31,128 +28,148 @@ const avatarUrl = (u) =>
   `https://ui-avatars.com/api/?name=${encodeURIComponent(u?.name || 'U')}&background=e879a0&color=fff`;
 
 const Chats = () => {
-  const { user } = useAuth();
+  const { user, socket } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   // track which matchIds just got a new message (for flash animation)
   const [newlyReceived, setNewlyReceived] = useState(new Set());
-  const socketRef = useRef(null);
+  const seenMessageIds = useRef(new Set());
+  const flashTimers = useRef(new Map());
+  const requestId = useRef(0);
+  const conversationsRef = useRef(conversations);
+  conversationsRef.current = conversations;
 
-  // ── Initial load ────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await api.get('/messages');
-        if (res.data.success) {
-          const withMessages = (res.data.conversations || []).filter(c => c.lastMessage);
-          setConversations(withMessages);
-        }
-      } catch (e) {
-        console.error('Chats fetch error:', e.response?.data || e.message);
-      } finally {
-        setLoading(false);
+  const loadConversations = useCallback(async () => {
+    const currentRequest = ++requestId.current;
+    try {
+      const res = await api.get('/messages');
+      if (currentRequest === requestId.current && res.data.success) {
+        setConversations((res.data.conversations || []).filter(c => c.lastMessage));
       }
-    };
-    load();
+    } catch (e) {
+      console.error('Chats fetch error:', e.response?.data || e.message);
+    } finally {
+      if (currentRequest === requestId.current) setLoading(false);
+    }
   }, []);
 
-  // Refresh conversations when a profile update occurs
   useEffect(() => {
-    const handler = async (e) => {
-      try {
-        const res = await api.get('/messages');
-        if (res.data.success) {
-          const withMessages = (res.data.conversations || []).filter(c => c.lastMessage);
-          setConversations(withMessages);
+    loadConversations();
+  }, [loadConversations]);
+
+  useEffect(() => {
+    if (!socket || !user?._id) return undefined;
+    const myId = String(user.id || user._id);
+    const handlePrivateMessage = ({ message, from, to }) => {
+      const messageId = String(message?._id || message?.id || '');
+      if (!messageId || seenMessageIds.current.has(messageId)) return;
+      seenMessageIds.current.add(messageId);
+
+      const senderId = String(message.sender?._id || message.sender?.id || message.sender || from || '');
+      const receiverId = String(message.receiver?._id || message.receiver?.id || message.receiver || to || '');
+      const sentByMe = senderId === myId;
+      const otherUserId = sentByMe ? receiverId : senderId;
+      if (!otherUserId) {
+        loadConversations();
+        return;
+      }
+
+      const updatedMsg = {
+        id: messageId,
+        _id: messageId,
+        content: message.content,
+        sender: message.sender,
+        createdAt: message.createdAt,
+        isRead: Boolean(message.isRead),
+      };
+      const conversationFound = conversationsRef.current.some(
+        c => String(c.otherUser.id || c.otherUser._id) === otherUserId
+      );
+      if (!conversationFound) {
+        const otherProfile = sentByMe ? message.receiver : message.sender;
+        if (!otherProfile?.name) {
+          loadConversations();
+          return;
         }
-      } catch (err) { console.error('Refresh chats error', err); }
-    };
-    window.addEventListener('profile_updated', handler);
-    return () => window.removeEventListener('profile_updated', handler);
-  }, []);
-
-  // ── Socket: update list in-place without refetch ────────────────────────────
-  useEffect(() => {
-    if (!user?._id) return;
-    const token = localStorage.getItem('token');
-    socketRef.current = io(SOCKET_URL, {
-      auth: { token },
-      transports: ['websocket', 'polling'],
-    });
-
-    socketRef.current.on('connect', () => {
-      socketRef.current.emit('join', (user.id || user._id).toString());
-    });
-
-    socketRef.current.on('private_message', ({ message, from }) => {
-      setConversations(prev => {
-        // Find the conversation this message belongs to
-        const idx = prev.findIndex(
-          c => c.otherUser.id?.toString() === from?.toString()
-        );
-
-        const updatedMsg = {
-          id: message._id,
-          content: message.content,
-          sender: message.sender,
-          createdAt: message.createdAt,
-          isRead: false,
+        const newConversation = {
+          matchId: `temp-${otherUserId}`,
+          otherUser: {
+            id: otherUserId,
+            name: otherProfile.name,
+            profilePhoto: otherProfile.profilePhoto,
+          },
+          lastMessage: updatedMsg,
+          unreadCount: sentByMe ? 0 : 1,
         };
-
-        if (idx !== -1) {
-          // Update existing conversation — bump to top
-          const updated = [...prev];
-          const conv = { ...updated[idx] };
-          conv.lastMessage = updatedMsg;
-          conv.unreadCount = (conv.unreadCount || 0) + 1;
-          updated.splice(idx, 1);
-          updated.unshift(conv);
-
-          // Flash highlight
-          setNewlyReceived(s => new Set(s).add(conv.matchId?.toString()));
-          setTimeout(() => {
-            setNewlyReceived(s => {
-              const next = new Set(s);
-              next.delete(conv.matchId?.toString());
-              return next;
-            });
-          }, 2500);
-
-          return updated;
-        } else {
-          // Brand-new conversation — fetch just that user's info then prepend
-          api.get(`/users/${from}`).then(r => {
-            if (r.data.success) {
-              const otherUser = r.data.user;
-              const newConv = {
-                matchId: `temp-${from}`,
-                otherUser: {
-                  id: otherUser._id || otherUser.id,
-                  name: otherUser.name,
-                  profilePhoto: otherUser.profilePhoto,
-                },
-                lastMessage: updatedMsg,
-                unreadCount: 1,
-              };
-              setConversations(p => [newConv, ...p]);
-              setNewlyReceived(s => new Set(s).add(newConv.matchId));
-              setTimeout(() => {
-                setNewlyReceived(s => {
-                  const next = new Set(s);
-                  next.delete(newConv.matchId);
-                  return next;
-                });
-              }, 2500);
-            }
-          }).catch(() => {});
-          return prev;
+        setConversations(prev => [newConversation, ...prev]);
+        if (!sentByMe) {
+          setNewlyReceived(prev => new Set(prev).add(newConversation.matchId));
         }
-      });
-    });
+        loadConversations();
+        return;
+      }
 
-    return () => socketRef.current?.disconnect();
-  }, [user?._id]);
+      setConversations(prev => {
+        const idx = prev.findIndex(
+          c => String(c.otherUser.id || c.otherUser._id) === otherUserId
+        );
+        if (idx === -1) return prev;
+
+        const updated = [...prev];
+        const conv = {
+          ...updated[idx],
+          lastMessage: updatedMsg,
+          unreadCount: sentByMe ? updated[idx].unreadCount : (updated[idx].unreadCount || 0) + 1,
+        };
+        updated.splice(idx, 1);
+        return [conv, ...updated];
+      });
+
+      if (sentByMe) return;
+
+      const conversation = conversationsRef.current.find(c => String(c.otherUser.id || c.otherUser._id) === otherUserId);
+      const flashId = String(conversation?.matchId || `temp-${otherUserId}`);
+      setNewlyReceived(prev => new Set(prev).add(flashId));
+      window.clearTimeout(flashTimers.current.get(flashId));
+      flashTimers.current.set(flashId, window.setTimeout(() => {
+        setNewlyReceived(prev => {
+          const next = new Set(prev);
+          next.delete(flashId);
+          return next;
+        });
+        flashTimers.current.delete(flashId);
+      }, 2500));
+    };
+
+    const handleMessagesRead = ({ by }) => {
+      setConversations(prev => prev.map(conv => (
+        String(conv.otherUser.id || conv.otherUser._id) === String(by)
+          && String(conv.lastMessage?.sender?._id || conv.lastMessage?.sender?.id || conv.lastMessage?.sender) === myId
+          ? { ...conv, lastMessage: { ...conv.lastMessage, isRead: true } }
+          : conv
+      )));
+    };
+
+    socket.on('private_message', handlePrivateMessage);
+    socket.on('messages_read', handleMessagesRead);
+    socket.on('messages_deleted', loadConversations);
+    socket.on('connect', loadConversations);
+    if (socket.connected) loadConversations();
+
+    const handleProfileUpdate = () => loadConversations();
+    window.addEventListener('profile_updated', handleProfileUpdate);
+    const timersToClear = flashTimers.current;
+    return () => {
+      socket.off('private_message', handlePrivateMessage);
+      socket.off('messages_read', handleMessagesRead);
+      socket.off('messages_deleted', loadConversations);
+      socket.off('connect', loadConversations);
+      window.removeEventListener('profile_updated', handleProfileUpdate);
+      timersToClear.forEach(window.clearTimeout);
+      timersToClear.clear();
+    };
+  }, [loadConversations, socket, user?._id, user?.id]);
 
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 
@@ -186,7 +203,7 @@ const Chats = () => {
                 <h1 className="text-xl font-bold text-slate-900 leading-tight">Chats</h1>
                 <AnimatePresence mode="wait">
                   {totalUnread > 0 && (
-                    <motion.p
+                    <Motion.p
                       key="unread"
                       initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -194,7 +211,7 @@ const Chats = () => {
                       className="text-xs text-primary-600 font-semibold"
                     >
                       {totalUnread} unread
-                    </motion.p>
+                    </Motion.p>
                   )}
                 </AnimatePresence>
               </div>
@@ -219,7 +236,7 @@ const Chats = () => {
             />
             <AnimatePresence>
               {search && (
-                <motion.button
+                <Motion.button
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -227,7 +244,7 @@ const Chats = () => {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   <X size={14} />
-                </motion.button>
+                </Motion.button>
               )}
             </AnimatePresence>
           </div>
@@ -267,11 +284,15 @@ const Chats = () => {
               {filtered.map((conv) => {
                 const isUnread = conv.unreadCount > 0;
                 const isNew = newlyReceived.has(conv.matchId?.toString());
-                const isMe = conv.lastMessage?.sender?._id !== conv.otherUser.id &&
-                             conv.lastMessage?.sender?._id !== conv.otherUser.id?.toString();
+                const isMe = String(
+                  conv.lastMessage?.sender?._id
+                  || conv.lastMessage?.sender?.id
+                  || conv.lastMessage?.sender
+                  || ''
+                ) === String(user.id || user._id);
 
                 return (
-                  <motion.div
+                  <Motion.div
                     key={conv.matchId}
                     layout
                     initial={{ opacity: 0, y: -12 }}
@@ -302,13 +323,13 @@ const Chats = () => {
                           height="56"
                         />
                         {isUnread && (
-                          <motion.span
+                          <Motion.span
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             className="absolute -top-0.5 -right-0.5 min-w-5 h-5 px-1 bg-primary-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white"
                           >
                             {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
-                          </motion.span>
+                          </Motion.span>
                         )}
                       </div>
 
@@ -340,7 +361,7 @@ const Chats = () => {
                         <span className="shrink-0 w-2.5 h-2.5 rounded-full bg-primary-500 animate-pulse" />
                       )}
                     </Link>
-                  </motion.div>
+                  </Motion.div>
                 );
               })}
             </AnimatePresence>

@@ -5,8 +5,11 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const User = require('./models/User');
+const Match = require('./models/Match');
 require('dotenv').config();
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -44,6 +47,19 @@ async function startServer() {
       origin: allowedOrigins,
       methods: ["GET", "POST"],
       credentials: true,
+    }
+  });
+  io.use(async (socket, next) => {
+    try {
+      const token = socket.handshake.auth?.token;
+      if (!token) throw new Error('Authentication required');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id).select('_id isActive');
+      if (!user?.isActive) throw new Error('Authentication required');
+      socket.data.userId = user._id.toString();
+      next();
+    } catch {
+      next(new Error('Socket authentication failed'));
     }
   });
 
@@ -308,28 +324,35 @@ async function startServer() {
 
   io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
+    socket.join(socket.data.userId);
 
     socket.on('join', (userId) => {
       const roomId = userId?.toString();
-      if (roomId) {
+      if (roomId === socket.data.userId) {
         socket.join(roomId);
-        console.log(`Socket ${socket.id} joined room: ${roomId}`);
       }
     });
 
-    socket.on('private_message', (data) => {
-      const { to, message, from } = data;
-      socket.to(to).emit('private_message', { message, from });
+    socket.on('typing', async ({ to } = {}) => {
+      try {
+        const senderId = socket.data.userId;
+        if (!to || String(to) === senderId) return;
+        const match = await Match.findOne({ users: { $all: [senderId, to] } }).select('_id');
+        if (match) socket.to(String(to)).emit('typing', { from: senderId });
+      } catch (error) {
+        console.error('Socket typing event failed:', error);
+      }
     });
 
-    socket.on('typing', (data) => {
-      const { to, from } = data;
-      socket.to(to).emit('typing', { from });
-    });
-
-    socket.on('stop_typing', (data) => {
-      const { to, from } = data;
-      socket.to(to).emit('stop_typing', { from });
+    socket.on('stop_typing', async ({ to } = {}) => {
+      try {
+        const senderId = socket.data.userId;
+        if (!to || String(to) === senderId) return;
+        const match = await Match.findOne({ users: { $all: [senderId, to] } }).select('_id');
+        if (match) socket.to(String(to)).emit('stop_typing', { from: senderId });
+      } catch (error) {
+        console.error('Socket stop-typing event failed:', error);
+      }
     });
 
     socket.on('disconnect', () => {

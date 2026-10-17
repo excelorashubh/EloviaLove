@@ -114,8 +114,9 @@ router.post('/:userId', protect, [
       content
     });
 
-    // Populate sender info
+    // Populate both participants so either side can render a new conversation immediately.
     await message.populate('sender', 'name profilePhoto');
+    await message.populate('receiver', 'name profilePhoto');
 
     // Create notification for receiver
     await Notification.create({
@@ -129,7 +130,7 @@ router.post('/:userId', protect, [
     // Emit the new message to the receiver via socket in real-time
     const io = req.app.get('io');
     if (io) {
-      io.to(userId.toString()).emit('private_message', {
+      const event = {
         message: {
           _id: message._id,
           sender: message.sender,
@@ -139,7 +140,10 @@ router.post('/:userId', protect, [
           isRead: message.isRead,
         },
         from: req.user._id.toString(),
-      });
+        to: userId.toString(),
+      };
+      io.to(userId.toString()).emit('private_message', event);
+      io.to(req.user._id.toString()).emit('private_message', event);
     }
 
     res.status(201).json({
@@ -155,6 +159,47 @@ router.post('/:userId', protect, [
     });
   } catch (error) {
     console.error('Send message error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+// @route   DELETE /api/messages/:userId
+// @desc    Clear messages between current user and another matched user
+// @access  Private
+router.delete('/:userId', protect, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const match = await Match.findOne({
+      users: { $all: [req.user._id, userId] }
+    }).select('_id');
+
+    if (!match) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only clear chats with matched users'
+      });
+    }
+
+    await Message.deleteMany({
+      $or: [
+        { sender: req.user._id, receiver: userId },
+        { sender: userId, receiver: req.user._id }
+      ]
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      const event = { userId: userId.toString(), by: req.user._id.toString() };
+      io.to(userId.toString()).emit('messages_deleted', event);
+      io.to(req.user._id.toString()).emit('messages_deleted', event);
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Clear messages error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error'

@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 const RandomVideoMatchPanel = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [status, setStatus] = useState('idle');
   const [cards, setCards] = useState({ randomMatchCards: 20, giftClaimed: false, coins: 0 });
   const [partner, setPartner] = useState(null);
@@ -30,7 +30,10 @@ const RandomVideoMatchPanel = () => {
   useEffect(() => {
     if (!user?._id) return;
 
-    const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+    const socket = io(SOCKET_URL, {
+      auth: { token },
+      transports: ['websocket', 'polling'],
+    });
     socketRef.current = socket;
 
     socket.on('connect', () => socket.emit('join', user._id));
@@ -55,7 +58,7 @@ const RandomVideoMatchPanel = () => {
     socket.on('partnerDisconnected', () => setToast({ type: 'warning', message: '⚠ Partner Disconnected' }));
 
     return () => socket.disconnect();
-  }, [user?._id]);
+  }, [token, user?._id]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {

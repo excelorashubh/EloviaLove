@@ -14,7 +14,8 @@ function setupCallSignaling(io) {
     console.log(`[Video Call] User connected: ${socket.id}`);
     
     // ── User Online ─────────────────────────────────────────────────────────────
-    socket.on('user:online', (userId) => {
+    socket.on('user:online', () => {
+      const userId = socket.data.userId;
       activeUsers.set(userId, socket.id);
       socket.userId = userId;
       console.log(`[Video Call] User ${userId} is online`);
@@ -287,7 +288,7 @@ function setupCallSignaling(io) {
         const disconnectedUserId = socket.userId;
 
         // Remove from active users
-        if (disconnectedUserId) {
+        if (disconnectedUserId && activeUsers.get(disconnectedUserId) === socket.id) {
           activeUsers.delete(disconnectedUserId);
           console.log(`[Video Call] User ${disconnectedUserId} marked offline`);
         }

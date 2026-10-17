@@ -5,7 +5,6 @@ import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { SITE_URL } from '../data/seoContent';
 import { Send, ArrowLeft, Check, CheckCheck, Phone, MoreVertical, Smile, Paperclip, Image, Gift, Search } from 'lucide-react';
 import VerifiedBadge from '../components/ui/VerifiedBadge';
-import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import CallButton from '../components/videocall/CallButton';
 import api from '../services/api';
@@ -13,8 +12,6 @@ import api from '../services/api';
 const avatarUrl = (u) =>
   u?.profilePhoto ||
   `https://ui-avatars.com/api/?name=${encodeURIComponent(u?.name || 'U')}&background=e879a0&color=fff`;
-
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 const formatTime = (ts) =>
   new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -108,7 +105,7 @@ const MessageBubble = React.memo(({ item, isMe, isGrouped, otherAvatar, otherUse
 
 const Chat = () => {
   const { userId } = useParams();
-  const { user } = useAuth();
+  const { user, socket: chatSocket } = useAuth();
   // Normalize current user ID — auth returns 'id', Mongoose virtuals return '_id'
   const myId = (user?.id || user?._id)?.toString();
 
@@ -135,6 +132,7 @@ const Chat = () => {
   const menuRef         = useRef(null); // Ref for menu dropdown
   const isNearBottomRef = useRef(true);
   const hasPositionedMessagesRef = useRef(false);
+  const hasConnectedOnceRef = useRef(false);
 
   const handleEmojiClick = () => {
     setInput(prev => `${prev}😊`);
@@ -173,6 +171,7 @@ const Chat = () => {
       setShowMenu(false);
       window.location.href = '/chats';
     } catch (err) {
+      console.error('Failed to block chat user:', err);
       alert('Failed to block user');
     }
   };
@@ -196,6 +195,7 @@ const Chat = () => {
       setShowMenu(false);
       alert('Chat cleared successfully');
     } catch (err) {
+      console.error('Failed to clear chat:', err);
       alert('Failed to clear chat');
     }
   };
@@ -205,26 +205,38 @@ const Chat = () => {
 
   // ── Socket setup ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const socket = io(SOCKET_URL, {
-      auth: { token },
-      transports: ['websocket', 'polling'],
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+    if (!chatSocket) {
+      setConnected(false);
+      return undefined;
+    }
+
+    const socket = chatSocket;
     socketRef.current = socket;
 
-    socket.on('connect', () => {
+    const handleConnect = () => {
       setConnected(true);
       socket.emit('join', myId);
-    });
+      if (hasConnectedOnceRef.current) {
+        Promise.all([
+          api.get(`/messages/${userId}?page=1`),
+          api.get('/messages'),
+        ]).then(([messageResponse, conversationResponse]) => {
+          if (messageResponse.data.success) {
+            setMessages(messageResponse.data.messages);
+            setHasMore(messageResponse.data.pagination.hasMore);
+          }
+          if (conversationResponse.data.success) {
+            setConversations((conversationResponse.data.conversations || []).filter(c => c.lastMessage));
+          }
+        }).catch((error) => console.error('Failed to sync chat after reconnect:', error));
+      }
+      hasConnectedOnceRef.current = true;
+    };
+    const handleDisconnect = () => setConnected(false);
 
-    socket.on('disconnect', () => setConnected(false));
-    socket.on('connect_error', () => setConnected(false));
-
-    socket.on('private_message', ({ message, from }) => {
+    const handlePrivateMessage = ({ message, from }) => {
       // Only accept messages from the person we're chatting with
-      if (from !== userId) return;
+      if (String(from) !== String(userId)) return;
 
       // Deduplicate — ignore if we already have this message (optimistic)
       if (sentIds.current.has(message._id?.toString())) return;
@@ -247,7 +259,7 @@ const Chat = () => {
           const updated = [...prev];
           const conv = { ...updated[idx] };
           conv.lastMessage = updatedMsg;
-          conv.unreadCount = (conv.unreadCount || 0) + 1;
+          conv.unreadCount = 0;
           updated.splice(idx, 1);
           return [conv, ...updated];
         }
@@ -255,18 +267,20 @@ const Chat = () => {
       });
 
       // Mark as read since chat is open
-      api.get(`/messages/${userId}`).catch(() => {});
-    });
+      api.get(`/messages/${userId}`).catch((error) => {
+        console.error('Failed to mark incoming chat messages read:', error);
+      });
+    };
 
-    socket.on('typing', ({ from }) => {
+    const handleTyping = ({ from }) => {
       if (from?.toString() === userId?.toString()) setIsTyping(true);
-    });
+    };
 
-    socket.on('stop_typing', ({ from }) => {
+    const handleStopTyping = ({ from }) => {
       if (from?.toString() === userId?.toString()) setIsTyping(false);
-    });
+    };
 
-    socket.on('messages_read', ({ by }) => {
+    const handleMessagesRead = ({ by }) => {
       if (by?.toString() === userId?.toString()) {
         setMessages(prev =>
           prev.map(m =>
@@ -276,13 +290,42 @@ const Chat = () => {
           )
         );
       }
-    });
+      setConversations(prev => prev.map(conv => (
+        String(conv.otherUser.id || conv.otherUser._id) === String(by)
+          && String(conv.lastMessage?.sender?._id || conv.lastMessage?.sender?.id || conv.lastMessage?.sender) === myId
+          ? { ...conv, lastMessage: { ...conv.lastMessage, isRead: true } }
+          : conv
+      )));
+    };
+    const handleMessagesDeleted = ({ userId: deletedUserId, by }) => {
+      if (String(deletedUserId) !== String(userId) && String(by) !== String(userId)) return;
+      setMessages([]);
+      api.get('/messages').then((res) => {
+        if (res.data.success) setConversations((res.data.conversations || []).filter(c => c.lastMessage));
+      }).catch((error) => console.error('Failed to refresh conversations after chat deletion:', error));
+    };
+
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('private_message', handlePrivateMessage);
+    socket.on('typing', handleTyping);
+    socket.on('stop_typing', handleStopTyping);
+    socket.on('messages_read', handleMessagesRead);
+    socket.on('messages_deleted', handleMessagesDeleted);
+    if (socket.connected) setConnected(true);
 
     return () => {
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('private_message', handlePrivateMessage);
+      socket.off('typing', handleTyping);
+      socket.off('stop_typing', handleStopTyping);
+      socket.off('messages_read', handleMessagesRead);
+      socket.off('messages_deleted', handleMessagesDeleted);
       clearTimeout(typingTimer.current);
-      socket.disconnect();
+      if (socketRef.current === socket) socketRef.current = null;
     };
-  }, [userId, myId]);
+  }, [chatSocket, userId, myId]);
 
   // ── Load history + other user ────────────────────────────────────────────────
   useEffect(() => {
