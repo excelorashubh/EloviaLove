@@ -65,9 +65,28 @@ const MatchPopup = React.memo(({ matchedUser, onClose }) => {
 });
 
 // ── Profile Card ──────────────────────────────────────────────────────────────
+const validProfiles = (profiles) => {
+  if (!Array.isArray(profiles)) return [];
+  const seenIds = new Set();
+
+  return profiles.filter((profile) => {
+    if (!profile || typeof profile !== 'object') return false;
+    const id = profile._id == null ? '' : String(profile._id).trim();
+    const name = typeof profile.name === 'string' ? profile.name.trim() : '';
+    if (!id || !name || seenIds.has(id)) return false;
+    seenIds.add(id);
+    return true;
+  });
+};
+
 const GridProfileCard = React.memo(({ user, onLike, onPass, onSuperLike }) => {
-  const avatar = user?.profilePhoto ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=e879a0&color=fff&size=800`;
+  const [imageFailed, setImageFailed] = useState(false);
+  const initials = (user.name || 'U')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('');
 
   return (
     <Motion.div
@@ -76,13 +95,19 @@ const GridProfileCard = React.memo(({ user, onLike, onPass, onSuperLike }) => {
       className="group flex flex-col rounded-[24px] overflow-hidden bg-white shadow-md hover:shadow-xl transition-transform duration-250 min-h-[470px] lg:min-h-[500px]"
     >
       {/* Top: Large Image */}
-      <div className="w-full overflow-hidden bg-slate-100">
-        <img
-          src={avatar}
-          alt={user?.name}
-          className="w-full h-[300px] lg:h-[325px] object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
-        />
+      <div className="relative h-[300px] w-full overflow-hidden bg-slate-100 dark:bg-slate-800 lg:h-[325px]">
+        <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-5xl font-semibold text-primary-600 dark:text-primary-300">
+          {initials}
+        </div>
+        {user.profilePhoto && !imageFailed && (
+          <img
+            src={user.profilePhoto}
+            alt={user.name}
+            onError={() => setImageFailed(true)}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        )}
       </div>
 
       {/* Body */}
@@ -204,7 +229,7 @@ const Discover = () => {
 
     try {
       const res = await api.get('/users/discover', { params: { page: pageNum } });
-      const fetched = Array.isArray(res.data.users) ? res.data.users : [];
+      const fetched = validProfiles(res.data.users);
 
       if (import.meta.env.DEV) {
         console.log('Discover fetch result:', {
@@ -218,7 +243,7 @@ const Discover = () => {
       if (pageNum === 1) {
         setUsers(fetched);
       } else {
-        setUsers(prev => [...prev, ...fetched]);
+        setUsers(prev => validProfiles([...prev, ...fetched]));
       }
 
       setHasMore(res.data.pagination?.hasMore ?? (fetched.length === DISCOVER_PAGE_SIZE));
@@ -256,7 +281,7 @@ const Discover = () => {
       if (filters.recentlyActive) payload.recentlyActive = true;
 
       const res = await api.post('/match/filter', payload);
-      setUsers(Array.isArray(res.data.users) ? res.data.users : []);
+      setUsers(validProfiles(res.data.users));
       setHasMore(false);
       setMode('filter');
     } catch (e) {
@@ -433,9 +458,9 @@ const Discover = () => {
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {users.map((user, idx) => (
                     <React.Fragment key={user._id}>
-                      {/* InFeed Ad every 5 profiles */}
+                    {/* Keep in-feed ads on their own row, not in a profile-card grid cell. */}
                       {idx > 0 && idx % 5 === 0 && (
-                        <AdWrapper>
+                      <AdWrapper className="col-span-full">
                           <InFeedAd slot={import.meta.env.VITE_GOOGLE_ADSENSE_SLOT_NATIVE || ''} className="rounded-2xl" />
                         </AdWrapper>
                       )}
