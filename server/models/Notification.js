@@ -8,7 +8,7 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['match', 'message', 'like', 'system'],
+    enum: ['match', 'message', 'like', 'system', 'verification'],
     required: true
   },
   title: {

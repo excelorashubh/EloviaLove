@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion as Motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { LogIn, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import NotificationBell from './NotificationBell';
 import EloviaLoveWB from "../../assets/EloviaLoveWB_small.png"
 import VerifiedBadge from '../ui/VerifiedBadge';
 
@@ -10,6 +11,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuPath, setMobileMenuPath] = useState(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const location = useLocation();
   const isMobileMenuOpen = mobileMenuPath === location.pathname;
@@ -30,11 +32,13 @@ const Navbar = () => {
 
   const toggleProfileMenu = () => {
     setIsProfileMenuOpen((prev) => !prev);
+    setIsNotificationOpen(false);
     setMobileMenuPath(null);
   };
 
   const handleLogout = () => {
     setIsProfileMenuOpen(false);
+    setIsNotificationOpen(false);
     setMobileMenuPath(null);
     logout();
   };
@@ -135,6 +139,16 @@ const Navbar = () => {
           {/* Action Buttons */}
           <div className="ml-auto md:ml-0 flex shrink-0 items-center gap-1 md:gap-4 relative">
             {isAuthenticated ? (
+              <>
+              <NotificationBell
+                open={isNotificationOpen}
+                onToggle={() => {
+                  setIsNotificationOpen((prev) => !prev);
+                  setIsProfileMenuOpen(false);
+                  setMobileMenuPath(null);
+                }}
+                onClose={() => setIsNotificationOpen(false)}
+              />
               <div className="relative z-[60]" ref={profileMenuContainerRef}>
                 <button
                   ref={profileToggleButtonRef}
@@ -182,6 +196,7 @@ const Navbar = () => {
                   )}
                 </AnimatePresence>
               </div>
+              </>
             ) : (
               <>
                 <Link
@@ -214,6 +229,7 @@ const Navbar = () => {
               onClick={() => {
                 setMobileMenuPath((prev) => (prev === location.pathname ? null : location.pathname));
                 setIsProfileMenuOpen(false);
+                setIsNotificationOpen(false);
               }}
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}

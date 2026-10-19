@@ -6,7 +6,9 @@ const User = require('../models/User');
 const Like = require('../models/Like');
 const Match = require('../models/Match');
 const Report = require('../models/Report');
+const Notification = require('../models/Notification');
 const { protect } = require('../middleware/auth');
+const { emitNotification } = require('../utils/notificationEvents');
 
 const router = express.Router();
 const Bookmark = require('../models/Bookmark');
@@ -346,8 +348,7 @@ router.post('/like/:userId', protect, [
         isMatch = true;
 
         // Create notifications for both users
-        const Notification = require('../models/Notification');
-        await Notification.create([
+        const notifications = await Notification.create([
           {
             user: req.user._id,
             type: 'match',
@@ -363,6 +364,9 @@ router.post('/like/:userId', protect, [
             relatedUser: req.user._id
           }
         ]);
+        await Promise.all(notifications.map((notification) => (
+          emitNotification(req.app.get('io'), notification)
+        )));
       }
     }
 

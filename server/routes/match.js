@@ -6,6 +6,7 @@ const Like = require('../models/Like');
 const Match = require('../models/Match');
 const Notification = require('../models/Notification');
 const { protect } = require('../middleware/auth');
+const { emitNotification } = require('../utils/notificationEvents');
 
 const router = express.Router();
 
@@ -237,8 +238,7 @@ router.post('/swipe', protect, [
         message: `${req.user.name} liked your profile.`,
         relatedUser: req.user._id
       });
-      const io = req.app.get('io');
-      if (io) io.to(targetUserId.toString()).emit('notification', likeNotif);
+      await emitNotification(req.app.get('io'), likeNotif);
       // Notify the liked user (unless it becomes a match — match notif covers it)
       const reciprocal = await Like.findOne({
         fromUser: targetUserId,
@@ -268,11 +268,9 @@ router.post('/swipe', protect, [
             }
           ]);
           // Push match notifications via socket
-          const io = req.app.get('io');
-          if (io) {
-            io.to(req.user._id.toString()).emit('notification', matchNotifs[0]);
-            io.to(targetUserId.toString()).emit('notification', matchNotifs[1]);
-          }
+          await Promise.all(matchNotifs.map((notification) => (
+            emitNotification(req.app.get('io'), notification)
+          )));
         }
         isMatch = true;
         matchedUser = {

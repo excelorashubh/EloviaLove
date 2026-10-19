@@ -80,6 +80,7 @@ import GlobalNavbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { VideoCallProvider } from './context/VideoCallContext';
 import CookieConsent from './components/CookieConsent';
 import AdInitializer from './components/ads/AdInitializer';
@@ -506,7 +507,9 @@ function App() {
       <AuthProvider>
         <VideoCallProvider>
           <Router>
-            <AppContent />
+            <NotificationProvider>
+              <AppContent />
+            </NotificationProvider>
           </Router>
         </VideoCallProvider>
       </AuthProvider>

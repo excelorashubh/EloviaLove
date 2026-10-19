@@ -2,8 +2,10 @@ const express  = require('express');
 const crypto   = require('crypto');
 const jwt      = require('jsonwebtoken');
 const User     = require('../models/User');
+const Notification = require('../models/Notification');
 const VerificationRequest = require('../models/VerificationRequest');
 const { protect } = require('../middleware/auth');
+const { emitNotification } = require('../utils/notificationEvents');
 
 const router = express.Router();
 
@@ -204,8 +206,11 @@ router.get('/requests', protect, async (req, res) => {
 router.post('/grant/:userId', protect, async (req, res) => {
   try {
     if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Admin only' });
+    if (typeof req.body.grant !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'Grant must be a boolean' });
+    }
 
-    const { grant } = req.body; // true = grant, false = revoke
+    const { grant } = req.body;
     const targetUser = await User.findById(req.params.userId);
     if (!targetUser) return res.status(404).json({ success: false, message: 'User not found' });
 
@@ -214,16 +219,17 @@ router.post('/grant/:userId', protect, async (req, res) => {
       blueTickStatus: grant ? 'approved' : 'none',
     });
 
-    // Notify user via socket
+    const notification = await Notification.create({
+      user: targetUser._id,
+      type: 'verification',
+      title: grant ? 'Blue Tick Granted' : 'Blue Tick Revoked',
+      message: grant
+        ? 'An admin has granted you a verified blue tick badge.'
+        : 'Your blue tick verification has been revoked by an admin.',
+    });
     const io = req.app.get('io');
     if (io) {
-      io.to(req.params.userId).emit('notification', {
-        type:    'verification',
-        title:   grant ? 'Blue Tick Granted ✓' : 'Blue Tick Revoked',
-        message: grant
-          ? 'An admin has granted you a verified blue tick badge!'
-          : 'Your blue tick verification has been revoked by an admin.',
-      });
+      await emitNotification(io, notification);
       // Broadcast profile update so clients can refresh UI immediately
       io.emit('profile_updated', {
         userId: req.params.userId,
@@ -243,9 +249,12 @@ router.post('/review/:requestId', protect, async (req, res) => {
   try {
     if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Admin only' });
 
-    const { action, note } = req.body; // action: 'approve' | 'reject'
+    const { action, note } = req.body;
     if (!['approve', 'reject'].includes(action)) {
       return res.status(400).json({ success: false, message: 'Invalid action' });
+    }
+    if (note !== undefined && (typeof note !== 'string' || note.length > 500)) {
+      return res.status(400).json({ success: false, message: 'Note must be 500 characters or fewer' });
     }
 
     const request = await VerificationRequest.findById(req.params.requestId);
@@ -264,18 +273,16 @@ router.post('/review/:requestId', protect, async (req, res) => {
       await User.findByIdAndUpdate(request.userId, { blueTickStatus: 'rejected' });
     }
 
-    // Emit notification via socket
+    const notification = await Notification.create({
+      user: request.userId,
+      type: 'verification',
+      title: action === 'approve' ? 'Profile Verified' : 'Verification Rejected',
+      message: action === 'approve'
+        ? 'Your profile has been verified.'
+        : `Verification rejected: ${note?.trim() || 'Does not meet requirements'}`,
+    });
     const io = req.app.get('io');
-    if (io) {
-      const notifMsg = action === 'approve'
-        ? 'Your profile has been verified ✓'
-        : `Verification rejected: ${note || 'Does not meet requirements'}`;
-      io.to(request.userId.toString()).emit('notification', {
-        type: 'verification',
-        title: action === 'approve' ? 'Verified! ✓' : 'Verification Rejected',
-        message: notifMsg,
-      });
-    }
+    await emitNotification(io, notification);
 
     res.json({ success: true, message: `Request ${action}d` });
   } catch (err) {

@@ -4,6 +4,7 @@ const Message = require('../models/Message');
 const Match = require('../models/Match');
 const Notification = require('../models/Notification');
 const { protect } = require('../middleware/auth');
+const { emitNotification } = require('../utils/notificationEvents');
 
 const router = express.Router();
 
@@ -160,13 +161,14 @@ router.post('/:userId', protect, [
     }
 
     try {
-      await Notification.create({
+      const notification = await Notification.create({
         user: userId,
         type: 'message',
         title: 'New Message',
         message: `${req.user.name} sent you a message`,
         relatedUser: req.user._id
       });
+      await emitNotification(io, notification);
     } catch (notificationError) {
       console.error('[messages] notification creation failed after message persistence', {
         messageId: message._id.toString(),
