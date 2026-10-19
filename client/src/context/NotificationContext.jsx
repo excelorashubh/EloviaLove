@@ -6,6 +6,7 @@ import api from '../services/api';
 const NotificationContext = createContext(null);
 const NOTIFICATION_LIMIT = 20;
 const POLL_INTERVAL = 30000;
+const NOTIFICATION_REQUEST_TIMEOUT = 15000;
 
 export const getNotificationDestination = (notification) => {
   const relatedUserId = typeof notification.relatedUser === 'object'
@@ -40,7 +41,7 @@ export const NotificationProvider = ({ children }) => {
   const userIdRef = useRef(userId);
   const notificationIdsRef = useRef(new Set());
   const notificationRevisionRef = useRef(0);
-  const refreshRequestRef = useRef(0);
+  const activeRequestRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -50,53 +51,96 @@ export const NotificationProvider = ({ children }) => {
 
   userIdRef.current = userId;
 
-  const refreshNotifications = useCallback(async ({ showLoading = false } = {}) => {
+  const refreshNotifications = useCallback(({ showLoading = false } = {}) => {
     if (!isAuthenticated || !userId) return false;
-    const requestId = ++refreshRequestRef.current;
+    const currentRequest = activeRequestRef.current;
+    if (currentRequest && String(currentRequest.userId) === String(userId)) {
+      if (showLoading) {
+        setLoading(true);
+        setError('');
+      }
+      return currentRequest.promise;
+    }
+
+    const controller = new AbortController();
+    const request = {
+      userId,
+      controller,
+      promise: null,
+    };
+    activeRequestRef.current = request;
     const notificationRevision = notificationRevisionRef.current;
     if (showLoading) {
       setLoading(true);
       setError('');
     }
 
-    try {
-      const response = await api.get('/notifications');
-      if (!response.data?.success) throw new Error('Unable to load notifications');
-      if (
-        String(userIdRef.current) !== String(userId) ||
-        requestId !== refreshRequestRef.current ||
-        notificationRevision !== notificationRevisionRef.current
-      ) return false;
+    request.promise = (async () => {
+      try {
+        const response = await api.get('/notifications', {
+          timeout: NOTIFICATION_REQUEST_TIMEOUT,
+          signal: controller.signal,
+        });
+        const payload = response.data;
+        if (payload?.success === false) {
+          throw new Error(payload.message || 'The notifications service could not complete the request.');
+        }
+        const latestNotifications = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.notifications)
+            ? payload.notifications
+            : Array.isArray(payload?.data?.notifications)
+              ? payload.data.notifications
+              : Array.isArray(payload?.data)
+                ? payload.data
+                : null;
+        if (!latestNotifications) {
+          throw new Error('The notifications service returned an unexpected response.');
+        }
+        if (
+          String(userIdRef.current) !== String(userId) ||
+          activeRequestRef.current !== request ||
+          notificationRevision !== notificationRevisionRef.current
+        ) return false;
 
-      const latestNotifications = Array.isArray(response.data.notifications) ? response.data.notifications : [];
-      notificationIdsRef.current = new Set(latestNotifications.map((notification) => notification._id));
-      setNotifications(latestNotifications);
-      setUnreadCount(Number(response.data.unreadCount) || 0);
-      setError('');
-      return true;
-    } catch (requestError) {
-      if (
-        String(userIdRef.current) === String(userId) &&
-        requestId === refreshRequestRef.current &&
-        notificationRevision === notificationRevisionRef.current
-      ) {
-        setError(requestError.response?.data?.message || 'Could not load notifications. Please try again.');
-        console.error('Load notifications error:', requestError);
+        notificationIdsRef.current = new Set(latestNotifications.map((notification) => notification._id));
+        setNotifications(latestNotifications);
+        const responseUnreadCount = Number(payload?.unreadCount ?? payload?.data?.unreadCount);
+        setUnreadCount(Number.isFinite(responseUnreadCount)
+          ? responseUnreadCount
+          : latestNotifications.filter((notification) => !notification.isRead).length);
+        setError('');
+        return true;
+      } catch (requestError) {
+        if (
+          !controller.signal.aborted &&
+          String(userIdRef.current) === String(userId) &&
+          activeRequestRef.current === request
+        ) {
+          const message = requestError.code === 'ECONNABORTED' || requestError.code === 'ERR_CANCELED'
+            ? 'Loading notifications timed out. Please try again.'
+            : requestError.response?.status === 401
+              ? 'Your session has expired. Please sign in again.'
+              : requestError.response?.data?.message || requestError.message || 'Could not load notifications. Please try again.';
+          setError(message);
+          console.error('Load notifications error:', requestError);
+        }
+        return false;
+      } finally {
+        if (activeRequestRef.current === request) {
+          activeRequestRef.current = null;
+          if (String(userIdRef.current) === String(userId)) setLoading(false);
+        }
       }
-      return false;
-    } finally {
-      if (
-        showLoading &&
-        String(userIdRef.current) === String(userId) &&
-        requestId === refreshRequestRef.current
-      ) setLoading(false);
-    }
+    })();
+    return request.promise;
   }, [isAuthenticated, userId]);
 
   useEffect(() => {
     if (!isAuthenticated || !userId) {
       notificationRevisionRef.current += 1;
-      refreshRequestRef.current += 1;
+      activeRequestRef.current?.controller.abort();
+      activeRequestRef.current = null;
       setNotifications([]);
       notificationIdsRef.current.clear();
       setUnreadCount(0);
@@ -114,7 +158,14 @@ export const NotificationProvider = ({ children }) => {
     setError('');
     setActionError('');
     refreshNotifications({ showLoading: true });
-    return undefined;
+
+    return () => {
+      const request = activeRequestRef.current;
+      if (request && String(request.userId) === String(userId)) {
+        activeRequestRef.current = null;
+        request.controller.abort();
+      }
+    };
   }, [isAuthenticated, userId, refreshNotifications]);
 
   useEffect(() => {

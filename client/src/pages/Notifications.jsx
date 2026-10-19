@@ -128,25 +128,26 @@ const Notifications = () => {
           </div>
         </div>
 
-        {error && (
-          <div className="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200" role="alert">
-            <p>{error}</p>
-            <button
-              type="button"
-              onClick={() => refreshNotifications({ showLoading: true })}
-              className="mt-2 font-semibold underline underline-offset-2"
-            >
-              Retry
-            </button>
-          </div>
-        )}
         {actionError && (
           <p className="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200" role="alert">
             {actionError}
           </p>
         )}
 
-        {filtered.length > 0 ? (
+        {error ? (
+          <div className="rounded-2xl border border-rose-200 bg-white p-8 text-center shadow-sm dark:border-rose-900 dark:bg-black">
+            <Bell className="mx-auto mb-4 h-10 w-10 text-rose-400" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Notifications couldn’t be loaded</h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300" role="alert">{error}</p>
+            <button
+              type="button"
+              onClick={() => refreshNotifications({ showLoading: true })}
+              className="mt-5 rounded-xl bg-linear-to-r from-[#FD5A7A] to-[#FD2B6B] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FD2B6B]"
+            >
+              Retry
+            </button>
+          </div>
+        ) : filtered.length > 0 ? (
           <Motion.div initial="hidden" animate="visible" variants={stagger} className="space-y-3">
             {filtered.map(n => (
               <Motion.div
