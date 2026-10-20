@@ -62,6 +62,8 @@ import SubscriptionSuccess from './pages/SubscriptionSuccess';
 import RandomVideoPage from './pages/RandomVideo';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminMatches from './pages/admin/AdminMatches';
+import AdminChats from './pages/admin/AdminChats';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminReports from './pages/admin/AdminReports';
 import AdminRevenue from './pages/admin/AdminRevenue';
@@ -480,6 +482,8 @@ function AppContent() {
             }
           />
           <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+          <Route path="/admin/matches" element={<AdminRoute><AdminMatches /></AdminRoute>} />
+          <Route path="/admin/chats" element={<AdminRoute><AdminChats /></AdminRoute>} />
           <Route path="/admin/messages" element={<AdminRoute><AdminContactMessages /></AdminRoute>} />
           <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
           <Route path="/admin/random-video/monitor" element={<AdminRoute><RandomVideoMonitor /></AdminRoute>} />
@@ -518,4 +522,3 @@ function App() {
 }
 
 export default App;
- 

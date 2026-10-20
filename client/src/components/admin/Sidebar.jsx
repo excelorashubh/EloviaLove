@@ -25,6 +25,8 @@ const navItems = [
   { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
   { label: 'Messages', path: '/admin/messages', icon: MessageSquare },
   { label: 'Users', path: '/admin/users', icon: Users },
+  { label: 'Matches', path: '/admin/matches', icon: Heart },
+  { label: 'Chats', path: '/admin/chats', icon: MessageSquare },
   { label: 'Reports', path: '/admin/reports', icon: Flag },
   { label: 'Random Video Monitor', path: '/admin/random-video/monitor', icon: Video },
   { label: 'Revenue', path: '/admin/revenue', icon: DollarSign },
