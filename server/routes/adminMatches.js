@@ -18,6 +18,14 @@ const USER_PROJECTION = {
   isActive: 1,
   createdAt: 1,
 };
+const LIKE_USER_PROJECTION = {
+  _id: 1,
+  name: 1,
+  email: 1,
+  profilePhoto: 1,
+  isActive: 1,
+  createdAt: 1,
+};
 
 const getDateRanges = () => {
   const now = new Date();
@@ -46,6 +54,154 @@ const parsePositiveInteger = (value, fallback, maximum) => {
 };
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const isObjectId = (value) => OBJECT_ID_PATTERN.test(value) && mongoose.Types.ObjectId.isValid(value);
+
+const getLikeDetailsStages = () => [
+  {
+    $lookup: {
+      from: Like.collection.name,
+      let: { fromUser: '$fromUser', toUser: '$toUser' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ['$fromUser', '$$toUser'] },
+                { $eq: ['$toUser', '$$fromUser'] },
+                { $eq: ['$type', 'like'] },
+              ],
+            },
+          },
+        },
+        { $project: { _id: 1, createdAt: 1 } },
+        { $limit: 1 },
+      ],
+      as: 'reciprocalLike',
+    },
+  },
+  {
+    $lookup: {
+      from: User.collection.name,
+      localField: 'fromUser',
+      foreignField: '_id',
+      pipeline: [{ $project: LIKE_USER_PROJECTION }],
+      as: 'senderUser',
+    },
+  },
+  {
+    $lookup: {
+      from: User.collection.name,
+      localField: 'toUser',
+      foreignField: '_id',
+      pipeline: [{ $project: LIKE_USER_PROJECTION }],
+      as: 'recipientUser',
+    },
+  },
+  {
+    $lookup: {
+      from: Match.collection.name,
+      let: { fromUser: '$fromUser', toUser: '$toUser' },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $setEquals: ['$users', ['$$fromUser', '$$toUser']] },
+          },
+        },
+        { $project: { _id: 1, createdAt: 1 } },
+        { $limit: 1 },
+      ],
+      as: 'relatedMatch',
+    },
+  },
+  {
+    $addFields: {
+      sender: { $ifNull: [{ $arrayElemAt: ['$senderUser', 0] }, null] },
+      recipient: { $ifNull: [{ $arrayElemAt: ['$recipientUser', 0] }, null] },
+      reciprocal: { $ifNull: [{ $arrayElemAt: ['$reciprocalLike', 0] }, null] },
+      match: { $ifNull: [{ $arrayElemAt: ['$relatedMatch', 0] }, null] },
+      accountsAvailable: {
+        $and: [
+          { $eq: [{ $size: '$senderUser' }, 1] },
+          { $eq: [{ $size: '$recipientUser' }, 1] },
+          { $ne: [{ $ifNull: [{ $arrayElemAt: ['$senderUser.isActive', 0] }, false] }, false] },
+          { $ne: [{ $ifNull: [{ $arrayElemAt: ['$recipientUser.isActive', 0] }, false] }, false] },
+        ],
+      },
+    },
+  },
+  {
+    $addFields: {
+      likeStatus: {
+        $cond: [
+          { $eq: ['$accountsAvailable', false] },
+          'unavailable',
+          { $cond: [{ $ne: ['$reciprocal', null] }, 'mutual', 'pending'] },
+        ],
+      },
+    },
+  },
+];
+
+const getLikeSummaryStages = ({ now, today, month }) => [
+  { $match: { type: 'like' } },
+  ...getLikeDetailsStages(),
+  {
+    $group: {
+      _id: null,
+      totalLikesSent: { $sum: 1 },
+      likesReceived: { $sum: 1 },
+      oneSidedLikes: {
+        $sum: { $cond: [{ $eq: ['$reciprocal', null] }, 1, 0] },
+      },
+      mutualLikes: {
+        $sum: {
+          $cond: [
+            {
+              $and: [
+                { $ne: ['$reciprocal', null] },
+                { $lt: ['$fromUser', '$toUser'] },
+              ],
+            },
+            1,
+            0,
+          ],
+        },
+      },
+      pendingLikes: {
+        $sum: {
+          $cond: [
+            {
+              $and: [
+                { $eq: ['$reciprocal', null] },
+                { $eq: ['$accountsAvailable', true] },
+              ],
+            },
+            1,
+            0,
+          ],
+        },
+      },
+      todayLikes: {
+        $sum: {
+          $cond: [
+            { $and: [{ $gte: ['$createdAt', today] }, { $lte: ['$createdAt', now] }] },
+            1,
+            0,
+          ],
+        },
+      },
+      monthLikes: {
+        $sum: {
+          $cond: [
+            { $and: [{ $gte: ['$createdAt', month] }, { $lte: ['$createdAt', now] }] },
+            1,
+            0,
+          ],
+        },
+      },
+    },
+  },
+];
 
 const getParticipantStatusStages = () => [
   {
@@ -364,6 +520,204 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error('Get admin matches error:', error);
     return res.status(500).json({ success: false, message: 'Unable to load matches' });
+  }
+});
+
+router.get('/likes/summary', async (req, res) => {
+  try {
+    const { now, today, month } = getDateRanges();
+    const [summary] = await Like.aggregate(getLikeSummaryStages({ now, today, month }));
+    return res.json({
+      success: true,
+      summary: {
+        totalLikesSent: summary?.totalLikesSent || 0,
+        likesReceived: summary?.likesReceived || 0,
+        oneSidedLikes: summary?.oneSidedLikes || 0,
+        mutualLikes: summary?.mutualLikes || 0,
+        pendingLikes: summary?.pendingLikes || 0,
+        todayLikes: summary?.todayLikes || 0,
+        monthLikes: summary?.monthLikes || 0,
+      },
+    });
+  } catch (error) {
+    console.error('Get admin like summary error:', error);
+    return res.status(500).json({ success: false, message: 'Unable to load like summary' });
+  }
+});
+
+router.get('/likes', async (req, res) => {
+  try {
+    const page = parsePositiveInteger(req.query.page, 1, MAX_PAGE);
+    const limit = parsePositiveInteger(req.query.limit, 20, MAX_PAGE_SIZE);
+    const {
+      search = '',
+      from,
+      to,
+      status = 'all',
+      sentBy,
+      receivedBy,
+      sort = 'newest',
+    } = req.query;
+
+    if (page === null || limit === null) {
+      return res.status(400).json({ success: false, message: 'Invalid pagination parameters' });
+    }
+    if (typeof search !== 'string' || search.length > 100) {
+      return res.status(400).json({ success: false, message: 'Search must be 100 characters or fewer' });
+    }
+    if (!['all', 'pending', 'mutual', 'unavailable'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid like status filter' });
+    }
+    if (!['newest', 'oldest'].includes(sort)) {
+      return res.status(400).json({ success: false, message: 'Invalid like sort option' });
+    }
+    if (from !== undefined && typeof from !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid start date' });
+    }
+    if (to !== undefined && typeof to !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid end date' });
+    }
+    if ((sentBy !== undefined && (typeof sentBy !== 'string' || !isObjectId(sentBy)))
+      || (receivedBy !== undefined && (typeof receivedBy !== 'string' || !isObjectId(receivedBy)))) {
+      return res.status(400).json({ success: false, message: 'Sender and recipient filters must be valid user IDs' });
+    }
+
+    const startDate = from ? parseDate(from) : null;
+    const endDate = to ? parseDate(to) : null;
+    if ((from && !startDate) || (to && !endDate)) {
+      return res.status(400).json({ success: false, message: 'Dates must be valid YYYY-MM-DD values' });
+    }
+    if (startDate && endDate && startDate > endDate) {
+      return res.status(400).json({ success: false, message: 'Start date must be before end date' });
+    }
+
+    const initialMatch = { type: 'like' };
+    if (sentBy) initialMatch.fromUser = new mongoose.Types.ObjectId(sentBy);
+    if (receivedBy) initialMatch.toUser = new mongoose.Types.ObjectId(receivedBy);
+    if (startDate || endDate) {
+      initialMatch.createdAt = {};
+      if (startDate) initialMatch.createdAt.$gte = startDate;
+      if (endDate) {
+        const exclusiveEndDate = new Date(endDate);
+        exclusiveEndDate.setDate(exclusiveEndDate.getDate() + 1);
+        initialMatch.createdAt.$lt = exclusiveEndDate;
+      }
+    }
+
+    const pipeline = [{ $match: initialMatch }, ...getLikeDetailsStages()];
+    const escapedSearch = search.trim() ? escapeRegex(search.trim()) : null;
+    if (escapedSearch) {
+      const searchRegex = { $regex: escapedSearch, $options: 'i' };
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'sender.name': searchRegex },
+            { 'sender.email': searchRegex },
+            { 'recipient.name': searchRegex },
+            { 'recipient.email': searchRegex },
+            { $expr: { $regexMatch: { input: { $toString: '$_id' }, regex: escapedSearch, options: 'i' } } },
+            { $expr: { $regexMatch: { input: { $toString: '$fromUser' }, regex: escapedSearch, options: 'i' } } },
+            { $expr: { $regexMatch: { input: { $toString: '$toUser' }, regex: escapedSearch, options: 'i' } } },
+          ],
+        },
+      });
+    }
+    if (status !== 'all') pipeline.push({ $match: { likeStatus: status } });
+    pipeline.push({
+      $facet: {
+        likes: [
+          { $sort: { createdAt: sort === 'oldest' ? 1 : -1, _id: sort === 'oldest' ? 1 : -1 } },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          {
+            $project: {
+              _id: 1,
+              fromUser: 1,
+              toUser: 1,
+              createdAt: 1,
+              likeStatus: 1,
+              sender: 1,
+              recipient: 1,
+              reciprocalLike: '$reciprocal',
+              relatedMatch: '$match',
+              accountsAvailable: 1,
+            },
+          },
+        ],
+        metadata: [{ $count: 'total' }],
+      },
+    });
+
+    const [result] = await Like.aggregate(pipeline);
+    const total = result?.metadata?.[0]?.total || 0;
+    return res.json({
+      success: true,
+      likes: result?.likes || [],
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    console.error('Get admin likes error:', error);
+    return res.status(500).json({ success: false, message: 'Unable to load likes' });
+  }
+});
+
+router.get('/likes/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isObjectId(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid like ID' });
+    }
+
+    const [like] = await Like.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id), type: 'like' } },
+      ...getLikeDetailsStages(),
+      {
+        $project: {
+          _id: 1,
+          fromUser: 1,
+          toUser: 1,
+          createdAt: 1,
+          likeStatus: 1,
+          sender: 1,
+          recipient: 1,
+          reciprocalLike: '$reciprocal',
+          relatedMatch: '$match',
+          accountsAvailable: 1,
+        },
+      },
+    ]);
+
+    if (!like) return res.status(404).json({ success: false, message: 'Like not found' });
+
+    const interactionHistory = [{
+      likeId: like._id,
+      senderId: like.fromUser,
+      recipientId: like.toUser,
+      createdAt: like.createdAt,
+    }];
+    if (like.reciprocalLike) {
+      interactionHistory.push({
+        likeId: like.reciprocalLike._id,
+        senderId: like.toUser,
+        recipientId: like.fromUser,
+        createdAt: like.reciprocalLike.createdAt,
+      });
+    }
+
+    return res.json({
+      success: true,
+      like: {
+        ...like,
+        accountStatus: {
+          sender: !like.sender ? 'deleted' : like.sender.isActive === false ? 'inactive' : 'active',
+          recipient: !like.recipient ? 'deleted' : like.recipient.isActive === false ? 'inactive' : 'active',
+        },
+        interactionHistory,
+      },
+    });
+  } catch (error) {
+    console.error('Get admin like details error:', error);
+    return res.status(500).json({ success: false, message: 'Unable to load like details' });
   }
 });
 

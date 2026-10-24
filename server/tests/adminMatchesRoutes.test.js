@@ -122,6 +122,87 @@ describe('admin match tracking routes', () => {
     expect(Match.countDocuments).not.toHaveBeenCalled();
   });
 
+  it('returns database-backed like totals with mutual pairs counted once', async () => {
+    Like.aggregate.mockResolvedValue([{
+      totalLikesSent: 8,
+      likesReceived: 8,
+      oneSidedLikes: 4,
+      mutualLikes: 2,
+      pendingLikes: 3,
+      todayLikes: 1,
+      monthLikes: 5,
+    }]);
+
+    const response = await fetch(`${baseUrl}/likes/summary`);
+    const body = await response.json();
+    const pipeline = Like.aggregate.mock.calls[0][0];
+
+    expect(response.status).toBe(200);
+    expect(body.summary).toEqual({
+      totalLikesSent: 8,
+      likesReceived: 8,
+      oneSidedLikes: 4,
+      mutualLikes: 2,
+      pendingLikes: 3,
+      todayLikes: 1,
+      monthLikes: 5,
+    });
+    expect(JSON.stringify(pipeline)).toContain('"type":"like"');
+    expect(JSON.stringify(pipeline)).toContain('"mutualLikes"');
+  });
+
+  it('server-paginates and combines like filters', async () => {
+    Like.aggregate.mockResolvedValue([{
+      likes: [{ _id: 'like-id', likeStatus: 'pending' }],
+      metadata: [{ total: 1 }],
+    }]);
+
+    const response = await fetch(`${baseUrl}/likes?search=alice&sentBy=64b000000000000000000011&status=pending&page=2&limit=10&sort=oldest&from=2026-01-01&to=2026-01-03`);
+    const body = await response.json();
+    const pipeline = JSON.stringify(Like.aggregate.mock.calls[0][0]);
+
+    expect(response.status).toBe(200);
+    expect(body.likes).toHaveLength(1);
+    expect(body.pagination).toEqual({ page: 2, limit: 10, total: 1, pages: 1 });
+    expect(pipeline).toContain('"fromUser":"64b000000000000000000011"');
+    expect(pipeline).toContain('"likeStatus":"pending"');
+    expect(pipeline).toContain('"createdAt":1');
+  });
+
+  it('rejects invalid like filters and protects like endpoints', async () => {
+    const invalidId = await fetch(`${baseUrl}/likes?sentBy=not-an-object-id`);
+    mockRole = 'user';
+    const forbidden = await fetch(`${baseUrl}/likes/summary`);
+
+    expect(invalidId.status).toBe(400);
+    expect(forbidden.status).toBe(403);
+    expect(Like.aggregate).not.toHaveBeenCalled();
+  });
+
+  it('returns like details and reciprocal history without credentials', async () => {
+    Like.aggregate.mockResolvedValue([{
+      _id: '64b000000000000000000099',
+      fromUser: '64b000000000000000000011',
+      toUser: '64b000000000000000000012',
+      createdAt: '2026-01-02T00:00:00.000Z',
+      likeStatus: 'mutual',
+      sender: { _id: '64b000000000000000000011', name: 'Alice', isActive: true },
+      recipient: { _id: '64b000000000000000000012', name: 'Bob', isActive: true },
+      reciprocalLike: { _id: '64b000000000000000000098', createdAt: '2026-01-03T00:00:00.000Z' },
+      relatedMatch: { _id: '64b000000000000000000097', createdAt: '2026-01-03T00:00:00.000Z' },
+      accountsAvailable: true,
+    }]);
+
+    const response = await fetch(`${baseUrl}/likes/64b000000000000000000099`);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.like.likeStatus).toBe('mutual');
+    expect(body.like.interactionHistory).toHaveLength(2);
+    expect(body.like.relatedMatch._id).toBe('64b000000000000000000097');
+    expect(JSON.stringify(body)).not.toMatch(/password|token|secret/i);
+  });
+
   it('returns match details without private message contents', async () => {
     const userA = { _id: '64b000000000000000000011', name: 'Alice', isActive: true };
     const userB = { _id: '64b000000000000000000012', name: 'Bob', isActive: true };

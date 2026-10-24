@@ -26,5 +26,6 @@ likeSchema.index({ fromUser: 1, toUser: 1 }, { unique: true });
 // Index for efficient queries
 likeSchema.index({ fromUser: 1, type: 1 });
 likeSchema.index({ toUser: 1, type: 1 });
+likeSchema.index({ type: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Like', likeSchema);
