@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -107,6 +107,10 @@ const AdminVisitors = () => {
   const [visitTotal, setVisitTotal] = useState(0);
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [notice, setNotice]         = useState(null);
+  const overviewRequest = useRef(null);
+  const recentRequest = useRef(null);
+  const refreshingRef = useRef(false);
 
   // Table filters
   const [tblPeriod,   setTblPeriod]   = useState('all');
@@ -117,19 +121,36 @@ const AdminVisitors = () => {
   const [showCustom,  setShowCustom]  = useState(false);
 
   const load = useCallback(async (spinner = false) => {
-    if (spinner) setRefreshing(true); else setLoading(true);
+    overviewRequest.current?.abort();
+    const controller = new AbortController();
+    overviewRequest.current = controller;
+    if (!spinner) setLoading(true);
     try {
       const [ovRes, dayRes] = await Promise.all([
-        api.get(`/analytics/overview?period=${period}`),
-        api.get('/analytics/daily'),
+        api.get(`/analytics/overview?period=${period}`, { signal: controller.signal }),
+        api.get('/analytics/daily', { signal: controller.signal }),
       ]);
+      if (overviewRequest.current !== controller) return false;
       setOverview(ovRes.data);
       setDaily(dayRes.data.data || []);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); setRefreshing(false); }
+      return true;
+    } catch (e) {
+      if (e.name !== 'CanceledError' && e.code !== 'ERR_CANCELED' && overviewRequest.current === controller) {
+        setNotice({
+          type: 'error',
+          message: e.response?.data?.message || e.message || 'Unable to refresh visitor analytics.',
+        });
+      }
+      return false;
+    } finally {
+      if (overviewRequest.current === controller) setLoading(false);
+    }
   }, [period]);
 
   const loadRecent = useCallback(async () => {
+    recentRequest.current?.abort();
+    const controller = new AbortController();
+    recentRequest.current = controller;
     try {
       const params = new URLSearchParams({ page: visitPage });
       if (tblDevice !== 'all') params.set('device', tblDevice);
@@ -140,14 +161,56 @@ const AdminVisitors = () => {
       } else if (tblPeriod !== 'all') {
         params.set('period', tblPeriod);
       }
-      const res = await api.get(`/analytics/recent?${params}`);
+      const res = await api.get(`/analytics/recent?${params}`, { signal: controller.signal });
+      if (recentRequest.current !== controller) return false;
       setRecent(res.data.visits || []);
       setVisitTotal(res.data.total || 0);
-    } catch (e) { console.error(e); }
+      return true;
+    } catch (e) {
+      if (e.name !== 'CanceledError' && e.code !== 'ERR_CANCELED' && recentRequest.current === controller) {
+        setNotice({
+          type: 'error',
+          message: e.response?.data?.message || e.message || 'Unable to refresh recent visitor records.',
+        });
+      }
+      return false;
+    }
   }, [visitPage, tblDevice, tblPage, tblPeriod, customFrom, customTo]);
 
-  useEffect(() => { load(); }, [load]);
-  useEffect(() => { loadRecent(); }, [loadRecent]);
+  const refreshAnalytics = useCallback(async () => {
+    if (refreshingRef.current) return;
+    refreshingRef.current = true;
+    setRefreshing(true);
+    setNotice(null);
+    try {
+      const [overviewLoaded, recentLoaded] = await Promise.all([load(true), loadRecent()]);
+      if (overviewLoaded && recentLoaded) {
+        setNotice({ type: 'success', message: 'Visitor analytics refreshed.' });
+      }
+    } catch (e) {
+      setNotice({
+        type: 'error',
+        message: e.response?.data?.message || e.message || 'Unable to refresh visitor analytics.',
+      });
+    } finally {
+      refreshingRef.current = false;
+      setRefreshing(false);
+    }
+  }, [load, loadRecent]);
+
+  useEffect(() => {
+    load();
+    return () => overviewRequest.current?.abort();
+  }, [load]);
+  useEffect(() => {
+    loadRecent();
+    return () => recentRequest.current?.abort();
+  }, [loadRecent]);
+  useEffect(() => {
+    if (notice?.type !== 'success') return undefined;
+    const timeout = window.setTimeout(() => setNotice(null), 3000);
+    return () => window.clearTimeout(timeout);
+  }, [notice]);
 
   if (loading) return (
     <AdminLayout>
@@ -190,13 +253,26 @@ const AdminVisitors = () => {
                 </button>
               ))}
             </div>
-            <button onClick={() => load(true)} disabled={refreshing}
+            <button onClick={refreshAnalytics} disabled={refreshing}
+              aria-label="Refresh visitor analytics"
+              title="Refresh visitor analytics"
               className="p-2 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-primary-600 transition-colors disabled:opacity-50"
             >
               <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
             </button>
           </div>
         </div>
+
+        {notice && (
+          <div
+            role={notice.type === 'error' ? 'alert' : 'status'}
+            className={`fixed top-4 right-4 z-50 rounded-xl px-4 py-3 text-sm font-medium shadow-lg ${
+              notice.type === 'error' ? 'bg-red-600 text-white' : 'bg-green-600 text-white'
+            }`}
+          >
+            {notice.message}
+          </div>
+        )}
 
         {/* ── Stat cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
