@@ -28,6 +28,13 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   }, [isBrowser]);
 
+  useEffect(() => {
+    if (!isBrowser) return undefined;
+    const handleSessionExpired = () => clearSession();
+    window.addEventListener('elovia:session-expired', handleSessionExpired);
+    return () => window.removeEventListener('elovia:session-expired', handleSessionExpired);
+  }, [clearSession, isBrowser]);
+
   const loadUser = useCallback(async () => {
     if (!token) return;
 
@@ -197,7 +204,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {loading ? null : children}
+      {children}
     </AuthContext.Provider>
   );
 };

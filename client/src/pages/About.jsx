@@ -1,12 +1,11 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Target, Heart, Shield, Users, Globe, ArrowRight } from 'lucide-react';
 import BannerAd from '../components/ads/BannerAd';
 import AdWrapper from '../components/ads/AdWrapper';
-import personalPhoto from '../assets/PersonalPhoto.jpeg';
-import CEOPHOTO from '../assets/ceophoto.png'
+import CEOPHOTO from '../assets/ceophoto-optimized.jpg';
 import { SITE_URL } from '../data/seoContent';
 
 
@@ -31,7 +30,7 @@ const About = () => {
           <div className="absolute top-0 left-0 w-125 h-125 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/4 -translate-x-1/4" />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
@@ -42,7 +41,7 @@ const About = () => {
               <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
                 We started Elovia Love with a simple belief: finding love shouldn't be exhausting. It should be exciting, authentic, and safe.
               </p>
-            </motion.div>
+            </Motion.div>
           </div>
         </section>
 
@@ -50,7 +49,7 @@ const About = () => {
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-2 gap-12 items-center">
-              <motion.div
+              <Motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -60,12 +59,14 @@ const About = () => {
                 <img
                   src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2070&auto=format&fit=crop"
                   alt="Happy couple walking"
+                  loading="lazy"
+                  decoding="async"
                   className="rounded-3xl shadow-2xl z-10 relative"
                 />
                 <div className="absolute -bottom-6 -right-6 w-full h-full border-2 border-primary-200 rounded-3xl z-0" />
-              </motion.div>
+              </Motion.div>
 
-              <motion.div
+              <Motion.div
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -95,7 +96,7 @@ const About = () => {
                     A world where technology serves as a bridge, not a barrier, bringing together compatible souls regardless of geography, guided by safety and authenticity.
                   </p>
                 </div>
-              </motion.div>
+              </Motion.div>
             </div>
           </div>
         </section>
@@ -103,7 +104,7 @@ const About = () => {
         {/* Why Choose Us */}
         <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <motion.div
+            <Motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -112,7 +113,7 @@ const About = () => {
             >
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Why Choose Elovia Love</h2>
               <p className="text-lg text-slate-600">The thoughtful approach to digital dating.</p>
-            </motion.div>
+            </Motion.div>
 
             <div className="grid md:grid-cols-3 gap-8">
               {[
@@ -120,7 +121,7 @@ const About = () => {
                 { icon: Heart, title: "Psychology-Backed Matches", desc: "Our algorithm is designed with behavioral scientists to find true compatibility traits." },
                 { icon: Users, title: "Inclusive Community", desc: "A welcoming, troll-free space for everyone looking for a serious, committed relationship." }
               ].map((feature, idx) => (
-                <motion.div
+                <Motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -133,7 +134,7 @@ const About = () => {
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
                   <p className="text-slate-600">{feature.desc}</p>
-                </motion.div>
+                </Motion.div>
               ))}
             </div>
           </div>
@@ -142,7 +143,7 @@ const About = () => {
         {/* Team Section */}
         <section className="py-24 bg-slate-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
+            <Motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -153,7 +154,7 @@ const About = () => {
               <p className="text-lg text-slate-600 text-center max-w-2xl mx-auto">
                 Passionate romantic-technologists dedicated to your success.
               </p>
-            </motion.div>
+            </Motion.div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
@@ -162,7 +163,7 @@ const About = () => {
                 { name: "Dr. Priya Singh", role: "Lead Psychologist", img: "https://thumbs.dreamstime.com/b/close-up-photo-young-indian-girl-home-sitting-couch-texting-phone-close-up-photo-young-indian-girl-401219813.jpg" },
                 { name: "Anjali Nair", role: "Head of Customer Executive", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfGuXHLGTsCBFAKp30Mb2v4Mc1E--LZL6vvjhDWS4yCLEtHm0IDHvT5Fw&s" }
               ].map((member, idx) => (
-                <motion.div
+                <Motion.div
                   key={idx}
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
@@ -171,12 +172,20 @@ const About = () => {
                   className="text-center group"
                 >
                   <div className="overflow-hidden rounded-full w-48 h-48 mx-auto mb-6 shadow-lg border-4 border-white relative">
-                    <img src={member.img} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <img
+                      src={member.img}
+                      alt={member.name}
+                      width={192}
+                      height={192}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
                     <div className="absolute inset-0 bg-primary-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                   </div>
                   <h4 className="text-xl font-bold text-slate-900">{member.name}</h4>
                   <p className="text-primary-600 font-medium">{member.role}</p>
-                </motion.div>
+                </Motion.div>
               ))}
             </div>
           </div>
@@ -192,7 +201,7 @@ const About = () => {
         {/* CTA Section */}
         <section className="py-20 bg-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -208,7 +217,7 @@ const About = () => {
               >
                 Start Free Trial <ArrowRight size={20} />
               </Link>
-            </motion.div>
+            </Motion.div>
           </div>
         </section>
       </div>

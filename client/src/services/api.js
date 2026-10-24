@@ -48,7 +48,7 @@ api.interceptors.response.use(
     if (isAuthProblem && isBrowser) {
       localStorage.removeItem('token');
       delete api.defaults.headers.common['Authorization'];
-      window.location.assign('/login');
+      window.dispatchEvent(new Event('elovia:session-expired'));
     }
 
     return Promise.reject(error);

@@ -21,6 +21,14 @@
   }
 }
 
+.admin-sidebar-nav {
+  scrollbar-width: none;
+}
+
+.admin-sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+
 /* Animated gradient background */
 @keyframes gradient-slow {
   0%, 100% {

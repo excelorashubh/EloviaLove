@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { motion as Motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { HeartHandshake, Star, Shield, Heart, MessageCircle, Zap, MapPin, Users, Quote, X, ArrowRight, Sparkles } from 'lucide-react';
@@ -41,14 +41,14 @@ const Home = () => {
   const triggerTimeoutRef = useRef(null);
   const triggeredRef = useRef(false);
 
-  const shouldShowPopup = () => {
+  const shouldShowPopup = useCallback(() => {
     if (typeof window === 'undefined') return false;
     if (loading || isAuthenticated) return false;
 
     const dismissedAt = Number(window.localStorage.getItem(AUTH_POPUP_STORAGE_KEY) || '0');
     const twentyFourHoursMs = 24 * 60 * 60 * 1000;
     return !dismissedAt || Date.now() - dismissedAt >= twentyFourHoursMs;
-  };
+  }, [isAuthenticated, loading]);
 
   const dismissAuthPopup = () => {
     if (typeof window !== 'undefined') {
@@ -57,17 +57,14 @@ const Home = () => {
     setShowAuthPopup(false);
   };
 
-  const showAuthPopupIfEligible = () => {
+  const showAuthPopupIfEligible = useCallback(() => {
     if (!shouldShowPopup() || triggeredRef.current) return;
     triggeredRef.current = true;
     setShowAuthPopup(true);
-  };
+  }, [shouldShowPopup]);
 
   useEffect(() => {
-    if (loading || isAuthenticated) {
-      setShowAuthPopup(false);
-      return;
-    }
+    if (loading || isAuthenticated) return undefined;
 
     if (triggerTimeoutRef.current) {
       window.clearTimeout(triggerTimeoutRef.current);
@@ -93,7 +90,7 @@ const Home = () => {
         window.clearTimeout(triggerTimeoutRef.current);
       }
     };
-  }, [loading, isAuthenticated]);
+  }, [loading, isAuthenticated, showAuthPopupIfEligible]);
 
   const handleAuthAction = (path) => {
     dismissAuthPopup();
@@ -103,13 +100,13 @@ const Home = () => {
   return (
     <>
       {showAuthPopup && !loading && !isAuthenticated && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 backdrop-blur-sm px-4 py-6">
-          <motion.div
+        <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-slate-950/45 px-4 py-6">
+          <Motion.div
             initial={{ opacity: 0, scale: 0.96, y: 18 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 18 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="relative w-full max-w-xl overflow-hidden rounded-[28px] border border-pink-100 bg-white/95 p-5 shadow-[0_30px_90px_rgba(15,23,42,0.22)] sm:p-8"
+            className="pointer-events-auto relative w-full max-w-xl overflow-hidden rounded-[28px] border border-pink-100 bg-white/95 p-5 shadow-[0_30px_90px_rgba(15,23,42,0.22)] sm:p-8"
           >
             <button
               type="button"
@@ -176,7 +173,7 @@ const Home = () => {
                 Maybe Later
               </button>
             </div>
-          </motion.div>
+          </Motion.div>
         </div>
       )}
       {/* ── SEO Schema Markup ── */}
@@ -190,7 +187,7 @@ const Home = () => {
         <title>Elovia Love — Verified Dating Platform | Find Genuine Singles Worldwide</title>
         <meta name="description" content="Join verified singles from 50+ countries including India, USA, UK, Canada, and Australia. AI-powered matching, advanced safety features, and meaningful connections. Start your relationship journey today." />
         <link rel="canonical" href={`${SITE_URL}/`} />
-        <link rel="preload" as="image" href="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1920&auto=format&fm=webp" fetchpriority="high" />
+        <link rel="preload" as="image" href="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1920&auto=format&fm=webp" fetchPriority="high" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
@@ -269,7 +266,7 @@ const Home = () => {
         <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -279,27 +276,27 @@ const Home = () => {
               <SparklesIcon className="w-4 h-4 text-primary-500" />
               #1 Dating App for Genuine Connections
             </span>
-          </motion.div>
+          </Motion.div>
 
-          <motion.h1 
+          <Motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8"
           >
             Find Meaningful Relationships with <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-600 to-pink-500">Verified Singles Worldwide</span>
-          </motion.h1>
+          </Motion.h1>
 
-          <motion.p 
+          <Motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
             className="mt-4 text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed font-light"
           >
             Join verified singles from India and around the world. Whether you're looking for friendship, dating, or a long-term relationship, Elovia Love helps you connect safely with genuine people through AI-powered matching and advanced safety features.
-          </motion.p>
+          </Motion.p>
 
-          <motion.div 
+          <Motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -323,19 +320,19 @@ const Home = () => {
             >
               Read Latest Blog Articles
             </Link>
-          </motion.div>
+          </Motion.div>
 
-          <motion.div 
+          <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}
             className="mt-8 text-center"
           >
             <p className="text-sm text-slate-400">Join thousands of singles finding real love</p>
-          </motion.div>
+          </Motion.div>
 
           {/* User faces pile up mock */}
-          <motion.div 
+          <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.8 }}
@@ -358,7 +355,7 @@ const Home = () => {
               </span>
               <span className="ml-2 font-semibold text-slate-700">4.9/5</span> from over 10,000+ happy couples
             </div>
-          </motion.div>
+          </Motion.div>
         </div>
       </section>
 
@@ -374,7 +371,7 @@ const Home = () => {
       {/* How It Works Section */}
       <section className="py-24 bg-slate-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <Motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -385,10 +382,10 @@ const Home = () => {
             <p className="text-lg text-slate-600 max-w-3xl mx-auto">
               Our verified dating platform is designed to help serious singles worldwide find meaningful relationships through a safe, structured process. From profile verification to AI-powered matching, every step is optimized for your success.
             </p>
-          </motion.div>
+          </Motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <motion.div 
+            <Motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -402,9 +399,9 @@ const Home = () => {
               <p className="text-slate-600 leading-relaxed">
                 Every member undergoes a comprehensive verification process to ensure authenticity. We require government-issued ID, detailed questionnaires, and photo reviews manually checked by our team. This rigorous process eliminates fake profiles, prevents catfishing, and creates a trustworthy community of genuine singles looking for serious relationships. Your verified badge shows others you're real and serious about finding love.
               </p>
-            </motion.div>
+            </Motion.div>
 
-            <motion.div 
+            <Motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -418,9 +415,9 @@ const Home = () => {
               <p className="text-slate-600 leading-relaxed">
                 Our advanced AI matching algorithm considers multiple compatibility factors including your personality traits, core values, lifestyle preferences, cultural background, religious beliefs, and long-term relationship goals. Unlike superficial swipe-based dating apps, we focus on deep compatibility that leads to lasting relationships. Our smart matching system learns from your preferences to suggest better matches over time, helping you find your perfect life partner.
               </p>
-            </motion.div>
+            </Motion.div>
 
-            <motion.div 
+            <Motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -434,10 +431,10 @@ const Home = () => {
               <p className="text-slate-600 leading-relaxed">
                 Begin conversations with intelligent icebreakers specifically designed for serious relationships. Our platform encourages thoughtful communication and provides comprehensive safety tools including emergency contact sharing, location-based safety check-ins, and direct access to our 24/7 safety team. Unlike casual dating apps, we create an environment for deep, meaningful conversations that lead to genuine connections and lasting love.
               </p>
-            </motion.div>
+            </Motion.div>
           </div>
 
-          <motion.div 
+          <Motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -466,7 +463,7 @@ const Home = () => {
                 <p className="text-slate-600 text-sm">Our AI algorithm considers cultural values, family expectations, religious preferences, and backgrounds for better compatibility worldwide.</p>
               </div>
             </div>
-          </motion.div>
+          </Motion.div>
         </div>
       </section>
 
@@ -482,7 +479,7 @@ const Home = () => {
       {/* Features Section */}
       <section className="py-24 bg-white relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <Motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
@@ -492,9 +489,9 @@ const Home = () => {
             <h3 className="text-primary-600 font-semibold tracking-wide uppercase mb-3">Why Elovia Love?</h3>
             <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Built for meaningful connections</h3>
             <p className="text-lg text-slate-600">We've designed our platform from the ground up to foster real, authentic conversations rather than endless swiping.</p>
-          </motion.div>
+          </Motion.div>
 
-          <motion.div 
+          <Motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -506,15 +503,15 @@ const Home = () => {
               { icon: Zap, title: "Smart Matching AI", desc: "Our advanced algorithm matches you based on your personality, values, and lifestyle preferences.", color: "text-primary-500", bg: "bg-primary-50" },
               { icon: MessageCircle, title: "Deep Conversations", desc: "Icebreaker prompts and intuitive chat features designed to spark meaningful dialogue immediately.", color: "text-pink-500", bg: "bg-pink-50" }
             ].map((feature, idx) => (
-              <motion.div key={idx} variants={fadeIn} className="bg-slate-50 rounded-3xl p-8 hover:shadow-xl transition-shadow duration-300 border border-slate-100">
+              <Motion.div key={idx} variants={fadeIn} className="bg-slate-50 rounded-3xl p-8 hover:shadow-xl transition-shadow duration-300 border border-slate-100">
                 <div className={`w-14 h-14 ${feature.bg} rounded-2xl flex items-center justify-center mb-6`}>
                   <feature.icon className={`w-7 h-7 ${feature.color}`} />
                 </div>
                 <h4 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h4>
                 <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
-              </motion.div>
+              </Motion.div>
             ))}
-          </motion.div>
+          </Motion.div>
         </div>
       </section>
 
@@ -523,7 +520,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="lg:w-1/2">
-              <motion.div 
+              <Motion.div
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
@@ -554,11 +551,11 @@ const Home = () => {
                 <Link to="/safety" className="inline-flex items-center gap-2 text-primary-600 font-bold hover:gap-3 transition-all">
                   Explore our Safety Hub <Zap size={18} />
                 </Link>
-              </motion.div>
+              </Motion.div>
             </div>
             <div className="lg:w-1/2 grid grid-cols-2 gap-4">
-              <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&auto=format&fm=webp&fit=crop" alt="Happy Couple" className="rounded-3xl shadow-xl mt-8" />
-              <img src="https://images.unsplash.com/photo-1522851259500-2eac44e7cde2?w=600&auto=format&fm=webp&fit=crop" alt="Secure Dating" className="rounded-3xl shadow-xl" />
+              <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&auto=format&fm=webp&fit=crop" alt="Happy Couple" loading="lazy" decoding="async" width={600} height={400} className="aspect-[3/2] w-full rounded-3xl object-cover shadow-xl mt-8" />
+              <img src="https://images.unsplash.com/photo-1522851259500-2eac44e7cde2?w=600&auto=format&fm=webp&fit=crop" alt="Secure Dating" loading="lazy" decoding="async" width={600} height={400} className="aspect-[3/2] w-full rounded-3xl object-cover shadow-xl" />
             </div>
           </div>
         </div>
@@ -594,7 +591,7 @@ const Home = () => {
       {/* How it Works */}
       <section className="py-24 bg-slate-50 border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div 
+          <Motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -603,7 +600,7 @@ const Home = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">How It Works</h2>
             <p className="text-lg text-slate-600">Your journey to finding love, simplified.</p>
-          </motion.div>
+          </Motion.div>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-12 lg:gap-24 relative">
              {/* Connection Line (Desktop) */}
@@ -614,7 +611,7 @@ const Home = () => {
               { icon: Heart, step: "2", title: "Find Matches", desc: "Our AI curates daily matches that fit your specific preferences." },
               { icon: MapPin, step: "3", title: "Meet & Date", desc: "Connect online and plan your perfect first date safely." }
             ].map((step, idx) => (
-              <motion.div 
+              <Motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -630,7 +627,7 @@ const Home = () => {
                 </div>
                 <h4 className="text-xl font-bold text-slate-900 mb-2">{step.title}</h4>
                 <p className="text-slate-600">{step.desc}</p>
-              </motion.div>
+              </Motion.div>
             ))}
           </div>
         </div>
@@ -639,7 +636,7 @@ const Home = () => {
       {/* Testimonials */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <Motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -648,7 +645,7 @@ const Home = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Success Stories from Around the World</h2>
             <p className="text-lg text-slate-600">Real couples who found meaningful connections on Elovia Love</p>
-          </motion.div>
+          </Motion.div>
 
           <React.Suspense fallback={<div className="h-96 w-full bg-slate-50 animate-pulse rounded-xl" />}>
             <GlobalTestimonials />
@@ -668,7 +665,7 @@ const Home = () => {
       {/* FAQ Section */}
       <section className="py-24 bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <Motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -677,7 +674,7 @@ const Home = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Frequently Asked Questions</h2>
             <p className="text-lg text-slate-600">Everything you need to know about finding love on Elovia Love.</p>
-          </motion.div>
+          </Motion.div>
 
           <React.Suspense fallback={<div className="h-64 w-full bg-slate-100 animate-pulse rounded-xl" />}>
             <FAQAccordion faqs={[
@@ -763,7 +760,7 @@ const Home = () => {
       {/* CTA Section */}
       <section className="py-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <Motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -787,7 +784,7 @@ const Home = () => {
               </Link>
               <p className="mt-6 text-sm text-slate-400">Setup takes only 2 minutes. Start connecting today.</p>
             </div>
-          </motion.div>
+          </Motion.div>
         </div>
       </section>
     </div>

@@ -118,7 +118,7 @@ const Sidebar = ({
         )}
       </div>
 
-      <nav className={`min-h-0 flex-1 space-y-1 py-4 ${mobile || !isCollapsed ? 'overflow-y-auto px-3' : 'overflow-visible px-2'}`}>
+      <nav className={`admin-sidebar-nav min-h-0 flex-1 space-y-1 py-4 ${mobile || !isCollapsed ? 'overflow-y-auto px-3' : 'overflow-visible px-2'}`}>
         {navItems.map(({ label, path, icon: Icon }) => {
           const active = location.pathname === path;
           return (

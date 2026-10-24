@@ -1,6 +1,6 @@
 import { createElement, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   BrainCircuit,
   Eye,
@@ -25,6 +25,7 @@ const Login = () => {
   const [error, setError] = useState('');
 
   const { login } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -43,7 +44,14 @@ const Login = () => {
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      navigate('/dashboard');
+      const destination = location.state?.from;
+      const redirectPath = typeof destination === 'string'
+        ? destination
+        : `${destination?.pathname || ''}${destination?.search || ''}${destination?.hash || ''}`;
+      navigate(
+        redirectPath.startsWith('/') && !redirectPath.startsWith('//') ? redirectPath : '/dashboard',
+        { replace: true }
+      );
     } else {
       setError(result.message);
     }

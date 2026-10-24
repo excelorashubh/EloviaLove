@@ -1,95 +1,91 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import api from './services/api';
-import Home from './pages/Home';
-import About from './pages/About';
-import Blog from './pages/Blog';
-import BlogPost from './pages/BlogPost';
-import Contact from './pages/Contact';
-import Discover from './pages/Discover';
-import CityPage from './pages/CityPage';
-import DatingInIndiaPage from './pages/DatingInIndiaPage';
-import DatingInDelhiPage from './pages/DatingInDelhiPage';
-import DatingInMumbaiPage from './pages/DatingInMumbaiPage';
-import DatingInBangalorePage from './pages/DatingInBangalorePage';
-import DatingInKolkataPage from './pages/DatingInKolkataPage';
-import DatingInRanchiPage from './pages/DatingInRanchiPage';
-import Hyderabad from './pages/cities/Hyderabad';
-import Chennai from './pages/cities/Chennai';
-import London from './pages/cities/London';
-import NewYork from './pages/cities/NewYork';
-import Toronto from './pages/cities/Toronto';
-import Sydney from './pages/cities/Sydney';
-import Dubai from './pages/cities/Dubai';
-import Singapore from './pages/cities/Singapore';
-import UnitedStates from './pages/countries/UnitedStates';
-import Canada from './pages/countries/Canada';
-import UnitedKingdom from './pages/countries/UnitedKingdom';
-import Australia from './pages/countries/Australia';
-import UnitedArabEmirates from './pages/countries/UnitedArabEmirates';
-import SingaporeCountry from './pages/countries/Singapore';
-import Germany from './pages/countries/Germany';
-import France from './pages/countries/France';
-import Japan from './pages/countries/Japan';
-import Brazil from './pages/countries/Brazil';
-import Mexico from './pages/countries/Mexico';
-import Nepal from './pages/countries/Nepal';
-import Bangladesh from './pages/countries/Bangladesh';
-import Malaysia from './pages/countries/Malaysia';
-import SouthAfrica from './pages/countries/SouthAfrica';
-import Dashboard from './pages/Dashboard';
-import NotFound from './pages/NotFound';
-
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Profile from './pages/Profile';
-import Notifications from './pages/Notifications';
-import Chats from './pages/Chats';
-import Chat from './pages/Chat';
-import Matches from './pages/Matches';
-import ProfileEdit from './pages/ProfileEdit';
-import Settings from './pages/Settings';
-import SalesmanSection from './pages/salesman/SalesmanSection';
-import FAQ from './pages/FAQ';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsOfService from './pages/TermsOfService';
-import SafetyHub from './pages/SafetyHub';
-import RefundPolicy from './pages/RefundPolicy';
-import ReportAbuse from './pages/ReportAbuse';
-import VerificationGuide from './pages/VerificationGuide';
-import Pricing from './pages/Pricing';
-import SubscriptionSuccess from './pages/SubscriptionSuccess';
-import RandomVideoPage from './pages/RandomVideo';
-
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminMatches from './pages/admin/AdminMatches';
-import AdminChats from './pages/admin/AdminChats';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminReports from './pages/admin/AdminReports';
-import AdminRevenue from './pages/admin/AdminRevenue';
-import AdminAnalytics from './pages/admin/AdminAnalytics';
-import AdminVisitors from './pages/admin/AdminVisitors';
-import AdminPlans from './pages/admin/AdminPlans';
-import AdminBlog from './pages/admin/AdminBlog';
-import AdminAds from './pages/admin/AdminAds';
-import AdminContactMessages from './pages/admin/AdminContactMessages';
-import RandomVideoMonitor from './pages/admin/RandomVideoMonitor';
-
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
-
 import GlobalNavbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
-import { VideoCallProvider } from './context/VideoCallContext';
+import { VideoCallProvider, useVideoCall } from './context/VideoCallContext';
 import CookieConsent from './components/CookieConsent';
 import AdInitializer from './components/ads/AdInitializer';
-import IncomingCallModal from './components/videocall/IncomingCallModal';
-import OutgoingCallScreen from './components/videocall/OutgoingCallScreen';
-import VideoCallScreen from './components/videocall/VideoCallScreen';
-import { useVideoCall } from './context/VideoCallContext';
+
+const Home = lazy(() => import('./pages/Home'));
+const About = lazy(() => import('./pages/About'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Discover = lazy(() => import('./pages/Discover'));
+const CityPage = lazy(() => import('./pages/CityPage'));
+const DatingInIndiaPage = lazy(() => import('./pages/DatingInIndiaPage'));
+const DatingInDelhiPage = lazy(() => import('./pages/DatingInDelhiPage'));
+const DatingInMumbaiPage = lazy(() => import('./pages/DatingInMumbaiPage'));
+const DatingInBangalorePage = lazy(() => import('./pages/DatingInBangalorePage'));
+const DatingInKolkataPage = lazy(() => import('./pages/DatingInKolkataPage'));
+const DatingInRanchiPage = lazy(() => import('./pages/DatingInRanchiPage'));
+const Hyderabad = lazy(() => import('./pages/cities/Hyderabad'));
+const Chennai = lazy(() => import('./pages/cities/Chennai'));
+const London = lazy(() => import('./pages/cities/London'));
+const NewYork = lazy(() => import('./pages/cities/NewYork'));
+const Toronto = lazy(() => import('./pages/cities/Toronto'));
+const Sydney = lazy(() => import('./pages/cities/Sydney'));
+const Dubai = lazy(() => import('./pages/cities/Dubai'));
+const Singapore = lazy(() => import('./pages/cities/Singapore'));
+const UnitedStates = lazy(() => import('./pages/countries/UnitedStates'));
+const Canada = lazy(() => import('./pages/countries/Canada'));
+const UnitedKingdom = lazy(() => import('./pages/countries/UnitedKingdom'));
+const Australia = lazy(() => import('./pages/countries/Australia'));
+const UnitedArabEmirates = lazy(() => import('./pages/countries/UnitedArabEmirates'));
+const SingaporeCountry = lazy(() => import('./pages/countries/Singapore'));
+const Germany = lazy(() => import('./pages/countries/Germany'));
+const France = lazy(() => import('./pages/countries/France'));
+const Japan = lazy(() => import('./pages/countries/Japan'));
+const Brazil = lazy(() => import('./pages/countries/Brazil'));
+const Mexico = lazy(() => import('./pages/countries/Mexico'));
+const Nepal = lazy(() => import('./pages/countries/Nepal'));
+const Bangladesh = lazy(() => import('./pages/countries/Bangladesh'));
+const Malaysia = lazy(() => import('./pages/countries/Malaysia'));
+const SouthAfrica = lazy(() => import('./pages/countries/SouthAfrica'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Chats = lazy(() => import('./pages/Chats'));
+const Chat = lazy(() => import('./pages/Chat'));
+const Matches = lazy(() => import('./pages/Matches'));
+const ProfileEdit = lazy(() => import('./pages/ProfileEdit'));
+const Settings = lazy(() => import('./pages/Settings'));
+const SalesmanSection = lazy(() => import('./pages/salesman/SalesmanSection'));
+const FAQ = lazy(() => import('./pages/FAQ'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const SafetyHub = lazy(() => import('./pages/SafetyHub'));
+const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
+const ReportAbuse = lazy(() => import('./pages/ReportAbuse'));
+const VerificationGuide = lazy(() => import('./pages/VerificationGuide'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const SubscriptionSuccess = lazy(() => import('./pages/SubscriptionSuccess'));
+const RandomVideoPage = lazy(() => import('./pages/RandomVideo'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminMatches = lazy(() => import('./pages/admin/AdminMatches'));
+const AdminChats = lazy(() => import('./pages/admin/AdminChats'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
+const AdminRevenue = lazy(() => import('./pages/admin/AdminRevenue'));
+const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
+const AdminVisitors = lazy(() => import('./pages/admin/AdminVisitors'));
+const AdminPlans = lazy(() => import('./pages/admin/AdminPlans'));
+const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'));
+const AdminAds = lazy(() => import('./pages/admin/AdminAds'));
+const AdminContactMessages = lazy(() => import('./pages/admin/AdminContactMessages'));
+const RandomVideoMonitor = lazy(() => import('./pages/admin/RandomVideoMonitor'));
+const IncomingCallModal = lazy(() => import('./components/videocall/IncomingCallModal'));
+const OutgoingCallScreen = lazy(() => import('./components/videocall/OutgoingCallScreen'));
+const VideoCallScreen = lazy(() => import('./components/videocall/VideoCallScreen'));
 
 const VISITOR_ID_KEY = 'elovia_visitor_id';
 
@@ -237,7 +233,9 @@ function AppContent() {
       {!hideGlobalNavbar && <GlobalNavbar />}
       
       {/* Global Video Call Handler */}
-      <VideoCallHandler />
+      <Suspense fallback={null}>
+        <VideoCallHandler />
+      </Suspense>
 
       <main
         className={isChatPage
@@ -250,6 +248,7 @@ function AppContent() {
           paddingTop: `${chatNavbarHeight}px`,
         } : undefined}
       >
+        <Suspense fallback={<div className="flex min-h-[50vh] items-center justify-center" role="status">Loading page...</div>}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
@@ -257,7 +256,7 @@ function AppContent() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/discover" element={<Discover />} />
+          <Route path="/discover" element={<ProtectedRoute><Discover /></ProtectedRoute>} />
           <Route path="/dating-in-india" element={<DatingInIndiaPage />} />
           <Route path="/dating-in-delhi" element={<DatingInDelhiPage />} />
           <Route path="/dating-in-mumbai" element={<DatingInMumbaiPage />} />
@@ -500,6 +499,7 @@ function AppContent() {
           {/* 404 MUST BE LAST */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </main>
 
       {!hideChatInterface && !hideFooter && <Footer />}
