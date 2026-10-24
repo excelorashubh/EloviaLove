@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Search, UserCheck, UserX, Trash2, ShieldCheck, ChevronLeft, ChevronRight, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Search, UserCheck, UserX, Trash2, ShieldCheck, ChevronLeft, ChevronRight, Clock, CheckCircle2, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import VerifiedBadge from '../../components/ui/VerifiedBadge';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../services/api';
@@ -226,13 +226,22 @@ const AdminUsers = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [pendingCount, setPendingCount] = useState(0);
+  const [loadError, setLoadError] = useState('');
   const fetchUsers = useCallback(async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const res = await api.get(`/admin/users?page=${page}`);
-      setUsers(res.data.users);
+      const refreshedUsers = res.data.users || [];
+      setUsers(refreshedUsers);
       setPagination(res.data.pagination);
-    } catch (e) { console.error(e); }
+      setSelectedUser((selected) => selected
+        ? refreshedUsers.find((user) => user._id === selected._id) || selected
+        : null);
+    } catch (e) {
+      console.error(e);
+      setLoadError(e.response?.data?.message || 'Unable to refresh users. Please try again.');
+    }
     finally { setLoading(false); }
   }, [page]);
 
@@ -291,7 +300,24 @@ const AdminUsers = () => {
             <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
             <p className="text-slate-500 text-sm mt-1">{pagination.total || 0} total users</p>
           </div>
+          {tab === 'users' && (
+            <button
+              type="button"
+              onClick={fetchUsers}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:border-primary-300 hover:text-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+              Refresh users
+            </button>
+          )}
         </div>
+        {loadError && (
+          <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <span>{loadError}</span>
+            <button type="button" onClick={fetchUsers} disabled={loading} className="font-semibold underline disabled:opacity-50">Try again</button>
+          </div>
+        )}
 
         {/* Tabs */}
           <div className="flex gap-1 bg-slate-100 p-1 rounded-2xl w-fit">

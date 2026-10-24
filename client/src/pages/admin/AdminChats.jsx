@@ -187,6 +187,7 @@ const AdminChats = () => {
   const analyticsKey = `${reload}:${days}`;
   const analytics = analyticsResult.key === analyticsKey ? analyticsResult.data : null;
   const analyticsError = analyticsResult.key === analyticsKey ? analyticsResult.error : '';
+  const refreshing = summaryResult.key !== summaryKey || !listCurrent || analyticsResult.key !== analyticsKey;
   const retry = () => setReload((value) => value + 1);
   const filterChange = (setter, value) => { setter(value); setPage(1); };
 
@@ -250,7 +251,7 @@ const AdminChats = () => {
       <div className="space-y-6">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div><h1 className="text-2xl font-bold text-slate-900">Chat Tracking</h1><p className="mt-1 text-sm text-slate-500">Monitor conversations, messaging activity, and chat engagement across Elovia Love.</p></div>
-          <button type="button" onClick={retry} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600"><RefreshCw size={15} />Refresh tracking</button>
+          <button type="button" onClick={retry} disabled={refreshing} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-50"><RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />Refresh tracking</button>
         </header>
         {summaryError && <ErrorBanner message={summaryError} onRetry={retry} />}
         <section aria-label="Chat summary" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

@@ -414,6 +414,7 @@ const AdminMatches = () => {
     ? listResult.pagination
     : { page, limit, total: 0, pages: 0 };
   const loading = !isCurrentList;
+  const refreshing = summaryResult.key !== reload || loading;
   const listError = isCurrentList ? listResult.error : '';
 
   useEffect(() => {
@@ -501,8 +502,8 @@ const AdminMatches = () => {
               <h1 className="text-2xl font-bold text-slate-900">Match Tracking</h1>
               <p className="mt-1 text-sm text-slate-500">Monitor, investigate, and analyze platform matches.</p>
             </div>
-            <button type="button" onClick={refresh} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600">
-              <RefreshCw size={15} /> Refresh tracking
+            <button type="button" onClick={refresh} disabled={refreshing} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-50">
+              <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} /> Refresh tracking
             </button>
           </div>
         </header>
