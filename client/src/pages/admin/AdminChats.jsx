@@ -59,62 +59,103 @@ const StatCard = ({ icon, label, value, note, color }) => (
   </div>
 );
 
-const DetailModal = ({ id, close }) => {
+const DetailModal = ({ id, close, refreshKey }) => {
   const [retry, setRetry] = useState(0);
-  const [result, setResult] = useState({ key: '', conversation: null, error: '' });
-  const key = `${id}:${retry}`;
+  const [messagePage, setMessagePage] = useState(1);
+  const [result, setResult] = useState({ key: '', conversation: null, messages: [], pagination: null, error: '' });
+  const key = `${id}:${retry}:${refreshKey}:${messagePage}`;
   const loading = result.key !== key;
   const conversation = result.key === key ? result.conversation : null;
+  const messages = result.key === key ? result.messages : [];
+  const pagination = result.key === key ? result.pagination : null;
   const error = result.key === key ? result.error : '';
 
   useEffect(() => {
     const controller = new AbortController();
-    api.get(`/admin/chats/${id}`, { signal: controller.signal })
-      .then((response) => setResult({ key, conversation: response.data.conversation, error: '' }))
+    Promise.all([
+      api.get(`/admin/chats/${id}`, { signal: controller.signal }),
+      api.get(`/admin/chats/${id}/messages`, {
+        signal: controller.signal,
+        params: { page: messagePage, limit: 50 },
+      }),
+    ])
+      .then(([conversationResponse, messagesResponse]) => setResult({
+        key,
+        conversation: conversationResponse.data.conversation,
+        messages: messagesResponse.data.messages || [],
+        pagination: messagesResponse.data.pagination,
+        error: '',
+      }))
       .catch((requestError) => {
         if (!controller.signal.aborted) setResult({
           key,
           conversation: null,
+          messages: [],
+          pagination: null,
           error: requestError.response?.data?.message || 'Unable to load conversation details.',
         });
       });
     return () => controller.abort();
-  }, [id, key]);
+  }, [id, key, messagePage]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-      <section role="dialog" aria-modal="true" aria-labelledby="chat-detail-heading" className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-xl sm:p-6">
-        <header className="mb-5 flex items-start justify-between gap-4">
+    <div className="fixed inset-0 z-50 bg-black/40" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="chat-detail-heading" className="absolute inset-y-0 right-0 flex w-full max-w-2xl flex-col overflow-hidden border-l border-slate-200 bg-white shadow-2xl">
+        <header className="flex items-start justify-between gap-4 border-b border-slate-200 p-5 sm:p-6">
           <div>
-            <h2 id="chat-detail-heading" className="text-xl font-bold text-slate-900">Conversation Details</h2>
+            <h2 id="chat-detail-heading" className="text-xl font-bold text-slate-900">Conversation</h2>
             <p className="mt-1 break-all font-mono text-xs text-slate-500">{id}</p>
           </div>
-          <button type="button" onClick={close} aria-label="Close details" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><X size={19} /></button>
+          <div className="flex items-center gap-1">
+            <button type="button" onClick={() => setRetry((value) => value + 1)} aria-label="Refresh conversation" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><RefreshCw size={17} /></button>
+            <button type="button" onClick={close} aria-label="Close details" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><X size={19} /></button>
+          </div>
         </header>
-        {loading ? <div className="space-y-3 animate-pulse"><div className="h-20 rounded-xl bg-slate-100" /><div className="h-20 rounded-xl bg-slate-100" /></div>
-          : error ? <ErrorBanner message={error} onRetry={() => setRetry((value) => value + 1)} />
+        {loading ? <div className="space-y-3 p-5 animate-pulse"><div className="h-20 rounded-xl bg-slate-100" /><div className="h-20 rounded-xl bg-slate-100" /><div className="h-48 rounded-xl bg-slate-100" /></div>
+          : error ? <div className="p-5"><ErrorBanner message={error} onRetry={() => setRetry((value) => value + 1)} /></div>
             : conversation && (
-              <div className="space-y-5">
-                <dl className="grid gap-4 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
-                  <div><dt className="text-xs uppercase tracking-wide text-slate-500">Conversation created</dt><dd className="mt-1 text-sm font-semibold text-slate-900">{formatDate(conversation.createdAt)}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-slate-500">Last activity</dt><dd className="mt-1 text-sm font-semibold text-slate-900">{formatDate(conversation.lastActivity)}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-slate-500">Messages persisted</dt><dd className="mt-1 text-sm font-semibold text-slate-900">{conversation.messageCount}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-slate-500">Unread messages</dt><dd className="mt-1 text-sm font-semibold text-slate-900">{conversation.unreadCount}</dd></div>
-                  <div><dt className="text-xs uppercase tracking-wide text-slate-500">Conversation activity</dt><dd className="mt-1 text-sm font-semibold capitalize text-slate-900">{conversation.status}</dd></div>
-                </dl>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {(conversation.participants || []).map((user, index) => (
-                    <article key={user?._id || `user-${index}`} className="flex items-center gap-3 rounded-xl border border-slate-200 p-4">
-                      <Avatar user={user} />
-                      <div className="min-w-0"><p className="truncate font-semibold text-slate-900">{user?.name || 'Unavailable user'}</p><p className="mt-1 text-xs text-slate-500">{!user ? 'No longer registered' : user.isActive === false ? 'Account inactive' : 'Account active'}</p></div>
-                    </article>
-                  ))}
+              <>
+                <div className="shrink-0 space-y-4 border-b border-slate-200 p-5">
+                  <div className="flex flex-wrap gap-3">
+                    {(conversation.participants || []).map((user, index) => (
+                      <div key={user?._id || `user-${index}`} className="flex min-w-0 items-center gap-2">
+                        <Avatar user={user} />
+                        <div className="min-w-0"><p className="max-w-36 truncate text-sm font-semibold text-slate-900">{user?.name || 'Unavailable user'}</p><p className="text-xs text-slate-500">{!user ? 'Deleted' : user.isActive === false ? 'Inactive' : 'Active'}</p></div>
+                      </div>
+                    ))}
+                  </div>
+                  <dl className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-3">
+                    <div><dt className="text-slate-500">Created</dt><dd className="mt-1 font-medium text-slate-800">{formatDate(conversation.createdAt)}</dd></div>
+                    <div><dt className="text-slate-500">Last activity</dt><dd className="mt-1 font-medium text-slate-800">{formatDate(conversation.lastActivity)}</dd></div>
+                    <div><dt className="text-slate-500">Availability</dt><dd className="mt-1 font-medium capitalize text-slate-800">{conversation.status}</dd></div>
+                    <div><dt className="text-slate-500">Messages</dt><dd className="mt-1 font-medium text-slate-800">{conversation.messageCount}</dd></div>
+                    <div><dt className="text-slate-500">Unread</dt><dd className="mt-1 font-medium text-slate-800">{conversation.unreadCount}</dd></div>
+                  </dl>
                 </div>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs text-slate-500">Message bodies are never included in Chat Tracking. Conversations are represented by existing match records.</p>
-                  <Link to="/admin/matches" onClick={close} className="text-sm font-semibold text-primary-700 hover:underline">View match records</Link>
+                <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4" aria-live="polite">
+                  {messages.length === 0 ? <p className="py-12 text-center text-sm text-slate-500">No messages in this conversation yet</p> : messages.map((message) => {
+                    const senderId = message.sender?._id || message.sender;
+                    const outgoing = String(senderId) === String(conversation.participants?.[0]?._id);
+                    return (
+                      <article key={message._id} className={`flex ${outgoing ? 'justify-start' : 'justify-end'}`}>
+                        <div className={`max-w-[85%] rounded-2xl px-3 py-2 shadow-sm ${outgoing ? 'rounded-tl-sm bg-white' : 'rounded-tr-sm bg-primary-50'}`}>
+                          <div className="mb-1 flex items-center gap-2"><Avatar user={message.sender && typeof message.sender === 'object' ? message.sender : null} /><span className="text-xs font-semibold text-slate-700">{message.sender?.name || 'Unavailable user'}</span></div>
+                          {message.messageType === 'image' ? <img src={message.content} alt="Message attachment" className="max-h-64 max-w-full rounded-lg object-contain" /> : <p className="whitespace-pre-wrap break-words text-sm text-slate-800">{message.content}</p>}
+                          <p className="mt-1 text-right text-[10px] text-slate-500">{formatDate(message.createdAt)} · {message.isRead ? 'Read' : 'Unread'}</p>
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
-              </div>
+                <footer className="flex shrink-0 items-center justify-between border-t border-slate-200 px-4 py-3">
+                  <span className="text-xs text-slate-500">{pagination?.total || 0} messages · Page {pagination?.page || 1} of {Math.max(pagination?.pages || 0, 1)}</span>
+                  <div className="flex gap-2">
+                    <button type="button" disabled={!pagination || messagePage <= 1} onClick={() => setMessagePage((value) => Math.max(1, value - 1))} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs disabled:opacity-40">Earlier</button>
+                    <button type="button" disabled={!pagination || messagePage >= pagination.pages} onClick={() => setMessagePage((value) => value + 1)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs disabled:opacity-40">Later</button>
+                    <Link to="/admin/matches" onClick={close} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary-700 hover:bg-primary-50">Matches</Link>
+                  </div>
+                </footer>
+              </>
             )}
       </section>
     </div>
@@ -207,10 +248,13 @@ const AdminChats = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <header><h1 className="text-2xl font-bold text-slate-900">Chat Tracking</h1><p className="mt-1 text-sm text-slate-500">Monitor conversations, messaging activity, and chat engagement across Elovia Love.</p></header>
+        <header className="flex flex-wrap items-start justify-between gap-3">
+          <div><h1 className="text-2xl font-bold text-slate-900">Chat Tracking</h1><p className="mt-1 text-sm text-slate-500">Monitor conversations, messaging activity, and chat engagement across Elovia Love.</p></div>
+          <button type="button" onClick={retry} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600"><RefreshCw size={15} />Refresh tracking</button>
+        </header>
         {summaryError && <ErrorBanner message={summaryError} onRetry={retry} />}
         <section aria-label="Chat summary" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {metrics.map(([label, value, icon, color]) => <StatCard key={label} label={label} value={summaryError ? '—' : summaryResult.key !== summaryKey ? '—' : value} icon={icon} color={color} note={label === 'Active Chatters' ? `Unique senders/recipients, last ${summary.activeChattersPeriodDays} days` : undefined} />)}
+          {metrics.map(([label, value, icon, color]) => <StatCard key={label} label={label} value={summaryError ? '—' : summaryResult.key !== summaryKey ? '—' : value} icon={icon} color={color} note={label === 'Active Chatters' ? `Unique senders/recipients, last ${summary.activeChattersPeriodDays} days` : label === 'Total Messages' ? 'Messages in recorded conversations' : undefined} />)}
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
@@ -259,12 +303,12 @@ const AdminChats = () => {
                 : <div className="overflow-x-auto"><table className="w-full min-w-[950px] text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-4 py-3">Conversation ID</th><th className="px-4 py-3">Participants</th><th className="px-4 py-3">Created</th><th className="px-4 py-3">Last activity</th><th className="px-4 py-3">Messages</th><th className="px-4 py-3">Unread</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Actions</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">{listResult.rows.map((conversation) => (
-                    <tr key={conversation._id} className="hover:bg-slate-50">
+                    <tr key={conversation._id} tabIndex={0} role="button" aria-label={`View conversation ${conversation._id}`} onClick={() => setSelectedId(conversation._id)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedId(conversation._id); } }} className="cursor-pointer hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500">
                       <td className="px-4 py-3 font-mono text-xs text-slate-600" title={conversation._id}>{conversation._id.slice(-8)}</td>
                       <td className="px-4 py-3"><div className="flex min-w-64 items-center gap-3">{(conversation.participants || []).map((user, index) => <div key={user?._id || `participant-${index}`} className="flex min-w-0 items-center gap-2">{index > 0 && <span className="text-slate-400">&amp;</span>}<Avatar user={user} /><span className="max-w-28 truncate font-medium text-slate-800">{user?.name || 'Unavailable user'}</span></div>)}</div></td>
                       <td className="whitespace-nowrap px-4 py-3 text-slate-600">{formatDate(conversation.createdAt)}</td><td className="whitespace-nowrap px-4 py-3 text-slate-600">{formatDate(conversation.lastActivity)}</td><td className="px-4 py-3 text-slate-700">{conversation.messageCount}</td><td className="px-4 py-3 text-slate-700">{conversation.unreadCount}</td>
                       <td className="px-4 py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${conversation.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{conversation.status}</span></td>
-                      <td className="px-4 py-3 text-right"><button type="button" onClick={() => setSelectedId(conversation._id)} className="rounded-lg px-3 py-2 text-xs font-semibold text-primary-700 hover:bg-primary-50">View Details</button></td>
+                      <td className="px-4 py-3 text-right"><button type="button" onClick={(event) => { event.stopPropagation(); setSelectedId(conversation._id); }} className="rounded-lg px-3 py-2 text-xs font-semibold text-primary-700 hover:bg-primary-50">View Details</button></td>
                     </tr>
                   ))}</tbody>
                 </table></div>}
@@ -274,7 +318,7 @@ const AdminChats = () => {
           </footer>
         </section>
       </div>
-      {selectedId && <DetailModal id={selectedId} close={() => setSelectedId(null)} />}
+      {selectedId && <DetailModal key={selectedId} id={selectedId} close={() => setSelectedId(null)} refreshKey={reload} />}
     </AdminLayout>
   );
 };

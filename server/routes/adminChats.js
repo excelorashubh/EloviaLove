@@ -57,6 +57,47 @@ const pairMessageLookup = (additionalStages = []) => ({
   },
 });
 
+const conversationMessageSummary = (now, todayStart) => [
+  {
+    $lookup: {
+      from: Match.collection.name,
+      let: { sender: '$sender', receiver: '$receiver' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $in: ['$$sender', { $ifNull: ['$users', []] }] },
+                { $in: ['$$receiver', { $ifNull: ['$users', []] }] },
+              ],
+            },
+          },
+        },
+        { $limit: 1 },
+        { $project: { _id: 1 } },
+      ],
+      as: 'conversation',
+    },
+  },
+  { $match: { conversation: { $ne: [] } } },
+  {
+    $group: {
+      _id: null,
+      totalMessages: { $sum: 1 },
+      unreadMessages: { $sum: { $cond: [{ $eq: ['$isRead', false] }, 1, 0] } },
+      messagesToday: {
+        $sum: {
+          $cond: [
+            { $and: [{ $gte: ['$createdAt', todayStart] }, { $lte: ['$createdAt', now] }] },
+            1,
+            0,
+          ],
+        },
+      },
+    },
+  },
+];
+
 const conversationStages = () => [
   {
     $lookup: {
@@ -147,17 +188,13 @@ router.get('/summary', async (req, res) => {
     const [
       totalConversations,
       todayChats,
-      totalMessages,
-      messagesToday,
-      unreadMessages,
+      messageSummary,
       activeConversations,
       activeChatters,
     ] = await Promise.all([
       Match.countDocuments(),
       Match.countDocuments({ createdAt: { $gte: todayStart, $lte: now } }),
-      Message.countDocuments(),
-      Message.countDocuments({ createdAt: { $gte: todayStart, $lte: now } }),
-      Message.countDocuments({ isRead: false }),
+      Message.aggregate(conversationMessageSummary(now, todayStart)),
       Match.aggregate([
         pairMessageLookup([{ $match: { createdAt: { $gte: activityStart } } }, { $limit: 1 }]),
         { $match: { conversationMessages: { $ne: [] } } },
@@ -171,6 +208,9 @@ router.get('/summary', async (req, res) => {
         { $count: 'total' },
       ]),
     ]);
+    const totalMessages = messageSummary[0]?.totalMessages || 0;
+    const messagesToday = messageSummary[0]?.messagesToday || 0;
+    const unreadMessages = messageSummary[0]?.unreadMessages || 0;
     const activeCount = activeConversations[0]?.total || 0;
     const chatterCount = activeChatters[0]?.total || 0;
     return res.json({
@@ -381,6 +421,60 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     console.error('Get admin chat details error:', error);
     return res.status(500).json({ success: false, message: 'Unable to load conversation details' });
+  }
+});
+
+router.get('/:id/messages', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!OBJECT_ID_PATTERN.test(id) || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid conversation ID' });
+    }
+    const page = parseInteger(req.query.page, 1, 10000);
+    const limit = parseInteger(req.query.limit, 50, 100);
+    if (page === null || limit === null) {
+      return res.status(400).json({ success: false, message: 'Invalid pagination parameters' });
+    }
+
+    const [conversation] = await Match.find({ _id: new mongoose.Types.ObjectId(id) })
+      .select('_id users')
+      .limit(1)
+      .lean();
+    if (!conversation) return res.status(404).json({ success: false, message: 'Conversation not found' });
+    if (!Array.isArray(conversation.users) || conversation.users.length !== 2) {
+      return res.status(200).json({
+        success: true,
+        messages: [],
+        pagination: { page, limit, total: 0, pages: 0 },
+      });
+    }
+
+    const messageFilter = {
+      $or: [
+        { sender: conversation.users[0], receiver: conversation.users[1] },
+        { sender: conversation.users[1], receiver: conversation.users[0] },
+      ],
+    };
+    const [messages, total] = await Promise.all([
+      Message.find(messageFilter)
+        .select('_id sender receiver content messageType isRead readAt createdAt')
+        .populate('sender', 'name profilePhoto')
+        .populate('receiver', 'name profilePhoto')
+        .sort({ createdAt: 1, _id: 1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      Message.countDocuments(messageFilter),
+    ]);
+
+    return res.json({
+      success: true,
+      messages,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    console.error('Get admin chat messages error:', error);
+    return res.status(500).json({ success: false, message: 'Unable to load conversation messages' });
   }
 });
 

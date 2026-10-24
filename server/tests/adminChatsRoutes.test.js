@@ -16,12 +16,14 @@ jest.mock('../models/Match', () => ({
   collection: { name: 'matches' },
   countDocuments: jest.fn(),
   aggregate: jest.fn(),
+  find: jest.fn(),
 }));
 
 jest.mock('../models/Message', () => ({
   collection: { name: 'messages' },
   countDocuments: jest.fn(),
   aggregate: jest.fn(),
+  find: jest.fn(),
 }));
 
 jest.mock('../models/User', () => ({
@@ -57,9 +59,10 @@ describe('admin chat tracking routes', () => {
 
   it('calculates summary statistics from matches and persisted message records', async () => {
     Match.countDocuments.mockResolvedValueOnce(4).mockResolvedValueOnce(1);
-    Message.countDocuments.mockResolvedValueOnce(20).mockResolvedValueOnce(3).mockResolvedValueOnce(5);
     Match.aggregate.mockResolvedValue([{ total: 2 }]);
-    Message.aggregate.mockResolvedValue([{ total: 3 }]);
+    Message.aggregate
+      .mockResolvedValueOnce([{ totalMessages: 20, messagesToday: 3, unreadMessages: 5 }])
+      .mockResolvedValueOnce([{ total: 3 }]);
 
     const response = await fetch(`${baseUrl}/summary`);
     const body = await response.json();
@@ -76,6 +79,9 @@ describe('admin chat tracking routes', () => {
       activeChattersPeriodDays: 30,
       averageMessagesPerConversation: 5,
     });
+    const messageSummaryPipeline = Message.aggregate.mock.calls[0][0];
+    expect(JSON.stringify(messageSummaryPipeline)).toContain('"totalMessages"');
+    expect(JSON.stringify(messageSummaryPipeline)).toContain('"$isRead"');
   });
 
   it('returns metadata-only conversation rows with server pagination', async () => {
@@ -133,5 +139,48 @@ describe('admin chat tracking routes', () => {
     expect(body.conversation.messageCount).toBe(5);
     expect(JSON.stringify(body)).not.toContain('must not be returned');
     expect(JSON.stringify(Match.aggregate.mock.calls[0][0])).not.toContain('content');
+  });
+
+  it('returns paginated chronological messages without changing read state', async () => {
+    Match.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([{
+        _id: '64b000000000000000000099',
+        users: ['64b000000000000000000011', '64b000000000000000000012'],
+      }]),
+    });
+    const messageQuery = {
+      select: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([{ _id: 'message-id', content: 'Hello', isRead: false }]),
+    };
+    Message.find.mockReturnValue(messageQuery);
+    Message.countDocuments.mockResolvedValue(1);
+
+    const response = await fetch(`${baseUrl}/64b000000000000000000099/messages?page=1&limit=10`);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.messages).toEqual([{ _id: 'message-id', content: 'Hello', isRead: false }]);
+    expect(body.pagination).toEqual({ page: 1, limit: 10, total: 1, pages: 1 });
+    expect(messageQuery.sort).toHaveBeenCalledWith({ createdAt: 1, _id: 1 });
+    expect(Message.countDocuments).toHaveBeenCalledWith({
+      $or: [
+        { sender: '64b000000000000000000011', receiver: '64b000000000000000000012' },
+        { sender: '64b000000000000000000012', receiver: '64b000000000000000000011' },
+      ],
+    });
+  });
+
+  it('rejects invalid message pagination before querying messages', async () => {
+    const response = await fetch(`${baseUrl}/64b000000000000000000099/messages?limit=0`);
+
+    expect(response.status).toBe(400);
+    expect(Match.find).not.toHaveBeenCalled();
+    expect(Message.find).not.toHaveBeenCalled();
   });
 });
