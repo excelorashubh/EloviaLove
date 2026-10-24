@@ -185,8 +185,9 @@ function AppContent() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/register';
   const isDiscoverPage = location.pathname === '/discover' || location.pathname.startsWith('/discover/');
   const isDashboardPage = location.pathname === '/dashboard' || location.pathname.startsWith('/dashboard/');
-  const hideGlobalNavbar = location.pathname.startsWith('/admin') || isAuthPage;
-  const hideFooter = location.pathname.startsWith('/admin') || isAuthPage || isDiscoverPage || isDashboardPage;
+  const isAdminPage = location.pathname.startsWith('/admin');
+  const hideGlobalNavbar = isAdminPage || isAuthPage;
+  const hideFooter = isAdminPage || isAuthPage || isDiscoverPage || isDashboardPage;
   const hideChatInterface = location.pathname === '/chats' || location.pathname.startsWith('/chat/');
   const [chatNavbarHeight, setChatNavbarHeight] = useState(80);
   const [chatViewportHeight, setChatViewportHeight] = useState(() => (
@@ -241,7 +242,9 @@ function AppContent() {
       <main
         className={isChatPage
           ? 'box-border min-h-0 overflow-hidden'
-          : `min-h-screen ${!hideGlobalNavbar ? 'pt-20' : ''}`}
+          : isAdminPage
+            ? 'h-screen h-dvh overflow-hidden'
+            : `min-h-screen ${!hideGlobalNavbar ? 'pt-20' : ''}`}
         style={isChatPage ? {
           height: `${chatViewportHeight}px`,
           paddingTop: `${chatNavbarHeight}px`,

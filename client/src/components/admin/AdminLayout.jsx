@@ -19,12 +19,20 @@ const AdminLayout = ({ children }) => {
     window.localStorage.setItem(ADMIN_THEME_KEY, theme);
   }, [theme]);
 
+  useLayoutEffect(() => {
+    const previousOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.documentElement.style.overflow = previousOverflow;
+    };
+  }, []);
+
   useEffect(() => {
     window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
   return (
-    <div className="admin-theme flex h-screen overflow-hidden bg-white text-slate-900 dark:bg-black dark:text-white">
+    <div className="admin-theme flex h-screen h-dvh overflow-hidden bg-white text-slate-900 dark:bg-black dark:text-white">
       {/* Desktop sidebar */}
       <div className="hidden h-full shrink-0 md:flex">
         <Sidebar
@@ -51,7 +59,7 @@ const AdminLayout = ({ children }) => {
       )}
 
       {/* Main content */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         {/* Top bar (mobile) */}
         <header className="flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 text-slate-900 dark:border-white/30 dark:bg-black dark:text-white md:hidden">
           <button onClick={() => setSidebarOpen(true)} className="p-1 text-slate-600 dark:text-white/60">
@@ -60,7 +68,7 @@ const AdminLayout = ({ children }) => {
           <span className="font-bold">Admin Panel</span>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto bg-white p-6 dark:bg-black">
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-white p-6 dark:bg-black">
           {children}
         </main>
       </div>
