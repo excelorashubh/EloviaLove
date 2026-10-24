@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import {
   Eye, Users, UserCheck, UserPlus, Smartphone, Monitor,
-  RefreshCw, Globe, Tablet, ChevronLeft, ChevronRight, X,
+  RefreshCw, Globe, Tablet, ChevronLeft, ChevronRight, Copy, X,
 } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../services/api';
@@ -45,6 +45,7 @@ const PAGE_OPTS = [
 const toISO = (d) => d ? new Date(d).toISOString().split('T')[0] : '';
 
 const PIE_COLORS = ['#e879a0', '#818cf8'];
+const VISIT_PAGE_SIZE = 20;
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, sub, color = 'bg-primary-500' }) => (
@@ -105,9 +106,12 @@ const AdminVisitors = () => {
   const [recentVisits, setRecent]   = useState([]);
   const [visitPage, setVisitPage]   = useState(1);
   const [visitTotal, setVisitTotal] = useState(0);
+  const [visitTotalPages, setVisitTotalPages] = useState(0);
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [notice, setNotice]         = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [copiedVisitorId, setCopiedVisitorId] = useState(null);
   const overviewRequest = useRef(null);
   const recentRequest = useRef(null);
   const refreshingRef = useRef(false);
@@ -152,7 +156,7 @@ const AdminVisitors = () => {
     const controller = new AbortController();
     recentRequest.current = controller;
     try {
-      const params = new URLSearchParams({ page: visitPage });
+      const params = new URLSearchParams({ page: visitPage, limit: VISIT_PAGE_SIZE });
       if (tblDevice !== 'all') params.set('device', tblDevice);
       if (tblPage   !== 'all') params.set('pageFilter', tblPage);
       if (tblPeriod === 'custom') {
@@ -163,8 +167,21 @@ const AdminVisitors = () => {
       }
       const res = await api.get(`/analytics/recent?${params}`, { signal: controller.signal });
       if (recentRequest.current !== controller) return false;
+      const total = Number.isFinite(res.data.total) ? res.data.total : 0;
+      const totalPages = Number.isFinite(res.data.totalPages)
+        ? res.data.totalPages
+        : Math.ceil(total / (res.data.limit || VISIT_PAGE_SIZE));
+      if (visitPage > Math.max(1, totalPages)) {
+        setRecent([]);
+        setVisitTotal(total);
+        setVisitTotalPages(totalPages);
+        setVisitPage(Math.max(1, totalPages));
+        return false;
+      }
       setRecent(res.data.visits || []);
-      setVisitTotal(res.data.total || 0);
+      setVisitTotal(total);
+      setVisitTotalPages(totalPages);
+      setLastUpdated(new Date());
       return true;
     } catch (e) {
       if (e.name !== 'CanceledError' && e.code !== 'ERR_CANCELED' && recentRequest.current === controller) {
@@ -198,6 +215,19 @@ const AdminVisitors = () => {
     }
   }, [load, loadRecent]);
 
+  const copyVisitorId = useCallback(async (visitorId) => {
+    try {
+      await navigator.clipboard.writeText(visitorId);
+      setCopiedVisitorId(visitorId);
+      setNotice({ type: 'success', message: 'Visitor ID copied.' });
+    } catch (e) {
+      setNotice({
+        type: 'error',
+        message: e.message || 'Unable to copy visitor ID.',
+      });
+    }
+  }, []);
+
   useEffect(() => {
     load();
     return () => overviewRequest.current?.abort();
@@ -229,7 +259,7 @@ const AdminVisitors = () => {
     { name: 'Returning', value: overview?.returning    || 0 },
   ];
 
-  const totalPages = Math.ceil(visitTotal / 20);
+  const totalPages = visitTotalPages;
 
   return (
     <AdminLayout>
@@ -262,6 +292,11 @@ const AdminVisitors = () => {
             </button>
           </div>
         </div>
+        {lastUpdated && (
+          <p className="text-xs text-slate-400 text-right -mt-4">
+            Last updated: {lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+          </p>
+        )}
 
         {notice && (
           <div
@@ -562,9 +597,20 @@ const AdminVisitors = () => {
                     {recentVisits.map(v => (
                       <tr key={v._id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-4 py-3">
-                          <span className="font-mono text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg">
-                            {v.visitorId?.slice(0, 16)}…
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg">
+                              {v.visitorId?.slice(0, 16)}{v.visitorId?.length > 16 ? '…' : ''}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => copyVisitorId(v.visitorId)}
+                              aria-label="Copy full visitor ID"
+                              title={copiedVisitorId === v.visitorId ? 'Copied' : 'Copy full visitor ID'}
+                              className="p-1 rounded text-slate-400 hover:text-primary-600"
+                            >
+                              <Copy size={12} />
+                            </button>
+                          </div>
                         </td>
                         <td className="px-4 py-3">
                           <span className="text-xs font-medium text-slate-700">{prettyPage(v.page)}</span>
@@ -572,7 +618,9 @@ const AdminVisitors = () => {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5">
                             <DeviceIcon device={v.device} />
-                            <span className="text-xs capitalize text-slate-600">{v.device}</span>
+                            <span className="text-xs text-slate-600">
+                              {{ desktop: 'Desktop', mobile: 'Mobile', tablet: 'Tablet' }[v.device] || 'Desktop'}
+                            </span>
                           </div>
                         </td>
                         <td className="px-4 py-3 hidden md:table-cell">

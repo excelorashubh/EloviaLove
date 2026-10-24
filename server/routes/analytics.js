@@ -112,8 +112,12 @@ router.get('/overview', async (req, res) => {
 // @desc   Paginated recent visit log with filters (page, device, pageFilter, period, from, to)
 router.get('/recent', async (req, res) => {
   try {
-    const page   = parseInt(req.query.page) || 1;
-    const limit  = 20;
+    const requestedPage = Number.parseInt(req.query.page, 10);
+    const requestedLimit = Number.parseInt(req.query.limit, 10);
+    const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+    const limit = Number.isInteger(requestedLimit) && requestedLimit > 0
+      ? Math.min(requestedLimit, 100)
+      : 20;
     const skip   = (page - 1) * limit;
     const { device, pageFilter, period, from, to } = req.query;
 
@@ -136,11 +140,24 @@ router.get('/recent', async (req, res) => {
     }
 
     const [visits, total] = await Promise.all([
-      Visitor.find(match).sort({ visitedAt: -1 }).skip(skip).limit(limit).lean(),
+      Visitor.find(match)
+        .select('visitorId page device ip visitedAt')
+        .sort({ visitedAt: -1, _id: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
       Visitor.countDocuments(match),
     ]);
 
-    res.json({ success: true, visits, total });
+    const totalPages = Math.ceil(total / limit);
+    res.json({
+      success: true,
+      visits,
+      total,
+      page,
+      limit,
+      totalPages,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
