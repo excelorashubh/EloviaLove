@@ -42,7 +42,14 @@ router.put('/profile', protect, [
   body('bio').optional().trim().isLength({ max: 500 }),
   body('location').optional().trim().isLength({ max: 100 }),
   body('interests').optional().isArray(),
-  body('relationshipGoals').optional().isIn(['Casual Dating', 'Serious Relationship', 'Marriage', 'Friendship'])
+  body('relationshipGoals').optional().isIn(['Casual Dating', 'Serious Relationship', 'Marriage', 'Friendship']),
+  body('education').optional().isIn(['', 'High School', "Bachelor's", "Master's", 'PhD', 'Diploma', 'Other']),
+  body('profession').optional().isIn(['', 'Engineer', 'Doctor', 'Teacher', 'Designer', 'Lawyer', 'Artist', 'Entrepreneur', 'Student', 'Other']),
+  body('height').optional({ nullable: true, checkFalsy: true }).isInt({ min: 100, max: 250 }),
+  body('income').optional().isIn(['', '< 3 LPA', '3–5 LPA', '5–10 LPA', '10–20 LPA', '20+ LPA']),
+  body('religion').optional().trim().isLength({ max: 50 }),
+  body('lifestyle.smoking').optional().isIn(['', 'Never', 'Occasionally', 'Regularly']),
+  body('lifestyle.drinking').optional().isIn(['', 'Never', 'Occasionally', 'Regularly'])
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -54,7 +61,10 @@ router.put('/profile', protect, [
       });
     }
 
-    const { name, bio, location, interests, relationshipGoals } = req.body;
+    const {
+      name, bio, location, interests, relationshipGoals,
+      education, profession, height, income, religion, lifestyle,
+    } = req.body;
 
     const updateData = {};
     if (name !== undefined) updateData.name = name;
@@ -62,6 +72,13 @@ router.put('/profile', protect, [
     if (location !== undefined) updateData.location = location;
     if (interests !== undefined) updateData.interests = interests;
     if (relationshipGoals !== undefined) updateData.relationshipGoals = relationshipGoals;
+    if (education !== undefined) updateData.education = education;
+    if (profession !== undefined) updateData.profession = profession;
+    if (height !== undefined) updateData.height = height === null || height === '' ? null : Number(height);
+    if (income !== undefined) updateData.income = income;
+    if (religion !== undefined) updateData.religion = religion;
+    if (lifestyle?.smoking !== undefined) updateData['lifestyle.smoking'] = lifestyle.smoking;
+    if (lifestyle?.drinking !== undefined) updateData['lifestyle.drinking'] = lifestyle.drinking;
 
     // Check if profile is now complete by combining existing values with submitted updates
     const user = await User.findById(req.user._id).lean();
@@ -99,7 +116,13 @@ router.put('/profile', protect, [
         location: updatedUser.location,
         interests: updatedUser.interests,
         relationshipGoals: updatedUser.relationshipGoals,
-        profileCompleted: updatedUser.profileCompleted
+        profileCompleted: updatedUser.profileCompleted,
+        education: updatedUser.education,
+        profession: updatedUser.profession,
+        height: updatedUser.height,
+        income: updatedUser.income,
+        religion: updatedUser.religion,
+        lifestyle: updatedUser.lifestyle
       }
     });
   } catch (error) {

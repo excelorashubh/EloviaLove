@@ -93,6 +93,16 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    override fun onStart() {
+        super.onStart()
+        authenticatedApp?.onHostStart()
+    }
+
+    override fun onStop() {
+        authenticatedApp?.onHostStop()
+        super.onStop()
+    }
+
     private fun restoreSession() {
         screen = Screen.SPLASH
         render()

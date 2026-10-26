@@ -94,7 +94,8 @@ router.get('/:userId', protect, async (req, res) => {
 // @desc    Send message to another user
 // @access  Private
 router.post('/:userId', protect, [
-  body('content').trim().isLength({ min: 1, max: 1000 }).withMessage('Message must be 1-1000 characters')
+  body('content').trim().isLength({ min: 1, max: 1000 }).withMessage('Message must be 1-1000 characters'),
+  body('clientMessageId').optional().trim().isLength({ min: 1, max: 64 })
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -107,7 +108,7 @@ router.post('/:userId', protect, [
     }
 
     const { userId } = req.params;
-    const { content } = req.body;
+    const { content, clientMessageId } = req.body;
 
     // Check if there's a match between users
     const match = await Match.findOne({
@@ -121,11 +122,38 @@ router.post('/:userId', protect, [
       });
     }
 
+    if (clientMessageId) {
+      const previousMessage = await Message.findOne({
+        sender: req.user._id,
+        receiver: userId,
+        clientMessageId
+      })
+        .populate('sender', 'name profilePhoto')
+        .populate('receiver', 'name profilePhoto');
+      if (previousMessage) {
+        return res.status(200).json({
+          success: true,
+          message: {
+            id: previousMessage._id,
+            _id: previousMessage._id,
+            clientMessageId: previousMessage.clientMessageId,
+            sender: previousMessage.sender,
+            receiver: previousMessage.receiver,
+            content: previousMessage.content,
+            createdAt: previousMessage.createdAt,
+            isRead: previousMessage.isRead,
+            readAt: previousMessage.readAt,
+          }
+        });
+      }
+    }
+
     // Create message
     const message = await Message.create({
       sender: req.user._id,
       receiver: userId,
-      content
+      content,
+      ...(clientMessageId ? { clientMessageId } : {})
     });
 
     // Populate both participants so either side can render a new conversation immediately.
@@ -138,6 +166,8 @@ router.post('/:userId', protect, [
       const event = {
         message: {
           _id: message._id,
+          id: message._id,
+          clientMessageId: message.clientMessageId,
           sender: message.sender,
           receiver: message.receiver,
           content: message.content,
@@ -181,6 +211,8 @@ router.post('/:userId', protect, [
       success: true,
       message: {
         id: message._id,
+        _id: message._id,
+        clientMessageId: message.clientMessageId,
         sender: message.sender,
         receiver: message.receiver,
         content: message.content,
@@ -194,6 +226,43 @@ router.post('/:userId', protect, [
       success: false,
       message: 'Server error'
     });
+  }
+});
+
+// Mark messages in an authorized match as read without reloading conversation history.
+router.post('/:userId/read', protect, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const match = await Match.findOne({
+      users: { $all: [req.user._id, userId] }
+    }).select('_id');
+
+    if (!match) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only read messages from matched users'
+      });
+    }
+
+    const result = await Message.updateMany(
+      { sender: userId, receiver: req.user._id, isRead: false },
+      { isRead: true, readAt: new Date() }
+    );
+    const io = req.app.get('io');
+    if (result.modifiedCount > 0 && io) {
+      const event = {
+        by: req.user._id.toString(),
+        from: userId.toString(),
+        to: req.user._id.toString(),
+      };
+      io.to(userId.toString()).emit('messages_read', event);
+      io.to(req.user._id.toString()).emit('messages_read', event);
+    }
+
+    res.json({ success: true, updatedCount: result.modifiedCount });
+  } catch (error) {
+    console.error('Mark messages read error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

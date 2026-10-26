@@ -1,8 +1,12 @@
 package com.example.elovia.auth
 
 import android.content.Context
+import com.example.elovia.BuildConfig
+import io.socket.client.IO
+import io.socket.client.Socket
 import org.json.JSONException
 import org.json.JSONObject
+import java.net.URISyntaxException
 
 data class AuthUser(
     val id: String,
@@ -15,7 +19,21 @@ data class AuthUser(
     val relationshipGoals: String = "",
     val age: Int? = null,
     val isVerified: Boolean = false,
-    val profileCompleted: Boolean = false
+    val profileCompleted: Boolean = false,
+    val plan: String = "free",
+    val dateOfBirth: String = "",
+    val gender: String = "",
+    val phone: String = "",
+    val phoneVerified: Boolean = false,
+    val emailVerified: Boolean = false,
+    val blueTickStatus: String = "none",
+    val education: String = "",
+    val profession: String = "",
+    val height: Int? = null,
+    val income: String = "",
+    val religion: String = "",
+    val smoking: String = "",
+    val drinking: String = ""
 )
 
 data class AuthSession(val user: AuthUser)
@@ -86,6 +104,22 @@ class AuthRepository(context: Context) {
     fun getDiscover(page: Int = 1): JSONObject =
         authenticatedRequest("GET", "/users/discover?page=$page")
 
+    fun filterDiscover(
+        ageMin: Int? = null,
+        ageMax: Int? = null,
+        gender: String? = null,
+        location: String? = null,
+        onlineOnly: Boolean = false
+    ): JSONObject {
+        val filters = JSONObject()
+        ageMin?.let { filters.put("ageMin", it) }
+        ageMax?.let { filters.put("ageMax", it) }
+        gender?.let { filters.put("gender", it) }
+        location?.let { filters.put("location", it) }
+        if (onlineOnly) filters.put("onlineOnly", true)
+        return authenticatedRequest("POST", "/match/filter", filters)
+    }
+
     fun getCurrentUser(): JSONObject = authenticatedRequest("GET", "/auth/me")
 
     fun parseCurrentUser(response: JSONObject): AuthUser = parseUser(response).user
@@ -115,26 +149,72 @@ class AuthRepository(context: Context) {
         return authenticatedRequest("GET", "/messages/$userId?page=1")
     }
 
-    fun sendMessage(userId: String, content: String): JSONObject {
+    fun sendMessage(userId: String, content: String, clientMessageId: String): JSONObject {
         requireValidId(userId)
         return authenticatedRequest(
             "POST",
             "/messages/$userId",
-            JSONObject().put("content", content)
+            JSONObject()
+                .put("content", content)
+                .put("clientMessageId", clientMessageId)
         )
     }
 
-    fun updateProfile(name: String, bio: String, location: String, interests: List<String>, goals: String): JSONObject =
-        authenticatedRequest(
-            "PUT",
-            "/users/profile",
-            JSONObject()
-                .put("name", name.trim())
-                .put("bio", bio.trim())
-                .put("location", location.trim())
-                .put("interests", org.json.JSONArray(interests))
-                .put("relationshipGoals", goals)
-        )
+    fun markMessagesRead(userId: String): JSONObject {
+        requireValidId(userId)
+        return authenticatedRequest("POST", "/messages/$userId/read")
+    }
+
+    fun createAuthenticatedSocket(): Socket {
+        val token = sessionStore.readToken()
+            ?: throw ApiException("Your session has expired. Please sign in again.", 401)
+        val backendUrl = BuildConfig.API_BASE_URL.trim().trimEnd('/').removeSuffix("/api")
+        val options = IO.Options().apply {
+            auth = mapOf("token" to token)
+            reconnection = true
+            reconnectionAttempts = Int.MAX_VALUE
+            reconnectionDelay = 1_000
+            reconnectionDelayMax = 30_000
+            timeout = 20_000
+        }
+        return try {
+            IO.socket(backendUrl, options)
+        } catch (error: URISyntaxException) {
+            throw ApiException("The configured chat server URL is invalid.", cause = error)
+        }
+    }
+
+    fun updateProfile(
+        name: String,
+        bio: String,
+        location: String,
+        interests: List<String>,
+        goals: String,
+        education: String,
+        profession: String,
+        height: Int?,
+        income: String,
+        religion: String,
+        smoking: String,
+        drinking: String
+    ): JSONObject {
+        val lifestyle = JSONObject()
+            .put("smoking", smoking)
+            .put("drinking", drinking)
+        val body = JSONObject()
+            .put("name", name.trim())
+            .put("bio", bio.trim())
+            .put("location", location.trim())
+            .put("interests", org.json.JSONArray(interests))
+            .put("relationshipGoals", goals)
+            .put("education", education)
+            .put("profession", profession)
+            .put("height", height)
+            .put("income", income)
+            .put("religion", religion)
+            .put("lifestyle", lifestyle)
+        return authenticatedRequest("PUT", "/users/profile", body)
+    }
 
     fun uploadProfilePhoto(fileName: String, mimeType: String, content: ByteArray): JSONObject {
         val token = sessionStore.readToken()
@@ -188,7 +268,21 @@ class AuthRepository(context: Context) {
                 relationshipGoals = user.optString("relationshipGoals"),
                 age = user.optInt("age").takeIf { user.has("age") && !user.isNull("age") },
                 isVerified = user.optBoolean("isVerified"),
-                profileCompleted = user.optBoolean("profileCompleted")
+                profileCompleted = user.optBoolean("profileCompleted"),
+                plan = user.optString("plan").ifBlank { "free" },
+                dateOfBirth = user.optString("dateOfBirth").takeUnless { it == "null" }.orEmpty(),
+                gender = user.optString("gender"),
+                phone = user.optString("phone").takeUnless { it == "null" }.orEmpty(),
+                phoneVerified = user.optBoolean("phoneVerified"),
+                emailVerified = user.optBoolean("emailVerified"),
+                blueTickStatus = user.optString("blueTickStatus").ifBlank { "none" },
+                education = user.optString("education"),
+                profession = user.optString("profession"),
+                height = user.optInt("height").takeIf { user.has("height") && !user.isNull("height") },
+                income = user.optString("income"),
+                religion = user.optString("religion"),
+                smoking = user.optJSONObject("lifestyle")?.optString("smoking").orEmpty(),
+                drinking = user.optJSONObject("lifestyle")?.optString("drinking").orEmpty()
             )
         )
     }

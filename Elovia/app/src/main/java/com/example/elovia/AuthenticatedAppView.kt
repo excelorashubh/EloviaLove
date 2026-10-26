@@ -16,6 +16,7 @@ import android.text.TextWatcher
 import android.text.format.DateUtils
 import android.view.Gravity
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -26,6 +27,7 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
+import android.widget.NumberPicker
 import android.widget.TextView
 import android.widget.Toast
 import android.util.Base64
@@ -43,9 +45,14 @@ import com.example.elovia.auth.ApiException
 import com.example.elovia.auth.AuthRepository
 import com.example.elovia.auth.AuthUser
 import com.example.elovia.auth.SessionStorageException
+import io.socket.client.Socket
+import io.socket.emitter.Emitter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONObject
@@ -54,7 +61,11 @@ import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.URISyntaxException
 import java.time.Instant
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.util.Locale
+import java.util.UUID
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -73,6 +84,7 @@ internal class AuthenticatedAppView(
         CHATS(4, "Chats", R.drawable.ic_nav_chats),
         PROFILE(5, "Profile", R.drawable.ic_nav_profile)
     }
+    private enum class DiscoverMode { SWIPE, GRID }
 
     private val IVORY get() = ContextCompat.getColor(context, R.color.app_background)
     private val ROSE get() = ContextCompat.getColor(context, R.color.brand_end)
@@ -106,8 +118,26 @@ internal class AuthenticatedAppView(
         background = rounded(SURFACE, 0)
         visibility = GONE
     }
+    private val chatReadHandler = Handler(Looper.getMainLooper())
+    private val chatSyncHandler = Handler(Looper.getMainLooper())
     private var selectedTab = Tab.HOME
     private var chatUser: JSONObject? = null
+    private var activeChatUserId: String? = null
+    private var chatMessageContainer: LinearLayout? = null
+    private var chatInputField: EditText? = null
+    private var chatSendButton: View? = null
+    private var chatRealtimeSocket: Socket? = null
+    private var chatSocketConnected = false
+    private var chatEverConnected = false
+    private var chatSyncOnReconnect = false
+    private var chatHostActive = true
+    private var chatHistoryGeneration = 0
+    private var chatReadTask: Runnable? = null
+    private var chatFallbackTask: Runnable? = null
+    private val chatMessageRows = mutableMapOf<String, View>()
+    private val sendingChatClientIds = mutableSetOf<String>()
+    private val seenChatMessageIds = linkedSetOf<String>()
+    private val failedChatMessages = mutableMapOf<String, MutableList<JSONObject>>()
     private var currentScreen = "tab"
     private var discoverProfiles = JSONArray()
     private var activeProfileIndex = 0
@@ -119,12 +149,39 @@ internal class AuthenticatedAppView(
     private var subscriptionStatus = JSONObject()
     private var loading = false
     private var loadError: String? = null
-    private var isSendingMessage = false
     private var isUploadingPhoto = false
+    private var isSavingProfile = false
+    private var profileGoal = ""
+    private var profileInterests = emptyList<String>()
+    private var profileEducation = ""
+    private var profileProfession = ""
+    private var profileIncome = ""
+    private var profileReligion = ""
+    private var profileSmoking = ""
+    private var profileDrinking = ""
+    private var profileHeightField: EditText? = null
     private var skipInitialHomeProfileRefresh = true
     private var focusedDiscoverProfileId: String? = null
     private var homeError: String? = null
     private var unreadNotificationCount = 0
+    private var discoverMode = DiscoverMode.SWIPE
+    private var discoverSearchQuery = ""
+    private var discoverSearchHandler = Handler(Looper.getMainLooper())
+    private var discoverSearchTask: Runnable? = null
+    private var discoverResultsContainer: LinearLayout? = null
+    private var selectedDiscoverProfile: JSONObject? = null
+    private var discoverAgeMin: Int? = null
+    private var discoverAgeMax: Int? = null
+    private var discoverGender: String? = null
+    private var discoverNearby = false
+    private var discoverOnlineOnly = false
+    private var discoverPage = 1
+    private var discoverHasMore = false
+    private var discoverPaginationLoading = false
+    private var discoverFilterLoading = false
+    private var discoverFilterError: String? = null
+    private var swipeRequestInFlight = false
+    private var discoverRequestGeneration = 0
 
     init {
         orientation = VERTICAL
@@ -172,6 +229,7 @@ internal class AuthenticatedAppView(
             insets
         }
         renderHeader()
+        setupChatSocket()
         loading = true
         renderTab()
         post {
@@ -179,12 +237,42 @@ internal class AuthenticatedAppView(
         }
     }
 
+    private fun previewVisibleProfilePhotos(view: View, uri: Uri) {
+        if (view is ImageView && view.contentDescription == "${user.name} profile picture") {
+            Glide.with(view)
+                .load(uri)
+                .transform(CircleCrop())
+                .placeholder(R.drawable.ic_profile_placeholder)
+                .error(R.drawable.ic_profile_placeholder)
+                .into(view)
+        }
+        if (view is ViewGroup) {
+            for (index in 0 until view.childCount) {
+                previewVisibleProfilePhotos(view.getChildAt(index), uri)
+            }
+        }
+    }
+
     fun handleBack(): Boolean {
         if (currentScreen == "chat") {
+            chatHistoryGeneration++
+            chatReadTask?.let(chatReadHandler::removeCallbacks)
+            chatFallbackTask?.let(chatSyncHandler::removeCallbacks)
             chatUser = null
+            activeChatUserId = null
+            chatMessageContainer = null
+            chatInputField = null
+            chatSendButton = null
             currentScreen = "tab"
             renderHeader()
-            loadTab()
+            renderTab()
+            return true
+        }
+        if (currentScreen == "discover_profile") {
+            currentScreen = "tab"
+            selectedDiscoverProfile = null
+            renderHeader()
+            renderTab()
             return true
         }
         if (currentScreen == "edit") {
@@ -211,12 +299,96 @@ internal class AuthenticatedAppView(
     }
 
     override fun onDetachedFromWindow() {
+        chatReadTask?.let(chatReadHandler::removeCallbacks)
+        chatFallbackTask?.let(chatSyncHandler::removeCallbacks)
+        chatRealtimeSocket?.let { socket ->
+            socket.off(Socket.EVENT_CONNECT)
+            socket.off(Socket.EVENT_DISCONNECT)
+            socket.off(Socket.EVENT_CONNECT_ERROR)
+            socket.off("private_message")
+            socket.off("messages_read")
+            socket.off("messages_deleted")
+            socket.disconnect()
+            socket.close()
+        }
+        chatRealtimeSocket = null
         io.shutdownNow()
         super.onDetachedFromWindow()
     }
 
+    fun onHostStart() {
+        chatHostActive = true
+        val socket = chatRealtimeSocket ?: return
+        chatSyncOnReconnect = currentScreen == "chat"
+        if (!socket.connected()) socket.connect()
+        else if (currentScreen == "chat") syncChatAfterReconnect()
+    }
+
+    fun onHostStop() {
+        chatHostActive = false
+        chatFallbackTask?.let(chatSyncHandler::removeCallbacks)
+        chatFallbackTask = null
+        chatRealtimeSocket?.disconnect()
+        if (currentScreen == "chat") chatSyncOnReconnect = true
+    }
+
     private fun renderHeader() {
         header.removeAllViews()
+        if (currentScreen == "discover_profile") {
+            header.setPadding(dp(16), dp(10), dp(16), dp(10))
+            header.addView(iconButton(R.drawable.ic_arrow_back, "Back to Discover", IVORY, HOME_PRIMARY) {
+                currentScreen = "tab"
+                selectedDiscoverProfile = null
+                renderHeader()
+                renderTab()
+            }, LayoutParams(dp(48), dp(48)))
+            val profileName = selectedDiscoverProfile?.optString("name").orEmpty().ifBlank { "Profile" }
+            addLabel(header, profileName, 18, HOME_PRIMARY, true).apply {
+                setPadding(dp(10), 0, 0, 0)
+                header.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+            }
+            return
+        }
+        if (currentScreen == "tab" && selectedTab == Tab.DISCOVER) {
+            header.setPadding(dp(16), dp(10), dp(16), dp(10))
+            header.addView(iconButton(R.drawable.ic_arrow_back, "Back to Home", IVORY, HOME_PRIMARY) {
+                navigation.selectedItemId = Tab.HOME.id
+            }, LayoutParams(dp(48), dp(48)))
+            addLabel(header, "Discover", 21, HOME_PRIMARY, true).apply {
+                typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+                setPadding(dp(8), 0, 0, 0)
+                header.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+            }
+            header.addView(iconButton(R.drawable.ic_discover_filter, "Discovery filters", IVORY, HOME_PRIMARY) {
+                showDiscoverFilterSheet()
+            }, LayoutParams(dp(48), dp(48)))
+            return
+        }
+        if (currentScreen == "tab" && selectedTab == Tab.PROFILE) {
+            header.setPadding(dp(16), dp(10), dp(16), dp(10))
+            header.addView(iconButton(R.drawable.ic_arrow_back, "Back to Home", IVORY, HOME_PRIMARY) {
+                navigation.selectedItemId = Tab.HOME.id
+            }, LayoutParams(dp(48), dp(48)))
+            addLabel(header, "My Profile", 20, HOME_PRIMARY, true).apply {
+                typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+                header.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+            }
+            header.addView(smallButton("Edit Profile") { openProfileEditor() })
+            return
+        }
+        if (currentScreen == "edit") {
+            header.setPadding(dp(16), dp(10), dp(16), dp(10))
+            header.addView(iconButton(R.drawable.ic_arrow_back, "Cancel editing", IVORY, HOME_PRIMARY) {
+                currentScreen = "tab"
+                renderHeader()
+                renderTab()
+            }, LayoutParams(dp(48), dp(48)))
+            addLabel(header, "Edit Profile", 20, HOME_PRIMARY, true).apply {
+                typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+                header.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+            }
+            return
+        }
         if (currentScreen == "tab" && selectedTab == Tab.HOME) {
             header.setPadding(dp(16), dp(10), dp(16), dp(10))
             val logo = ImageView(context).apply {
@@ -312,6 +484,11 @@ internal class AuthenticatedAppView(
         }
         loading = true
         loadError = null
+        if (selectedTab == Tab.DISCOVER && discoverProfiles.length() > 0) {
+            loading = false
+            renderTab()
+            return
+        }
         renderTab()
         io.execute {
             try {
@@ -362,6 +539,8 @@ internal class AuthenticatedAppView(
                                 user = repository.parseCurrentUser(profileResponse)
                             }
                             discoverProfiles = discovered?.optJSONArray("users") ?: JSONArray()
+                            discoverPage = discovered?.optJSONObject("pagination")?.optInt("page", 1) ?: 1
+                            discoverHasMore = discovered?.optJSONObject("pagination")?.optBoolean("hasMore") ?: false
                             conversations = chatResponse?.optJSONArray("conversations") ?: JSONArray()
                             matches = matchesResponse?.optJSONArray("matches") ?: JSONArray()
                             notifications = notificationsResponse?.optJSONArray("notifications") ?: JSONArray()
@@ -378,6 +557,8 @@ internal class AuthenticatedAppView(
                         mainHandler.post {
                             if (!isAttachedToWindow) return@post
                             discoverProfiles = response.optJSONArray("users") ?: JSONArray()
+                            discoverPage = response.optJSONObject("pagination")?.optInt("page", 1) ?: 1
+                            discoverHasMore = response.optJSONObject("pagination")?.optBoolean("hasMore") ?: false
                             activeProfileIndex = focusedDiscoverProfileId
                                 ?.let { targetId ->
                                     (0 until discoverProfiles.length()).firstOrNull { index ->
@@ -436,7 +617,9 @@ internal class AuthenticatedAppView(
         when {
             currentScreen == "edit" -> renderEditProfile()
             currentScreen == "chat" -> renderChat()
-            loading -> addState("Loading your ${selectedTab.label.lowercase()}…", loading = true)
+            currentScreen == "discover_profile" -> renderDiscoverProfileDetails()
+            loading && selectedTab != Tab.DISCOVER ->
+                addState("Loading your ${selectedTab.label.lowercase()}…", loading = true)
             loadError != null -> addState(loadError!!, action = "Try again") { loadTab() }
             currentScreen == "notifications" -> renderNotifications()
             currentScreen == "membership" -> renderMembership()
@@ -1019,6 +1202,15 @@ internal class AuthenticatedAppView(
     }
 
     private fun addHomeEmptyState(text: String, action: String, onAction: (() -> Unit)?) {
+        addHomeEmptyStateIn(body, text, action, onAction)
+    }
+
+    private fun addHomeEmptyStateIn(
+        parent: LinearLayout,
+        text: String,
+        action: String,
+        onAction: (() -> Unit)?
+    ) {
         val panel = LinearLayout(context).apply {
             orientation = HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -1034,7 +1226,7 @@ internal class AuthenticatedAppView(
                 panel.addView(this)
             }
         }
-        body.addView(panel, matchWidth())
+        parent.addView(panel, matchWidth())
     }
 
     private fun addHomeSectionHeader(
@@ -1175,6 +1367,12 @@ internal class AuthenticatedAppView(
         val onClick: () -> Unit
     )
 
+    private data class FilterOption(
+        val label: String,
+        val selected: Boolean,
+        val onClick: () -> Unit
+    )
+
     private fun homeRoundAction(
         icon: Int,
         description: String,
@@ -1225,28 +1423,882 @@ internal class AuthenticatedAppView(
     }
 
     private fun renderDiscover() {
-        addHeading(body, "Discover", 27)
-        addText(body, "Meet people looking for something meaningful.", 15, MUTED)
-        addSpace(body, 18)
-        val profile = discoverProfiles.optJSONObject(activeProfileIndex)
-        if (profile == null) {
-            addState(
-                if (discoverProfiles.length() == 0) "No profiles are available right now. Check back soon."
-                else "You've seen all available profiles for now.",
-                action = "Refresh"
-            ) { loadTab() }
+        body.setPadding(dp(16), dp(2), dp(16), dp(24))
+        val searchRow = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(12), 0, dp(8), 0)
+            background = rounded(SURFACE, 15)
+        }
+        val searchIcon = ImageView(context).apply {
+            setImageResource(R.drawable.ic_home_search)
+            contentDescription = "Search profiles"
+            imageTintList = ColorStateList.valueOf(HOME_SECONDARY)
+        }
+        searchRow.addView(searchIcon, LayoutParams(dp(24), dp(24)).apply { marginEnd = dp(8) })
+        val searchInput = EditText(context).apply {
+            hint = "Search by name, city or interests..."
+            textSize = 14f
+            setSingleLine(true)
+            imeOptions = EditorInfo.IME_ACTION_SEARCH
+            setTextColor(HOME_PRIMARY)
+            setHintTextColor(HOME_SECONDARY)
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            setPadding(0, dp(13), 0, dp(13))
+            setText(discoverSearchQuery)
+            contentDescription = "Search by name, city or interests"
+        }
+        searchRow.addView(searchInput, LayoutParams(0, dp(48), 1f))
+        searchInput.setOnEditorActionListener { view, _, _ ->
+            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager)
+                ?.hideSoftInputFromWindow(view.windowToken, 0)
+            true
+        }
+        val clearSearch = ImageButton(context).apply {
+            setImageResource(R.drawable.ic_discover_clear)
+            imageTintList = ColorStateList.valueOf(HOME_SECONDARY)
+            background = android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
+            contentDescription = "Clear search"
+            visibility = if (discoverSearchQuery.isBlank()) GONE else VISIBLE
+            setOnClickListener { searchInput.setText("") }
+        }
+        searchRow.addView(clearSearch, LayoutParams(dp(40), dp(48)))
+        body.addView(searchRow, matchWidth())
+
+        val filterRail = horizontalRail()
+        val filterChips = listOf(
+            FilterOption("All", noBackendDiscoverFilters() && discoverSearchQuery.isBlank()) { resetDiscoverFilters() },
+            FilterOption("Online", discoverOnlineOnly) { toggleOnlineFilter() },
+            FilterOption("Nearby", discoverNearby) { toggleNearbyFilter() },
+            FilterOption("Age", discoverAgeMin != null || discoverAgeMax != null) { showAgeRangeDialog() },
+            FilterOption("Gender", discoverGender != null) { showGenderDialog() }
+        )
+        filterChips.forEach { option ->
+            filterRail.content.addView(
+                filterChip(option.label, option.selected, option.onClick),
+                LayoutParams(WRAP_CONTENT, dp(38)).apply { marginEnd = dp(8) }
+            )
+        }
+        body.addView(filterRail, matchWidth())
+
+        val modeRow = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(8), 0, dp(10))
+        }
+        addLabel(modeRow, "Meet someone new", 15, HOME_PRIMARY, true)
+            .also { modeRow.addView(it, LayoutParams(0, WRAP_CONTENT, 1f)) }
+        val segment = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            background = rounded(SURFACE, 14)
+            setPadding(dp(3), dp(3), dp(3), dp(3))
+        }
+        segment.addView(
+            modeButton("Swipe", R.drawable.ic_discover_swipe, discoverMode == DiscoverMode.SWIPE) {
+                discoverMode = DiscoverMode.SWIPE
+                renderTab()
+            },
+            LayoutParams(dp(94), dp(42))
+        )
+        segment.addView(
+            modeButton("Grid", R.drawable.ic_discover_grid, discoverMode == DiscoverMode.GRID) {
+                discoverMode = DiscoverMode.GRID
+                renderTab()
+            },
+            LayoutParams(dp(88), dp(42))
+        )
+        modeRow.addView(segment)
+        body.addView(modeRow, matchWidth())
+
+        discoverResultsContainer = LinearLayout(context).apply {
+            orientation = VERTICAL
+        }
+        body.addView(discoverResultsContainer, matchWidth())
+        searchInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                discoverSearchQuery = s?.toString().orEmpty()
+                clearSearch.visibility = if (discoverSearchQuery.isBlank()) GONE else VISIBLE
+                discoverSearchTask?.let(discoverSearchHandler::removeCallbacks)
+                val task = Runnable {
+                    if (currentScreen == "tab" && selectedTab == Tab.DISCOVER) {
+                        renderDiscoverResults()
+                    }
+                }
+                discoverSearchTask = task
+                discoverSearchHandler.postDelayed(task, 250)
+            }
+            override fun afterTextChanged(s: Editable?) = Unit
+        })
+        renderDiscoverResults()
+        scroll.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+            if (scrollY > oldScrollY && selectedTab == Tab.DISCOVER &&
+                discoverMode == DiscoverMode.GRID && currentScreen == "tab" &&
+                scrollY + scroll.height >= body.height - dp(180)
+            ) loadMoreDiscover()
+        }
+    }
+
+    private fun renderDiscoverResults() {
+        val container = discoverResultsContainer ?: return
+        container.removeAllViews()
+        val visibleProfiles = filteredDiscoverProfiles()
+        if (discoverFilterError != null) {
+            addHomeEmptyStateIn(container, discoverFilterError!!, "Retry") { applyDiscoverFilters() }
             return
         }
-        addProfileCard(body, profile, compact = false)
+        if (discoverFilterLoading || loading) {
+            if (discoverMode == DiscoverMode.GRID) {
+                renderDiscoverSkeletonGrid(container)
+            } else {
+                renderDiscoverSkeletonSwipe(container)
+            }
+            return
+        }
+        if (visibleProfiles.isEmpty()) {
+            val text = when {
+                discoverSearchQuery.isNotBlank() -> "No profiles match your search."
+                discoverProfiles.length() == 0 -> "No profiles are available right now."
+                else -> "No profiles match these filters."
+            }
+            val emptyAction = when {
+                discoverSearchQuery.isNotBlank() -> "Clear search"
+                !noBackendDiscoverFilters() -> "Clear filters"
+                else -> "Refresh"
+            }
+            addHomeEmptyStateIn(container, text, emptyAction) {
+                when {
+                    discoverSearchQuery.isNotBlank() -> {
+                        discoverSearchQuery = ""
+                        renderTab()
+                    }
+                    !noBackendDiscoverFilters() -> resetDiscoverFilters()
+                    else -> refreshDiscover()
+                }
+            }
+            if (discoverHasMore && discoverSearchQuery.isBlank() && noBackendDiscoverFilters()) {
+                addButton(container, "Load more profiles", false) { loadMoreDiscover() }
+            } else if (discoverProfiles.length() == 0) {
+                addButton(container, "Try again", false) {
+                    discoverFilterError = null
+                    if (noBackendDiscoverFilters()) refreshDiscover() else applyDiscoverFilters()
+                }
+            }
+            return
+        }
+        if (discoverMode == DiscoverMode.SWIPE) {
+            val profile = visibleProfiles.first()
+            createDiscoverSwipeCard(profile).also {
+                container.addView(it, LayoutParams(MATCH_PARENT, dp(440)))
+            }
+            val actions = LinearLayout(context).apply {
+                orientation = HORIZONTAL
+                gravity = Gravity.CENTER
+                setPadding(0, dp(10), 0, 0)
+            }
+            actions.addView(
+                homeRoundAction(R.drawable.ic_discover_clear, "Pass on ${profile.optString("name")}", SURFACE, PLUM) {
+                    performSwipe(profile, "pass")
+                },
+                LayoutParams(dp(56), dp(56)).apply { marginEnd = dp(26) }
+            )
+            actions.addView(
+                homeRoundAction(R.drawable.ic_home_eye, "View ${profile.optString("name")}", SURFACE, HOME_PRIMARY) {
+                    openDiscoverProfile(profile)
+                },
+                LayoutParams(dp(50), dp(50)).apply { marginEnd = dp(26) }
+            )
+            actions.addView(
+                homeRoundAction(R.drawable.ic_nav_matches, "Like ${profile.optString("name")}", ROSE,
+                    ContextCompat.getColor(context, R.color.white)) {
+                    performSwipe(profile, "like")
+                },
+                LayoutParams(dp(60), dp(60))
+            )
+            container.addView(actions, matchWidth())
+        } else {
+            val columns = LinearLayout(context).apply { orientation = VERTICAL }
+            visibleProfiles.forEachIndexed { index, profile ->
+                if (index % 2 == 0) {
+                    val row = LinearLayout(context).apply {
+                        orientation = HORIZONTAL
+                        gravity = Gravity.TOP
+                    }
+                    columns.addView(row, matchWidth())
+                    row.addView(
+                        createDiscoverGridCard(profile),
+                        LayoutParams(0, dp(250), 1f).apply { marginEnd = dp(6); bottomMargin = dp(12) }
+                    )
+                    val next = visibleProfiles.getOrNull(index + 1)
+                    if (next != null) {
+                        row.addView(
+                            createDiscoverGridCard(next),
+                            LayoutParams(0, dp(250), 1f).apply { marginStart = dp(6); bottomMargin = dp(12) }
+                        )
+                    } else {
+                        row.addView(View(context), LayoutParams(0, dp(250), 1f).apply { marginStart = dp(6) })
+                    }
+                }
+            }
+            container.addView(columns, matchWidth())
+            if (discoverPaginationLoading) {
+                addStateTo(container, "Loading more profiles…", loading = true)
+            } else if (discoverHasMore && noBackendDiscoverFilters()) {
+                addButton(container, "Load more profiles", false) { loadMoreDiscover() }
+            }
+        }
+    }
+
+    private fun filteredDiscoverProfiles(): List<JSONObject> {
+        val query = discoverSearchQuery.trim().lowercase()
+        return (0 until discoverProfiles.length()).mapNotNull { discoverProfiles.optJSONObject(it) }
+            .filter { profile ->
+                if (discoverOnlineOnly && !profile.optBoolean("discoveryOnline")) return@filter false
+                if (discoverNearby && !profile.optBoolean("discoveryNearby")) return@filter false
+                if (discoverAgeMin != null || discoverAgeMax != null) {
+                    val age = profile.optInt("age").takeIf { profile.has("age") && !profile.isNull("age") }
+                        ?: return@filter false
+                    if (discoverAgeMin?.let { age < it } == true || discoverAgeMax?.let { age > it } == true) {
+                        return@filter false
+                    }
+                }
+                if (discoverGender != null && !profile.optString("gender").equals(discoverGender, ignoreCase = true)) {
+                    return@filter false
+                }
+                if (query.isBlank()) return@filter true
+                val interests = profile.optJSONArray("interests")
+                val interestText = interests?.let { values ->
+                    (0 until values.length()).joinToString(" ") { values.optString(it) }
+                }.orEmpty()
+                listOf(profile.optString("name"), profile.optString("location"), interestText)
+                    .any { it.lowercase().contains(query) }
+            }
+    }
+
+    private fun noBackendDiscoverFilters(): Boolean =
+        discoverAgeMin == null && discoverAgeMax == null && discoverGender == null &&
+            !discoverNearby && !discoverOnlineOnly
+
+    private fun filterChip(label: String, selected: Boolean, onClick: () -> Unit) =
+        MaterialButton(context).apply {
+            text = label
+            isAllCaps = false
+            textSize = 12f
+            minWidth = dp(48)
+            minHeight = dp(38)
+            insetTop = 0
+            insetBottom = 0
+            cornerRadius = dp(19)
+            if (selected) {
+                background = rounded(ROSE, 19)
+                setTextColor(ContextCompat.getColor(context, R.color.white))
+            } else {
+                background = rounded(SURFACE, 19)
+                strokeColor = ColorStateList.valueOf(HOME_DIVIDER)
+                setTextColor(HOME_PRIMARY)
+            }
+            setOnClickListener { onClick() }
+        }
+
+    private fun modeButton(label: String, icon: Int, selected: Boolean, onClick: () -> Unit) =
+        LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER
+            background = rounded(if (selected) ROSE else android.graphics.Color.TRANSPARENT, 12)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "$label mode${if (selected) ", selected" else ""}"
+            setOnClickListener { onClick() }
+            val image = ImageView(context).apply {
+                setImageResource(icon)
+                imageTintList = ColorStateList.valueOf(
+                    if (selected) ContextCompat.getColor(context, R.color.white) else HOME_SECONDARY
+                )
+            }
+            addView(image, LayoutParams(dp(18), dp(18)).apply { marginEnd = dp(5) })
+            addLabel(this, label, 12,
+                if (selected) ContextCompat.getColor(context, R.color.white) else HOME_SECONDARY,
+                true).also { addView(it) }
+        }
+
+    private fun createDiscoverSwipeCard(profile: JSONObject): FrameLayout {
+        val name = profile.optString("name").ifBlank { "Elovia member" }
+        val card = FrameLayout(context).apply {
+            background = rounded(SURFACE, 20)
+            clipToOutline = true
+            elevation = dp(3).toFloat()
+            isClickable = true
+            isFocusable = true
+            contentDescription = "View $name's profile. Swipe right to like or left to pass."
+            setOnClickListener { openDiscoverProfile(profile) }
+        }
+        val image = ImageView(context).apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setBackgroundColor(ContextCompat.getColor(context, R.color.home_pink_tint))
+            contentDescription = "$name profile photo"
+        }
+        card.addView(image, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        loadPhoto(image, profile.optString("profilePhoto"))
+        addDiscoverProfileOverlay(card, profile, name, showActions = false)
+        val gestureState = SwipeGestureState()
+        card.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    gestureState.startX = event.rawX
+                    gestureState.startY = event.rawY
+                    gestureState.tracking = false
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = event.rawX - gestureState.startX
+                    val dy = event.rawY - gestureState.startY
+                    if (kotlin.math.abs(dx) > dp(10) && kotlin.math.abs(dx) > kotlin.math.abs(dy)) {
+                        gestureState.tracking = true
+                        view.translationX = dx
+                        view.rotation = dx / dp(30).toFloat()
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    val dx = event.rawX - gestureState.startX
+                    if (gestureState.tracking && kotlin.math.abs(dx) > dp(90) && !swipeRequestInFlight) {
+                        val action = if (dx > 0) "like" else "pass"
+                        val targetX = if (dx > 0) width.toFloat() else -width.toFloat()
+                        view.animate().translationX(targetX).alpha(0f).setDuration(180).withEndAction {
+                            view.translationX = 0f
+                            view.rotation = 0f
+                            view.alpha = 1f
+                            performSwipe(profile, action)
+                        }.start()
+                    } else {
+                        view.animate().translationX(0f).rotation(0f).setDuration(160).start()
+                        if (!gestureState.tracking) view.performClick()
+                    }
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    view.animate().translationX(0f).rotation(0f).setDuration(160).start()
+                    true
+                }
+                else -> false
+            }
+        }
+        return card
+    }
+
+    private data class SwipeGestureState(
+        var startX: Float = 0f,
+        var startY: Float = 0f,
+        var tracking: Boolean = false
+    )
+
+    private fun addDiscoverProfileOverlay(parent: FrameLayout, profile: JSONObject, name: String, showActions: Boolean) {
+        val gradient = View(context).apply {
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(0x00000000, 0xEE000000.toInt())
+            )
+        }
+        parent.addView(gradient, FrameLayout.LayoutParams(MATCH_PARENT, dp(190), Gravity.BOTTOM))
+        val content = LinearLayout(context).apply {
+            orientation = VERTICAL
+            setPadding(dp(16), dp(54), dp(16), dp(15))
+            gravity = Gravity.BOTTOM
+        }
+        val heading = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        val age = profile.optInt("age").takeIf { profile.has("age") && !profile.isNull("age") }
+        addLabel(heading, name + (age?.let { ", $it" } ?: ""), 22,
+            ContextCompat.getColor(context, R.color.white), true).apply {
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
+            heading.addView(this)
+        }
+        if (profile.optBoolean("isVerified")) {
+            val verified = ImageView(context).apply {
+                setImageResource(R.drawable.ic_home_verified)
+                contentDescription = "Verified profile"
+            }
+            heading.addView(verified, LayoutParams(dp(19), dp(19)).apply { marginStart = dp(6) })
+        }
+        content.addView(heading)
+        val location = profile.optString("location").substringBefore(',').trim()
+        if (location.isNotBlank()) addLabel(content, location, 13, ContextCompat.getColor(context, R.color.white), false)
+            .also { content.addView(it) }
+        val bio = profile.optString("bio").takeIf(String::isNotBlank)
+        val interests = profile.optJSONArray("interests")?.let { values ->
+            (0 until minOf(3, values.length())).mapNotNull { values.optString(it).takeIf(String::isNotBlank) }
+        }.orEmpty()
+        val description = bio ?: interests.joinToString("  ·  ")
+        if (description.isNotBlank()) {
+            addLabel(content, description, 12, ContextCompat.getColor(context, R.color.white), false).apply {
+                maxLines = 2
+                ellipsize = android.text.TextUtils.TruncateAt.END
+                setPadding(0, dp(3), 0, 0)
+                content.addView(this)
+            }
+        }
+        parent.addView(content, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, Gravity.BOTTOM))
+        if (isDiscoveryOnline(profile)) addOnlineBadge(parent)
+        if (showActions) {
+            val actions = LinearLayout(context).apply {
+                orientation = HORIZONTAL
+                gravity = Gravity.END
+                setPadding(dp(12), dp(10), dp(12), 0)
+            }
+            actions.addView(homeRoundAction(R.drawable.ic_home_eye, "View $name", SURFACE, HOME_PRIMARY) {
+                openDiscoverProfile(profile)
+            }, LayoutParams(dp(42), dp(42)))
+            actions.addView(homeRoundAction(R.drawable.ic_nav_matches, "Like $name", ROSE,
+                ContextCompat.getColor(context, R.color.white)) {
+                performSwipe(profile, "like")
+            }, LayoutParams(dp(42), dp(42)).apply { marginStart = dp(8) })
+            parent.addView(actions, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, Gravity.TOP))
+        }
+    }
+
+    private fun createDiscoverGridCard(profile: JSONObject): FrameLayout {
+        val name = profile.optString("name").ifBlank { "Elovia member" }
+        val card = FrameLayout(context).apply {
+            background = rounded(SURFACE, 16)
+            clipToOutline = true
+            elevation = dp(2).toFloat()
+            isClickable = true
+            isFocusable = true
+            contentDescription = "View $name's profile"
+            setOnClickListener { openDiscoverProfile(profile) }
+        }
+        val image = ImageView(context).apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setBackgroundColor(ContextCompat.getColor(context, R.color.home_pink_tint))
+            contentDescription = "$name profile photo"
+        }
+        card.addView(image, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        loadPhoto(image, profile.optString("profilePhoto"))
+        addDiscoverProfileOverlay(card, profile, name, showActions = true)
+        return card
+    }
+
+    private fun addOnlineBadge(parent: FrameLayout) {
+        val badge = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            background = rounded(0x99000000.toInt(), 16)
+            setPadding(dp(8), dp(5), dp(9), dp(5))
+        }
+        badge.addView(View(context).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(ContextCompat.getColor(context, R.color.home_online))
+            }
+        }, LayoutParams(dp(7), dp(7)).apply { marginEnd = dp(5) })
+        addLabel(badge, "Online", 10, ContextCompat.getColor(context, R.color.white), true)
+            .also { badge.addView(it) }
+        parent.addView(badge, FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, Gravity.TOP or Gravity.START).apply {
+            topMargin = dp(12)
+            marginStart = dp(12)
+        })
+    }
+
+    private fun isDiscoveryOnline(profile: JSONObject): Boolean =
+        profile.optBoolean("discoveryOnline") || isFreshlyOnline(profile)
+
+    private fun openDiscoverProfile(profile: JSONObject) {
+        selectedDiscoverProfile = profile
+        currentScreen = "discover_profile"
+        renderHeader()
+        renderTab()
+    }
+
+    private fun renderDiscoverProfileDetails() {
+        val profile = selectedDiscoverProfile ?: run {
+            currentScreen = "tab"
+            selectedTab = Tab.DISCOVER
+            renderHeader()
+            renderDiscover()
+            return
+        }
+        val name = profile.optString("name").ifBlank { "Elovia member" }
+        val image = ImageView(context).apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            contentDescription = "$name profile photo"
+            setBackgroundColor(ContextCompat.getColor(context, R.color.home_pink_tint))
+        }
+        body.addView(image, LayoutParams(MATCH_PARENT, dp(340)))
+        loadPhoto(image, profile.optString("profilePhoto"))
+        addHeading(body, name + (profile.optInt("age").takeIf { profile.has("age") && !profile.isNull("age") }?.let { ", $it" } ?: ""), 24)
+        val location = profile.optString("location")
+        if (location.isNotBlank()) addText(body, location, 14, MUTED)
+        if (profile.optBoolean("isVerified")) addText(body, "Verified profile", 13, PLUM, true)
+        if (isDiscoveryOnline(profile)) addText(body, "Online", 13, ContextCompat.getColor(context, R.color.home_online), true)
+        val bio = profile.optString("bio")
+        if (bio.isNotBlank()) addText(body, bio, 15, CHARCOAL)
+        val interests = profile.optJSONArray("interests")
+        if (interests != null && interests.length() > 0) {
+            val labels = (0 until interests.length()).mapNotNull { interests.optString(it).takeIf(String::isNotBlank) }
+            if (labels.isNotEmpty()) addText(body, labels.joinToString("  ·  "), 14, PLUM)
+        }
         addSpace(body, 12)
+        addButton(body, "Like $name", true) { performSwipe(profile, "like") }
+        addButton(body, "Pass", false) { performSwipe(profile, "pass") }
+    }
+
+    private fun renderDiscoverSkeletonGrid(parent: LinearLayout) {
+        repeat(3) {
+            val row = LinearLayout(context).apply {
+                orientation = HORIZONTAL
+                setPadding(0, 0, 0, dp(12))
+            }
+
+            repeat(2) { column ->
+                val skeleton = View(context).apply {
+                    background = rounded(SURFACE, 16)
+                    isActivated = true
+                }
+                row.addView(skeleton, LayoutParams(0, dp(230), 1f).apply {
+                    if (column == 0) marginEnd = dp(6) else marginStart = dp(6)
+                })
+            }
+            parent.addView(row, matchWidth())
+        }
+    }
+
+    private fun renderDiscoverSkeletonSwipe(parent: LinearLayout) {
+        val card = FrameLayout(context).apply {
+            background = rounded(SURFACE, 20)
+            isActivated = true
+        }
+        parent.addView(card, LayoutParams(MATCH_PARENT, dp(440)))
         val actions = LinearLayout(context).apply {
             orientation = HORIZONTAL
             gravity = Gravity.CENTER
+            setPadding(0, dp(10), 0, 0)
         }
-        actions.addView(actionButton("Pass", PLUM) { performSwipe(profile, "pass") }, LayoutParams(0, dp(54), 1f))
-        actions.addView(View(context), LayoutParams(dp(12), 1))
-        actions.addView(actionButton("Like  ♥", ROSE) { performSwipe(profile, "like") }, LayoutParams(0, dp(54), 1f))
-        body.addView(actions, matchWidth())
+        repeat(3) {
+            actions.addView(
+                View(context).apply {
+                    background = GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(SURFACE)
+                    }
+                },
+                LayoutParams(dp(54), dp(54)).apply { marginEnd = dp(16) }
+            )
+        }
+        parent.addView(actions, matchWidth())
+    }
+
+    private fun addStateTo(parent: LinearLayout, message: String, loading: Boolean = false) {
+        val panel = card().apply {
+            gravity = Gravity.CENTER
+            setPadding(dp(18), dp(26), dp(18), dp(26))
+        }
+        addLabel(panel, if (loading) "…" else message, 14, HOME_SECONDARY, false).apply {
+            gravity = Gravity.CENTER
+            panel.addView(this, matchWidth())
+        }
+        parent.addView(panel, matchWidth())
+    }
+
+    private fun loadMoreDiscover() {
+        if (!discoverHasMore || discoverPaginationLoading || !noBackendDiscoverFilters()) return
+        discoverPaginationLoading = true
+        renderDiscoverResults()
+        val requestedPage = discoverPage + 1
+        val requestGeneration = discoverRequestGeneration
+        io.execute {
+            try {
+                val response = repository.getDiscover(requestedPage)
+                mainHandler.post {
+                    if (!isAttachedToWindow) return@post
+                    if (requestGeneration != discoverRequestGeneration) return@post
+                    val knownIds = (0 until discoverProfiles.length()).mapNotNull {
+                        discoverProfiles.optJSONObject(it)?.let(::profileId)
+                    }.toMutableSet()
+                    val combined = JSONArray()
+                    for (index in 0 until discoverProfiles.length()) {
+                        discoverProfiles.optJSONObject(index)?.let(combined::put)
+                    }
+                    val incoming = response.optJSONArray("users") ?: JSONArray()
+                    for (index in 0 until incoming.length()) {
+                        val item = incoming.optJSONObject(index) ?: continue
+                        if (knownIds.add(profileId(item))) combined.put(item)
+                    }
+                    discoverProfiles = combined
+                    discoverPage = requestedPage
+                    discoverHasMore = response.optJSONObject("pagination")?.optBoolean("hasMore") ?: false
+                    discoverPaginationLoading = false
+                    renderDiscoverResults()
+                }
+            } catch (error: Exception) {
+                mainHandler.post {
+                    if (requestGeneration != discoverRequestGeneration) return@post
+                    discoverPaginationLoading = false
+                    addHomeEmptyStateIn(discoverResultsContainer ?: body, error.message ?: "Couldn't load more profiles.", "Retry") {
+                        loadMoreDiscover()
+                    }
+                    if (error is ApiException && error.statusCode == 401) onSessionExpired()
+                }
+            }
+        }
+    }
+
+    private fun refreshDiscover() {
+        discoverRequestGeneration++
+        discoverPaginationLoading = false
+        if (!noBackendDiscoverFilters()) {
+            applyDiscoverFilters()
+            return
+        }
+        discoverProfiles = JSONArray()
+        discoverPage = 0
+        discoverHasMore = true
+        loadMoreDiscover()
+    }
+
+    private fun showAgeRangeDialog() {
+        val content = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(dp(12), dp(8), dp(12), dp(8))
+        }
+        val minPicker = NumberPicker(context).apply {
+            minValue = 18
+            maxValue = 99
+            value = discoverAgeMin ?: 18
+            wrapSelectorWheel = false
+            contentDescription = "Minimum age"
+        }
+        val maxPicker = NumberPicker(context).apply {
+            minValue = 18
+            maxValue = 99
+            value = discoverAgeMax ?: 99
+            wrapSelectorWheel = false
+            contentDescription = "Maximum age"
+        }
+        content.addView(minPicker, LayoutParams(dp(112), dp(150)))
+        addLabel(content, "to", 14, HOME_SECONDARY, false).also { content.addView(it) }
+        content.addView(maxPicker, LayoutParams(dp(112), dp(150)))
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Age range")
+            .setView(content)
+            .setNegativeButton("Cancel", null)
+            .setNeutralButton("Clear") { _, _ ->
+                discoverAgeMin = null
+                discoverAgeMax = null
+                applyDiscoverFilters()
+            }
+            .setPositiveButton("Apply") { _, _ ->
+                if (minPicker.value <= maxPicker.value) {
+                    discoverAgeMin = minPicker.value
+                    discoverAgeMax = maxPicker.value
+                    applyDiscoverFilters()
+                } else {
+                    showMessage("Minimum age must not exceed maximum age.")
+                }
+            }
+            .show()
+    }
+
+    private fun showGenderDialog() {
+        val options = arrayOf("All genders", "Female", "Male", "Non-binary")
+        val selected = when (discoverGender) {
+            "Female" -> 1
+            "Male" -> 2
+            "Non-binary" -> 3
+            else -> 0
+        }
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Gender preference")
+            .setSingleChoiceItems(options, selected) { dialog, which ->
+                discoverGender = options[which].takeIf { which != 0 }
+                dialog.dismiss()
+                applyDiscoverFilters()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun toggleOnlineFilter() {
+        if (user.plan !in setOf("basic", "premium", "pro")) {
+            showMessage("Online-only discovery is available on Basic, Premium, and Pro plans.")
+            return
+        }
+        discoverOnlineOnly = !discoverOnlineOnly
+        applyDiscoverFilters()
+    }
+
+    private fun toggleNearbyFilter() {
+        if (user.location.isBlank()) {
+            MaterialAlertDialogBuilder(context)
+                .setTitle("Add your city")
+                .setMessage("Nearby discovery uses the city saved on your profile. Add a location in Edit Profile first.")
+                .setPositiveButton("Edit profile") { _, _ -> openProfileEditor() }
+                .setNegativeButton("Cancel", null)
+                .show()
+            return
+        }
+        discoverNearby = !discoverNearby
+        applyDiscoverFilters()
+    }
+
+    private fun resetDiscoverFilters() {
+        discoverAgeMin = null
+        discoverAgeMax = null
+        discoverGender = null
+        discoverNearby = false
+        discoverOnlineOnly = false
+        discoverFilterError = null
+        discoverProfiles = JSONArray()
+        discoverPage = 0
+        discoverHasMore = true
+        applyDiscoverFilters()
+    }
+
+    private fun showDiscoverFilterSheet() {
+        val dialog = BottomSheetDialog(context)
+        val panel = LinearLayout(context).apply {
+            orientation = VERTICAL
+            setPadding(dp(22), dp(18), dp(22), dp(24))
+            setBackgroundColor(IVORY)
+        }
+        addHeading(panel, "Discovery filters", 22)
+        addLabel(panel, "Set preferences supported by your discovery feed.", 13, MUTED, false)
+            .also { panel.addView(it) }
+        addSpace(panel, 12)
+        val age = MaterialButton(context).apply {
+            text = "Age  ${discoverAgeMin ?: 18}–${discoverAgeMax ?: 99}"
+            isAllCaps = false
+            minHeight = dp(48)
+            setOnClickListener {
+                dialog.dismiss()
+                showAgeRangeDialog()
+            }
+        }
+        panel.addView(age, matchWidth())
+        val gender = MaterialButton(context).apply {
+            text = "Gender  ${discoverGender ?: "All genders"}"
+            isAllCaps = false
+            minHeight = dp(48)
+            setOnClickListener {
+                dialog.dismiss()
+                showGenderDialog()
+            }
+        }
+        panel.addView(gender, matchWidth())
+        val nearbyLabel = if (user.location.isBlank()) "Nearby (add your profile city first)" else "Nearby · ${user.location}"
+        val nearbySwitch = androidx.appcompat.widget.SwitchCompat(context).apply {
+            text = nearbyLabel
+            isChecked = discoverNearby
+            isEnabled = user.location.isNotBlank()
+            setTextColor(HOME_PRIMARY)
+        }
+        panel.addView(nearbySwitch, LayoutParams(MATCH_PARENT, dp(48)))
+        val onlineSwitch = androidx.appcompat.widget.SwitchCompat(context).apply {
+            text = "Online only"
+            isChecked = discoverOnlineOnly
+            isEnabled = user.plan in setOf("basic", "premium", "pro")
+            setTextColor(HOME_PRIMARY)
+        }
+        panel.addView(onlineSwitch, LayoutParams(MATCH_PARENT, dp(48)))
+        if (!onlineSwitch.isEnabled) {
+            addLabel(panel, "Online-only filtering requires a Basic, Premium, or Pro plan.", 12, MUTED, false)
+                .also { panel.addView(it) }
+        }
+        addSpace(panel, 12)
+        val actions = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+        }
+        val reset = MaterialButton(context).apply {
+            text = "Reset"
+            isAllCaps = false
+            setOnClickListener {
+                dialog.dismiss()
+                resetDiscoverFilters()
+            }
+        }
+        actions.addView(reset, LayoutParams(0, dp(50), 1f))
+        val apply = MaterialButton(context).apply {
+            text = "Apply filters"
+            isAllCaps = false
+            background = rounded(ROSE, 14)
+            setTextColor(ContextCompat.getColor(context, R.color.white))
+            setOnClickListener {
+                discoverNearby = nearbySwitch.isChecked
+                discoverOnlineOnly = onlineSwitch.isChecked
+                dialog.dismiss()
+                applyDiscoverFilters()
+            }
+        }
+        actions.addView(apply, LayoutParams(0, dp(50), 1f).apply { marginStart = dp(8) })
+        panel.addView(actions, matchWidth())
+        dialog.setContentView(panel)
+        dialog.show()
+    }
+
+    private fun applyDiscoverFilters() {
+        discoverRequestGeneration++
+        val requestGeneration = discoverRequestGeneration
+        discoverPaginationLoading = false
+        discoverFilterLoading = false
+        if (discoverOnlineOnly && user.plan !in setOf("basic", "premium", "pro")) {
+            discoverOnlineOnly = false
+            showMessage("Online-only discovery requires a Basic, Premium, or Pro plan.")
+        }
+        if (discoverNearby && user.location.isBlank()) {
+            discoverNearby = false
+            showMessage("Add a city to your profile to use Nearby.")
+        }
+        if (noBackendDiscoverFilters()) {
+            discoverFilterError = null
+            discoverProfiles = JSONArray()
+            discoverPage = 0
+            discoverHasMore = true
+            refreshDiscover()
+            return
+        }
+        discoverFilterLoading = true
+        discoverFilterError = null
+        renderDiscoverResults()
+        io.execute {
+            try {
+                val response = repository.filterDiscover(
+                    discoverAgeMin,
+                    discoverAgeMax,
+                    discoverGender,
+                    user.location.takeIf { discoverNearby },
+                    discoverOnlineOnly
+                )
+                val filtered = response.optJSONArray("users") ?: JSONArray()
+                if (discoverOnlineOnly || discoverNearby) {
+                    for (index in 0 until filtered.length()) {
+                        filtered.optJSONObject(index)?.apply {
+                            if (discoverOnlineOnly) put("discoveryOnline", true)
+                            if (discoverNearby) put("discoveryNearby", true)
+                        }
+                    }
+                }
+                mainHandler.post {
+                    if (!isAttachedToWindow) return@post
+                    if (requestGeneration != discoverRequestGeneration) return@post
+                    discoverProfiles = filtered
+                    discoverHasMore = false
+                    discoverFilterLoading = false
+                    discoverFilterError = null
+                    renderDiscoverResults()
+                }
+            } catch (error: Exception) {
+                mainHandler.post {
+                    if (requestGeneration != discoverRequestGeneration) return@post
+                    discoverFilterLoading = false
+                    discoverFilterError = error.message ?: "Couldn't apply discovery filters."
+                    renderDiscoverResults()
+                    if (error is ApiException && error.statusCode == 401) onSessionExpired()
+                }
+            }
+        }
     }
 
     private fun renderMatches() {
@@ -1284,37 +2336,111 @@ internal class AuthenticatedAppView(
     }
 
     private fun renderProfile() {
-        addHeading(body, "Your profile", 27)
+        addCard(body) {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addAvatar(this, user.profilePhoto, user.name, 96)
+            val details = LinearLayout(context).apply {
+                orientation = VERTICAL
+            }
+            val age = profileAge()
+            addText(details, user.name + (age?.let { ", $it" } ?: ""), 22, CHARCOAL, true)
+            if (user.isVerified) addText(details, "Verified profile", 13, ROSE, true)
+            if (user.location.isNotBlank()) addText(details, user.location, 14, MUTED)
+            if (user.dateOfBirth.isNotBlank()) addText(details, "Born ${formatDateOfBirth()}", 13, MUTED)
+            addView(details, LayoutParams(0, WRAP_CONTENT, 1f))
+        }
         addSpace(body, 14)
         addCard(body) {
-            addAvatar(this, user.profilePhoto, user.name, 92)
-            addSpace(this, 12)
-            addText(this, user.name + (user.age?.let { ", $it" } ?: ""), 23, CHARCOAL, true)
-            if (user.isVerified) addText(this, "Verified profile", 13, PLUM, true)
-            if (user.location.isNotBlank()) addText(this, user.location, 14, MUTED)
-            if (user.bio.isNotBlank()) {
-                addSpace(this, 12)
-                addText(this, user.bio, 15, CHARCOAL)
-            }
-            if (user.interests.isNotEmpty()) {
-                addSpace(this, 14)
-                addText(this, user.interests.joinToString("  ·  "), 14, PLUM)
-            }
+            addText(this, "About Me", 18, CHARCOAL, true)
+            addSpace(this, 8)
+            addText(
+                this,
+                user.bio.ifBlank { "No bio yet — edit your profile to add one." },
+                14,
+                if (user.bio.isBlank()) MUTED else CHARCOAL
+            )
             if (user.relationshipGoals.isNotBlank()) {
-                addSpace(this, 8)
-                addText(this, user.relationshipGoals, 14, MUTED)
+                addSpace(this, 14)
+                addText(this, "Relationship Goal", 13, MUTED, true)
+                addText(this, "♥  ${user.relationshipGoals}", 14, ROSE, true)
             }
         }
+        addSpace(body, 14)
+        addCard(body) {
+            addText(this, "Interests", 18, CHARCOAL, true)
+            addSpace(this, 10)
+            if (user.interests.isEmpty()) {
+                addText(this, "No interests added yet.", 13, MUTED)
+            } else {
+                addProfileChips(this, user.interests)
+            }
+        }
+        val extended = listOf(
+            "Education" to user.education,
+            "Profession" to user.profession,
+            "Height" to user.height?.let { "$it cm" }.orEmpty(),
+            "Income" to user.income,
+            "Religion" to user.religion,
+            "Smoking" to user.smoking,
+            "Drinking" to user.drinking
+        ).filter { it.second.isNotBlank() }
+        if (extended.isNotEmpty()) {
+            addSpace(body, 14)
+            addCard(body) {
+                addText(this, "About Me", 18, CHARCOAL, true)
+                addSpace(this, 8)
+                extended.forEach { (label, value) -> addProfileInfoRow(this, label, value) }
+            }
+        }
+        addSpace(body, 14)
+        addCard(body) {
+            val titleRow = LinearLayout(context).apply {
+                orientation = HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            addLabel(titleRow, "Account Information", 18, CHARCOAL, true).apply {
+                titleRow.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+            }
+            titleRow.addView(smallButton("Verify Account") {
+                openPage("https://elovialove.onrender.com/verify")
+            })
+            addView(titleRow, matchWidth())
+            addSpace(this, 8)
+            addProfileInfoRow(this, "Email", user.email)
+            addProfileInfoRow(this, "Gender", user.gender.ifBlank { "—" })
+            addProfileInfoRow(
+                this,
+                "Profile Status",
+                if (user.profileCompleted) "Complete" else "Incomplete",
+                if (user.profileCompleted) ContextCompat.getColor(context, R.color.home_online) else 0xFFE68A00.toInt()
+            )
+            addProfileVerificationRow(this, "Phone", user.phone.ifBlank { "Not added" },
+                user.phoneVerified, "Verify →", "https://elovialove.onrender.com/verify")
+            addProfileVerificationRow(this, "Email", user.email,
+                user.emailVerified, "Verify →", "https://elovialove.onrender.com/verify?tab=email")
+            val blueTickStatus = when {
+                user.isVerified || user.blueTickStatus == "approved" -> "Verified"
+                user.blueTickStatus == "pending" -> "Under Review"
+                else -> "Not verified"
+            }
+            val blueTickAction = if (user.isVerified || user.blueTickStatus == "approved") null
+                else "Get Verified →"
+            addProfileVerificationRow(
+                this,
+                "Blue Tick",
+                blueTickStatus,
+                user.isVerified || user.blueTickStatus == "approved",
+                blueTickAction,
+                "https://elovialove.onrender.com/verify?tab=bluetick",
+                pending = user.blueTickStatus == "pending"
+            )
+        }
+        addSpace(body, 14)
         addButton(body, "Change profile photo", false) {
             if (!isUploadingPhoto) onRequestPhoto()
         }
         addSpace(body, 14)
-        addButton(body, "Edit profile", true) {
-            currentScreen = "edit"
-            renderHeader()
-            renderEditProfile()
-        }
-        addSpace(body, 10)
         addButton(body, "Notifications", false) {
             currentScreen = "notifications"
             renderHeader()
@@ -1418,121 +2544,666 @@ internal class AuthenticatedAppView(
         addText(body, "Appearance follows your Android system light or dark theme.", 13, MUTED)
     }
 
-    private fun renderEditProfile() {
-        body.removeAllViews()
-        addHeading(body, "Edit profile", 27)
-        addText(body, "Update the profile details shown to other members.", 14, MUTED)
-        addButton(body, "Change profile photo", false) {
-            if (!isUploadingPhoto) onRequestPhoto()
-        }
-        addSpace(body, 18)
-        val name = textField("Name", user.name)
-        val bio = textField("About you", user.bio, multiline = true)
-        val location = textField("Location", user.location)
-        val interests = textField("Interests (comma-separated)", user.interests.joinToString(", "))
-        val goals = TextInputLayout(context).apply {
-            hint = "Relationship goals"
-            boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_OUTLINE
-            setDefaultHintTextColor(ColorStateList.valueOf(MUTED))
-            boxBackgroundColor = SURFACE
-        }
-        val goalInput = android.widget.AutoCompleteTextView(context).apply {
-            setText(user.relationshipGoals)
-            setAdapter(android.widget.ArrayAdapter(
-                context,
-                android.R.layout.simple_dropdown_item_1line,
-                listOf("Casual Dating", "Serious Relationship", "Marriage", "Friendship")
-            ))
-            threshold = 0
-            setOnClickListener { showDropDown() }
-            isFocusable = false
-        }
-        goals.addView(goalInput)
-        body.addView(goals, matchWidth())
-        addSpace(body, 18)
-        lateinit var save: MaterialButton
-        save = addButton(body, "Save profile", true) {
-            val value = name.text?.toString()?.trim().orEmpty()
-            if (value.length !in 2..50) {
-                name.error = "Name must be 2–50 characters"
-                return@addButton
-            }
-            save.isEnabled = false
-            save.text = "Saving…"
-            io.execute {
-                try {
-                    repository.updateProfile(
-                        value,
-                        bio.text?.toString().orEmpty(),
-                        location.text?.toString().orEmpty(),
-                        interests.text?.toString().orEmpty().split(',').map(String::trim).filter(String::isNotBlank),
-                        goalInput.text?.toString().orEmpty()
-                    )
-                    val refreshed = repository.getCurrentUser()
-                    user = repository.parseCurrentUser(refreshed)
-                    mainHandler.post {
-                        if (!isAttachedToWindow) return@post
-                        currentScreen = "tab"
-                        renderHeader()
-                        renderTab()
-                        showMessage("Profile updated.")
+    private fun setupChatSocket() {
+        try {
+            val socket = repository.createAuthenticatedSocket()
+            chatRealtimeSocket = socket
+            socket.on(Socket.EVENT_CONNECT, Emitter.Listener {
+                mainHandler.post {
+                    chatSocketConnected = true
+                    socket.emit("join", user.id)
+                    chatFallbackTask?.let(chatSyncHandler::removeCallbacks)
+                    chatFallbackTask = null
+                    if (chatSyncOnReconnect || chatEverConnected) {
+                        chatSyncOnReconnect = false
+                        if (currentScreen == "chat") syncChatAfterReconnect() else syncConversationsOnly()
                     }
-                } catch (error: Exception) {
-                    mainHandler.post {
-                        save.isEnabled = true
-                        save.text = "Save profile"
-                        showError(error)
-                    }
+                    chatEverConnected = true
                 }
-            }
-        }
-        addSpace(body, 10)
-        addButton(body, "Cancel", false) {
-            currentScreen = "tab"
-            renderHeader()
-            renderTab()
+            })
+            socket.on(Socket.EVENT_DISCONNECT, Emitter.Listener {
+                mainHandler.post {
+                    chatSocketConnected = false
+                    scheduleChatFallbackSync()
+                }
+            })
+            socket.on(Socket.EVENT_CONNECT_ERROR, Emitter.Listener { args ->
+                android.util.Log.w("EloviaChat", "Real-time chat connection failed: ${args.firstOrNull()}")
+                mainHandler.post {
+                    chatSocketConnected = false
+                    scheduleChatFallbackSync()
+                }
+            })
+            socket.on("private_message", Emitter.Listener { args ->
+                val event = args.firstOrNull() as? JSONObject ?: return@Listener
+                val message = event.optJSONObject("message") ?: return@Listener
+                mainHandler.post {
+                    if (!isAttachedToWindow) return@post
+                    handleIncomingChatMessage(message, event)
+                }
+            })
+            socket.on("messages_read", Emitter.Listener { args ->
+                val event = args.firstOrNull() as? JSONObject ?: return@Listener
+                mainHandler.post {
+                    val readerId = event.optString("by")
+                    val chatId = activeChatUserId
+                    if (currentScreen == "chat" && chatId != null && readerId == chatId) {
+                        updateChatReadReceipts(chatId)
+                    }
+                    updateConversationReadReceipt(readerId)
+                }
+            })
+            socket.on("messages_deleted", Emitter.Listener { args ->
+                val event = args.firstOrNull() as? JSONObject ?: return@Listener
+                mainHandler.post {
+                    val peerId = activeChatUserId ?: return@post
+                    if (event.optString("userId") != peerId && event.optString("by") != peerId) return@post
+                    messages = JSONArray()
+                    chatMessageRows.clear()
+                    chatMessageContainer?.removeAllViews()
+                    syncConversationsOnly()
+                }
+            })
+            socket.connect()
+        } catch (error: Exception) {
+            if (error is ApiException && error.statusCode == 401) onSessionExpired()
+            else android.util.Log.w("EloviaChat", "Real-time chat is unavailable; using periodic sync.", error)
+            scheduleChatFallbackSync()
         }
     }
 
-    private fun renderChat() {
+    private fun handleIncomingChatMessage(message: JSONObject, event: JSONObject) {
+        val sender = senderId(message).ifBlank { event.optString("from") }
+        val receiver = receiverId(message).ifBlank { event.optString("to") }
+        if (sender != user.id && receiver != user.id) return
+        val messageId = chatMessageKey(message)
+        if (messageId.startsWith("client:")) {
+            android.util.Log.w("EloviaChat", "Ignoring real-time message without a persisted server ID.")
+            return
+        }
+        val peerId = if (sender == user.id) receiver else sender
+        val visibleInActiveChat = currentScreen == "chat" && activeChatUserId == peerId &&
+            windowVisibility == VISIBLE
+        val incoming = JSONObject(message.toString()).apply {
+            put("sending", false)
+            put("sendFailed", false)
+        }
+        if (currentScreen == "chat" && activeChatUserId == peerId) upsertChatMessage(incoming)
+        val isNewMessage = seenChatMessageIds.add(messageId)
+        while (seenChatMessageIds.size > MAX_SEEN_CHAT_MESSAGES) {
+            seenChatMessageIds.remove(seenChatMessageIds.first())
+        }
+        updateConversationPreview(
+            incoming,
+            peerId,
+            sentByMe = sender == user.id,
+            markRead = visibleInActiveChat,
+            isNewMessage = isNewMessage
+        )
+        updateNavigationBadges()
+        renderChatListIfVisible()
+        if (sender != user.id && visibleInActiveChat) scheduleMarkMessagesRead(peerId)
+    }
+
+    private fun scheduleMarkMessagesRead(peerId: String) {
+        chatReadTask?.let(chatReadHandler::removeCallbacks)
+        val task = Runnable {
+            if (currentScreen != "chat" || activeChatUserId != peerId || windowVisibility != VISIBLE) return@Runnable
+            io.execute {
+                try {
+                    repository.markMessagesRead(peerId)
+                } catch (error: Exception) {
+                    if (error is ApiException && error.statusCode == 401) mainHandler.post { onSessionExpired() }
+                    else android.util.Log.w("EloviaChat", "Couldn't mark incoming messages as read.", error)
+                }
+            }
+        }
+        chatReadTask = task
+        chatReadHandler.postDelayed(task, 250)
+    }
+
+    private fun scheduleChatFallbackSync() {
+        chatFallbackTask?.let(chatSyncHandler::removeCallbacks)
+        if (currentScreen != "chat" || chatSocketConnected || !chatHostActive || !isAttachedToWindow) return
+        val task = Runnable {
+            if (currentScreen == "chat" && !chatSocketConnected && chatHostActive) {
+                syncChatAfterReconnect()
+                scheduleChatFallbackSync()
+            }
+        }
+        chatFallbackTask = task
+        chatSyncHandler.postDelayed(task, CHAT_FALLBACK_SYNC_INTERVAL_MS)
+    }
+
+    private fun syncChatAfterReconnect() {
+        val peerId = activeChatUserId ?: return
+        val requestGeneration = chatHistoryGeneration
+        io.execute {
+            try {
+                val messageResponse = repository.getMessages(peerId)
+                val conversationResponse = repository.getConversations()
+                mainHandler.post {
+                    if (!isAttachedToWindow || activeChatUserId != peerId ||
+                        requestGeneration != chatHistoryGeneration
+                    ) return@post
+                    mergeChatMessageArrays(messages, messageResponse.optJSONArray("messages") ?: JSONArray())
+                        .also { merged ->
+                            messages = merged
+                            for (index in 0 until merged.length()) {
+                                merged.optJSONObject(index)?.let { upsertChatMessage(it) }
+                            }
+                        }
+                    conversations = conversationResponse.optJSONArray("conversations") ?: conversations
+                    updateNavigationBadges()
+                    updateConversationReadState(peerId)
+                    renderChatListIfVisible()
+                }
+            } catch (error: Exception) {
+                mainHandler.post {
+                    if (error is ApiException && error.statusCode == 401) onSessionExpired()
+                    else android.util.Log.w("EloviaChat", "Couldn't sync chat after reconnect.", error)
+                }
+            }
+        }
+    }
+
+    private fun syncConversationsOnly() {
+        io.execute {
+            try {
+                val response = repository.getConversations()
+                mainHandler.post {
+                    if (!isAttachedToWindow) return@post
+                    conversations = response.optJSONArray("conversations") ?: JSONArray()
+                    updateNavigationBadges()
+                    renderChatListIfVisible()
+                }
+            } catch (error: Exception) {
+                if (error is ApiException && error.statusCode == 401) mainHandler.post { onSessionExpired() }
+                else android.util.Log.w("EloviaChat", "Couldn't refresh conversations.", error)
+            }
+        }
+    }
+
+    private fun renderEditProfile() {
+        body.removeAllViews()
+        profileGoal = user.relationshipGoals.ifBlank { "Casual Dating" }
+        profileInterests = user.interests.toList()
+        profileEducation = user.education
+        profileProfession = user.profession
+        profileIncome = user.income
+        profileReligion = user.religion
+        profileSmoking = user.smoking
+        profileDrinking = user.drinking
+        profileHeightField = null
+        addText(body, "Update the profile details shown to other members.", 14, MUTED)
+        addSpace(body, 14)
+        addCard(body) {
+            gravity = Gravity.CENTER_HORIZONTAL
+            addAvatar(this, user.profilePhoto, user.name, 112)
+            addSpace(this, 8)
+            addText(this, "Tap below to change your photo", 13, MUTED)
+            addSpace(this, 8)
+            addButton(this, if (isUploadingPhoto) "Uploading photo…" else "Change Photo", false) {
+                if (!isUploadingPhoto) onRequestPhoto()
+            }.isEnabled = !isUploadingPhoto
+        }
+        addSpace(body, 14)
+
+        lateinit var name: EditText
+        lateinit var location: EditText
+        lateinit var bio: EditText
+        addCard(body) {
+            addText(this, "Basic Info", 16, CHARCOAL, true)
+            addSpace(this, 10)
+            name = profileEditField(this, "Display Name", user.name, "Your name", maxLength = 50)
+            location = profileEditField(this, "Location", user.location, "e.g. New York, NY", maxLength = 100)
+        }
+        addSpace(body, 12)
+        addCard(body) {
+            addText(this, "About Me", 16, CHARCOAL, true)
+            addSpace(this, 10)
+            bio = profileEditField(
+                this,
+                "",
+                user.bio,
+                "Tell people a bit about yourself — your personality, what you enjoy, what you're looking for...",
+                maxLength = 500,
+                multiline = true
+            )
+            val bioCount = addLabel(this, "${user.bio.length}/500", 12, MUTED, false).apply {
+                gravity = Gravity.END
+                this@addCard.addView(this, matchWidth())
+            }
+            bio.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    bioCount.text = "${s?.length ?: 0}/500"
+                }
+                override fun afterTextChanged(s: Editable?) = Unit
+            })
+        }
+        addSpace(body, 10)
+
+        addCard(body) {
+            addText(this, "Relationship Goal", 16, CHARCOAL, true)
+            addSpace(this, 8)
+            addChoiceChips(
+                this,
+                listOf("Casual Dating", "Serious Relationship", "Marriage", "Friendship"),
+                listOf(user.relationshipGoals).filter(String::isNotBlank),
+                multiple = false
+            ) { selected -> profileGoal = selected.firstOrNull().orEmpty() }
+        }
+        addSpace(body, 12)
+        addCard(body) {
+            addText(this, "Interests", 16, CHARCOAL, true)
+            addText(this, "Pick everything that applies to you", 12, MUTED)
+            addSpace(this, 8)
+            lateinit var selectedCount: TextView
+            addChoiceChips(
+                this,
+                PROFILE_INTEREST_OPTIONS,
+                user.interests,
+                multiple = true
+            ) { selected ->
+                profileInterests = selected
+                selectedCount.text = "${selected.size} selected"
+            }
+            addSpace(this, 6)
+            selectedCount = addLabel(this, "${profileInterests.size} selected", 12, ROSE, true)
+            addView(selectedCount, matchWidth())
+        }
+        addSpace(body, 12)
+        addCard(body) {
+            addText(this, "Education & Career", 16, CHARCOAL, true)
+            addText(this, "Premium Filter", 11, MUTED)
+            addSpace(this, 10)
+            addText(this, "Education", 13, CHARCOAL, true)
+            addChoiceChips(
+                this,
+                PROFILE_EDUCATION_OPTIONS,
+                listOf(user.education).filter(String::isNotBlank),
+                multiple = false
+            ) { selected -> profileEducation = selected.firstOrNull().orEmpty() }
+            addSpace(this, 8)
+            addText(this, "Profession", 13, CHARCOAL, true)
+            addChoiceChips(
+                this,
+                PROFILE_PROFESSION_OPTIONS,
+                listOf(user.profession).filter(String::isNotBlank),
+                multiple = false
+            ) { selected -> profileProfession = selected.firstOrNull().orEmpty() }
+        }
+        addSpace(body, 12)
+        addCard(body) {
+            addText(this, "Lifestyle", 16, CHARCOAL, true)
+            addText(this, "Premium Filter", 11, MUTED)
+            addSpace(this, 10)
+            addText(this, "Smoking", 13, CHARCOAL, true)
+            addChoiceChips(
+                this,
+                PROFILE_LIFESTYLE_OPTIONS,
+                listOf(user.smoking).filter(String::isNotBlank),
+                multiple = false
+            ) { selected -> profileSmoking = selected.firstOrNull().orEmpty() }
+            addSpace(this, 8)
+            addText(this, "Drinking", 13, CHARCOAL, true)
+            addChoiceChips(
+                this,
+                PROFILE_LIFESTYLE_OPTIONS,
+                listOf(user.drinking).filter(String::isNotBlank),
+                multiple = false
+            ) { selected -> profileDrinking = selected.firstOrNull().orEmpty() }
+        }
+        addSpace(body, 12)
+        addCard(body) {
+            addText(this, "More About You", 16, CHARCOAL, true)
+            addText(this, "Pro Filter", 11, MUTED)
+            addSpace(this, 10)
+            profileEditField(this, "Height (cm)", user.height?.toString().orEmpty(), "e.g. 170", maxLength = 3)
+                .apply { inputType = android.text.InputType.TYPE_CLASS_NUMBER }
+                .also { profileHeightField = it }
+            addText(this, "Income Range", 13, CHARCOAL, true)
+            addChoiceChips(
+                this,
+                PROFILE_INCOME_OPTIONS,
+                listOf(user.income).filter(String::isNotBlank),
+                multiple = false
+            ) { selected -> profileIncome = selected.firstOrNull().orEmpty() }
+            addSpace(this, 8)
+            addText(this, "Religion", 13, CHARCOAL, true)
+            addChoiceChips(
+                this,
+                PROFILE_RELIGION_OPTIONS,
+                listOf(user.religion).filter(String::isNotBlank),
+                multiple = false
+            ) { selected -> profileReligion = selected.firstOrNull().orEmpty() }
+        }
+        addSpace(body, 14)
+        addCard(body) {
+            addText(this, "Account Information", 16, CHARCOAL, true)
+            addProfileInfoRow(this, "Email", user.email)
+            addProfileInfoRow(this, "Gender", user.gender.ifBlank { "—" })
+            addProfileInfoRow(this, "Date of Birth", formatDateOfBirth().ifBlank { "—" })
+            addText(this, "Account details are managed separately and cannot be edited here.", 12, MUTED)
+        }
+        addSpace(body, 14)
+        val actions = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+        }
+        val cancel = MaterialButton(context).apply {
+            text = "Cancel"
+            isAllCaps = false
+            minHeight = dp(50)
+            cornerRadius = dp(17)
+            setOnClickListener {
+                currentScreen = "tab"
+                renderHeader()
+                renderTab()
+            }
+        }
+        val save = MaterialButton(context).apply {
+            text = if (isSavingProfile) "Saving…" else "Save Changes"
+            isAllCaps = false
+            minHeight = dp(50)
+            cornerRadius = dp(17)
+            background = rounded(ROSE, 17)
+            setTextColor(ContextCompat.getColor(context, R.color.white))
+            isEnabled = !isSavingProfile
+            setOnClickListener { saveProfileChanges(name, location, bio, this) }
+        }
+        actions.addView(cancel, LayoutParams(0, dp(52), 1f).apply { marginEnd = dp(6) })
+        actions.addView(save, LayoutParams(0, dp(52), 1f).apply { marginStart = dp(6) })
+        body.addView(actions, matchWidth())
+    }
+
+    private fun profileEditField(
+        parent: LinearLayout,
+        label: String,
+        value: String,
+        placeholder: String,
+        maxLength: Int,
+        multiline: Boolean = false
+    ): EditText {
+        if (label.isNotBlank()) {
+            addText(parent, label, 13, CHARCOAL, true)
+            addSpace(parent, 4)
+        }
+        val inputLayout = TextInputLayout(context).apply {
+            boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_OUTLINE
+            boxBackgroundColor = SURFACE
+            setDefaultHintTextColor(ColorStateList.valueOf(MUTED))
+        }
+        val field = EditText(context).apply {
+            setText(value)
+            hint = placeholder
+            textSize = 14f
+            setTextColor(CHARCOAL)
+            setHintTextColor(MUTED)
+            filters = arrayOf(android.text.InputFilter.LengthFilter(maxLength))
+            if (multiline) {
+                minLines = 4
+                maxLines = 5
+                gravity = Gravity.TOP
+                inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                    android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+                    android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            } else {
+                maxLines = 1
+                inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                    android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            }
+        }
+        inputLayout.addView(field)
+        parent.addView(inputLayout, matchWidth())
+        addSpace(parent, 12)
+        return field
+    }
+
+    private fun addChoiceChips(
+        parent: LinearLayout,
+        options: List<String>,
+        selected: List<String>,
+        multiple: Boolean,
+        onChanged: (List<String>) -> Unit
+    ) {
+        val chipGroup = ChipGroup(context).apply {
+            isSingleSelection = !multiple
+            isSelectionRequired = false
+            chipSpacingHorizontal = dp(6)
+            chipSpacingVertical = dp(4)
+        }
+        val labelsById = mutableMapOf<Int, String>()
+        val chipColors = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(ROSE, SURFACE)
+        )
+        val textColors = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(ContextCompat.getColor(context, R.color.white), CHARCOAL)
+        )
+        options.forEach { option ->
+            val chip = Chip(context).apply {
+                id = View.generateViewId()
+                text = option
+                isCheckable = true
+                isChecked = option in selected
+                chipBackgroundColor = chipColors
+                setTextColor(textColors)
+                chipStrokeColor = ColorStateList.valueOf(HOME_DIVIDER)
+                chipStrokeWidth = dp(1).toFloat()
+                textSize = 13f
+                minHeight = dp(40)
+            }
+            labelsById[chip.id] = option
+            chipGroup.addView(chip)
+        }
+        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            onChanged(checkedIds.mapNotNull(labelsById::get))
+        }
+        parent.addView(chipGroup, matchWidth())
+    }
+
+    private fun addProfileChips(parent: LinearLayout, values: List<String>) {
+        val group = ChipGroup(context).apply {
+            isSingleLine = false
+            chipSpacingHorizontal = dp(6)
+            chipSpacingVertical = dp(4)
+        }
+        values.forEach { value ->
+            group.addView(Chip(context).apply {
+                text = value
+                isCheckable = false
+                chipBackgroundColor = ColorStateList.valueOf(PALE_ROSE)
+                setTextColor(ROSE)
+                textSize = 13f
+            })
+        }
+        parent.addView(group, matchWidth())
+    }
+
+    private fun addProfileInfoRow(parent: LinearLayout, label: String, value: String, valueColor: Int = CHARCOAL) {
+        val row = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(12), 0, dp(12))
+        }
+        addLabel(row, label, 13, MUTED, false).apply {
+            row.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+        }
+        addLabel(row, value.ifBlank { "—" }, 13, valueColor, true).apply {
+            gravity = Gravity.END
+            row.addView(this)
+        }
+        parent.addView(row, matchWidth())
+        val divider = View(context).apply { setBackgroundColor(HOME_DIVIDER) }
+        parent.addView(divider, LayoutParams(MATCH_PARENT, dp(1)))
+    }
+
+    private fun addProfileVerificationRow(
+        parent: LinearLayout,
+        title: String,
+        detail: String,
+        verified: Boolean,
+        action: String?,
+        url: String,
+        pending: Boolean = false
+    ) {
+        val row = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(12), 0, dp(12))
+        }
+        val labels = LinearLayout(context).apply { orientation = VERTICAL }
+        addText(labels, title, 13, CHARCOAL, true)
+        addText(labels, detail, 12, MUTED)
+        row.addView(labels, LayoutParams(0, WRAP_CONTENT, 1f))
+        val status = when {
+            verified -> "✓ Verified"
+            pending -> "Under Review"
+            else -> action.orEmpty()
+        }
+        addLabel(
+            row,
+            status,
+            12,
+            when {
+                verified -> ContextCompat.getColor(context, R.color.home_online)
+                pending -> 0xFFE68A00.toInt()
+                else -> ROSE
+            },
+            true
+        ).apply {
+            gravity = Gravity.END or Gravity.CENTER_VERTICAL
+            if (!verified && !pending) {
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { openPage(url) }
+            }
+            row.addView(this)
+        }
+        parent.addView(row, matchWidth())
+        parent.addView(View(context).apply { setBackgroundColor(HOME_DIVIDER) }, LayoutParams(MATCH_PARENT, dp(1)))
+    }
+
+    private fun saveProfileChanges(name: EditText, location: EditText, bio: EditText, button: MaterialButton) {
+        val displayName = name.text?.toString()?.trim().orEmpty()
+        val city = location.text?.toString()?.trim().orEmpty()
+        val about = bio.text?.toString().orEmpty()
+        val heightValue = profileHeightField?.text?.toString()?.trim().orEmpty()
+        val height = if (heightValue.isBlank()) null else heightValue.toIntOrNull()
+        when {
+            displayName.length !in 2..50 -> {
+                name.error = "Name must be 2–50 characters"
+                return
+            }
+            city.length > 100 -> {
+                location.error = "Location must be 100 characters or fewer"
+                return
+            }
+            about.length > 500 -> {
+                bio.error = "About Me must be 500 characters or fewer"
+                return
+            }
+            heightValue.isNotBlank() && (height == null || height !in 100..250) -> {
+                profileHeightField?.error = "Enter a height between 100 and 250 cm"
+                return
+            }
+            profileGoal !in PROFILE_RELATIONSHIP_OPTIONS -> {
+                showMessage("Choose a relationship goal.")
+                return
+            }
+        }
+        if (isSavingProfile) return
+        isSavingProfile = true
+        button.isEnabled = false
+        button.text = "Saving…"
+        io.execute {
+            try {
+                repository.updateProfile(
+                    displayName,
+                    about,
+                    city,
+                    profileInterests,
+                    profileGoal,
+                    profileEducation,
+                    profileProfession,
+                    height,
+                    profileIncome,
+                    profileReligion,
+                    profileSmoking,
+                    profileDrinking
+                )
+                val refreshed = repository.parseCurrentUser(repository.getCurrentUser())
+                mainHandler.post {
+                    if (!isAttachedToWindow) return@post
+                    isSavingProfile = false
+                    user = refreshed
+                    currentScreen = "tab"
+                    renderHeader()
+                    renderTab()
+                    showMessage("Profile updated successfully.")
+                }
+            } catch (error: Exception) {
+                mainHandler.post {
+                    if (!isAttachedToWindow) return@post
+                    isSavingProfile = false
+                    button.isEnabled = true
+                    button.text = "Save Changes"
+                    if (error is ApiException && error.statusCode == 401) onSessionExpired()
+                    else showMessage(error.message ?: "Profile update failed. Please try again.")
+                }
+            }
+        }
+    }
+
+    private fun profileAge(): Int? {
+        val date = runCatching { LocalDate.parse(user.dateOfBirth.take(10)) }.getOrNull()
+        return date?.let { java.time.Period.between(it, LocalDate.now()).years } ?: user.age
+    }
+
+    private fun formatDateOfBirth(): String {
+        val date = runCatching { LocalDate.parse(user.dateOfBirth.take(10)) }.getOrNull() ?: return ""
+        return date.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.US))
+    }
+
+    private fun renderChat(preserveComposer: Boolean = false) {
         val person = chatUser ?: return
         body.removeAllViews()
+        chatMessageRows.clear()
+        chatMessageContainer = null
         chatComposer.visibility = VISIBLE
         navigation.visibility = GONE
         addText(body, "Messages are shared only with your match.", 13, MUTED)
-        addSpace(body, 10)
-        if (loading) {
-            addState("Loading conversation…", loading = true)
-            return
-        }
         if (loadError != null) {
             addState(loadError!!, "Try again") { loadChat() }
-            return
+        } else if (loading) {
+            addState("Loading conversation…", loading = true)
         }
-        if (messages.length() == 0) {
-            addState("Say hello to ${person.optString("name")} and start the conversation.")
-        } else {
-            for (index in 0 until messages.length()) {
-                val message = messages.optJSONObject(index) ?: continue
-                val senderValue = message.opt("sender")
-                val senderId = if (senderValue is JSONObject) senderValue.optString("_id") else senderValue?.toString().orEmpty()
-                val mine = senderId == user.id
-                val bubble = TextView(context).apply {
-                    text = message.optString("content")
-                    textSize = 15f
-                    setTextColor(if (mine) ON_ACCENT else CHARCOAL)
-                    setPadding(dp(15), dp(11), dp(15), dp(11))
-                    background = rounded(if (mine) ROSE else SURFACE, 18)
-                }
-                val row = LinearLayout(context).apply {
-                    gravity = if (mine) Gravity.END else Gravity.START
-                    setPadding(dp(5), dp(4), dp(5), dp(4))
-                    addView(bubble, LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
-                }
-                body.addView(row, matchWidth())
-            }
+        val messageList = LinearLayout(context).apply {
+            orientation = VERTICAL
         }
-        renderChatComposer(person)
+        chatMessageContainer = messageList
+        if (!loading && loadError == null && messages.length() == 0) {
+            messageList.addView(addLabel(
+                messageList,
+                "Say hello to ${person.optString("name")} and start the conversation.",
+                14,
+                MUTED,
+                false
+            ).apply {
+                gravity = Gravity.CENTER
+                setPadding(dp(24), dp(28), dp(24), dp(28))
+                tag = CHAT_EMPTY_STATE_TAG
+            }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+        }
+        body.addView(messageList, matchWidth())
+        for (index in 0 until messages.length()) {
+            messages.optJSONObject(index)?.let { addChatMessageRow(it, index, scrollToLatest = false) }
+        }
+        if (!preserveComposer || chatInputField == null) renderChatComposer(person)
+        if (messages.length() > 0) scroll.post { scroll.fullScroll(View.FOCUS_DOWN) }
+        scheduleChatFallbackSync()
     }
 
     private fun renderChatComposer(person: JSONObject) {
@@ -1549,6 +3220,7 @@ internal class AuthenticatedAppView(
             minHeight = dp(48)
             contentDescription = "Message"
         }
+        chatInputField = field
         chatComposer.addView(field, LayoutParams(0, WRAP_CONTENT, 1f))
         val sendButton = iconButton(
             R.drawable.ic_send,
@@ -1556,16 +3228,20 @@ internal class AuthenticatedAppView(
             ROSE,
             ContextCompat.getColor(context, R.color.white)
         ) { }
+        chatSendButton = sendButton
         chatComposer.addView(sendButton, LayoutParams(dp(48), dp(48)).apply {
             marginStart = dp(8)
         })
         val send = {
-            val content = field.text?.toString()?.trim().orEmpty()
-            if (content.isNotEmpty() && !isSendingMessage) sendMessage(person, content)
+            val content = field.text?.toString().orEmpty()
+            if (content.isNotBlank()) {
+                field.text?.clear()
+                sendMessage(person, content.trim())
+            }
         }
         sendButton.setOnClickListener { send() }
         fun updateSendButton() {
-            val canSend = !isSendingMessage && !field.text.isNullOrBlank()
+            val canSend = field.text?.isNotBlank() == true
             sendButton.isEnabled = canSend
             sendButton.alpha = if (canSend) 1f else 0.55f
         }
@@ -1578,7 +3254,7 @@ internal class AuthenticatedAppView(
         field.setOnEditorActionListener { _, actionId, event ->
             val sendRequested = actionId == EditorInfo.IME_ACTION_SEND ||
                 actionId == EditorInfo.IME_ACTION_DONE ||
-                (event?.keyCode == KeyEvent.KEYCODE_ENTER && event?.action == KeyEvent.ACTION_DOWN)
+                (event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
             if (sendRequested) send()
             sendRequested
         }
@@ -1586,73 +3262,424 @@ internal class AuthenticatedAppView(
 
     private fun loadChat() {
         val person = chatUser ?: return
+        val userId = person.optString("id").ifBlank { person.optString("_id") }
+        if (userId.isBlank()) {
+            loadError = "This conversation doesn't have a valid user ID."
+            loading = false
+            renderChat(preserveComposer = true)
+            return
+        }
+        val requestGeneration = ++chatHistoryGeneration
         loading = true
         loadError = null
-        renderChat()
+        renderChat(preserveComposer = true)
         io.execute {
             try {
-                val response = repository.getMessages(person.optString("id").ifBlank { person.optString("_id") })
+                val response = repository.getMessages(userId)
                 mainHandler.post {
-                    if (!isAttachedToWindow) return@post
-                    messages = response.optJSONArray("messages") ?: JSONArray()
+                    if (!isAttachedToWindow || requestGeneration != chatHistoryGeneration ||
+                        currentScreen != "chat" || activeChatUserId != userId
+                    ) return@post
+                    messages = mergeChatMessageArrays(messages, response.optJSONArray("messages") ?: JSONArray())
+                    for (index in 0 until messages.length()) {
+                        val serverMessageId = messages.optJSONObject(index)?.let(::chatMessageKey).orEmpty()
+                        if (serverMessageId.isNotBlank() && !serverMessageId.startsWith("client:")) {
+                            seenChatMessageIds.add(serverMessageId)
+                        }
+                    }
                     loading = false
                     loadError = null
-                    renderChat()
+                    updateConversationReadState(userId)
+                    renderChat(preserveComposer = true)
                 }
             } catch (error: Exception) {
                 mainHandler.post {
+                    if (requestGeneration != chatHistoryGeneration || activeChatUserId != userId) return@post
                     loading = false
                     loadError = error.message ?: "Couldn't load this conversation."
-                    renderChat()
+                    if (error is ApiException && error.statusCode == 401) onSessionExpired()
+                    else renderChat(preserveComposer = true)
                 }
             }
         }
     }
 
-    private fun sendMessage(person: JSONObject, content: String) {
-        if (isSendingMessage || content.isBlank()) return
-        isSendingMessage = true
-        val id = person.optString("id").ifBlank { person.optString("_id") }
+    private fun sendMessage(person: JSONObject, content: String, clientMessageId: String = UUID.randomUUID().toString()) {
+        if (content.isBlank() || !sendingChatClientIds.add(clientMessageId)) return
+        val userId = person.optString("id").ifBlank { person.optString("_id") }
+        if (userId.isBlank()) {
+            sendingChatClientIds.remove(clientMessageId)
+            showMessage("This conversation doesn't have a valid user ID.")
+            return
+        }
+        val optimistic = JSONObject()
+            .put("clientMessageId", clientMessageId)
+            .put("sender", user.id)
+            .put("receiver", userId)
+            .put("content", content)
+            .put("createdAt", Instant.now().toString())
+            .put("isRead", false)
+            .put("sending", true)
+        upsertChatMessage(optimistic, forceScroll = true)
+        updateConversationPreview(optimistic, userId, sentByMe = true)
+        updateNavigationBadges()
         io.execute {
             try {
-                repository.sendMessage(id, content)
-                val response = repository.getMessages(id)
+                val response = repository.sendMessage(userId, content, clientMessageId)
+                val confirmed = response.optJSONObject("message")
+                    ?: throw ApiException("The server didn't confirm this message.")
+                if (!confirmed.has("clientMessageId")) confirmed.put("clientMessageId", clientMessageId)
+                confirmed.put("sending", false)
+                confirmed.put("sendFailed", false)
                 mainHandler.post {
-                    if (!isAttachedToWindow) return@post
-                    isSendingMessage = false
-                    messages = response.optJSONArray("messages") ?: JSONArray()
-                    renderChat()
+                    sendingChatClientIds.remove(clientMessageId)
+                    failedChatMessages[userId]?.removeAll { it.optString("clientMessageId") == clientMessageId }
+                    if (activeChatUserId == userId && currentScreen == "chat") upsertChatMessage(confirmed)
+                    updateConversationPreview(confirmed, userId, sentByMe = true)
+                    updateNavigationBadges()
+                    updateChatSendButton()
+                    renderChatListIfVisible()
                 }
             } catch (error: Exception) {
                 mainHandler.post {
-                    isSendingMessage = false
-                    showError(error)
+                    sendingChatClientIds.remove(clientMessageId)
+                    var confirmedInSocket = false
+                    if (activeChatUserId == userId && currentScreen == "chat") {
+                        val currentMessage = findChatMessageByClientId(clientMessageId)
+                        val persisted = currentMessage?.optString("_id")?.isNotBlank() == true ||
+                            currentMessage?.optString("id")?.isNotBlank() == true
+                        confirmedInSocket = persisted
+                        if (!persisted) {
+                            currentMessage?.apply {
+                                put("sending", false)
+                                put("sendFailed", true)
+                                failedChatMessages.getOrPut(userId) { mutableListOf() }
+                                    .removeAll { it.optString("clientMessageId") == clientMessageId }
+                                failedChatMessages.getOrPut(userId) { mutableListOf() }
+                                    .add(JSONObject(currentMessage.toString()))
+                            }?.let(::upsertChatMessage)
+                        }
+                    }
+                    updateChatSendButton()
+                    if (error is ApiException && error.statusCode == 401) onSessionExpired()
+                    else if (!confirmedInSocket) {
+                        showMessage(error.message ?: "Message couldn't be sent. Tap Retry.")
+                    }
                 }
             }
         }
+    }
+
+    private fun upsertChatMessage(message: JSONObject, forceScroll: Boolean = false) {
+        val container = chatMessageContainer ?: return
+        val clientId = message.optString("clientMessageId").takeIf(String::isNotBlank)
+        val serverId = message.optString("_id").ifBlank { message.optString("id") }
+        val oldKeys = chatMessageRows.keys.filter { key ->
+            key == serverId || (clientId != null && key == "client:$clientId")
+        }
+        val wasNearBottom = isChatNearBottom()
+        oldKeys.forEach { key ->
+            chatMessageRows.remove(key)?.let(container::removeView)
+        }
+        if (container.childCount == 1 && container.getChildAt(0).tag == CHAT_EMPTY_STATE_TAG) {
+            container.removeAllViews()
+        }
+
+        messages = mergeChatMessageArrays(messages, JSONArray().put(message))
+        val position = (0 until messages.length()).firstOrNull { index ->
+            messages.optJSONObject(index)?.let { sameChatMessage(it, message) } == true
+        } ?: container.childCount
+        val key = chatMessageKey(message)
+        val row = createChatMessageRow(message)
+        chatMessageRows[key] = row
+        container.addView(row, position.coerceIn(0, container.childCount), matchWidth())
+        if (wasNearBottom || forceScroll) {
+            scroll.post { scroll.fullScroll(View.FOCUS_DOWN) }
+        }
+    }
+
+    private fun addChatMessageRow(message: JSONObject, index: Int, scrollToLatest: Boolean) {
+        val container = chatMessageContainer ?: return
+        val key = chatMessageKey(message)
+        if (chatMessageRows.containsKey(key)) return
+        val row = createChatMessageRow(message)
+        chatMessageRows[key] = row
+        container.addView(row, index.coerceIn(0, container.childCount), matchWidth())
+        if (scrollToLatest) scroll.post { scroll.fullScroll(View.FOCUS_DOWN) }
+    }
+
+    private fun createChatMessageRow(message: JSONObject): View {
+        val mine = senderId(message) == user.id
+        val clientId = message.optString("clientMessageId")
+        val bubble = LinearLayout(context).apply {
+            orientation = VERTICAL
+            setPadding(dp(13), dp(9), dp(13), dp(6))
+            background = rounded(
+                if (mine) ROSE else SURFACE,
+                16
+            )
+            elevation = dp(1).toFloat()
+        }
+        val content = TextView(context).apply {
+            text = message.optString("content")
+            textSize = 15f
+            setTextColor(if (mine) ContextCompat.getColor(context, R.color.white) else CHARCOAL)
+            maxWidth = dp(300)
+            setTextIsSelectable(true)
+        }
+        bubble.addView(content, LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+        val metadata = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.END or Gravity.CENTER_VERTICAL
+            setPadding(0, dp(3), 0, 0)
+        }
+        addLabel(metadata, chatTime(message.optString("createdAt")), 10,
+            if (mine) 0xFFFFDDE7.toInt() else MUTED, false).also { metadata.addView(it) }
+        if (mine) {
+            val statusText = when {
+                message.optBoolean("sendFailed") -> " · Failed"
+                message.optBoolean("sending") -> " · Sending"
+                message.optBoolean("isRead") -> " · Read ✓✓"
+                else -> " · Sent ✓"
+            }
+            addLabel(metadata, statusText, 10,
+                if (message.optBoolean("sendFailed")) 0xFFFFDDE7.toInt()
+                else if (message.optBoolean("isRead")) 0xFFFFFFFF.toInt()
+                else 0xFFFFDDE7.toInt(), false).also { metadata.addView(it) }
+        }
+        bubble.addView(metadata, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+        if (message.optBoolean("sendFailed") && clientId.isNotBlank()) {
+            addLabel(bubble, "Tap to retry", 11, 0xFFFFFFFF.toInt(), true).apply {
+                gravity = Gravity.END
+                setPadding(0, dp(4), 0, 0)
+                setOnClickListener { retryChatMessage(clientId) }
+                bubble.addView(this, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+            }
+        }
+        val row = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = if (mine) Gravity.END else Gravity.START
+            setPadding(dp(7), dp(4), dp(7), dp(4))
+        }
+        row.addView(bubble, LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+        return row
+    }
+
+    private fun retryChatMessage(clientMessageId: String) {
+        val pending = findChatMessageByClientId(clientMessageId) ?: return
+        val person = chatUser ?: return
+        pending.put("sendFailed", false)
+        pending.put("sending", true)
+        upsertChatMessage(pending)
+        sendMessage(person, pending.optString("content"), clientMessageId)
+    }
+
+    private fun findChatMessageByClientId(clientMessageId: String): JSONObject? =
+        (0 until messages.length()).mapNotNull { messages.optJSONObject(it) }
+            .firstOrNull { it.optString("clientMessageId") == clientMessageId }
+
+    private fun mergeChatMessageArrays(first: JSONArray, second: JSONArray): JSONArray {
+        val merged = mutableListOf<JSONObject>()
+        fun addAll(source: JSONArray) {
+            for (index in 0 until source.length()) {
+                val candidate = source.optJSONObject(index) ?: continue
+                val existingIndex = merged.indexOfFirst { sameChatMessage(it, candidate) }
+                if (existingIndex >= 0) {
+                    merged[existingIndex] = JSONObject(merged[existingIndex].toString()).apply {
+                        val keys = candidate.keys()
+                        while (keys.hasNext()) {
+                            val key = keys.next()
+                            put(key, candidate.opt(key))
+                        }
+                    }
+                } else {
+                    merged.add(JSONObject(candidate.toString()))
+                }
+            }
+        }
+        addAll(first)
+        addAll(second)
+        return JSONArray().apply {
+            merged.sortedBy { it.optString("createdAt") }.forEach(::put)
+        }
+    }
+
+    private fun sameChatMessage(first: JSONObject, second: JSONObject): Boolean {
+        val firstId = first.optString("_id").ifBlank { first.optString("id") }
+        val secondId = second.optString("_id").ifBlank { second.optString("id") }
+        if (firstId.isNotBlank() && secondId.isNotBlank() && firstId == secondId) return true
+        val firstClientId = first.optString("clientMessageId")
+        return firstClientId.isNotBlank() && firstClientId == second.optString("clientMessageId")
+    }
+
+    private fun chatMessageKey(message: JSONObject): String {
+        val id = message.optString("_id").ifBlank { message.optString("id") }
+        return id.ifBlank { "client:${message.optString("clientMessageId")}" }
+    }
+
+    private fun senderId(message: JSONObject): String = jsonUserId(message.opt("sender"))
+
+    private fun receiverId(message: JSONObject): String = jsonUserId(message.opt("receiver"))
+
+    private fun jsonUserId(value: Any?): String = when (value) {
+        is JSONObject -> value.optString("_id").ifBlank { value.optString("id") }
+        null -> ""
+        else -> value.toString()
+    }
+
+    private fun isChatNearBottom(): Boolean =
+        scroll.scrollY + scroll.height >= body.height - dp(120)
+
+    private fun chatTime(value: String): String {
+        val timestamp = runCatching { Instant.parse(value).toEpochMilli() }.getOrNull() ?: return ""
+        return java.text.SimpleDateFormat("h:mm a", Locale.getDefault()).format(java.util.Date(timestamp))
+    }
+
+    private fun updateChatSendButton() {
+        val fieldHasText = chatInputField?.text?.isNotBlank() == true
+        chatSendButton?.isEnabled = fieldHasText
+        chatSendButton?.alpha = if (fieldHasText) 1f else 0.55f
+    }
+
+    private fun updateConversationPreview(
+        message: JSONObject,
+        peerId: String,
+        sentByMe: Boolean,
+        markRead: Boolean = false,
+        isNewMessage: Boolean = true
+    ) {
+        if (peerId.isBlank()) return
+        val items = (0 until conversations.length()).mapNotNull { conversations.optJSONObject(it) }
+            .map { JSONObject(it.toString()) }
+            .toMutableList()
+        val existingIndex = items.indexOfFirst {
+            it.optJSONObject("otherUser")?.let(::jsonUserId) == peerId
+        }
+        val conversation = if (existingIndex >= 0) {
+            items.removeAt(existingIndex)
+        } else {
+            val person = chatUser?.takeIf {
+                it.optString("id").ifBlank { it.optString("_id") } == peerId
+            }
+            val otherUser = person?.let { JSONObject(it.toString()) }
+                ?: JSONObject().put("id", peerId).put("name", "Elovia member")
+            JSONObject()
+                .put("otherUser", otherUser)
+                .put("unreadCount", 0)
+        }
+        val messageId = message.optString("_id").ifBlank { message.optString("id") }
+        val preview = JSONObject(message.toString())
+        if (messageId.isNotBlank()) {
+            preview.put("id", messageId)
+            preview.put("_id", messageId)
+        }
+        conversation.put("lastMessage", preview)
+        val unreadCount = when {
+            sentByMe || markRead -> 0
+            isNewMessage -> conversation.optInt("unreadCount") + 1
+            else -> conversation.optInt("unreadCount")
+        }
+        conversation.put("unreadCount", unreadCount)
+        items.add(0, conversation)
+        items.sortByDescending { it.optJSONObject("lastMessage")?.optString("createdAt").orEmpty() }
+        conversations = JSONArray().apply { items.forEach(::put) }
+    }
+
+    private fun updateConversationReadState(peerId: String) {
+        val items = (0 until conversations.length()).mapNotNull { conversations.optJSONObject(it) }
+        items.firstOrNull { it.optJSONObject("otherUser")?.let(::jsonUserId) == peerId }
+            ?.put("unreadCount", 0)
+        updateNavigationBadges()
+    }
+
+    private fun updateConversationReadReceipt(readerId: String) {
+        val items = (0 until conversations.length()).mapNotNull { conversations.optJSONObject(it) }
+        items.forEach { conversation ->
+            val otherId = conversation.optJSONObject("otherUser")?.let(::jsonUserId)
+            val lastMessage = conversation.optJSONObject("lastMessage")
+            if (otherId == readerId && lastMessage != null && senderId(lastMessage) == user.id) {
+                lastMessage.put("isRead", true)
+            }
+        }
+        renderChatListIfVisible()
+    }
+
+    private fun updateChatReadReceipts(peerId: String) {
+        val updated = JSONArray()
+        val changed = mutableListOf<JSONObject>()
+        for (index in 0 until messages.length()) {
+            val message = messages.optJSONObject(index) ?: continue
+            if (senderId(message) == user.id && receiverId(message) == peerId) {
+                message.put("isRead", true)
+                message.put("sending", false)
+                message.put("sendFailed", false)
+                changed.add(message)
+            }
+            updated.put(message)
+        }
+        messages = updated
+        changed.forEach { upsertChatMessage(it) }
+    }
+
+    private fun renderChatListIfVisible() {
+        if (currentScreen != "tab") return
+        if (selectedTab == Tab.CHATS || selectedTab == Tab.HOME) renderTab()
     }
 
     private fun performSwipe(profile: JSONObject, action: String) {
-        val id = profile.optString("_id").ifBlank { profile.optString("id") }
-        loading = true
-        renderTab()
+        if (swipeRequestInFlight) return
+        val id = profileId(profile)
+        if (id.isBlank()) {
+            showMessage("This profile doesn't have a valid ID.")
+            return
+        }
+        swipeRequestInFlight = true
         io.execute {
             try {
                 val result = repository.swipe(id, action)
+                var updatedMatches: JSONObject? = null
+                var matchesRefreshError: Exception? = null
+                if (result.optBoolean("isMatch")) {
+                    try {
+                        updatedMatches = repository.getMatches()
+                    } catch (error: Exception) {
+                        matchesRefreshError = error
+                    }
+                }
                 mainHandler.post {
                     if (!isAttachedToWindow) return@post
-                    activeProfileIndex++
-                    loading = false
+                    swipeRequestInFlight = false
+                    discoverProfiles = JSONArray().apply {
+                        for (index in 0 until discoverProfiles.length()) {
+                            val candidate = discoverProfiles.optJSONObject(index) ?: continue
+                            if (profileId(candidate) != id) put(candidate)
+                        }
+                    }
+                    if (updatedMatches != null) {
+                        matches = updatedMatches.optJSONArray("matches") ?: matches
+                    }
+                    if (currentScreen == "discover_profile") {
+                        selectedDiscoverProfile = null
+                        currentScreen = "tab"
+                        renderHeader()
+                    }
                     renderTab()
                     if (result.optBoolean("isMatch")) {
                         showMessage("It's a match! Open Matches to say hello.")
+                    } else if (matchesRefreshError is ApiException && matchesRefreshError.statusCode == 401) {
+                        onSessionExpired()
+                    } else if (matchesRefreshError != null) {
+                        showMessage("Your choice was saved, but matches couldn't be refreshed.")
                     }
+                    if (selectedTab == Tab.DISCOVER && discoverMode == DiscoverMode.SWIPE &&
+                        filteredDiscoverProfiles().size <= 2
+                    ) loadMoreDiscover()
                 }
             } catch (error: Exception) {
                 mainHandler.post {
-                    loading = false
-                    loadError = error.message ?: "Couldn't save your choice."
-                    renderTab()
+                    swipeRequestInFlight = false
+                    if (error is ApiException && error.statusCode == 401) onSessionExpired()
+                    else showMessage(error.message ?: "Couldn't save your choice.")
                 }
             }
         }
@@ -1735,6 +3762,14 @@ internal class AuthenticatedAppView(
             return
         }
         chatUser = JSONObject(person.toString()).put("id", id)
+        activeChatUserId = id
+        chatHistoryGeneration++
+        messages = JSONArray().apply {
+            failedChatMessages[id]?.forEach { put(JSONObject(it.toString())) }
+        }
+        chatMessageRows.clear()
+        loading = true
+        loadError = null
         currentScreen = "chat"
         renderHeader()
         loadChat()
@@ -1992,6 +4027,17 @@ internal class AuthenticatedAppView(
             .into(image)
     }
 
+    private fun refreshVisibleProfilePhotos(view: View) {
+        if (view is ImageView && view.contentDescription == "${user.name} profile picture") {
+            loadPhoto(view, user.profilePhoto)
+        }
+        if (view is ViewGroup) {
+            for (index in 0 until view.childCount) {
+                refreshVisibleProfilePhotos(view.getChildAt(index))
+            }
+        }
+    }
+
     private fun lastActiveLabel(person: JSONObject): String {
         val value = person.optString("lastActive").takeIf { it.isNotBlank() && it != "null" } ?: return ""
         val timestamp = try {
@@ -2010,6 +4056,9 @@ internal class AuthenticatedAppView(
     fun uploadProfilePhoto(uri: Uri) {
         if (isUploadingPhoto) return
         isUploadingPhoto = true
+        val returnToEdit = currentScreen == "edit"
+        previewVisibleProfilePhotos(header, uri)
+        previewVisibleProfilePhotos(body, uri)
         showMessage("Uploading profile photo…")
         io.execute {
             try {
@@ -2025,7 +4074,7 @@ internal class AuthenticatedAppView(
                         if (count < 0) break
                         total += count
                         if (total > MAX_PROFILE_PHOTO_BYTES) {
-                            throw ApiException("Profile photos must be 10 MB or smaller.")
+                            throw ApiException("Profile photos must be 5 MB or smaller.")
                         }
                         output.write(buffer, 0, count)
                     }
@@ -2044,11 +4093,11 @@ internal class AuthenticatedAppView(
                     isUploadingPhoto = false
                     user = refreshed
                     selectedTab = Tab.PROFILE
-                    currentScreen = "tab"
+                    currentScreen = if (returnToEdit) "edit" else "tab"
                     loading = false
                     loadError = null
                     renderHeader()
-                    renderTab()
+                    if (returnToEdit) refreshVisibleProfilePhotos(body) else renderTab()
                     showMessage("Profile photo updated.")
                 }
             } catch (error: Exception) {
@@ -2057,6 +4106,8 @@ internal class AuthenticatedAppView(
                     if (error is ApiException && error.statusCode == 401) {
                         onSessionExpired()
                     } else {
+                        refreshVisibleProfilePhotos(header)
+                        refreshVisibleProfilePhotos(body)
                         showMessage(error.message ?: "Couldn't upload your profile photo.")
                     }
                 }
@@ -2165,7 +4216,25 @@ internal class AuthenticatedAppView(
     }
 
     private companion object {
-        const val MAX_PROFILE_PHOTO_BYTES = 10 * 1_024 * 1_024
+        const val MAX_SEEN_CHAT_MESSAGES = 2_000
+        const val CHAT_FALLBACK_SYNC_INTERVAL_MS = 30_000L
+        const val CHAT_EMPTY_STATE_TAG = "chat_empty_state"
+        val PROFILE_INTEREST_OPTIONS = listOf(
+            "Travel", "Coffee", "Dogs", "Photography", "Hiking", "Music",
+            "Cooking", "Reading", "Gaming", "Fitness", "Art", "Movies",
+            "Dancing", "Yoga", "Sports", "Nature", "Fashion", "Tech"
+        )
+        val PROFILE_RELATIONSHIP_OPTIONS =
+            listOf("Casual Dating", "Serious Relationship", "Marriage", "Friendship")
+        val PROFILE_EDUCATION_OPTIONS =
+            listOf("High School", "Bachelor's", "Master's", "PhD", "Diploma", "Other")
+        val PROFILE_PROFESSION_OPTIONS =
+            listOf("Engineer", "Doctor", "Teacher", "Designer", "Lawyer", "Artist", "Entrepreneur", "Student", "Other")
+        val PROFILE_INCOME_OPTIONS =
+            listOf("< 3 LPA", "3–5 LPA", "5–10 LPA", "10–20 LPA", "20+ LPA")
+        val PROFILE_RELIGION_OPTIONS = listOf("Hindu", "Muslim", "Christian", "Sikh", "Buddhist", "Jain", "Other")
+        val PROFILE_LIFESTYLE_OPTIONS = listOf("Never", "Occasionally", "Regularly")
+        const val MAX_PROFILE_PHOTO_BYTES = 5 * 1_024 * 1_024
         const val MATCH_PARENT = ViewGroup.LayoutParams.MATCH_PARENT
         const val WRAP_CONTENT = ViewGroup.LayoutParams.WRAP_CONTENT
     }
