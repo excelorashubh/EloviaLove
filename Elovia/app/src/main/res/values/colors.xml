@@ -19,4 +19,12 @@
     <color name="app_on_accent">#171717</color>
     <color name="app_error">#B3261E</color>
     <color name="app_nav_unselected">#666666</color>
+    <color name="home_primary">#172033</color>
+    <color name="home_secondary">#718096</color>
+    <color name="home_divider">#EDF0F4</color>
+    <color name="home_pink_tint">#FFF0F4</color>
+    <color name="home_purple_tint">#F3F0FF</color>
+    <color name="home_peach_tint">#FFF2EA</color>
+    <color name="home_online">#22C55E</color>
+    <color name="home_verified">#3B82F6</color>
 </resources>

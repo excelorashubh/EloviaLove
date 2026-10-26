@@ -38,6 +38,13 @@ routes:
   send messages to a match.
 - `PUT /api/users/profile` to save the profile fields supported by the server.
 
+Home combines live discovery profiles, mutual matches, recent conversations,
+unread-message and notification counts, and a profile-completion percentage
+calculated from the signed-in member's saved profile. Home actions navigate to
+the existing app tabs; Random Video opens its existing website route.
+The bundled Home inspiration photo is from Unsplash and is used under the
+[Unsplash License](https://unsplash.com/license).
+
 The app does not make up profiles, matches, messages, online indicators, or
 compatibility scores. The Android profile editor updates name, bio, location,
 interests, relationship goals, and profile photos through the existing

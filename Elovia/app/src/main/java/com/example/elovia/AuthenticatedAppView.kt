@@ -2,6 +2,9 @@ package com.example.elovia
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.graphics.Typeface
@@ -50,7 +53,6 @@ import java.io.IOException
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.URISyntaxException
-import java.net.URL
 import java.time.Instant
 import java.time.format.DateTimeParseException
 import java.util.concurrent.ExecutorService
@@ -67,7 +69,7 @@ internal class AuthenticatedAppView(
     private enum class Tab(val id: Int, val label: String, val icon: Int) {
         HOME(1, "Home", R.drawable.ic_nav_home),
         DISCOVER(2, "Discover", R.drawable.ic_nav_discover),
-        MATCHES(3, "Matches", R.drawable.ic_nav_matches),
+        MATCHES(3, "Likes", R.drawable.ic_nav_matches),
         CHATS(4, "Chats", R.drawable.ic_nav_chats),
         PROFILE(5, "Profile", R.drawable.ic_nav_profile)
     }
@@ -80,6 +82,9 @@ internal class AuthenticatedAppView(
     private val PALE_ROSE get() = ContextCompat.getColor(context, R.color.app_tint)
     private val SURFACE get() = ContextCompat.getColor(context, R.color.app_surface)
     private val ON_ACCENT get() = ContextCompat.getColor(context, R.color.app_on_accent)
+    private val HOME_PRIMARY get() = ContextCompat.getColor(context, R.color.home_primary)
+    private val HOME_SECONDARY get() = ContextCompat.getColor(context, R.color.home_secondary)
+    private val HOME_DIVIDER get() = ContextCompat.getColor(context, R.color.home_divider)
     private val io: ExecutorService = Executors.newFixedThreadPool(2)
     private val mainHandler = Handler(Looper.getMainLooper())
     private val body = LinearLayout(context).apply { orientation = VERTICAL }
@@ -117,6 +122,9 @@ internal class AuthenticatedAppView(
     private var isSendingMessage = false
     private var isUploadingPhoto = false
     private var skipInitialHomeProfileRefresh = true
+    private var focusedDiscoverProfileId: String? = null
+    private var homeError: String? = null
+    private var unreadNotificationCount = 0
 
     init {
         orientation = VERTICAL
@@ -136,12 +144,14 @@ internal class AuthenticatedAppView(
         }
         val navColors = ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
-            intArrayOf(PLUM, ContextCompat.getColor(context, R.color.app_nav_unselected))
+            intArrayOf(ROSE, HOME_SECONDARY)
         )
         navigation.itemIconTintList = navColors
         navigation.itemTextColor = navColors
         navigation.background = rounded(SURFACE, 0)
+        navigation.labelVisibilityMode = BottomNavigationView.LABEL_VISIBILITY_LABELED
         navigation.selectedItemId = Tab.HOME.id
+        updateNavigationBadges()
         navigation.setOnItemSelectedListener { item ->
             val tab = Tab.entries.firstOrNull { it.id == item.itemId } ?: return@setOnItemSelectedListener false
             selectedTab = tab
@@ -207,6 +217,29 @@ internal class AuthenticatedAppView(
 
     private fun renderHeader() {
         header.removeAllViews()
+        if (currentScreen == "tab" && selectedTab == Tab.HOME) {
+            header.setPadding(dp(16), dp(10), dp(16), dp(10))
+            val logo = ImageView(context).apply {
+                setImageResource(R.drawable.elovia_love_logo)
+                contentDescription = "Elovia Love"
+                scaleType = ImageView.ScaleType.FIT_CENTER
+            }
+            header.addView(logo, LayoutParams(dp(42), dp(42)))
+            addLabel(header, "Elovia Love", 20, HOME_PRIMARY, true).apply {
+                typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+                setPadding(dp(8), 0, 0, 0)
+                header.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+            }
+            header.addView(notificationButton())
+            addAvatar(header, user.profilePhoto, user.name, 42).apply {
+                contentDescription = "Open profile"
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { navigation.selectedItemId = Tab.PROFILE.id }
+            }
+            return
+        }
+        header.setPadding(dp(22), dp(12), dp(22), dp(12))
         if (currentScreen == "chat" && chatUser != null) {
             header.addView(iconButton(R.drawable.ic_arrow_back, "Back to chats") {
                 handleBack()
@@ -290,16 +323,52 @@ internal class AuthenticatedAppView(
                         } else {
                             repository.getCurrentUser()
                         }
-                        val discovered = repository.getDiscover()
-                        val chatResponse = repository.getConversations()
+                        val requestErrors = mutableListOf<Exception>()
+                        val discovered = try {
+                            repository.getDiscover()
+                        } catch (error: Exception) {
+                            requestErrors.add(error)
+                            null
+                        }
+                        val chatResponse = try {
+                            repository.getConversations()
+                        } catch (error: Exception) {
+                            requestErrors.add(error)
+                            null
+                        }
+                        val matchesResponse = try {
+                            repository.getMatches()
+                        } catch (error: Exception) {
+                            requestErrors.add(error)
+                            null
+                        }
+                        val notificationsResponse = try {
+                            repository.getNotifications()
+                        } catch (error: Exception) {
+                            requestErrors.add(error)
+                            null
+                        }
                         mainHandler.post {
                             if (!isAttachedToWindow) return@post
+                            val authError = requestErrors.firstOrNull {
+                                it is ApiException && it.statusCode == 401
+                            }
+                            if (authError != null) {
+                                loading = false
+                                showError(authError)
+                                return@post
+                            }
                             if (profileResponse != null) {
                                 user = repository.parseCurrentUser(profileResponse)
                             }
-                            discoverProfiles = discovered.optJSONArray("users") ?: JSONArray()
-                            conversations = chatResponse.optJSONArray("conversations") ?: JSONArray()
+                            discoverProfiles = discovered?.optJSONArray("users") ?: JSONArray()
+                            conversations = chatResponse?.optJSONArray("conversations") ?: JSONArray()
+                            matches = matchesResponse?.optJSONArray("matches") ?: JSONArray()
+                            notifications = notificationsResponse?.optJSONArray("notifications") ?: JSONArray()
+                            unreadNotificationCount = notificationsResponse?.optInt("unreadCount") ?: 0
+                            homeError = requestErrors.firstOrNull()?.message
                             loading = false
+                            updateNavigationBadges()
                             renderHeader()
                             renderTab()
                         }
@@ -309,7 +378,13 @@ internal class AuthenticatedAppView(
                         mainHandler.post {
                             if (!isAttachedToWindow) return@post
                             discoverProfiles = response.optJSONArray("users") ?: JSONArray()
-                            activeProfileIndex = 0
+                            activeProfileIndex = focusedDiscoverProfileId
+                                ?.let { targetId ->
+                                    (0 until discoverProfiles.length()).firstOrNull { index ->
+                                        discoverProfiles.optJSONObject(index)?.let(::profileId) == targetId
+                                    }
+                                } ?: 0
+                            focusedDiscoverProfileId = null
                             loading = false
                             renderTab()
                         }
@@ -329,6 +404,7 @@ internal class AuthenticatedAppView(
                             if (!isAttachedToWindow) return@post
                             conversations = response.optJSONArray("conversations") ?: JSONArray()
                             loading = false
+                            updateNavigationBadges()
                             renderTab()
                         }
                     }
@@ -353,6 +429,9 @@ internal class AuthenticatedAppView(
         val chatVisible = currentScreen == "chat"
         chatComposer.visibility = if (chatVisible) VISIBLE else GONE
         navigation.visibility = if (chatVisible) GONE else VISIBLE
+        if (currentScreen != "tab" || selectedTab != Tab.HOME) {
+            body.setPadding(dp(22), dp(4), dp(22), dp(24))
+        }
         body.removeAllViews()
         when {
             currentScreen == "edit" -> renderEditProfile()
@@ -417,34 +496,731 @@ internal class AuthenticatedAppView(
     }
 
     private fun renderHome() {
-        addHeading(body, greeting(), 26)
-        addText(body, "A good connection starts with a good hello.", 15, MUTED)
-        addSpace(body, 22)
-        val featured = discoverProfiles.optJSONObject(0)
-        if (featured != null) {
-            addText(body, "A fresh face to discover", 19, CHARCOAL, true)
-            addSpace(body, 10)
-            addProfileCard(body, featured, compact = false)
-            addButton(body, "Explore people", false) {
-                navigation.selectedItemId = Tab.DISCOVER.id
-            }
-        } else if (!loading) {
-            addCard(body) {
-                addText(this, "You're all caught up", 18, PLUM, true)
-                addText(this, "There are no new profiles to show right now.", 14, MUTED)
-            }
+        body.setPadding(dp(16), dp(2), dp(16), dp(28))
+        renderWelcome()
+        if (!user.profileCompleted) renderProfileCompletionCard()
+        if (homeError != null) {
+            addHomeError()
         }
-        addSpace(body, 24)
-        addSectionHeader(body, "Your connections", "See all") {
+        addHomeSectionHeader(body, "Discover People", "See All  ›") {
+            navigation.selectedItemId = Tab.DISCOVER.id
+        }
+        renderHomeDiscoverRail()
+        addHomeSectionHeader(body, "Quick Actions", null, null)
+        renderQuickActions()
+        addHomeSectionHeader(body, "Your Matches", "View All  ›") {
             navigation.selectedItemId = Tab.MATCHES.id
         }
-        if (conversations.length() == 0) {
-            addText(body, "Your matches and conversations will appear here.", 14, MUTED)
-        } else {
-            for (index in 0 until minOf(2, conversations.length())) {
-                val conversation = conversations.optJSONObject(index) ?: continue
-                addConversationRow(body, conversation) { openConversation(conversation) }
+        renderHomeMatches()
+        addHomeSectionHeader(body, "Recent Conversations", "View All  ›") {
+            navigation.selectedItemId = Tab.CHATS.id
+        }
+        renderRecentConversations()
+        renderInspirationBanner()
+    }
+
+    private fun renderWelcome() {
+        val welcome = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(6), 0, dp(14))
+        }
+        val greetingText = LinearLayout(context).apply { orientation = VERTICAL }
+        val titleRow = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        val title = addLabel(titleRow, greeting(), 23, HOME_PRIMARY, true).apply {
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            maxLines = 2
+            titleRow.addView(this)
+        }
+        val titleHeart = ImageView(context).apply {
+            setImageResource(R.drawable.ic_home_brand_heart)
+            imageTintList = ColorStateList.valueOf(ROSE)
+            contentDescription = "Love"
+        }
+        titleRow.addView(titleHeart, LayoutParams(dp(16), dp(16)).apply { marginStart = dp(5) })
+        greetingText.addView(titleRow)
+        addLabel(greetingText, "Your next meaningful connection could start today.", 13, HOME_SECONDARY, false)
+            .also { greetingText.addView(it) }
+        welcome.addView(greetingText, LayoutParams(0, WRAP_CONTENT, 1f))
+        val heart = ImageView(context).apply {
+            setImageResource(R.drawable.ic_home_brand_heart)
+            alpha = 0.28f
+            contentDescription = null
+        }
+        welcome.addView(heart, LayoutParams(dp(44), dp(44)).apply { marginStart = dp(8) })
+        body.addView(welcome, matchWidth())
+    }
+
+    private fun renderProfileCompletionCard() {
+        val percent = profileCompletionPercent()
+        if (percent >= 100) return
+        val panel = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(14), dp(14), dp(14), dp(14))
+            background = rounded(ContextCompat.getColor(context, R.color.home_pink_tint), 18)
+            elevation = dp(2).toFloat()
+        }
+        panel.addView(ProfileProgressRing(context, percent), LayoutParams(dp(62), dp(62)))
+        val details = LinearLayout(context).apply {
+            orientation = VERTICAL
+            setPadding(dp(12), 0, 0, 0)
+        }
+        addLabel(details, "Complete Your Profile", 15, HOME_PRIMARY, true).also { details.addView(it) }
+        addLabel(
+            details,
+            "Add details to get better matches and more meaningful connections.",
+            12,
+            HOME_SECONDARY,
+            false
+        ).apply {
+            setPadding(0, dp(3), 0, dp(9))
+            details.addView(this)
+        }
+        val button = MaterialButton(context).apply {
+            text = "Complete Profile  →"
+            textSize = 12f
+            isAllCaps = false
+            minHeight = dp(38)
+            insetTop = 0
+            insetBottom = 0
+            cornerRadius = dp(13)
+            background = GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(ContextCompat.getColor(context, R.color.brand_start), ROSE)
+            ).apply { cornerRadius = dp(13).toFloat() }
+            setTextColor(ContextCompat.getColor(context, R.color.white))
+            setOnClickListener { openProfileEditor() }
+        }
+        details.addView(button, LayoutParams(WRAP_CONTENT, dp(38)))
+        panel.addView(details, LayoutParams(0, WRAP_CONTENT, 1f))
+        body.addView(panel, matchWidth())
+        addSpace(body, 18)
+    }
+
+    private fun profileCompletionPercent(): Int {
+        val filled = listOf(
+            user.name.isNotBlank() && user.name != "there",
+            user.bio.isNotBlank(),
+            user.location.isNotBlank(),
+            user.interests.isNotEmpty(),
+            user.relationshipGoals.isNotBlank()
+        ).count { it }
+        return (filled * 100) / 5
+    }
+
+    private fun openProfileEditor() {
+        selectedTab = Tab.PROFILE
+        navigation.menu.findItem(Tab.PROFILE.id).isChecked = true
+        currentScreen = "edit"
+        renderHeader()
+        renderEditProfile()
+    }
+
+    private fun renderHomeDiscoverRail() {
+        if (discoverProfiles.length() == 0) {
+            addHomeEmptyState(
+                "No new profiles to show right now.",
+                "Try again",
+                if (loading) null else ({ loadTab() })
+            )
+            return
+        }
+        val rail = horizontalRail()
+        for (index in 0 until minOf(discoverProfiles.length(), 12)) {
+            val profile = discoverProfiles.optJSONObject(index) ?: continue
+            rail.content.addView(
+                createHomeDiscoverCard(profile),
+                LayoutParams(dp(230), dp(310)).apply { marginEnd = dp(12) }
+            )
+        }
+        body.addView(rail, matchWidth())
+        addSpace(body, 4)
+    }
+
+    private fun createHomeDiscoverCard(profile: JSONObject): View {
+        val name = profile.optString("name").ifBlank { "Elovia member" }
+        val card = FrameLayout(context).apply {
+            background = rounded(SURFACE, 16)
+            clipToOutline = true
+            elevation = dp(3).toFloat()
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { openProfileInDiscover(profile) }
+        }
+        val photo = ImageView(context).apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            contentDescription = "$name profile photo"
+            setBackgroundColor(ContextCompat.getColor(context, R.color.home_pink_tint))
+        }
+        card.addView(photo, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        loadPhoto(photo, profile.optString("profilePhoto"))
+
+        val gradient = View(context).apply {
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(0x00000000, 0xCC000000.toInt())
+            )
+        }
+        card.addView(gradient, FrameLayout.LayoutParams(MATCH_PARENT, dp(150), Gravity.BOTTOM))
+
+        if (isFreshlyOnline(profile)) {
+            val online = LinearLayout(context).apply {
+                orientation = HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(8), dp(5), dp(9), dp(5))
+                background = rounded(0x99000000.toInt(), 18)
             }
+            online.addView(View(context).apply {
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(ContextCompat.getColor(context, R.color.home_online))
+                }
+            }, LayoutParams(dp(7), dp(7)).apply { marginEnd = dp(5) })
+            addLabel(online, "Online", 10, ContextCompat.getColor(context, R.color.white), true)
+                .also { online.addView(it) }
+            val topRight = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, Gravity.TOP or Gravity.END)
+            topRight.setMargins(0, dp(10), dp(10), 0)
+            card.addView(online, topRight)
+        }
+
+        val bottom = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.BOTTOM or Gravity.CENTER_VERTICAL
+            setPadding(dp(12), dp(38), dp(10), dp(12))
+        }
+        val profileInfo = LinearLayout(context).apply {
+            orientation = VERTICAL
+            gravity = Gravity.BOTTOM
+        }
+        val titleRow = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        addLabel(titleRow, name, 17, ContextCompat.getColor(context, R.color.white), true).apply {
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
+            titleRow.addView(this)
+        }
+        if (profile.optBoolean("isVerified")) {
+            val verified = ImageView(context).apply {
+                setImageResource(R.drawable.ic_home_verified)
+                contentDescription = "Verified profile"
+            }
+            titleRow.addView(verified, LayoutParams(dp(18), dp(18)).apply { marginStart = dp(4) })
+        }
+        profileInfo.addView(titleRow)
+        val age = profile.optInt("age").takeIf { profile.has("age") && !profile.isNull("age") }
+        val location = profile.optString("location").takeIf(String::isNotBlank)
+        val subline = listOfNotNull(age?.toString(), location?.substringBefore(',')?.trim())
+            .joinToString("  ·  ")
+        if (subline.isNotBlank()) {
+            addLabel(profileInfo, subline, 12, ContextCompat.getColor(context, R.color.white), false)
+                .also { profileInfo.addView(it) }
+        }
+        bottom.addView(profileInfo, LayoutParams(0, WRAP_CONTENT, 1f))
+
+        val viewButton = homeRoundAction(R.drawable.ic_home_eye, "View $name") {
+            openProfileInDiscover(profile)
+        }
+        bottom.addView(viewButton, LayoutParams(dp(40), dp(40)).apply { marginStart = dp(5) })
+        val likeButton = homeRoundAction(
+            R.drawable.ic_nav_matches,
+            "Like $name",
+            ROSE,
+            ContextCompat.getColor(context, R.color.white)
+        ) {
+            likeHomeProfile(profile)
+        }
+        bottom.addView(likeButton, LayoutParams(dp(40), dp(40)).apply { marginStart = dp(7) })
+        card.addView(bottom, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, Gravity.BOTTOM))
+        return card
+    }
+
+    private fun openProfileInDiscover(profile: JSONObject) {
+        focusedDiscoverProfileId = profileId(profile)
+        navigation.selectedItemId = Tab.DISCOVER.id
+    }
+
+    private fun likeHomeProfile(profile: JSONObject) {
+        val id = profileId(profile)
+        if (id.isBlank()) {
+            showMessage("This profile doesn't have a valid ID.")
+            return
+        }
+        io.execute {
+            try {
+                val result = repository.swipe(id, "like")
+                val refreshedMatches = if (result.optBoolean("isMatch")) repository.getMatches() else null
+                mainHandler.post {
+                    if (!isAttachedToWindow) return@post
+                    discoverProfiles = JSONArray().apply {
+                        for (index in 0 until discoverProfiles.length()) {
+                            val candidate = discoverProfiles.optJSONObject(index) ?: continue
+                            if (profileId(candidate) != id) put(candidate)
+                        }
+                    }
+                    if (refreshedMatches != null) {
+                        matches = refreshedMatches.optJSONArray("matches") ?: matches
+                    }
+                    renderTab()
+                    showMessage(if (result.optBoolean("isMatch")) "It's a match!" else "Like sent.")
+                }
+            } catch (error: Exception) {
+                mainHandler.post {
+                    if (error is ApiException && error.statusCode == 401) onSessionExpired()
+                    else showMessage(error.message ?: "Couldn't send your like.")
+                }
+            }
+        }
+    }
+
+    private fun renderQuickActions() {
+        val rail = horizontalRail()
+        val cards = listOf(
+            QuickAction("Discover", "Find your people", R.drawable.ic_home_search,
+                ContextCompat.getColor(context, R.color.home_pink_tint), null) {
+                navigation.selectedItemId = Tab.DISCOVER.id
+            },
+            QuickAction("Matches", "View your matches", R.drawable.ic_nav_matches,
+                ContextCompat.getColor(context, R.color.home_pink_tint), matches.length()) {
+                navigation.selectedItemId = Tab.MATCHES.id
+            },
+            QuickAction("Messages", "Continue chatting", R.drawable.ic_home_chat,
+                ContextCompat.getColor(context, R.color.home_purple_tint), totalUnreadMessages()) {
+                navigation.selectedItemId = Tab.CHATS.id
+            },
+            QuickAction("Random Video", "Meet new people", R.drawable.ic_home_video,
+                ContextCompat.getColor(context, R.color.home_peach_tint), null) {
+                openPage("https://elovialove.onrender.com/random-video")
+            }
+        )
+        cards.forEach { action ->
+            val tile = LinearLayout(context).apply {
+                orientation = VERTICAL
+                setPadding(dp(12), dp(12), dp(10), dp(12))
+                background = rounded(action.tint, 16)
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { action.onClick() }
+            }
+            val iconRow = FrameLayout(context)
+            val icon = ImageView(context).apply {
+                setImageResource(action.icon)
+                contentDescription = null
+            }
+            iconRow.addView(icon, FrameLayout.LayoutParams(dp(24), dp(24)))
+            if (action.badgeCount != null && action.badgeCount > 0) {
+                addCountBadge(iconRow, action.badgeCount, Gravity.TOP or Gravity.END)
+            }
+            if (action.title == "Matches") {
+                icon.imageTintList = ColorStateList.valueOf(ROSE)
+            }
+            tile.addView(iconRow, LayoutParams(MATCH_PARENT, dp(26)))
+            addLabel(tile, action.title, 13, HOME_PRIMARY, true).apply {
+                maxLines = 1
+                setPadding(0, dp(9), 0, dp(2))
+                tile.addView(this)
+            }
+            addLabel(tile, action.subtitle, 10, HOME_SECONDARY, false).apply {
+                maxLines = 2
+                tile.addView(this)
+            }
+            rail.content.addView(tile, LayoutParams(dp(132), dp(112)).apply { marginEnd = dp(10) })
+        }
+        body.addView(rail, matchWidth())
+        addSpace(body, 2)
+    }
+
+    private fun renderHomeMatches() {
+        if (matches.length() == 0) {
+            addHomeEmptyState("Your mutual matches will appear here.", "Discover people") {
+                navigation.selectedItemId = Tab.DISCOVER.id
+            }
+            return
+        }
+        val rail = horizontalRail()
+        for (index in 0 until matches.length()) {
+            val match = matches.optJSONObject(index) ?: continue
+            val person = match.optJSONArray("users")?.optJSONObject(0) ?: match.optJSONObject("otherUser") ?: continue
+            val item = LinearLayout(context).apply {
+                orientation = VERTICAL
+                gravity = Gravity.CENTER_HORIZONTAL
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { openConversation(person) }
+            }
+            val avatar = addAvatar(item, person.optString("profilePhoto"), person.optString("name"), 80).apply {
+                setPadding(dp(2), dp(2), dp(2), dp(2))
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(SURFACE)
+                    setStroke(dp(1), ROSE)
+                }
+                contentDescription = "Open ${person.optString("name")}'s conversation"
+            }
+            if (isFreshlyOnline(person)) addOnlineDot(avatar)
+            addLabel(item, person.optString("name").ifBlank { "Match" }, 11, HOME_PRIMARY, true).apply {
+                gravity = Gravity.CENTER
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+                item.addView(this, LayoutParams(dp(82), WRAP_CONTENT).apply { topMargin = dp(6) })
+            }
+            item.contentDescription = "Open match ${person.optString("name")}"
+            rail.content.addView(item, LayoutParams(dp(88), WRAP_CONTENT).apply { marginEnd = dp(8) })
+        }
+        body.addView(rail, matchWidth())
+    }
+
+    private fun renderRecentConversations() {
+        if (conversations.length() == 0) {
+            addHomeEmptyState("No conversations yet. Your chats will show up here.", "See matches") {
+                navigation.selectedItemId = Tab.MATCHES.id
+            }
+            return
+        }
+        for (index in 0 until minOf(4, conversations.length())) {
+            val conversation = conversations.optJSONObject(index) ?: continue
+            val person = conversation.optJSONObject("otherUser") ?: continue
+            val row = LinearLayout(context).apply {
+                orientation = HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(0, dp(9), 0, dp(9))
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { openConversation(conversation) }
+            }
+            addAvatar(row, person.optString("profilePhoto"), person.optString("name"), 50)
+            val details = LinearLayout(context).apply {
+                orientation = VERTICAL
+                setPadding(dp(9), 0, dp(4), 0)
+            }
+            addLabel(details, person.optString("name").ifBlank { "Elovia member" }, 14, HOME_PRIMARY, true)
+                .also { details.addView(it) }
+            val lastMessage = conversation.optJSONObject("lastMessage")
+            addLabel(
+                details,
+                lastMessage?.optString("content")?.takeIf(String::isNotBlank) ?: "You matched — say hello.",
+                12,
+                HOME_SECONDARY,
+                false
+            ).apply {
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+                details.addView(this)
+            }
+            row.addView(details, LayoutParams(0, WRAP_CONTENT, 1f))
+            val trailing = LinearLayout(context).apply {
+                orientation = VERTICAL
+                gravity = Gravity.END or Gravity.CENTER_VERTICAL
+            }
+            val timestamp = lastMessage?.optString("createdAt").orEmpty()
+            val whenText = relativeTimestamp(timestamp)
+            if (whenText.isNotBlank()) addLabel(trailing, whenText, 10, HOME_SECONDARY, false)
+                .also { trailing.addView(it) }
+            val unread = conversation.optInt("unreadCount")
+            if (unread > 0) addLabel(trailing, unread.toString(), 10, ContextCompat.getColor(context, R.color.white), true).apply {
+                gravity = Gravity.CENTER
+                background = rounded(ROSE, 12)
+                trailing.addView(this, LayoutParams(dp(20), dp(20)).apply { topMargin = dp(3) })
+            }
+            row.addView(trailing, LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+            val chevron = ImageView(context).apply {
+                setImageResource(R.drawable.ic_home_chevron)
+                contentDescription = null
+            }
+            row.addView(chevron, LayoutParams(dp(20), dp(24)).apply { marginStart = dp(3) })
+            body.addView(row, matchWidth())
+            if (index < minOf(3, conversations.length() - 1)) {
+                body.addView(View(context).apply { setBackgroundColor(HOME_DIVIDER) }, LayoutParams(MATCH_PARENT, dp(1)))
+            }
+        }
+    }
+
+    private fun renderInspirationBanner() {
+        val banner = FrameLayout(context).apply {
+            background = rounded(ROSE, 20)
+            clipToOutline = true
+            elevation = dp(2).toFloat()
+            setPadding(dp(16), dp(16), dp(14), dp(16))
+        }
+        val photograph = ImageView(context).apply {
+            setImageResource(R.drawable.home_sunset_couple)
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            contentDescription = null
+        }
+        banner.addView(photograph, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        val tint = View(context).apply {
+            background = GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(0xE8FD2B6B.toInt(), 0x6696375E)
+            )
+        }
+        banner.addView(tint, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        val copy = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, 0, dp(60), 0)
+        }
+        val heartBadge = FrameLayout(context).apply {
+            background = rounded(0x44FFFFFF, 30)
+        }
+        val heart = ImageView(context).apply {
+            setImageResource(R.drawable.ic_home_brand_heart)
+            imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
+            contentDescription = null
+        }
+        heartBadge.addView(heart, FrameLayout.LayoutParams(dp(22), dp(22), Gravity.CENTER))
+        copy.addView(heartBadge, LayoutParams(dp(38), dp(38)).apply { marginEnd = dp(10) })
+        addLabel(
+            copy,
+            "A meaningful connection begins with one honest conversation.  ♥",
+            14,
+            ContextCompat.getColor(context, R.color.white),
+            true
+        ).apply {
+            maxLines = 3
+            copy.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+        }
+        banner.addView(copy, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        val couple = ImageView(context).apply {
+            setImageResource(R.drawable.ic_home_couple)
+            alpha = 0.86f
+            contentDescription = null
+        }
+        banner.addView(
+            couple,
+            FrameLayout.LayoutParams(dp(74), dp(76), Gravity.END or Gravity.CENTER_VERTICAL)
+        )
+        body.addView(banner, LayoutParams(MATCH_PARENT, dp(100)).apply {
+            topMargin = dp(18)
+            bottomMargin = dp(12)
+        })
+    }
+
+    private fun addHomeError() {
+        val error = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(12), dp(10), dp(12), dp(10))
+            background = rounded(ContextCompat.getColor(context, R.color.home_peach_tint), 12)
+        }
+        addLabel(error, "Some Home content couldn't be refreshed.", 12, HOME_PRIMARY, false)
+            .also { error.addView(it, LayoutParams(0, WRAP_CONTENT, 1f)) }
+        addLabel(error, "Retry", 12, ROSE, true).apply {
+            setOnClickListener { loadTab() }
+            error.addView(this)
+        }
+        body.addView(error, matchWidth())
+        addSpace(body, 10)
+    }
+
+    private fun addHomeEmptyState(text: String, action: String, onAction: (() -> Unit)?) {
+        val panel = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(12), dp(12), dp(12), dp(12))
+            background = rounded(SURFACE, 14)
+        }
+        addLabel(panel, text, 12, HOME_SECONDARY, false).apply {
+            panel.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+        }
+        if (onAction != null) {
+            addLabel(panel, action, 12, ROSE, true).apply {
+                setOnClickListener { onAction() }
+                panel.addView(this)
+            }
+        }
+        body.addView(panel, matchWidth())
+    }
+
+    private fun addHomeSectionHeader(
+        parent: LinearLayout,
+        title: String,
+        action: String?,
+        onClick: (() -> Unit)?
+    ) {
+        val row = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(16), 0, dp(9))
+        }
+        addLabel(row, title, 18, HOME_PRIMARY, true).apply {
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            row.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+        }
+        if (action != null && onClick != null) {
+            addLabel(row, action, 12, ROSE, true).apply {
+                gravity = Gravity.CENTER_VERTICAL
+                setOnClickListener { onClick() }
+                row.addView(this)
+            }
+        }
+        parent.addView(row, matchWidth())
+    }
+
+    private fun horizontalRail() = HomeRail(context)
+
+    private inner class HomeRail(context: Context) : android.widget.HorizontalScrollView(context) {
+        val content = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.TOP
+        }
+
+        init {
+            isHorizontalScrollBarEnabled = false
+            clipToPadding = false
+            setPadding(0, dp(2), dp(2), dp(8))
+            addView(content, ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+        }
+    }
+
+    private fun totalUnreadMessages(): Int =
+        (0 until conversations.length()).sumOf { conversations.optJSONObject(it)?.optInt("unreadCount") ?: 0 }
+
+    private fun updateNavigationBadges() {
+        val chatBadge = navigation.getOrCreateBadge(Tab.CHATS.id)
+        chatBadge.backgroundColor = ROSE
+        chatBadge.badgeTextColor = ContextCompat.getColor(context, R.color.white)
+        chatBadge.number = totalUnreadMessages()
+        chatBadge.isVisible = totalUnreadMessages() > 0
+    }
+
+    private fun notificationButton(): View {
+        val container = FrameLayout(context)
+        val button = ImageButton(context).apply {
+            contentDescription = "Notifications"
+            setImageResource(R.drawable.ic_home_bell)
+            imageTintList = ColorStateList.valueOf(HOME_PRIMARY)
+            background = android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
+            setPadding(dp(11), dp(11), dp(11), dp(11))
+            setOnClickListener {
+                currentScreen = "notifications"
+                renderHeader()
+                loadAuxiliaryScreen()
+            }
+        }
+        container.addView(button, FrameLayout.LayoutParams(dp(46), dp(48), Gravity.CENTER))
+        if (unreadNotificationCount > 0) {
+            val dot = View(context).apply {
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(ROSE)
+                    setStroke(dp(2), IVORY)
+                }
+            }
+            container.addView(
+                dot,
+                FrameLayout.LayoutParams(dp(10), dp(10), Gravity.TOP or Gravity.END).apply {
+                    topMargin = dp(7)
+                    marginEnd = dp(8)
+                }
+            )
+        }
+        return container
+    }
+
+    private fun addCountBadge(parent: FrameLayout, count: Int, badgeGravity: Int) {
+        val badge = TextView(context).apply {
+            text = if (count > 99) "99+" else count.toString()
+            textSize = 9f
+            gravity = Gravity.CENTER
+            setTextColor(ContextCompat.getColor(context, R.color.white))
+            setPadding(dp(4), 0, dp(4), 0)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(ROSE)
+            }
+        }
+        parent.addView(badge, FrameLayout.LayoutParams(WRAP_CONTENT, dp(17), badgeGravity))
+    }
+
+    private fun relativeTimestamp(value: String): String {
+        if (value.isBlank() || value == "null") return ""
+        val time = try {
+            Instant.parse(value).toEpochMilli()
+        } catch (_: DateTimeParseException) {
+            return ""
+        }
+        return android.text.format.DateUtils.getRelativeTimeSpanString(
+            time,
+            System.currentTimeMillis(),
+            android.text.format.DateUtils.MINUTE_IN_MILLIS
+        ).toString()
+    }
+
+    private fun isFreshlyOnline(person: JSONObject): Boolean {
+        if (!person.has("isActive") || !person.optBoolean("isActive")) return false
+        val timestamp = person.optString("lastActive").takeIf { it.isNotBlank() && it != "null" } ?: return false
+        val time = try {
+            Instant.parse(timestamp).toEpochMilli()
+        } catch (_: DateTimeParseException) {
+            return false
+        }
+        return System.currentTimeMillis() - time in 0..(5 * 60 * 1000)
+    }
+
+    private fun profileId(profile: JSONObject): String =
+        profile.optString("id").ifBlank { profile.optString("_id") }
+
+    private data class QuickAction(
+        val title: String,
+        val subtitle: String,
+        val icon: Int,
+        val tint: Int,
+        val badgeCount: Int?,
+        val onClick: () -> Unit
+    )
+
+    private fun homeRoundAction(
+        icon: Int,
+        description: String,
+        backgroundColor: Int = ContextCompat.getColor(context, R.color.white),
+        iconColor: Int = ROSE,
+        onClick: () -> Unit
+    ) = ImageButton(context).apply {
+        contentDescription = description
+        setImageResource(icon)
+        imageTintList = ColorStateList.valueOf(iconColor)
+        background = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(backgroundColor)
+        }
+        setPadding(dp(10), dp(10), dp(10), dp(10))
+        isClickable = true
+        isFocusable = true
+        setOnClickListener { onClick() }
+    }
+
+    private inner class ProfileProgressRing(context: Context, private val progress: Int) : View(context) {
+        private val stroke = dp(5).toFloat()
+        private val trackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = ContextCompat.getColor(context, R.color.home_divider)
+            style = Paint.Style.STROKE
+            strokeWidth = stroke
+        }
+        private val progressPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = ROSE
+            style = Paint.Style.STROKE
+            strokeWidth = stroke
+            strokeCap = Paint.Cap.ROUND
+        }
+        private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = HOME_PRIMARY
+            textSize = dp(12).toFloat()
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
+        }
+        override fun onDraw(canvas: Canvas) {
+            super.onDraw(canvas)
+            val inset = stroke / 2 + dp(2)
+            val bounds = RectF(inset, inset, width - inset, height - inset)
+            canvas.drawArc(bounds, 0f, 360f, false, trackPaint)
+            canvas.drawArc(bounds, -90f, 360f * progress / 100f, false, progressPaint)
+            canvas.drawText("$progress%", width / 2f, height / 2f - (labelPaint.ascent() + labelPaint.descent()) / 2f, labelPaint)
         }
     }
 
@@ -1093,7 +1869,7 @@ internal class AuthenticatedAppView(
         setOnClickListener { onClick() }
     }
 
-    private fun addAvatar(parent: LinearLayout, imageUrl: String, name: String, size: Int) {
+    private fun addAvatar(parent: LinearLayout, imageUrl: String, name: String, size: Int): FrameLayout {
         val avatar = ImageView(context).apply {
             scaleType = ImageView.ScaleType.CENTER_CROP
             contentDescription = "$name profile picture"
@@ -1122,7 +1898,7 @@ internal class AuthenticatedAppView(
         val model = photoModel(imageUrl)
         if (model == null) {
             avatar.setImageResource(R.drawable.ic_profile_placeholder)
-            return
+            return frame
         }
 
         progress.visibility = VISIBLE
@@ -1154,6 +1930,19 @@ internal class AuthenticatedAppView(
                 }
             })
             .into(avatar)
+        return frame
+    }
+
+    private fun addOnlineDot(parent: FrameLayout) {
+        val dot = View(context).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(ContextCompat.getColor(context, R.color.home_online))
+                setStroke(dp(2), IVORY)
+            }
+            contentDescription = "Online"
+        }
+        parent.addView(dot, FrameLayout.LayoutParams(dp(15), dp(15), Gravity.BOTTOM or Gravity.END))
     }
 
     private fun photoModel(imageUrl: String): Any? {
@@ -1344,7 +2133,7 @@ internal class AuthenticatedAppView(
             in 12..17 -> "Good afternoon"
             else -> "Good evening"
         }
-        return "$salutation, ${user.name.substringBefore(' ')}"
+        return "$salutation, ${user.name}"
     }
 
     private fun openPage(url: String) {
