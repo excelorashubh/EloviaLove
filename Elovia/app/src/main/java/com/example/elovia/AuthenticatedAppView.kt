@@ -37,6 +37,7 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
@@ -66,6 +67,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
 import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -97,7 +99,7 @@ internal class AuthenticatedAppView(
     private val HOME_PRIMARY get() = ContextCompat.getColor(context, R.color.home_primary)
     private val HOME_SECONDARY get() = ContextCompat.getColor(context, R.color.home_secondary)
     private val HOME_DIVIDER get() = ContextCompat.getColor(context, R.color.home_divider)
-    private val io: ExecutorService = Executors.newFixedThreadPool(2)
+    private val io: ExecutorService = Executors.newFixedThreadPool(6)
     private val mainHandler = Handler(Looper.getMainLooper())
     private val body = LinearLayout(context).apply { orientation = VERTICAL }
     private val header = LinearLayout(context).apply {
@@ -121,6 +123,12 @@ internal class AuthenticatedAppView(
     private val chatReadHandler = Handler(Looper.getMainLooper())
     private val chatSyncHandler = Handler(Looper.getMainLooper())
     private var selectedTab = Tab.HOME
+    private val loadedTabs = mutableSetOf<Tab>()
+    private val tabRefreshTimes = mutableMapOf<Tab, Long>()
+    private val tabRequestsInFlight = mutableSetOf<Tab>()
+    private val loadedAuxiliaryScreens = mutableSetOf<String>()
+    private val auxiliaryRefreshTimes = mutableMapOf<String, Long>()
+    private val auxiliaryRequestsInFlight = mutableSetOf<String>()
     private var chatUser: JSONObject? = null
     private var activeChatUserId: String? = null
     private var chatMessageContainer: LinearLayout? = null
@@ -482,49 +490,41 @@ internal class AuthenticatedAppView(
             loadAuxiliaryScreen()
             return
         }
-        loading = true
+        val requestedTab = selectedTab
+        val hasCachedData = requestedTab == Tab.PROFILE || requestedTab in loadedTabs
+        loading = !hasCachedData
         loadError = null
-        if (selectedTab == Tab.DISCOVER && discoverProfiles.length() > 0) {
-            loading = false
-            renderTab()
-            return
-        }
         renderTab()
+        if (hasCachedData && isCacheFresh(tabRefreshTimes[requestedTab])) return
+        if (requestedTab == Tab.DISCOVER && discoverProfiles.length() > 0) loading = false
+        if (!tabRequestsInFlight.add(requestedTab)) return
         io.execute {
             try {
-                when (selectedTab) {
+                when (requestedTab) {
                     Tab.HOME -> {
-                        val profileResponse = if (skipInitialHomeProfileRefresh) {
+                        val profileFuture = if (skipInitialHomeProfileRefresh) {
                             skipInitialHomeProfileRefresh = false
                             null
                         } else {
-                            repository.getCurrentUser()
+                            requestInParallel { repository.getCurrentUser() }
                         }
-                        val requestErrors = mutableListOf<Exception>()
-                        val discovered = try {
-                            repository.getDiscover()
-                        } catch (error: Exception) {
-                            requestErrors.add(error)
-                            null
-                        }
-                        val chatResponse = try {
-                            repository.getConversations()
-                        } catch (error: Exception) {
-                            requestErrors.add(error)
-                            null
-                        }
-                        val matchesResponse = try {
-                            repository.getMatches()
-                        } catch (error: Exception) {
-                            requestErrors.add(error)
-                            null
-                        }
-                        val notificationsResponse = try {
-                            repository.getNotifications()
-                        } catch (error: Exception) {
-                            requestErrors.add(error)
-                            null
-                        }
+                        val discoverFuture = requestInParallel { repository.getDiscover() }
+                        val chatsFuture = requestInParallel { repository.getConversations() }
+                        val matchesFuture = requestInParallel { repository.getMatches() }
+                        val notificationsFuture = requestInParallel { repository.getNotifications() }
+                        val profileResult = profileFuture?.get()
+                        val discoverResult = discoverFuture.get()
+                        val chatsResult = chatsFuture.get()
+                        val matchesResult = matchesFuture.get()
+                        val notificationsResult = notificationsFuture.get()
+                        val requestErrors = listOfNotNull(
+                            profileResult?.exceptionOrNull()?.let(::asException),
+                            discoverResult.exceptionOrNull()?.let(::asException),
+                            chatsResult.exceptionOrNull()?.let(::asException),
+                            matchesResult.exceptionOrNull()?.let(::asException),
+                            notificationsResult.exceptionOrNull()?.let(::asException)
+                        )
+                        val fetchedAt = System.currentTimeMillis()
                         mainHandler.post {
                             if (!isAttachedToWindow) return@post
                             val authError = requestErrors.firstOrNull {
@@ -535,17 +535,38 @@ internal class AuthenticatedAppView(
                                 showError(authError)
                                 return@post
                             }
-                            if (profileResponse != null) {
-                                user = repository.parseCurrentUser(profileResponse)
+                            profileResult?.getOrNull()?.let {
+                                user = repository.parseCurrentUser(it)
+                                loadedTabs.add(Tab.PROFILE)
+                                tabRefreshTimes[Tab.PROFILE] = fetchedAt
                             }
-                            discoverProfiles = discovered?.optJSONArray("users") ?: JSONArray()
-                            discoverPage = discovered?.optJSONObject("pagination")?.optInt("page", 1) ?: 1
-                            discoverHasMore = discovered?.optJSONObject("pagination")?.optBoolean("hasMore") ?: false
-                            conversations = chatResponse?.optJSONArray("conversations") ?: JSONArray()
-                            matches = matchesResponse?.optJSONArray("matches") ?: JSONArray()
-                            notifications = notificationsResponse?.optJSONArray("notifications") ?: JSONArray()
-                            unreadNotificationCount = notificationsResponse?.optInt("unreadCount") ?: 0
+                            discoverResult.getOrNull()?.let { response ->
+                                discoverProfiles = response.optJSONArray("users") ?: JSONArray()
+                                discoverPage = response.optJSONObject("pagination")?.optInt("page", 1) ?: 1
+                                discoverHasMore = response.optJSONObject("pagination")?.optBoolean("hasMore") ?: false
+                                loadedTabs.add(Tab.DISCOVER)
+                                tabRefreshTimes[Tab.DISCOVER] = fetchedAt
+                            }
+                            chatsResult.getOrNull()?.optJSONArray("conversations")?.let {
+                                conversations = it
+                                loadedTabs.add(Tab.CHATS)
+                                tabRefreshTimes[Tab.CHATS] = fetchedAt
+                            }
+                            matchesResult.getOrNull()?.optJSONArray("matches")?.let {
+                                matches = it
+                                loadedTabs.add(Tab.MATCHES)
+                                tabRefreshTimes[Tab.MATCHES] = fetchedAt
+                            }
+                            notificationsResult.getOrNull()?.let { response ->
+                                notifications = response.optJSONArray("notifications") ?: JSONArray()
+                                unreadNotificationCount = response.optInt("unreadCount")
+                                loadedAuxiliaryScreens.add("notifications")
+                                auxiliaryRefreshTimes["notifications"] = fetchedAt
+                            }
                             homeError = requestErrors.firstOrNull()?.message
+                            if (requestErrors.isEmpty()) tabRefreshTimes[Tab.HOME] = System.currentTimeMillis()
+                            if (requestErrors.size < 5) loadedTabs.add(Tab.HOME)
+                            if (currentScreen != "tab" || selectedTab != requestedTab) return@post
                             loading = false
                             updateNavigationBadges()
                             renderHeader()
@@ -559,6 +580,8 @@ internal class AuthenticatedAppView(
                             discoverProfiles = response.optJSONArray("users") ?: JSONArray()
                             discoverPage = response.optJSONObject("pagination")?.optInt("page", 1) ?: 1
                             discoverHasMore = response.optJSONObject("pagination")?.optBoolean("hasMore") ?: false
+                            loadedTabs.add(Tab.DISCOVER)
+                            tabRefreshTimes[Tab.DISCOVER] = System.currentTimeMillis()
                             activeProfileIndex = focusedDiscoverProfileId
                                 ?.let { targetId ->
                                     (0 until discoverProfiles.length()).firstOrNull { index ->
@@ -566,6 +589,7 @@ internal class AuthenticatedAppView(
                                     }
                                 } ?: 0
                             focusedDiscoverProfileId = null
+                            if (currentScreen != "tab" || selectedTab != requestedTab) return@post
                             loading = false
                             renderTab()
                         }
@@ -575,6 +599,9 @@ internal class AuthenticatedAppView(
                         mainHandler.post {
                             if (!isAttachedToWindow) return@post
                             matches = response.optJSONArray("matches") ?: JSONArray()
+                            loadedTabs.add(Tab.MATCHES)
+                            tabRefreshTimes[Tab.MATCHES] = System.currentTimeMillis()
+                            if (currentScreen != "tab" || selectedTab != requestedTab) return@post
                             loading = false
                             renderTab()
                         }
@@ -584,6 +611,9 @@ internal class AuthenticatedAppView(
                         mainHandler.post {
                             if (!isAttachedToWindow) return@post
                             conversations = response.optJSONArray("conversations") ?: JSONArray()
+                            loadedTabs.add(Tab.CHATS)
+                            tabRefreshTimes[Tab.CHATS] = System.currentTimeMillis()
+                            if (currentScreen != "tab" || selectedTab != requestedTab) return@post
                             loading = false
                             updateNavigationBadges()
                             renderTab()
@@ -594,6 +624,9 @@ internal class AuthenticatedAppView(
                         mainHandler.post {
                             if (!isAttachedToWindow) return@post
                             user = repository.parseCurrentUser(response)
+                            loadedTabs.add(Tab.PROFILE)
+                            tabRefreshTimes[Tab.PROFILE] = System.currentTimeMillis()
+                            if (currentScreen != "tab" || selectedTab != requestedTab) return@post
                             loading = false
                             renderHeader()
                             renderTab()
@@ -601,10 +634,33 @@ internal class AuthenticatedAppView(
                     }
                 }
             } catch (error: Exception) {
-                showError(error)
+                mainHandler.post {
+                    if (!isAttachedToWindow || currentScreen != "tab" || selectedTab != requestedTab) return@post
+                    if (error is ApiException && error.statusCode == 401) {
+                        onSessionExpired()
+                        return@post
+                    }
+                    loading = false
+                    if (hasCachedData) {
+                        if (requestedTab == Tab.HOME) homeError = error.message
+                        else showMessage(error.message ?: "Couldn't refresh this screen.")
+                        renderTab()
+                    } else showError(error)
+                }
+            } finally {
+                mainHandler.post { tabRequestsInFlight.remove(requestedTab) }
             }
         }
     }
+
+    private fun requestInParallel(request: () -> JSONObject): CompletableFuture<Result<JSONObject>> =
+        CompletableFuture.supplyAsync({ runCatching(request) }, io)
+
+    private fun asException(error: Throwable): Exception =
+        error as? Exception ?: RuntimeException(error)
+
+    private fun isCacheFresh(refreshedAt: Long?): Boolean =
+        refreshedAt != null && System.currentTimeMillis() - refreshedAt < SCREEN_CACHE_TTL_MS
 
     private fun renderTab() {
         val chatVisible = currentScreen == "chat"
@@ -618,7 +674,7 @@ internal class AuthenticatedAppView(
             currentScreen == "edit" -> renderEditProfile()
             currentScreen == "chat" -> renderChat()
             currentScreen == "discover_profile" -> renderDiscoverProfileDetails()
-            loading && selectedTab != Tab.DISCOVER ->
+            loading && selectedTab != Tab.DISCOVER && selectedTab != Tab.HOME ->
                 addState("Loading your ${selectedTab.label.lowercase()}…", loading = true)
             loadError != null -> addState(loadError!!, action = "Try again") { loadTab() }
             currentScreen == "notifications" -> renderNotifications()
@@ -640,9 +696,12 @@ internal class AuthenticatedAppView(
 
     private fun loadAuxiliaryScreen() {
         val requestedScreen = currentScreen
-        loading = true
+        val hasCachedData = requestedScreen == "settings" || requestedScreen in loadedAuxiliaryScreens
+        loading = !hasCachedData
         loadError = null
         renderTab()
+        if (hasCachedData && isCacheFresh(auxiliaryRefreshTimes[requestedScreen])) return
+        if (!auxiliaryRequestsInFlight.add(requestedScreen)) return
         io.execute {
             try {
                 when (requestedScreen) {
@@ -651,29 +710,51 @@ internal class AuthenticatedAppView(
                         mainHandler.post {
                             if (!isAttachedToWindow || currentScreen != requestedScreen) return@post
                             notifications = response.optJSONArray("notifications") ?: JSONArray()
+                            unreadNotificationCount = response.optInt("unreadCount")
+                            loadedAuxiliaryScreens.add(requestedScreen)
+                            auxiliaryRefreshTimes[requestedScreen] = System.currentTimeMillis()
                             loading = false
                             renderTab()
                         }
                     }
                     "membership" -> {
-                        val status = repository.getSubscriptionStatus()
-                        val planResponse = repository.getSubscriptionPlans()
+                        val statusFuture = requestInParallel { repository.getSubscriptionStatus() }
+                        val plansFuture = requestInParallel { repository.getSubscriptionPlans() }
+                        val status = statusFuture.get().getOrThrow()
+                        val planResponse = plansFuture.get().getOrThrow()
                         mainHandler.post {
                             if (!isAttachedToWindow || currentScreen != requestedScreen) return@post
                             subscriptionStatus = status
                             subscriptionPlans = planResponse.optJSONArray("plans") ?: JSONArray()
+                            loadedAuxiliaryScreens.add(requestedScreen)
+                            auxiliaryRefreshTimes[requestedScreen] = System.currentTimeMillis()
                             loading = false
                             renderTab()
                         }
                     }
                     "settings" -> mainHandler.post {
                         if (!isAttachedToWindow || currentScreen != requestedScreen) return@post
+                        loadedAuxiliaryScreens.add(requestedScreen)
+                        auxiliaryRefreshTimes[requestedScreen] = System.currentTimeMillis()
                         loading = false
                         renderTab()
                     }
                 }
             } catch (error: Exception) {
-                showError(error)
+                mainHandler.post {
+                    if (!isAttachedToWindow || currentScreen != requestedScreen) return@post
+                    if (error is ApiException && error.statusCode == 401) {
+                        onSessionExpired()
+                        return@post
+                    }
+                    loading = false
+                    if (hasCachedData) {
+                        showMessage(error.message ?: "Couldn't refresh this screen.")
+                        renderTab()
+                    } else showError(error)
+                }
+            } finally {
+                mainHandler.post { auxiliaryRequestsInFlight.remove(requestedScreen) }
             }
         }
     }
@@ -806,7 +887,7 @@ internal class AuthenticatedAppView(
     private fun renderHomeDiscoverRail() {
         if (discoverProfiles.length() == 0) {
             addHomeEmptyState(
-                "No new profiles to show right now.",
+                if (loading) "Loading profiles…" else "No new profiles to show right now.",
                 "Try again",
                 if (loading) null else ({ loadTab() })
             )
@@ -3726,6 +3807,7 @@ internal class AuthenticatedAppView(
 
     private fun addConversationRow(parent: LinearLayout, item: JSONObject, onClick: () -> Unit) {
         val person = item.optJSONObject("otherUser") ?: item
+        val lastMessage = item.optJSONObject("lastMessage")
         val row = card().apply {
             orientation = HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -3738,9 +3820,37 @@ internal class AuthenticatedAppView(
             orientation = VERTICAL
             setPadding(dp(12), dp(2), dp(6), dp(2))
         }
-        addText(details, person.optString("name").ifBlank { "Elovia member" }, 16, CHARCOAL, true)
-        val lastMessage = item.optJSONObject("lastMessage")?.optString("content").orEmpty()
-        addText(details, lastMessage.ifBlank { "You matched — say hello." }, 13, MUTED)
+        val titleRow = LinearLayout(context).apply {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        addLabel(titleRow, person.optString("name").ifBlank { "Elovia member" }, 16, CHARCOAL, true)
+            .apply {
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+                titleRow.addView(this, LayoutParams(0, WRAP_CONTENT, 1f))
+            }
+        val timestamp = relativeTimestamp(lastMessage?.optString("createdAt").orEmpty())
+        if (timestamp.isNotBlank()) {
+            addLabel(titleRow, timestamp, 11, MUTED, false).apply {
+                maxLines = 1
+                titleRow.addView(this, LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                    marginStart = dp(6)
+                })
+            }
+        }
+        details.addView(titleRow, matchWidth())
+        addLabel(
+            details,
+            lastMessage?.optString("content")?.takeIf(String::isNotBlank) ?: "You matched — say hello.",
+            13,
+            MUTED,
+            false
+        ).apply {
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
+            details.addView(this)
+        }
         row.addView(details, LayoutParams(0, WRAP_CONTENT, 1f))
         val unread = item.optInt("unreadCount")
         if (unread > 0) {
@@ -3939,6 +4049,9 @@ internal class AuthenticatedAppView(
         progress.visibility = VISIBLE
         Glide.with(avatar)
             .load(model)
+            .override(dp(size), dp(size))
+            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            .skipMemoryCache(false)
             .transform(CircleCrop())
             .placeholder(R.drawable.ic_profile_placeholder)
             .error(R.drawable.ic_profile_placeholder)
@@ -4216,6 +4329,7 @@ internal class AuthenticatedAppView(
     }
 
     private companion object {
+        const val SCREEN_CACHE_TTL_MS = 30_000L
         const val MAX_SEEN_CHAT_MESSAGES = 2_000
         const val CHAT_FALLBACK_SYNC_INTERVAL_MS = 30_000L
         const val CHAT_EMPTY_STATE_TAG = "chat_empty_state"

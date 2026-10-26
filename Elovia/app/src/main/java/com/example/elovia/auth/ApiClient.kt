@@ -54,6 +54,9 @@ internal class ApiClient {
             if (!token.isNullOrBlank()) {
                 connection.setRequestProperty("Authorization", "Bearer $token")
             }
+            if (!token.isNullOrBlank()) {
+                connection.setRequestProperty("Authorization", "Bearer " + token)
+            }
             if (body != null) {
                 connection.doOutput = true
                 connection.outputStream.use { output ->
@@ -110,7 +113,7 @@ internal class ApiClient {
             connection.readTimeout = 30_000
             connection.doOutput = true
             connection.setRequestProperty("Accept", "application/json")
-            connection.setRequestProperty("Authorization", "******")
+            connection.setRequestProperty("Authorization", "Bearer " + token)
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
             connection.outputStream.use { output ->
                 writeMultipartPhoto(output, boundary, fileName, mimeType, content)
