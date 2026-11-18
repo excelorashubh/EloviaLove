@@ -156,7 +156,7 @@ const Login = () => {
             </div>
           </section>
 
-          <main className="flex w-full flex-1 items-center justify-center px-4 py-6 sm:px-7 lg:max-w-[768px] lg:px-4 lg:py-0">
+          <main className="flex w-full flex-1 items-center justify-center px-4 py-6 sm:px-7 lg:max-w-[576px] lg:px-4 lg:py-0">
             <div className="w-full">
               <Link to="/" className="mb-5 flex items-center justify-center gap-2 lg:hidden">
                 <img src={Logo} alt="" className="h-9 w-auto" />

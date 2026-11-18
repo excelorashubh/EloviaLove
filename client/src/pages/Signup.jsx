@@ -248,7 +248,7 @@ const Signup = () => {
             </div>
           </section>
 
-          <main className="flex w-full flex-1 justify-center px-4 py-6 sm:px-7 lg:h-[calc(100vh-40px)] lg:min-h-0 lg:max-w-[768px] lg:overflow-y-auto custom-scrollbar lg:px-4 lg:py-0">
+          <main className="flex w-full flex-1 justify-center px-4 py-6 sm:px-7 lg:h-[calc(100vh-40px)] lg:min-h-0 lg:max-w-[576px] lg:overflow-y-auto custom-scrollbar lg:px-4 lg:py-0">
             <div className="w-full">
               <Link to="/" className="mb-5 flex items-center justify-center gap-2 lg:hidden">
                 <img src={Logo} alt="" className="h-9 w-auto" />
