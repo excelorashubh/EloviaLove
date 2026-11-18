@@ -82,16 +82,26 @@ const Login = () => {
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
-      <div className="min-h-screen bg-[#fff3f7] p-0 text-slate-900 lg:p-5">
+      <div className="min-h-screen bg-[#fff3f7] p-0 text-slate-900 lg:p-5"
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "100% 100%",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        width: "100%",
+        minHeight: "100vh",
+      }}
+      >
+
         <div className="mx-auto flex min-h-screen max-w-[1700px] flex-col gap-5 lg:min-h-[calc(100vh-40px)] lg:flex-row">
           <section
             className="relative hidden min-h-[720px] flex-1 overflow-hidden rounded-[28px] bg-cover bg-center lg:flex"
-            style={{ backgroundImage: `url(${backgroundImage})` }}
+            // style={{ backgroundImage: `url(${backgroundImage})` }}
             aria-label="Elovia Love dating community"
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/20" />
+            <div className="absolute inset-0 " />
 
-            <div className="relative z-10 flex min-h-full w-full flex-col justify-between p-8 xl:p-12">
+            <div className="relative z-10  flex min-h-full w-full flex-col justify-between p-8 xl:p-12">
               <div className="flex items-start justify-between gap-5">
                 <Link
                   to="/"
@@ -146,8 +156,8 @@ const Login = () => {
             </div>
           </section>
 
-          <main className="flex w-full flex-1 items-center justify-center px-4 py-6 sm:px-7 lg:max-w-[560px] lg:px-4 lg:py-0">
-            <div className="w-full max-w-[480px]">
+          <main className="flex w-full flex-1 items-center justify-center px-4 py-6 sm:px-7 lg:max-w-[768px] lg:px-4 lg:py-0">
+            <div className="w-full">
               <Link to="/" className="mb-5 flex items-center justify-center gap-2 lg:hidden">
                 <img src={Logo} alt="" className="h-9 w-auto" />
                 <span className="text-2xl font-bold text-slate-900">
@@ -155,7 +165,7 @@ const Login = () => {
                 </span>
               </Link>
 
-              <div className="rounded-[28px] border border-white bg-white p-5 shadow-[0_20px_70px_rgba(246,41,112,0.12)] sm:p-8">
+              <div className="w-full rounded-[28px] border border-white bg-white p-5 shadow-[0_20px_70px_rgba(246,41,112,0.12)] sm:p-8">
                 <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#f62970]/35 bg-[#fff1f5] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#d91f60]">
                   <span className="h-2 w-2 rounded-full bg-[#f62970]" />
                   Secure access
